@@ -1,6 +1,6 @@
 # P0-03 ERD 초안
 
-> 논리 ERD. 실제 물리 테이블명, PK 타입, 정규화 수준은 Phase 1 DB 설계에서 확정한다.
+> 논리 ERD. Phase 0 승인된 GAP-018 기준을 반영했으며, 실제 물리 테이블명/인덱스/정규화 수준은 Phase 1 DB 설계에서 확정한다.
 
 ## 1. Core Logical ERD
 
@@ -66,7 +66,7 @@ Lead
 - target_opportunity_id
 - converted_at / converted_by
 
-Activity 이관 방식은 `related_type/related_id` 변경 또는 별도 Link History 두 방식이 가능하며 Phase 1에서 선택한다.
+Activity 이관 방식은 `related_type/related_id` 변경 또는 별도 Link History 두 방식이 가능하며 해당 도메인 착수 전 GAP-019에서 확정한다.
 
 ## 3. Activity 모델 분리 이유
 
@@ -103,13 +103,58 @@ Business Entity
   └─ InterfaceLog 1..N = 요청/응답/재시도 상세이력
 ```
 
-## 6. 물리설계 전 확정 필요
+## 6. Phase 0 승인 물리 식별 기준
 
-- PK: bigint identity vs UUID
-- Soft Delete 정책
-- Multi-company / 법인 구분키
-- 조직/사용자 Master 원천
-- Product/Package Master 동기화 방식
-- Lead Convert Activity 이관 구현방식
-- 수금계획 변경이력 저장방식
-- Interface payload 보관기간/민감정보 마스킹
+### Primary Key
+```sql
+id bigint IDENTITY(1,1) PRIMARY KEY
+```
+
+### API/Public Identifier
+```sql
+public_id uniqueidentifier NOT NULL DEFAULT NEWSEQUENTIALID()
+```
+
+원칙:
+- 내부 Join/FK는 `bigint` 사용.
+- URL/API/외부노출은 `public_id` 우선 사용.
+
+### Company Boundary
+주요 업무 Master/Transaction에 아래 키를 필수 적용한다.
+```text
+company_id
+```
+국내 1개 법인으로 시작해도 글로벌 확장을 위해 데이터 경계를 초기부터 유지한다.
+
+### Soft Delete
+적용 대상:
+- User/Organization의 CRM 관리정보
+- Lead / Account / Contact
+- 공통코드 / 설정 등 Master/Config
+
+권장 컬럼:
+```text
+is_deleted
+ deleted_at
+ deleted_by
+```
+
+미적용 대상:
+- Contract
+- CollectionPlan / CollectionActual
+- Order / Delivery / Sales
+- Approval
+- AuditLog
+- InterfaceLog
+
+Transaction/Audit 데이터는 물리삭제나 Soft Delete 대신 취소/무효 상태와 이력을 사용한다.
+
+## 7. Phase 1 이후 확정 필요
+
+- Product/Package Master 동기화 방식 (GAP-015)
+- Lead Convert Activity 이관 구현방식 (GAP-019)
+- 수금계획 변경이력 저장방식 (GAP-021)
+- Interface payload 보관기간/민감정보 마스킹 (GAP-023)
+
+## 8. 관련 결정서
+- `spec/gaps/P0-09_p1_gap_decisions.md`
