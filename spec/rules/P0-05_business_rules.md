@@ -9,6 +9,8 @@
 | BR-LEAD-003 | 본인 소유가 아닌 Lead는 조회 가능하나 수정 제한된다. | PDF |
 | BR-LEAD-004 | Lead Convert 시 Account, Contact, Opportunity로 변환하며 기존 활동기록도 이관한다. | PDF |
 | BR-LEAD-005 | Lead Convert 시 기존 Account/Contact/Opportunity 중복을 확인한다. | PDF |
+| BR-LEAD-006 | 일반 영업담당자의 Lead는 정방향 전이를 기본으로 하고 역전이는 지점장/CRM 관리자만 사유와 AuditLog를 남기고 수행한다. | Phase0 결정 |
+| BR-LEAD-007 | `CONVERTED` Lead는 Terminal이며 역전이 금지한다. | Phase0 결정 |
 | BR-ACC-001 | ERP 거래처 등록요청 전 사업자번호로 중복 거래처를 검증한다. | PDF |
 | BR-ACC-002 | 중복 거래처 병합은 최대 3개까지 선택 가능하며 완료 후 실행취소 불가하다. | PDF |
 | BR-ACC-003 | ERP 거래처 등록 필수정보가 모두 준비되어야 요청 가능하다. | PDF |
@@ -20,7 +22,7 @@
 |---|---|---|
 | BR-ACT-001 | 위치 권한/정확한 위치가 활동지도 사용의 전제다. | PDF |
 | BR-ACT-002 | 병원과 사용자 위치가 설정된 제한거리 이내일 때만 IN 가능하다. | PDF |
-| BR-ACT-003 | 제한거리 수치는 설정값으로 두며 현재 값은 미정이다. | GAP |
+| BR-ACT-003 | GPS IN 기본 허용거리는 `200m`이며 `ACTIVITY_IN_RADIUS_M` 시스템 설정값으로 관리한다. | Phase0 결정 |
 | BR-ACT-004 | OUT하지 않은 기존 활동이 존재하면 다른 활동의 IN을 할 수 없다. | PDF |
 | BR-ACT-005 | IN 정보가 없으면 활동정보는 업데이트 제한되며 병원 상세정보만 수정 가능하다. | PDF |
 | BR-ACT-006 | IN/OUT이 완료된 일정은 수정 불가하다. | PDF |
@@ -44,6 +46,9 @@
 | BR-DW-003 | 승인 진행중/완료 시 직출/직퇴 내용 수정 불가다. |
 | BR-DW-004 | 반려되면 담당자가 재승인 요청 가능하다. |
 | BR-DW-005 | Activity OUT 완료 시 직출/직퇴 정보가 ERP로 자동 전송된다. |
+| BR-APR-001 | 승인 요청 시점의 조직 구조를 Snapshot하여 지점장/본부장 승인자를 확정한다. |
+| BR-APR-002 | 승인자 미설정 시 단계 Skip 없이 요청을 차단하고 `APPROVER_NOT_CONFIGURED` 처리한다. |
+| BR-APR-003 | 대리승인/재할당은 명시적 위임 또는 권한에 의해서만 허용하며 모두 AuditLog에 남긴다. |
 
 ## 4. Opportunity / Contract
 
@@ -52,6 +57,9 @@
 | BR-OPP-001 | Opportunity 단계는 니즈파악→제안→협상→수주성공/수주실패이다. |
 | BR-OPP-002 | 기회에서 제안 패키지/제안금액을 관리한다. |
 | BR-OPP-003 | 수주성공(마감) 시 거래처 ERP 승인여부를 확인한다. |
+| BR-OPP-004 | Open 단계는 앞/뒤 단계 이동을 허용하되 역전이 시 사유와 Stage History를 보존한다. |
+| BR-OPP-005 | `CLOSED_LOST` 재오픈은 지점장 또는 CRM 관리자만 가능하다. |
+| BR-OPP-006 | `CLOSED_WON`은 Contract 미생성 시에만 지점장/CRM 관리자가 재오픈할 수 있고 Contract 생성 후에는 재오픈 금지다. |
 | BR-CON-001 | Contract 생성은 Opportunity가 수주성공일 때만 가능하다. |
 | BR-CON-002 | ERP 승인 및 연동 완료 거래처만 Contract 자동생성 가능하다. |
 | BR-CON-003 | Contract는 Opportunity당 최초 1회만 생성한다. |
@@ -84,7 +92,7 @@
 | BR-STM-003 | 모바일에서는 전체 내역 PDF 생성만 가능하다. |
 | BR-STM-004 | 모바일 생성 PDF는 거래처 파일 영역에 저장된다. |
 
-## 7. 공통 Integration Rule
+## 7. 공통 Integration / Platform Rule
 
 | Rule ID | Rule |
 |---|---|
@@ -92,9 +100,14 @@
 | BR-INT-002 | 연동실패는 관리자 확인이 필요하다. |
 | BR-INT-003 | 외부 원천 데이터는 Source of Truth 정책을 따른다. |
 | BR-INT-004 | 모든 ERP 요청/응답은 InterfaceLog로 추적한다. |
+| BR-PLT-001 | 사용자/조직 기본 Master는 ERP를 Source of Truth로 사용하고 CRM은 동기화 사본과 CRM 전용 권한을 관리한다. |
+| BR-PLT-002 | 내부 PK는 `bigint IDENTITY`, 외부/API 식별자는 `public_id(UUID)`를 사용한다. |
+| BR-PLT-003 | 주요 업무 테이블은 `company_id`를 필수로 가져 글로벌/법인 데이터 경계를 보장한다. |
+| BR-PLT-004 | Master/Config는 Soft Delete를 사용할 수 있으나 Transaction/Audit/Integration 데이터는 삭제 대신 상태이력으로 처리한다. |
 
 ## 8. 구현 원칙
 - UI에서만 막지 않고 Backend Validation에 동일 규칙 적용.
 - 상태전이는 중앙 정의 사용.
 - ERP/심평원 원천필드는 Read-only 또는 동기화 정책 적용.
 - PDF에 없는 임계값/코드/공식은 `GAP-*` 결정 전 하드코딩 금지.
+- Phase 0에서 승인된 Gap 결정은 `spec/gaps/P0-09_p1_gap_decisions.md`를 따른다.
