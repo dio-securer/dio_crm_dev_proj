@@ -1,44 +1,106 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>DIO CRM Project Progress</title>
 <style>
-body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#f4f6f9;color:#172033;margin:0}
-.wrap{max-width:1400px;margin:auto;padding:28px} .hero{background:#14365d;color:#fff;padding:28px;border-radius:16px}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px} .card{background:#fff;border:1px solid #dfe4ea;border-radius:12px;padding:16px}
-.ok{border-top:4px solid #177245} .next{border-top:4px solid #6d28d9} .warn{border-top:4px solid #b54708}
-h1,h2,h3{margin-top:0} table{width:100%;border-collapse:collapse;background:#fff} th,td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left}
-th{background:#f8fafc} .badge{display:inline-block;padding:3px 9px;border-radius:999px;background:#e8f5ee;color:#177245;font-weight:700;font-size:12px}
+body{font-family:'Malgun Gothic','Segoe UI',Arial,sans-serif;background:#f4f6f9;color:#172033;margin:0}
+.wrap{max-width:1440px;margin:auto;padding:28px}
+.hero{background:linear-gradient(135deg,#14365d,#1f5a8a);color:#fff;padding:28px;border-radius:16px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px}
+.card,.panel{background:#fff;border:1px solid #dfe4ea;border-radius:12px;padding:16px}
+.ok{border-top:4px solid #177245}.next{border-top:4px solid #6d28d9}.warn{border-top:4px solid #b54708}
+h1,h2,h3{margin-top:0} table{width:100%;border-collapse:collapse;background:#fff}
+th,td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left;vertical-align:top}
+th{background:#f8fafc}.badge{display:inline-block;padding:3px 9px;border-radius:999px;font-weight:700;font-size:12px}
+.badge.ok{background:#e8f5ee;color:#177245;border:0}.badge.wait{background:#eef1f5;color:#667085}.badge.next{background:#f1ebff;color:#6d28d9;border:0}
 .block{background:#fff7ed;border:1px solid #fed7aa;padding:16px;border-radius:12px;margin-top:14px}
-a{color:#14365d} code{font-family:Consolas,monospace} @media(max-width:900px){.grid{grid-template-columns:1fr}}
-</style></head>
-<body><div class="wrap">
+.good{background:#effaf3;border:1px solid #b7dec7;padding:16px;border-radius:12px;margin-top:14px}
+a{color:#14365d} code{font-family:Consolas,monospace}.muted{color:#667085}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
 <section class="hero">
 <h1>DIO CRM AI Orchestration — 프로젝트 진행현황</h1>
-<p>Last Updated: 2026-09-11 · Phase 0 Specification Baseline 작성 완료</p>
+<p>Last Updated: 2026-09-11 · Phase 0 APPROVED</p>
 <div class="grid">
-<div class="card ok"><h3>CURRENT</h3><b>Phase 0 산출물 작성 완료</b><p>Product Owner 승인 대기</p></div>
-<div class="card next"><h3>NEXT</h3><b>Phase 0 승인 / P1 Gap 결정</b><p>승인 후 P1-01 Repository/Application Skeleton</p></div>
-<div class="card warn"><h3>BLOCKER / DECISION</h3><b>P1 우선 GAP 6건</b><p>GPS, 조직 Master, 승인자 로직, 상태 역전이, PK/삭제/법인키</p></div>
-</div></section>
-<section style="margin-top:24px"><h2>Phase 진행률</h2><div class="grid">
-<div class="card ok"><span class="badge">완료</span><h3>PREP</h3><p>3/3</p></div>
-<div class="card ok"><span class="badge">작성완료</span><h3>Phase 0</h3><p>9/9 · 승인대기</p></div>
-<div class="card next"><h3>Phase 1</h3><p>0/8 · 다음 단계</p></div>
-</div></section>
-<section style="margin-top:24px"><h2>Phase 0 Work Package</h2><table><thead><tr><th>ID</th><th>상태</th><th>Commit</th></tr></thead><tbody>
-<tr><td>P0-01</td><td>완료</td><td><code>247846866e2e</code></td></tr>
-<tr><td>P0-02</td><td>완료</td><td><code>d415fef0b534</code></td></tr>
-<tr><td>P0-03</td><td>완료</td><td><code>7742f40a4f74</code></td></tr>
-<tr><td>P0-04</td><td>완료</td><td><code>217a89c98764</code></td></tr>
-<tr><td>P0-05</td><td>완료</td><td><code>b7106bec53cd</code></td></tr>
-<tr><td>P0-06</td><td>완료</td><td><code>546fe01c8c65</code></td></tr>
-<tr><td>P0-07</td><td>완료</td><td><code>194334c1535a</code></td></tr>
-<tr><td>P0-08</td><td>완료</td><td><code>add8ae2d7547</code></td></tr>
-<tr><td>P0-09</td><td>완료</td><td><code>6faf65ef6635</code></td></tr>
-</tbody></table></section>
-<section class="block"><h2>Phase 0 Open Gaps</h2><p>총 25건. 이 중 P1 우선순위는 다음 6개이며 Phase 1/Activity 상세개발 전에 결정이 필요합니다.</p><ul>
-<li>GAP-001: GPS IN 허용거리</li><li>GAP-003: 사용자/조직 Master 원천</li><li>GAP-004: 지점/본부 승인자 결정 및 대리승인 로직</li><li>GAP-007: Lead 상태 역전이 허용 여부</li><li>GAP-008: Opportunity 단계 역전이/재오픈 정책</li><li>GAP-018: PK, Soft Delete, 법인 구분키</li></ul><p>전체 목록: <a href="../spec/gaps/P0-09_phase0_approval.md">P0-09 Phase 0 승인자료</a></p></section>
-<section style="margin-top:24px"><h2>Phase 0 산출물</h2><ul>
-<li><a href="../spec/process/P0-01_process_breakdown.md">P0-01 전체 업무 프로세스 분해</a></li><li><a href="../spec/entities/P0-02_entity_data_dictionary.md">P0-02 Entity/Data Dictionary</a></li><li><a href="../spec/erd/P0-03_erd_draft.md">P0-03 ERD 초안</a></li><li><a href="../spec/states/P0-04_state_transitions.md">P0-04 상태전이</a></li><li><a href="../spec/rules/P0-05_business_rules.md">P0-05 Business Rules</a></li><li><a href="../spec/permissions/P0-06_permission_matrix.md">P0-06 권한 Matrix</a></li><li><a href="../spec/interfaces/P0-07_interface_catalog.md">P0-07 ERP/심평원 Interface Catalog</a></li><li><a href="../spec/screens/P0-08_screen_menu_catalog.md">P0-08 Screen/Menu Catalog</a></li><li><a href="../spec/gaps/P0-09_phase0_approval.md">P0-09 Spec Gap 및 승인자료</a></li></ul></section>
-<section style="margin-top:24px"><h2>다음 진행 순서</h2><ol><li>Product Owner가 P0-09 체크리스트와 P1 우선 GAP을 검토</li><li>Phase 0 승인 상태를 APPROVED로 변경</li><li>P1-01 Repository/Application Skeleton 실행</li><li>P1-02 Authentication → P1-03 User/Organization 순차 진행</li></ol></section>
-</div></body></html>
+<div class="card ok"><h3>CURRENT</h3><b>Phase 0 승인 완료</b><p>P0-01~P0-09 및 P1 선행 Gap 6건 결정 완료</p></div>
+<div class="card next"><h3>NEXT</h3><b>P1-01 Repository/Application Skeleton</b><p>React + .NET API + SQL Server 기반 Foundation 시작</p></div>
+<div class="card warn"><h3>BLOCKER / DECISION</h3><b>Phase 1 Blocker 없음</b><p>잔여 P2/P3 Gap은 각 도메인 착수 전에 처리</p></div>
+</div>
+</section>
+
+<section style="margin-top:24px">
+<h2>Phase 진행률</h2>
+<div class="grid">
+<div class="card ok"><span class="badge ok">완료</span><h3>PREP</h3><p>3/3</p></div>
+<div class="card ok"><span class="badge ok">APPROVED</span><h3>Phase 0</h3><p>9/9 + P1 Gap Decision</p></div>
+<div class="card next"><span class="badge next">NEXT</span><h3>Phase 1</h3><p>0/8 · 착수 가능</p></div>
+</div>
+</section>
+
+<section class="good">
+<h2>Phase 0 승인결과</h2>
+<ul>
+<li>GPS IN 기본거리: <b>200m</b>, 시스템 설정값으로 관리</li>
+<li>사용자/조직 Master: <b>ERP 기준</b>, CRM은 동기화 사본 + CRM Role/Permission</li>
+<li>승인경로: <b>영업담당자 → 지점장 → 본부장</b>, 요청시점 Snapshot</li>
+<li>Lead 역전이: 관리자 통제 + 사유/Audit, <b>CONVERTED Terminal</b></li>
+<li>Opportunity 역전이: Open 단계 허용+History, Closed 재오픈 제한, Contract 생성 후 Won 재오픈 금지</li>
+<li>DB 식별정책: <b>bigint IDENTITY + public_id(UUID) + company_id</b>, Master/Config Soft Delete</li>
+</ul>
+</section>
+
+<section style="margin-top:24px">
+<h2>P1 우선 Gap 처리현황</h2>
+<table>
+<thead><tr><th>GAP</th><th>결정</th><th>상태</th></tr></thead>
+<tbody>
+<tr><td>GAP-001</td><td>GPS IN 200m + 설정값</td><td><span class="badge ok">RESOLVED</span></td></tr>
+<tr><td>GAP-003</td><td>ERP User/Organization Master</td><td><span class="badge ok">RESOLVED</span></td></tr>
+<tr><td>GAP-004</td><td>지점장→본부장 승인, Delegation/Audit</td><td><span class="badge ok">RESOLVED</span></td></tr>
+<tr><td>GAP-007</td><td>Lead 역전이 관리자 통제, Converted Terminal</td><td><span class="badge ok">RESOLVED</span></td></tr>
+<tr><td>GAP-008</td><td>Opportunity Open 역전이 허용, Closed 재오픈 제한</td><td><span class="badge ok">RESOLVED</span></td></tr>
+<tr><td>GAP-018</td><td>bigint + UUID + company_id + Soft Delete 정책</td><td><span class="badge ok">RESOLVED</span></td></tr>
+</tbody>
+</table>
+<p class="muted">GAP-002는 Phase 1 Foundation Blocker가 아니므로 P2(Phase 3 Activity 착수 전 필수)로 조정.</p>
+</section>
+
+<section style="margin-top:24px">
+<h2>Canonical Spec 반영 완료</h2>
+<ul>
+<li><a href="../spec/gaps/P0-09_p1_gap_decisions.md">P0-09 P1 우선 Gap 결정서</a></li>
+<li><a href="../spec/gaps/P0-09_phase0_approval.md">P0-09 Phase 0 승인자료 — APPROVED</a></li>
+<li><a href="../spec/states/P0-04_state_transitions.md">P0-04 상태전이 — Lead/Opportunity 결정 반영</a></li>
+<li><a href="../spec/rules/P0-05_business_rules.md">P0-05 Business Rules — GPS/Approval/Platform Rule 반영</a></li>
+<li><a href="../spec/permissions/P0-06_permission_matrix.md">P0-06 권한 Matrix — 승인/조직정책 반영</a></li>
+<li><a href="../spec/erd/P0-03_erd_draft.md">P0-03 ERD — PK/company/Soft Delete 반영</a></li>
+</ul>
+</section>
+
+<section class="block">
+<h2>잔여 Gap</h2>
+<p>Phase 0 승인 이후에도 P2/P3 Gap은 남아 있다. 다만 Phase 1 Foundation을 시작하는 데 Blocker가 아니다.</p>
+<p>다음 중요 시점: Activity 착수 전 GAP-002/005/006, Opportunity 상세 착수 전 GAP-009, Contract/ERP 연동 전 GAP-010~017 등을 처리한다.</p>
+</section>
+
+<section style="margin-top:24px">
+<h2>다음 진행순서</h2>
+<ol>
+<li><b>P1-01 Repository/Application Skeleton</b></li>
+<li>P1-02 Authentication</li>
+<li>P1-03 User / Organization</li>
+<li>P1-04 Role / Permission</li>
+<li>P1-05 Common Code</li>
+<li>P1-06 Audit Log</li>
+<li>P1-07 Interface Framework</li>
+<li>P1-08 File / Notification Foundation</li>
+</ol>
+</section>
+</div>
+</body>
+</html>
