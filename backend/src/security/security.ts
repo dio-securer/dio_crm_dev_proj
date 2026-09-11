@@ -20,15 +20,13 @@ export type JwtPayload = {
   scope: 'SELF' | 'BRANCH' | 'DIVISION' | 'ALL' | 'SYSTEM';
 };
 
-declare module 'express-serve-static-core' {
-  interface Request { authUser?: JwtPayload; }
-}
+export type AuthenticatedRequest = Request & { authUser?: JwtPayload };
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(private readonly jwt: JwtService) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest<Request>();
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const header = request.headers.authorization;
     if (!header?.startsWith('Bearer ')) throw new UnauthorizedException('Missing access token');
     try {
@@ -47,7 +45,7 @@ export class PermissionGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const permission = Reflect.getMetadata(PERMISSION_KEY, context.getHandler()) as string | undefined;
     if (!permission) return true;
-    const request = context.switchToHttp().getRequest<Request>();
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     if (!request.authUser?.permissions.includes(permission)) {
       throw new ForbiddenException(`Permission required: ${permission}`);
     }
