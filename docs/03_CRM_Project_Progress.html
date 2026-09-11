@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DIO CRM AI Orchestration - Project Progress</title>
+<style>
+:root{--bg:#f4f6f9;--card:#fff;--text:#172033;--muted:#667085;--line:#dfe4ea;--brand:#14365d;--brand2:#1f5a8a;--done:#177245;--next:#6d28d9;--wait:#667085;--block:#b42318}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:"Malgun Gothic","Segoe UI",Arial,sans-serif;line-height:1.55}.wrap{max-width:1480px;margin:auto;padding:28px}.hero{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border-radius:18px;padding:28px 30px}.hero h1{margin:0 0 8px;font-size:28px}.hero p{margin:0;opacity:.9}.top{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:14px;margin-top:18px}.box{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:15px}.box small{opacity:.75}.box b{display:block;font-size:20px;margin:5px 0}.notice{margin:18px 0 0;background:#fff7ed;border:1px solid #fed7aa;border-left:5px solid #b54708;border-radius:10px;padding:14px 16px;color:#7c2d12}.section{margin-top:24px}.section h2{margin:0 0 12px}.now{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card,.panel,details{background:var(--card);border:1px solid var(--line);border-radius:13px}.card{padding:17px}.card h3{margin:0 0 6px;color:var(--muted);font-size:13px}.card strong{font-size:20px}.current{border-top:4px solid #0b63ce}.next{border-top:4px solid var(--next)}.blocked{border-top:4px solid var(--block)}.roadmap{display:flex;gap:8px;overflow:auto;padding:18px;background:#fff;border:1px solid var(--line);border-radius:13px}.step{min-width:135px;text-align:center;padding:11px 8px;border:1px solid var(--line);border-radius:10px;font-size:12px;font-weight:700;background:#fff}.step.done{background:#eef8f2;border-color:#b7dec7;color:#17643d}.step.next{background:#f5f0ff;border-color:#d7c6ff;color:var(--next)}.arrow{align-self:center;color:#98a2b3}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.phase{padding:16px}.phase h3{margin:8px 0 5px;font-size:16px}.phase p{margin:0;color:var(--muted);font-size:13px;min-height:40px}.phase-meta{margin-top:8px;font-size:12px;color:var(--muted)}.badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700}.done-b{background:#e8f5ee;color:var(--done)}.next-b{background:#f1ebff;color:var(--next)}.wait-b{background:#eef1f5;color:var(--wait)}.block-b{background:#feeceb;color:var(--block)}details{margin-bottom:9px;overflow:hidden}summary{cursor:pointer;display:flex;justify-content:space-between;padding:14px 17px;background:#fafbfc;font-weight:800}.inside{padding:14px 17px}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:9px 11px;border-bottom:1px solid #eaecf0;text-align:left}th{background:#f8fafc;color:#475467}.id{font-family:Consolas,monospace;font-weight:700;width:105px}.gate{margin-top:10px;background:#f8fafc;border-radius:8px;padding:9px 11px;color:#475467}.two{display:grid;grid-template-columns:1.2fr 1fr;gap:14px}.panel{padding:17px}.panel h3{margin-top:0}.panel li{margin:6px 0}.code{font-family:Consolas,monospace;background:#101828;color:#f2f4f7;padding:13px;border-radius:9px;white-space:pre-wrap;font-size:12px}.log{display:grid;grid-template-columns:110px 1fr;gap:10px;padding:9px 0;border-bottom:1px solid #eaecf0;font-size:13px}.foot{text-align:center;color:var(--muted);font-size:12px;padding:26px 0 8px}@media(max-width:980px){.top,.now,.grid,.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<section class="hero">
+<h1>DIO CRM AI Orchestration - 프로젝트 진행현황</h1>
+<p>전체 로드맵, 현재 위치, 완료내역, 다음 작업, 의사결정 필요사항을 한 화면에서 확인</p>
+<div class="top">
+<div class="box"><small>현재 단계</small><b>Phase 0 착수 대기</b>사전 설계 및 작업지시 기준 수립 완료</div>
+<div class="box"><small>개발 진행률</small><b>0 / 63 Work Packages</b>Phase 0~8 기준</div>
+<div class="box"><small>다음 작업</small><b>P0-01</b>전체 프로세스 분해</div>
+</div>
+</section>
+<div class="notice"><b>운영 원칙:</b> Work Package 또는 Phase가 끝날 때마다 이 HTML을 갱신한다. 완료 산출물, Commit/PR, 검증결과, 결정사항, Blocker를 기록하고 CURRENT와 NEXT를 반드시 지정한다.</div>
+<section class="section"><h2>현재 / 다음 / 중단요인</h2><div class="now">
+<div class="card current"><h3>CURRENT</h3><strong>Phase 0 착수 준비 완료</strong><div>Phase 0 Work Package는 아직 실행하지 않음</div></div>
+<div class="card next"><h3>NEXT</h3><strong>P0-01 전체 프로세스 분해</strong><div>PDF와 설계서를 기준으로 Process Spec 생성</div></div>
+<div class="card blocked"><h3>BLOCKER / DECISION</h3><strong>현재 없음</strong><div>미정의 사항은 spec/gaps/open_gaps.md에 등록</div></div>
+</div></section>
+<section class="section"><h2>전체 진행 흐름</h2><div class="roadmap">
+<div class="step done">사전 준비<br>설계/작업지시</div><div class="arrow">→</div>
+<div class="step next">Phase 0<br>Specification</div><div class="arrow">→</div>
+<div class="step">Phase 1<br>Foundation</div><div class="arrow">→</div>
+<div class="step">Phase 2<br>Customer</div><div class="arrow">→</div>
+<div class="step">Phase 3<br>Activity</div><div class="arrow">→</div>
+<div class="step">Phase 4<br>Opportunity</div><div class="arrow">→</div>
+<div class="step">Phase 5<br>Contract</div><div class="arrow">→</div>
+<div class="step">Phase 6<br>Order/Sales</div><div class="arrow">→</div>
+<div class="step">Phase 7<br>Analytics</div><div class="arrow">→</div>
+<div class="step">Phase 8<br>Rollout</div>
+</div></section>
+<section class="section"><h2>Phase 요약</h2><div class="grid">
+<div class="card phase current"><span class="badge done-b">완료</span><h3>PREP - 사전 준비</h3><p>설계서, 단계별 작업지시서, 진행현황 대시보드</p><div class="phase-meta">3/3 완료 · Gate: Phase 0 착수 가능</div></div>
+<div class="card phase next"><span class="badge next-b">다음</span><h3>Phase 0 - Specification Baseline</h3><p>Canonical Spec, Entity, ERD, State, Rule, Interface, Screen, Gap 정의</p><div class="phase-meta">0/9 완료 · Gate: Product Owner 승인</div></div>
+<div class="card phase"><span class="badge wait-b">대기</span><h3>Phase 1 - Platform Foundation</h3><p>인증, 조직, 권한, 공통코드, Audit, Interface Framework</p><div class="phase-meta">0/8 완료</div></div>
+<div class="card phase"><span class="badge wait-b">대기</span><h3>Phase 2 - Customer / Lead / Account</h3><p>심평원, Lead, 담당자 할당, Account/Contact, Convert</p><div class="phase-meta">0/7 완료</div></div>
+<div class="card phase"><span class="badge wait-b">대기</span><h3>Phase 3 - Sales Activity</h3><p>활동계획, 지도, GPS IN/OUT, 보고, 승인, 직출/직퇴</p><div class="phase-meta">0/8 완료</div></div>
+<div class="card phase"><span class="badge wait-b">대기</span><h3>Phase 4 - Opportunity / Pipeline</h3><p>니즈파악, 제안, 협상, 수주/실패, Package, Funnel</p><div class="phase-meta">0/6 완료</div></div>
+<div class="card phase"><span class="badge wait-b">대기</span><h3>Phase 5 - ERP Account / Contract / Collection</h3><p>ERP 거래처, 계약, 수금계획, 실수금, 미수</p><div class="phase-meta">0/7 완료</div></div>
+<div class="card phase"><span class="badge wait-b">대기</span><h3>Phase 6 - Order / Delivery / Sales / Return</h3><p>제품검색, 주문, 납품, 매출, 반품/교환</p><div class="phase-meta">0/7 완료</div></div>
+<div class="card phase"><span class="badge wait-b">대기</span><h3>Phase 7 - Ledger / Statement / Analytics</h3><p>패키지원장, 거래명세서, Account 360, Dashboard</p><div class="phase-meta">0/4 완료</div></div>
+<div class="card phase"><span class="badge wait-b">대기</span><h3>Phase 8 - Hardening / Rollout</h3><p>보안, 성능, 복구, 모니터링, Pilot, Cutover</p><div class="phase-meta">0/7 완료</div></div>
+</div></section>
+<section class="section"><h2>상세 Work Package</h2>
+<details open><summary><span>PREP - 사전 준비</span><span>3/3</span></summary><div class="inside"><table><tr><th>Work ID</th><th>작업</th><th>상태</th></tr><tr><td class="id">PREP-01</td><td>CRM AI 오케스트레이션 전체 설계서 작성</td><td><span class="badge done-b">완료</span></td></tr><tr><td class="id">PREP-02</td><td>Phase 0~8 단계별 작업지시서 작성</td><td><span class="badge done-b">완료</span></td></tr><tr><td class="id">PREP-03</td><td>프로젝트 진행현황 HTML 대시보드 구축</td><td><span class="badge done-b">완료</span></td></tr></table><div class="gate"><b>Gate:</b> Phase 0 착수 가능</div></div></details>
+<details open><summary><span>Phase 0 - Specification Baseline</span><span>0/9</span></summary><div class="inside"><table><tr><th>Work ID</th><th>작업</th><th>상태</th></tr><tr><td class="id">P0-01</td><td>전체 프로세스 분해</td><td><span class="badge next-b">다음</span></td></tr><tr><td class="id">P0-02</td><td>Entity Dictionary 작성</td><td><span class="badge wait-b">대기</span></td></tr><tr><td class="id">P0-03</td><td>ERD 초안 작성</td><td><span class="badge wait-b">대기</span></td></tr><tr><td class="id">P0-04</td><td>상태전이 정의</td><td><span class="badge wait-b">대기</span></td></tr><tr><td class="id">P0-05</td><td>Business Rule 목록</td><td><span class="badge wait-b">대기</span></td></tr><tr><td class="id">P0-06</td><td>권한 Matrix</td><td><span class="badge wait-b">대기</span></td></tr><tr><td class="id">P0-07</td><td>Interface Catalog</td><td><span class="badge wait-b">대기</span></td></tr><tr><td class="id">P0-08</td><td>Screen Catalog</td><td><span class="badge wait-b">대기</span></td></tr><tr><td class="id">P0-09</td><td>Spec Gap 등록</td><td><span class="badge wait-b">대기</span></td></tr></table><div class="gate"><b>Gate:</b> Product Owner 승인</div></div></details>
+<details><summary><span>Phase 1 - Platform Foundation</span><span>0/8</span></summary><div class="inside"><table><tr><th>ID</th><th>작업</th></tr><tr><td class="id">P1-01</td><td>Repository/Application Skeleton</td></tr><tr><td class="id">P1-02</td><td>Authentication</td></tr><tr><td class="id">P1-03</td><td>User / Organization</td></tr><tr><td class="id">P1-04</td><td>Role / Permission</td></tr><tr><td class="id">P1-05</td><td>Common Code</td></tr><tr><td class="id">P1-06</td><td>Audit Log</td></tr><tr><td class="id">P1-07</td><td>Interface Framework</td></tr><tr><td class="id">P1-08</td><td>File / Notification Foundation</td></tr></table></div></details>
+<details><summary><span>Phase 2 - Customer / Lead / Account</span><span>0/7</span></summary><div class="inside"><table><tr><th>ID</th><th>작업</th></tr><tr><td class="id">P2-01</td><td>심평원 신규병원 수신</td></tr><tr><td class="id">P2-02</td><td>Lead 관리</td></tr><tr><td class="id">P2-03</td><td>담당자 자동할당</td></tr><tr><td class="id">P2-04</td><td>Lead 상태전이</td></tr><tr><td class="id">P2-05</td><td>Account / Contact</td></tr><tr><td class="id">P2-06</td><td>거래처 중복검사/병합</td></tr><tr><td class="id">P2-07</td><td>Lead Convert</td></tr></table></div></details>
+<details><summary><span>Phase 3 - Sales Activity</span><span>0/8</span></summary><div class="inside"><table><tr><th>ID</th><th>작업</th></tr><tr><td class="id">P3-01</td><td>Activity Plan</td></tr><tr><td class="id">P3-02</td><td>Calendar / Event</td></tr><tr><td class="id">P3-03</td><td>Map</td></tr><tr><td class="id">P3-04</td><td>GPS IN</td></tr><tr><td class="id">P3-05</td><td>Activity Update / OUT</td></tr><tr><td class="id">P3-06</td><td>Activity Report</td></tr><tr><td class="id">P3-07</td><td>Activity Approval</td></tr><tr><td class="id">P3-08</td><td>Direct Work</td></tr></table></div></details>
+<details><summary><span>Phase 4 - Opportunity / Sales Pipeline</span><span>0/6</span></summary><div class="inside"><table><tr><th>ID</th><th>작업</th></tr><tr><td class="id">P4-01</td><td>Opportunity 생성/조회</td></tr><tr><td class="id">P4-02</td><td>Opportunity Stage</td></tr><tr><td class="id">P4-03</td><td>Opportunity Product / Package</td></tr><tr><td class="id">P4-04</td><td>협상정보</td></tr><tr><td class="id">P4-05</td><td>Closed Won Validation</td></tr><tr><td class="id">P4-06</td><td>Pipeline / Funnel</td></tr></table></div></details>
+<details><summary><span>Phase 5 - ERP Account / Contract / Collection</span><span>0/7</span></summary><div class="inside"><table><tr><th>ID</th><th>작업</th></tr><tr><td class="id">P5-01</td><td>ERP 거래처 등록요청</td></tr><tr><td class="id">P5-02</td><td>Contract 생성</td></tr><tr><td class="id">P5-03</td><td>최초 수금계획</td></tr><tr><td class="id">P5-04</td><td>ERP 계약등록</td></tr><tr><td class="id">P5-05</td><td>ERP 계약승인 결과</td></tr><tr><td class="id">P5-06</td><td>실제 수금 조회</td></tr><tr><td class="id">P5-07</td><td>미수/수금계획 변경</td></tr></table></div></details>
+<details><summary><span>Phase 6 - Order / Delivery / Sales / Return</span><span>0/7</span></summary><div class="inside"><table><tr><th>ID</th><th>작업</th></tr><tr><td class="id">P6-01</td><td>제품/상품 검색</td></tr><tr><td class="id">P6-02</td><td>Cart / 수량</td></tr><tr><td class="id">P6-03</td><td>배송지/특송</td></tr><tr><td class="id">P6-04</td><td>주문요청</td></tr><tr><td class="id">P6-05</td><td>주문/납품현황</td></tr><tr><td class="id">P6-06</td><td>매출</td></tr><tr><td class="id">P6-07</td><td>반품/교환</td></tr></table></div></details>
+<details><summary><span>Phase 7 - Ledger / Statement / Analytics</span><span>0/4</span></summary><div class="inside"><table><tr><th>ID</th><th>작업</th></tr><tr><td class="id">P7-01</td><td>패키지원장</td></tr><tr><td class="id">P7-02</td><td>월합 거래명세서</td></tr><tr><td class="id">P7-03</td><td>Account 360</td></tr><tr><td class="id">P7-04</td><td>Dashboard</td></tr></table></div></details>
+<details><summary><span>Phase 8 - Hardening / Rollout</span><span>0/7</span></summary><div class="inside"><table><tr><th>ID</th><th>작업</th></tr><tr><td class="id">P8-01</td><td>Security</td></tr><tr><td class="id">P8-02</td><td>Performance</td></tr><tr><td class="id">P8-03</td><td>Resilience</td></tr><tr><td class="id">P8-04</td><td>Backup / Recovery</td></tr><tr><td class="id">P8-05</td><td>Monitoring</td></tr><tr><td class="id">P8-06</td><td>Pilot</td></tr><tr><td class="id">P8-07</td><td>Cutover</td></tr></table></div></details>
+</section>
+<section class="section"><div class="two"><div class="panel"><h3>각 작업 종료 시 반드시 갱신</h3><ul><li>해당 Work ID의 상태</li><li>생성/수정 산출물 경로</li><li>Commit SHA 또는 PR 번호</li><li>Build/Test/Review 결과</li><li>결정된 Business Rule</li><li>Spec Gap / Blocker</li><li>CURRENT / NEXT</li></ul></div><div class="panel"><h3>프로젝트 재시작 규칙</h3><div class="code">1. 이 HTML을 연다.
+2. CURRENT / NEXT / BLOCKER를 확인한다.
+3. NEXT Work ID의 선행조건을 확인한다.
+4. 관련 Spec/설계서를 읽는다.
+5. 작업을 실행한다.
+6. 테스트/리뷰 후 Git에 반영한다.
+7. 마지막으로 이 HTML을 갱신한다.</div></div></div></section>
+<section class="section"><div class="two"><div class="panel"><h3>기준 문서</h3><ul><li><a href="01_CRM_AI_Orchestration_Design.md">01_CRM_AI_Orchestration_Design.md</a></li><li><a href="02_CRM_Phased_Work_Instructions.md">02_CRM_Phased_Work_Instructions.md</a></li><li>영업활동 프로세스 PDF</li><li>영업판매 프로세스 PDF</li></ul></div><div class="panel"><h3>진행 이력</h3><div class="log"><div>2026-09-11</div><div>CRM AI 오케스트레이션 전체 설계서 작성/반영</div></div><div class="log"><div>2026-09-11</div><div>Phase 0~8 단계별 작업지시서 작성/반영</div></div><div class="log"><div>2026-09-11</div><div>프로젝트 진행현황 HTML 생성, 다음 작업 P0-01 지정</div></div></div></div></section>
+<section class="section"><div class="panel"><h3>Phase 0 완료 후</h3><p>CURRENT는 Phase 1 - Platform Foundation으로 이동하고, P0-01~P0-09 산출물 및 Product Owner 승인결과를 완료내역에 남긴다. 이후 동일 방식으로 다음 Work Package를 순차 실행한다.</p></div></section>
+<div class="foot">DIO CRM AI Orchestration Project · Status Dashboard v1.0 · Last Updated 2026-09-11</div>
+</div>
+</body>
+</html>
