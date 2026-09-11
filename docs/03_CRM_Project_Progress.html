@@ -3,17 +3,18 @@
 <style>
 body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#f4f6f9;color:#172033;margin:0}.wrap{max-width:1440px;margin:auto;padding:28px}.hero{background:linear-gradient(135deg,#14365d,#1f5a8a);color:#fff;padding:28px;border-radius:16px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px}.card,.panel{background:#fff;border:1px solid #dfe4ea;border-radius:12px;padding:16px}.ok{border-top:4px solid #177245}.next{border-top:4px solid #6d28d9}.warn{border-top:4px solid #b54708}h1,h2,h3{margin-top:0}table{width:100%;border-collapse:collapse;background:#fff}th,td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left;vertical-align:top}th{background:#f8fafc}.badge{display:inline-block;padding:3px 9px;border-radius:999px;font-weight:700;font-size:12px}.done{background:#e8f5ee;color:#177245}.review{background:#fff7ed;color:#b54708}.wait{background:#eef1f5;color:#667085}.good{background:#effaf3;border:1px solid #b7dec7;padding:16px;border-radius:12px;margin-top:18px}.block{background:#fff7ed;border:1px solid #fed7aa;padding:16px;border-radius:12px;margin-top:18px}@media(max-width:900px){.grid{grid-template-columns:1fr}}
 </style></head><body><div class="wrap">
-<section class="hero"><h1>DIO CRM AI Orchestration — 프로젝트 진행현황</h1><p>Last Updated: 2026-09-11 · Phase 1 CI PASS</p><div class="grid">
-<div class="card ok"><h3>CURRENT</h3><b>Phase 1 구현 + CI 완료</b><p>P1-00~P1-08 구현, Build/Test PASS</p></div>
-<div class="card next"><h3>NEXT</h3><b>DEV DB Migration + Human Review</b><p>두 Gate 통과 후 Phase 1 APPROVED 및 Phase 2 착수</p></div>
-<div class="card warn"><h3>BLOCKER / DECISION</h3><b>외부환경 Gate</b><p>DEV SQL Server 연결정보와 Human Architecture 승인 필요</p></div>
+<section class="hero"><h1>DIO CRM AI Orchestration — 프로젝트 진행현황</h1><p>Last Updated: 2026-09-11 · Phase 1 Human Architecture APPROVED</p><div class="grid">
+<div class="card ok"><h3>CURRENT</h3><b>Phase 1 구현 + CI + Architecture 승인 완료</b><p>P1-00~P1-08 구현, Build/Test PASS, Product Owner 승인 완료</p></div>
+<div class="card next"><h3>NEXT</h3><b>DEV DB Migration 적용/검증</b><p>완료 후 Phase 1 APPROVED 및 Phase 2 착수</p></div>
+<div class="card warn"><h3>BLOCKER / DECISION</h3><b>DEV SQL Server 환경</b><p>실제 DEV DB 접속환경에서 Migration 적용 확인만 남음</p></div>
 </div></section>
 <section style="margin-top:24px"><h2>Phase 진행률</h2><div class="grid">
 <div class="card ok"><span class="badge done">APPROVED</span><h3>Phase 0</h3><p>9/9 완료</p></div>
-<div class="card warn"><span class="badge review">CI PASS</span><h3>Phase 1</h3><p>8/8 구현 · DEV DB/Human Gate 대기</p></div>
+<div class="card warn"><span class="badge review">DEV DB PENDING</span><h3>Phase 1</h3><p>8/8 구현 · CI PASS · Architecture APPROVED</p></div>
 <div class="card"><span class="badge wait">WAIT</span><h3>Phase 2</h3><p>Customer / Lead / Account</p></div>
 </div></section>
 <section class="good"><h2>P1-00 기술스택 결정</h2><p><b>React + TypeScript + Vite / NestJS + TypeScript / SQL Server / mssql / REST + Zod / JWT / pnpm Monorepo</b></p><p>.NET으로 고정하지 않고 Frontend/Backend 언어를 TypeScript로 통일했다. ERP는 별도 Integration Adapter를 통해 연결하고, AI 전용 기능이 필요할 때 Python/FastAPI 서비스를 추가한다.</p></section>
+<section class="good"><h2>Human Architecture Review</h2><p><b>APPROVED — 2026-09-11</b></p><p>Product Owner 승인 범위: 기술스택, Monorepo 구조, JWT 인증, Role/Permission/Data Scope, SQL Server Foundation, ERP/HIRA Adapter 분리, Audit/Interface/File/Notification Foundation.</p></section>
 <section style="margin-top:24px"><h2>Phase 1 Work Package</h2><table><thead><tr><th>ID</th><th>내용</th><th>상태</th></tr></thead><tbody>
 <tr><td>P1-00</td><td>Technology Stack Decision</td><td><span class="badge done">완료</span></td></tr>
 <tr><td>P1-01</td><td>Repository/Application Skeleton + CI + Health</td><td><span class="badge done">완료</span></td></tr>
@@ -26,6 +27,6 @@ body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#f4f6f9;color:
 <tr><td>P1-08</td><td>File Metadata / Notification Foundation</td><td><span class="badge done">완료</span></td></tr>
 </tbody></table></section>
 <section class="good"><h2>CI 검증</h2><p><b>PASS</b> — dependency install, shared contracts, NestJS backend build, React/Vite frontend build, tests 모두 성공.</p></section>
-<section class="block"><h2>Phase 1 남은 Gate</h2><ul><li>DEV SQL Server에 <code>database/migrations/001_phase1_foundation.sql</code> 적용/검증</li><li>Human Architecture Review 승인</li></ul><p>운영 DB/ERP에는 아무 변경도 수행하지 않았다.</p></section>
-<section style="margin-top:24px"><h2>다음 Phase</h2><p>Phase 1 승인 후 <b>Phase 2 — Customer / Lead / Account</b>를 시작한다. P2-01 심평원 신규병원 수신 → P2-02 Lead 관리 → P2-03 담당자 자동할당 순으로 진행한다.</p></section>
+<section class="block"><h2>Phase 1 마지막 Gate</h2><ul><li>DEV SQL Server에 <code>database/migrations/001_phase1_foundation.sql</code> 적용</li><li><code>database/seeds/001_phase1_seed.sql</code> 적용</li><li>Foundation Table/Seed/API 연결 검증</li></ul><p>상세 절차: <code>docs/P1_DEV_DB_APPLY_RUNBOOK.md</code></p><p>운영 DB/ERP에는 아무 변경도 수행하지 않는다.</p></section>
+<section style="margin-top:24px"><h2>다음 Phase</h2><p>DEV DB Gate 완료 후 Phase 1을 <b>APPROVED</b>로 변경하고 <b>Phase 2 — Customer / Lead / Account</b>를 시작한다. P2-01 심평원 신규병원 수신 → P2-02 Lead 관리 → P2-03 담당자 자동할당 순으로 진행한다.</p></section>
 </div></body></html>
