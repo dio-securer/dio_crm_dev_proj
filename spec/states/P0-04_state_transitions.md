@@ -10,14 +10,19 @@
 | 키맨미팅 | 변환 | 계약 의지/수주 가능성이 높아 기회 포착 |
 | 변환 | - | Terminal |
 
-> PDF는 모든 역방향 전이 허용 여부를 정의하지 않는다. 역전이 정책은 GAP.
+### Phase 0 승인 후 역전이 정책
+- 일반 영업담당자는 정방향 전이를 기본으로 한다.
+- `신규등록 / 초도방문 / 키맨미팅` 사이의 역전이는 지점장 또는 CRM 관리자만 가능하다.
+- 역전이 시 사유 입력과 AuditLog 기록이 필수다.
+- `컨택제외`는 지점장/CRM 관리자가 활성 단계로 재오픈할 수 있다.
+- `변환(CONVERTED)`은 Terminal이며 역전이 금지한다.
 
 ## 2. Opportunity 단계
 
 ```text
 NEEDS_ANALYSIS
-  → PROPOSAL
-    → NEGOTIATION
+  ↔ PROPOSAL
+    ↔ NEGOTIATION
       → CLOSED_WON
       → CLOSED_LOST
 ```
@@ -28,6 +33,13 @@ NEEDS_ANALYSIS
 | PROPOSAL | NEGOTIATION | 제안 조건 협상 |
 | NEGOTIATION | CLOSED_WON | 계약확정, ERP 거래처 승인 필요 |
 | NEGOTIATION | CLOSED_LOST | 제안 실패 |
+
+### Phase 0 승인 후 역전이/재오픈 정책
+- Open 단계(`NEEDS_ANALYSIS/PROPOSAL/NEGOTIATION`)는 영업담당자가 앞/뒤 단계로 이동 가능하다.
+- 역전이 시 사유를 기록하고 Stage History를 보존한다.
+- `CLOSED_LOST` 재오픈은 지점장 또는 CRM 관리자만 가능하다.
+- `CLOSED_WON`은 Contract 미생성 시 지점장/CRM 관리자만 재오픈할 수 있다.
+- Contract 생성 이후 `CLOSED_WON` 재오픈 및 Opportunity 수정은 금지한다.
 
 자료상 기회의 `마감됨` 처리 시 ERP 승인여부 경고/확인이 필요하다.
 
@@ -42,6 +54,7 @@ NEEDS_ANALYSIS
 추가 Rule:
 - 다른 미완료 IN 활동이 존재하면 새 IN 불가.
 - GPS 허용범위 밖이면 IN 불가.
+- 최초 Baseline GPS IN 허용거리는 `200m`이며 시스템 설정값으로 관리한다.
 - 완료된 일정은 수정 제한.
 
 ## 4. Activity Report 승인상태
@@ -68,7 +81,7 @@ NEEDS_ANALYSIS
  └→ 지점장 반려
 ```
 
-반려 후 담당자의 재승인 요청이 가능하다. 동일 레코드 재활성화인지 새 승인차수 생성인지는 GAP.
+반려 후 담당자의 재승인 요청이 가능하다. 동일 레코드 재활성화인지 새 승인차수 생성인지는 후속 Gap에서 확정한다.
 
 ## 6. ERP 연동상태
 
@@ -87,7 +100,7 @@ NEEDS_ANALYSIS
 - SUCCESS
 - FAILED
 
-FAILED → REQUESTING 재시도 전이는 자체개발에서 필요하나 자료에는 상세정책이 없어 GAP.
+FAILED → REQUESTING 재시도 전이는 자체개발에서 필요하나 상세 Retry 정책은 후속 Gap에서 확정한다.
 
 ## 7. Contract 생명주기(초안)
 
@@ -96,7 +109,7 @@ FAILED → REQUESTING 재시도 전이는 자체개발에서 필요하나 자료
 - ERP_APPROVED: ERP 승인/계약번호 반영
 - CLOSED: 마감
 
-정확한 계약 상태코드는 자료에 완전한 목록이 없으므로 Phase 1 확정 대상.
+정확한 계약 상태코드는 Contract 도메인 착수 전 확정한다.
 
 ## 8. Collection Plan 상태(초안)
 
@@ -107,4 +120,7 @@ FAILED → REQUESTING 재시도 전이는 자체개발에서 필요하나 자료
 - 미수 발생
 - 변경계획 ERP 전송
 
-구현 시 상태를 임의 확정하지 말고 `correction_required_yn`, 실제수금 존재여부, `erp_sync_status` 조합으로 우선 설계 검토한다.
+구현 시 `correction_required_yn`, 실제수금 존재여부, `erp_sync_status` 조합을 우선 사용하고 상세 상태는 Contract/Collection 설계에서 확정한다.
+
+## 9. 관련 결정서
+- `spec/gaps/P0-09_p1_gap_decisions.md`
