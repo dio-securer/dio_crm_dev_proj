@@ -11,24 +11,34 @@
 - P0-07 ERP/심평원 Interface Catalog
 - P0-08 Screen/Menu Catalog
 - P0-09 Spec Gap/승인자료
+- P0-09 P1 우선 Gap 결정서
 
-## 2. Open Spec Gaps
+## 2. P1 우선 Gap 결정 결과
+
+| GAP ID | 결정 | 상태 |
+|---|---|---|
+| GAP-001 | GPS IN 기본 허용거리 200m, 시스템 설정값으로 관리 | RESOLVED |
+| GAP-003 | 사용자/조직 Master는 ERP 기준, CRM은 동기화 사본과 CRM 권한 관리 | RESOLVED |
+| GAP-004 | 승인 요청 시점 조직 Snapshot 기준 `영업담당자 → 지점장 → 본부장`; 위임/재할당은 Audit 필수 | RESOLVED |
+| GAP-007 | Lead 역전이는 지점장/관리자만 사유와 함께 허용, CONVERTED는 Terminal | RESOLVED |
+| GAP-008 | Opportunity Open 단계 역전이 허용+History, Closed 재오픈은 관리자 제한, Contract 생성 후 Closed Won 재오픈 금지 | RESOLVED |
+| GAP-018 | 내부 bigint IDENTITY + API public_id(UUID) + company_id 필수 + Master/Config Soft Delete | RESOLVED |
+
+세부 결정은 `P0-09_p1_gap_decisions.md`를 따른다.
+
+> 기존 `GAP-002 위치 오차 허용/Mock GPS 정책`은 Phase 1 Foundation 자체의 선행조건이 아니므로 **P2(Phase 3 Activity 착수 전 필수)** 로 조정한다.
+
+## 3. 잔여 Open Spec Gaps
 
 우선순위:
-- P1: Phase 1~3 개발 전 반드시 결정
 - P2: 해당 도메인 개발 전 결정
 - P3: 운영 상세설계 시 결정 가능
 
 | GAP ID | 우선 | 미정의 사항 | 왜 필요한가 | 결정 주체 |
 |---|---:|---|---|---|
-| GAP-001 | P1 | GPS IN 허용거리(m) | Activity IN Validation | 영업/관리 |
-| GAP-002 | P1 | 위치 오차 허용/Mock GPS 정책 | 모바일 현장통제 | IT/영업 |
-| GAP-003 | P1 | 사용자/조직 Master 원천(ERP/인사/CRM) | 인증/권한 | IT |
-| GAP-004 | P1 | 지점/본부 승인자 결정 로직 및 대리승인 | Approval 엔진 | 영업관리 |
+| GAP-002 | P2 | 위치 오차 허용/Mock GPS 정책 | 모바일 현장통제 | IT/영업 |
 | GAP-005 | P2 | 활동보고 반려 상태/재요청 프로세스 | State machine | 영업관리 |
 | GAP-006 | P2 | 직출/직퇴 반려 후 동일 승인건 재사용 vs 신규 차수 | Approval history | 영업관리 |
-| GAP-007 | P1 | Lead 단계 역전이 허용 여부 | 상태통제 | 영업 |
-| GAP-008 | P1 | Opportunity 단계 역전이/재오픈 정책 | Pipeline | 영업 |
 | GAP-009 | P2 | Opportunity 지점장/본부장 승인 조건 | PDF에 미결정으로 명시 | 영업관리 |
 | GAP-010 | P2 | 할인율/할증율 계산 공식 및 반올림 | 계약금액 정확성 | ERP/영업 |
 | GAP-011 | P2 | Contract 상태코드/마감 기준 | 주문가능 조건 | ERP/영업 |
@@ -38,7 +48,6 @@
 | GAP-015 | P2 | 제품/패키지 Master 연동 방식 | 제안/주문 | ERP/IT |
 | GAP-016 | P2 | 심평원 데이터 수신 기술 방식 | Lead 자동수신 | IT |
 | GAP-017 | P2 | 심평원 수동수정 충돌/덮어쓰기 정책 | 데이터 정합성 | 영업관리/IT |
-| GAP-018 | P1 | PK(bigint/UUID), Soft Delete, 법인키 | 물리 DB 설계 | Architect |
 | GAP-019 | P2 | Lead Convert 시 Activity 이관 방식 | 이력 보존 | Architect |
 | GAP-020 | P2 | 중복 Account 병합 권한/감사/복구정책 | 데이터 안전 | 영업관리/IT |
 | GAP-021 | P2 | 수금계획 변경이력 저장/ERP 전송 단위 | 금액 이력 | ERP/IT |
@@ -47,44 +56,50 @@
 | GAP-024 | P3 | 알림 채널(앱/메일/SMS) 및 재알림 | Workflow | 영업/IT |
 | GAP-025 | P2 | 거래처 이탈가능성 9개월 조건의 정확한 ERP 데이터/fixture 정의 | 이탈 로직 | 영업/ERP |
 
-## 3. Phase 0 판정
-
-### 작성 완료
-Phase 0 Specification Baseline 산출물은 작성 완료.
+## 4. Phase 0 판정
 
 ### 승인 상태
-`APPROVAL_PENDING`
+`APPROVED`
 
-이유:
-- PDF에서 확인 가능한 업무는 Baseline으로 정리했으나 P1 우선순위 GAP들이 사람의 결정을 필요로 한다.
-- 특히 `GAP-001`, `003`, `004`, `007`, `008`, `018`은 Phase 1 또는 Activity 개발 이전에 확정 필요.
+### 승인일
+`2026-09-11`
 
-## 4. Phase 1 진입 조건
+### 승인 범위
+- PDF 기반 현행 업무 Baseline 승인
+- P1 선행 6개 Gap의 자체개발 Baseline 승인
+- 나머지 P2/P3 Gap은 해당 도메인 착수 전 결정하는 조건부 후속과제로 이관
 
-1. 본 문서 Product Owner 승인
-2. P1 Gap 결정 또는 명시적으로 '설계 중 결정' 승인
-3. 기술스택 최종 고정
-4. 개발/DEV DB 환경 기준 확정
-5. Git branch / PR / CI 기본정책 확정
+Phase 0은 더 이상 Phase 1 착수 Blocker가 아니다.
 
-## 5. Product Owner 승인 체크리스트
+## 5. Phase 1 진입조건 판정
 
-- [ ] 전체 업무 범위가 실제 현행 프로세스와 일치한다.
-- [ ] Lead → Account/Opportunity → Contract → Order 흐름에 누락이 없다.
-- [ ] Activity / Activity Report / Direct Work 분리가 맞다.
-- [ ] ERP를 Master로 둘 데이터 범위가 맞다.
-- [ ] 권한/승인 경로가 맞다.
-- [ ] 화면 목록에 핵심 업무가 빠지지 않았다.
-- [ ] Open Gap의 담당자와 우선순위를 승인한다.
-- [ ] Phase 1 착수를 승인한다.
+| 조건 | 상태 | 비고 |
+|---|---|---|
+| Phase 0 산출물 작성 | PASS | P0-01~P0-09 |
+| P1 선행 Gap 결정 | PASS | 6건 Resolve |
+| 기술스택 기준 | PASS | React + .NET API + SQL Server 기준으로 설계 진행 |
+| 데이터 식별/법인키 기본정책 | PASS | GAP-018 결정 |
+| 사용자/조직 원천 | PASS | ERP Master |
+| 승인 기본경로 | PASS | 지점장→본부장 |
 
-## 6. 다음 작업
+개발환경/CI 세부는 P1-01 Repository/Application Skeleton에서 구체화한다.
 
-승인 전:
-- Open Gap 검토/답변
+## 6. Product Owner 승인 체크리스트
 
-승인 후:
-- `P1-01 Repository/Application Skeleton`
-- `P1-02 Authentication`
-- `P1-03 User / Organization`
-순으로 Phase 1을 실행한다.
+- [x] 전체 업무 범위를 Phase 0 Baseline으로 채택한다.
+- [x] Lead → Account/Opportunity → Contract → Order 흐름을 Baseline으로 채택한다.
+- [x] Activity / Activity Report / Direct Work 분리구조를 채택한다.
+- [x] ERP Master 데이터 범위를 채택한다.
+- [x] P1 승인경로/권한 Baseline을 채택한다.
+- [x] P1 선행 Gap 6건의 결정값을 채택한다.
+- [x] 잔여 Gap은 해당 도메인 착수 전 해결하는 조건으로 Phase 0을 종료한다.
+- [x] Phase 1 착수를 승인한다.
+
+## 7. 다음 작업
+
+Phase 1 시작:
+1. `P1-01 Repository/Application Skeleton`
+2. `P1-02 Authentication`
+3. `P1-03 User / Organization`
+4. `P1-04 Role / Permission`
+5. 이후 Foundation Work Package 순차 실행
