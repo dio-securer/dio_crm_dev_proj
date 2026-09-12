@@ -2,9 +2,9 @@
 
 ## Status
 
-`IMPLEMENTED / CI_PENDING / HUMAN_REVIEW_PENDING / DB_MIGRATION_DEFERRED`
+`IMPLEMENTED / CI_PASS / HUMAN_REVIEW_PENDING / DB_MIGRATION_DEFERRED`
 
-Phase 5 P5-01~P5-07 Source Baseline 구현을 완료한다. 실제 ERP Transport/API/SP 상세와 DEV DB Migration은 별도 환경 Gate로 유지한다.
+Phase 5 P5-01~P5-07 Source Baseline 구현과 GitHub Actions Build/Test 검증을 완료했다. 실제 ERP Transport/API/SP 상세와 DEV DB Migration은 별도 환경 Gate로 유지한다.
 
 ## P5-01 ERP Account Request
 - Account 필수정보 검증 후 IF-ERP-002 Queue 생성
@@ -77,6 +77,14 @@ Phase 5 P5-01~P5-07 Source Baseline 구현을 완료한다. 실제 ERP Transport
 - ERP 계약 등록요청
 - 수금대사 조회
 
+## CI Result
+GitHub Actions Run `34678277112` PASS.
+- pnpm install: PASS
+- shared contracts build: PASS
+- NestJS backend build: PASS
+- React/Vite frontend build: PASS
+- Jest / Phase 5 Domain Rule tests: PASS
+
 ## Deferred / Open
 - Phase 1~5 SQL Migration 실제 DEV DB 적용
 - GAP-012/013 실제 ERP API/SP/DB 방식, 인증, Payload, 오류코드
@@ -93,8 +101,8 @@ Phase 5 P5-01~P5-07 Source Baseline 구현을 완료한다. 실제 ERP Transport
 - [x] P5-05 ERP Contract Result Handler
 - [x] P5-06 Actual Collection
 - [x] P5-07 Arrears / Plan Change
-- [x] Domain Rule Unit Test 작성
-- [ ] GitHub Actions Build/Test PASS
+- [x] Domain Rule Unit Test
+- [x] GitHub Actions Build/Test PASS
 - [ ] Human Domain Review
 
 ## Next after approval
