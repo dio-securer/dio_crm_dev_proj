@@ -9,6 +9,8 @@ import { AccountController, HiraController, LeadController } from './modules/cus
 import { CustomerService } from './modules/customer/customer.service';
 import { ActivityController, ActivityReportController, DirectWorkController } from './modules/activity/activity.controller';
 import { ActivityService } from './modules/activity/activity.service';
+import { ApprovalRouteController } from './modules/activity/approval-route.controller';
+import { ApprovalRouteService } from './modules/activity/approval-route.service';
 import { AuthGuard, PermissionGuard } from './security/security';
 import { InterfaceService } from './integration/interface.service';
 
@@ -23,7 +25,8 @@ import { InterfaceService } from './integration/interface.service';
     HiraController,
     ActivityController,
     ActivityReportController,
-    DirectWorkController
+    DirectWorkController,
+    ApprovalRouteController
   ],
   providers: [
     DatabaseService,
@@ -31,6 +34,7 @@ import { InterfaceService } from './integration/interface.service';
     PlatformService,
     CustomerService,
     ActivityService,
+    ApprovalRouteService,
     AuthGuard,
     PermissionGuard,
     InterfaceService
