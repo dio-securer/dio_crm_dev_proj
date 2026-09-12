@@ -7,6 +7,8 @@ import { CommonCodeController, PlatformController } from './modules/platform/pla
 import { PlatformService } from './modules/platform/platform.service';
 import { AccountController, HiraController, LeadController } from './modules/customer/customer.controller';
 import { CustomerService } from './modules/customer/customer.service';
+import { ActivityController, ActivityReportController, DirectWorkController } from './modules/activity/activity.controller';
+import { ActivityService } from './modules/activity/activity.service';
 import { AuthGuard, PermissionGuard } from './security/security';
 import { InterfaceService } from './integration/interface.service';
 
@@ -18,13 +20,17 @@ import { InterfaceService } from './integration/interface.service';
     CommonCodeController,
     LeadController,
     AccountController,
-    HiraController
+    HiraController,
+    ActivityController,
+    ActivityReportController,
+    DirectWorkController
   ],
   providers: [
     DatabaseService,
     AuthService,
     PlatformService,
     CustomerService,
+    ActivityService,
     AuthGuard,
     PermissionGuard,
     InterfaceService
