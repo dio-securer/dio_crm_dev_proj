@@ -75,3 +75,37 @@ export type ActivityMapHospital = {
   address?: string | null;
   distance_m: number;
 };
+
+export type OpportunityStage = 'NEEDS_ANALYSIS' | 'PROPOSAL' | 'NEGOTIATION' | 'CLOSED_WON' | 'CLOSED_LOST';
+
+export type OpportunitySummary = {
+  public_id: string;
+  opportunity_name: string;
+  account_public_id: string;
+  account_name: string;
+  stage: OpportunityStage;
+  record_type: 'NEW' | 'EXISTING' | 'RECONTRACT';
+  amount: number;
+  expected_close_date?: string | null;
+  success_probability?: number | null;
+  forecast_category?: 'PIPELINE' | 'BEST_CASE' | 'COMMIT' | 'OMITTED' | null;
+  erp_approved_yn: boolean;
+  contract_created_yn: boolean;
+};
+
+export type ProductPackageSummary = {
+  public_id: string;
+  item_type: 'PACKAGE' | 'PRODUCT';
+  item_name: string;
+  erp_item_code?: string | null;
+  category?: string | null;
+  base_price: number;
+  source_system: string;
+};
+
+export type PipelineStageSummary = {
+  stage: OpportunityStage;
+  opportunity_count: number;
+  amount: number;
+  weighted_amount: number;
+};
