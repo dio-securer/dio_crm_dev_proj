@@ -2,9 +2,9 @@
 
 ## Status
 
-`IMPLEMENTED / CI_PENDING / HUMAN_REVIEW_PENDING / DB_MIGRATION_DEFERRED`
+`IMPLEMENTED / CI_PASS / HUMAN_REVIEW_PENDING / DB_MIGRATION_DEFERRED`
 
-Phase 6 P6-01~P6-07 Source Baseline을 구현한다. 실제 ERP 주문/출고/매출/반품 Transport 및 DEV DB Migration은 환경 Gate로 유지한다.
+Phase 6 P6-01~P6-07 Source Baseline 구현과 GitHub Actions Build/Test 검증을 완료했다. 실제 ERP 주문/출고/매출/반품 Transport 및 DEV DB Migration은 환경 Gate로 유지한다.
 
 ## P6-01 Product Search
 - `crm_product_package`를 주문용 Catalog로 재사용
@@ -92,6 +92,14 @@ Phase 6 P6-01~P6-07 Source Baseline을 구현한다. 실제 ERP 주문/출고/�
 - ERP 주문 Queue 생성
 - 납품/매출/반품·교환 통합현황
 
+## CI Result
+GitHub Actions Run `34679162667` PASS.
+- pnpm install: PASS
+- shared contracts build: PASS
+- NestJS backend build: PASS
+- React/Vite frontend build: PASS
+- Jest / Phase 6 Domain Rule tests: PASS
+
 ## Deferred / Open
 - Phase 1~6 SQL Migration 실제 DEV DB 적용
 - GAP-012/013 실제 ERP API/SP/DB 방식, 인증, Payload, 오류코드
@@ -109,8 +117,8 @@ Phase 6 P6-01~P6-07 Source Baseline을 구현한다. 실제 ERP 주문/출고/�
 - [x] P6-05 Order / Delivery Status
 - [x] P6-06 Sales
 - [x] P6-07 Return / Exchange inbound/read model
-- [x] Domain Rule Unit Test 작성
-- [ ] GitHub Actions Build/Test PASS
+- [x] Domain Rule Unit Test
+- [x] GitHub Actions Build/Test PASS
 - [ ] Human Domain Review
 
 ## Next after approval
