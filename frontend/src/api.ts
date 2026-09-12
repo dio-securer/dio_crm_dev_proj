@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '';
+const API_BASE = ((window as unknown as { __DIO_CRM_API_BASE__?: string }).__DIO_CRM_API_BASE__ ?? '').replace(/\/$/, '');
 
 export async function apiGet<T>(path: string): Promise<T> {
   const token = localStorage.getItem('dio_crm_access_token');
