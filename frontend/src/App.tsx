@@ -8,6 +8,8 @@ import { DirectWorkPage } from './DirectWorkPage';
 import { OpportunitiesPage } from './OpportunitiesPage';
 import { PipelinePage } from './PipelinePage';
 import { ContractsPage } from './ContractsPage';
+import { OrdersPage } from './OrdersPage';
+import { FulfillmentPage } from './FulfillmentPage';
 
 const linkStyle = ({ isActive }: { isActive: boolean }) => ({
   padding: '10px 14px', textDecoration: 'none', borderRadius: 8,
@@ -19,7 +21,7 @@ export default function App() {
     <main style={{ fontFamily: 'Malgun Gothic, sans-serif', maxWidth: 1180, margin: '28px auto', padding: 20 }}>
       <header style={{ marginBottom: 20 }}>
         <h1 style={{ marginBottom: 4 }}>DIO CRM</h1>
-        <p style={{ marginTop: 0, color: '#667085' }}>Phase 5 — ERP Account / Contract / Collection</p>
+        <p style={{ marginTop: 0, color: '#667085' }}>Phase 6 — Order / Delivery / Sales / Return</p>
         <nav style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <NavLink to="/" end style={linkStyle}>Lead</NavLink>
           <NavLink to="/accounts" style={linkStyle}>Account</NavLink>
@@ -29,6 +31,8 @@ export default function App() {
           <NavLink to="/opportunities" style={linkStyle}>Opportunity</NavLink>
           <NavLink to="/pipeline" style={linkStyle}>Pipeline / Funnel</NavLink>
           <NavLink to="/contracts" style={linkStyle}>계약 / 수금</NavLink>
+          <NavLink to="/orders" style={linkStyle}>주문</NavLink>
+          <NavLink to="/fulfillment" style={linkStyle}>납품 / 매출 / 반품</NavLink>
         </nav>
       </header>
       <Routes>
@@ -40,9 +44,11 @@ export default function App() {
         <Route path="/opportunities" element={<OpportunitiesPage />} />
         <Route path="/pipeline" element={<PipelinePage />} />
         <Route path="/contracts" element={<ContractsPage />} />
+        <Route path="/orders" element={<OrdersPage />} />
+        <Route path="/fulfillment" element={<FulfillmentPage />} />
       </Routes>
       <footer style={{ marginTop: 28, color: '#667085', fontSize: 12 }}>
-        ERP Account/Contract/Collection 실제 Transport와 DEV DB Migration은 별도 환경 Gate입니다. 현재 요청은 Interface Queue까지 생성하며 외부 성공을 가정하지 않습니다.
+        주문/납품/매출/반품·교환의 실제 ERP Transport와 DEV DB Migration은 별도 환경 Gate입니다. 반품·교환 요청/취소 규칙은 Spec 확정 전 임의 구현하지 않습니다.
       </footer>
     </main>
   );
