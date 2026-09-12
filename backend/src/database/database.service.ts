@@ -1,4 +1,4 @@
-import { Injectable, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import sql, { ConnectionPool, IResult, Request, Transaction } from 'mssql';
 import { env } from '../config/env';
 
@@ -7,6 +7,7 @@ export type DbQuery = <T = any>(text: string, params?: Record<string, unknown>) 
 @Injectable()
 export class DatabaseService implements OnModuleDestroy {
   private pool?: ConnectionPool;
+  private readonly logger = new Logger(DatabaseService.name);
 
   private async getPool(): Promise<ConnectionPool> {
     if (this.pool?.connected) return this.pool;
@@ -16,8 +17,10 @@ export class DatabaseService implements OnModuleDestroy {
       database: env.CRM_DB_DATABASE,
       user: env.CRM_DB_USER,
       password: env.CRM_DB_PASSWORD,
+      connectionTimeout: env.CRM_DB_CONNECT_TIMEOUT_MS,
+      requestTimeout: env.CRM_DB_REQUEST_TIMEOUT_MS,
       options: { encrypt: env.CRM_DB_ENCRYPT === 'true', trustServerCertificate: env.NODE_ENV !== 'production' },
-      pool: { min: 0, max: 10, idleTimeoutMillis: 30000 }
+      pool: { min: 0, max: env.CRM_DB_POOL_MAX, idleTimeoutMillis: 30000 }
     }).connect();
     return this.pool;
   }
@@ -43,14 +46,34 @@ export class DatabaseService implements OnModuleDestroy {
     }
   }
 
-  private executeRequest<T>(request: Request, text: string, params: Record<string, unknown>): Promise<IResult<T>> {
+  private async executeRequest<T>(request: Request, text: string, params: Record<string, unknown>): Promise<IResult<T>> {
     for (const [key, value] of Object.entries(params)) request.input(key, value as never);
-    return request.query<T>(text);
+    const started = Date.now();
+    try {
+      return await request.query<T>(text);
+    } finally {
+      const elapsed = Date.now() - started;
+      if (elapsed >= env.CRM_DB_SLOW_QUERY_MS) {
+        const statement = text.replace(/\s+/g, ' ').trim().slice(0, 240);
+        this.logger.warn(`slow_query elapsedMs=${elapsed} sql=${statement}`);
+      }
+    }
   }
 
   async ping(): Promise<boolean> {
     const result = await this.query<{ ok: number }>('SELECT CAST(1 AS int) AS ok');
     return result.recordset[0]?.ok === 1;
+  }
+
+  async diagnostics() {
+    const pool = await this.getPool();
+    return {
+      connected: pool.connected,
+      connecting: pool.connecting,
+      healthy: pool.healthy,
+      poolMax: env.CRM_DB_POOL_MAX,
+      requestTimeoutMs: env.CRM_DB_REQUEST_TIMEOUT_MS
+    };
   }
 
   async onModuleDestroy(): Promise<void> {
