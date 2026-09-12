@@ -12,7 +12,7 @@ export function configureHttpHardening(app: INestApplication) {
 
   app.enableCors({
     credentials: true,
-    origin(origin, callback) {
+    origin(origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
       if (isOriginAllowed(origin, allowedOrigins)) return callback(null, true);
       return callback(new Error('CORS origin is not allowed'), false);
     }
