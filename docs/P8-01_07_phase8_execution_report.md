@@ -2,9 +2,9 @@
 
 ## Status
 
-`SOURCE_BASELINE_IMPLEMENTED / CI_PENDING / ENVIRONMENT_GATES_PENDING / PRODUCTION_NOT_EXECUTED`
+`SOURCE_BASELINE_COMPLETE / CI_PASS / ENVIRONMENT_GATES_PENDING / PRODUCTION_NOT_EXECUTED`
 
-Phase 8 P8-01~P8-07에 대해 코드/DB Baseline/운영 Runbook/검증 Script를 구현한다. 실제 DEV/UAT DB 적용, Restore Drill, Pilot, Production Cutover는 접속환경과 Production Gate가 필요하므로 실행 완료로 간주하지 않는다.
+Phase 8 P8-01~P8-07에 대해 코드/DB Baseline/운영 Runbook/검증 Script 구현과 GitHub Actions Build/Test/Security Audit 검증을 완료했다. 실제 DEV/UAT DB 적용, Restore Drill, Pilot, Production Cutover는 접속환경과 Production Gate가 필요하므로 실행 완료로 간주하지 않는다.
 
 ## P8-01 Security
 구현:
@@ -113,6 +113,15 @@ Production Cutover는 명시적 Production Gate 없이는 실행하지 않는다
 - `crm_release_event`
 - `OPS.READ`, `RELEASE.READ`, `RELEASE.MANAGE`
 
+## CI Result
+GitHub Actions Run `34686372372` PASS.
+- dependency install: PASS
+- shared contracts/backend/frontend build: PASS
+- Jest tests: PASS
+- `pnpm audit:critical`: PASS
+
+초기 Phase 8 CI에서 CORS callback parameter의 TypeScript implicit `any` 오류를 발견했고 명시적 타입을 적용한 뒤 재검증했다.
+
 ## Phase 8 Gate
 - [x] P8-01 Security Source Baseline
 - [x] P8-02 Performance Source Baseline
@@ -121,7 +130,7 @@ Production Cutover는 명시적 Production Gate 없이는 실행하지 않는다
 - [x] P8-05 Monitoring Source Baseline
 - [x] P8-06 Pilot Plan + Smoke Script
 - [x] P8-07 Cutover Runbook
-- [ ] GitHub Actions Build/Test/Security Audit PASS
+- [x] GitHub Actions Build/Test/Security Audit PASS
 - [ ] Phase 1~8 Migration DEV/UAT 적용
 - [ ] Backup + Restore Drill PASS
 - [ ] UAT/Pilot GO
@@ -130,3 +139,11 @@ Production Cutover는 명시적 Production Gate 없이는 실행하지 않는다
 
 ## Current Decision
 DB Migration을 나중에 수행한다는 기존 사용자 결정에 따라 Production/UAT 환경 작업은 Deferred 상태를 유지한다. Source/CI 단계와 실제 환경 실행 단계를 명확히 분리한다.
+
+## Next
+1. Phase 8 Source Review
+2. DEV/UAT DB Migration 적용
+3. Backup/Restore Drill
+4. UAT/Pilot
+5. Production Cutover 승인
+6. Production Cutover 및 Hyper-care
