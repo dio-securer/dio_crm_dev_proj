@@ -2,9 +2,9 @@
 
 ## Status
 
-`IMPLEMENTED / CI_PENDING / ENVIRONMENT_INTEGRATION_DEFERRED`
+`IMPLEMENTED / CI_PASS / HUMAN_DOMAIN_REVIEW_PENDING / ENVIRONMENT_INTEGRATION_DEFERRED`
 
-Phase 2 Work Package P2-01~P2-07의 소스 Baseline을 구현했다. 실제 DEV DB Migration 및 심평원/ERP 실연동은 환경 준비 후 연결한다.
+Phase 2 Work Package P2-01~P2-07의 소스 Baseline 구현과 GitHub Actions Build/Test를 완료했다. 실제 DEV DB Migration 및 심평원/ERP 실연동은 환경 준비 후 연결한다.
 
 ## P2-01 심평원 신규병원 수신
 - `/api/integrations/hira/hospitals/import`
@@ -80,6 +80,14 @@ Phase 2 Work Package P2-01~P2-07의 소스 Baseline을 구현했다. 실제 DEV 
 - crm_account_merge_history
 - crm_hira_hospital_inbox
 
+## CI Result
+GitHub Actions `ci` PASS.
+- pnpm install: PASS
+- shared contracts build: PASS
+- NestJS backend build: PASS
+- React/Vite frontend build: PASS
+- Jest tests: PASS
+
 ## Permissions
 - LEAD.READ
 - LEAD.WRITE
@@ -106,7 +114,7 @@ Phase 2 Work Package P2-01~P2-07의 소스 Baseline을 구현했다. 실제 DEV 
 - [x] P2-05 Source Baseline
 - [x] P2-06 Source Baseline
 - [x] P2-07 Source Baseline
-- [ ] GitHub Actions Build/Test PASS
+- [x] GitHub Actions Build/Test PASS
 - [ ] Human Domain Review
 
 ## Next after approval
