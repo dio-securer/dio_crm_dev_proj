@@ -54,3 +54,36 @@ export type ContractSummary = {
 export type CollectionPlanSummary = { public_id:string; plan_version:number; installment_no:number; collection_method:string; amount:number; planned_date:string; adjustment_type:'ORIGINAL'|'SPLIT'|'ARREARS_REALLOCATION'; is_current:boolean; erp_sync_status:string; correction_required_yn:boolean; };
 export type CollectionActualSummary = { public_id:string; erp_collection_no:string; amount:number; collected_at:string; source_system:string; };
 export type CollectionReconciliation = { contractPublicId:string; contractAmount:number; currentPlanTotal:number; actualTotal:number; overduePlanTotal:number; outstandingAmount:number; correctionRequired:boolean; };
+
+export type OrderStatus = 'DRAFT' | 'REQUESTING' | 'ACCEPTED' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+export type OrderSummary = {
+  public_id:string;
+  status:OrderStatus;
+  integration_status:string;
+  erp_order_no?:string|null;
+  delivery_address_type?:'ACCOUNT'|'DIRECT'|null;
+  delivery_address?:string|null;
+  express_yn:boolean;
+  note?:string|null;
+  contract_public_id:string;
+  contract_name:string;
+  account_public_id:string;
+  account_name:string;
+  order_amount:number;
+  item_count:number;
+};
+export type OrderProductSummary = {
+  public_id:string;
+  item_type:'PACKAGE'|'PRODUCT';
+  item_name:string;
+  erp_item_code?:string|null;
+  category?:string|null;
+  unit_price:number;
+  stock_qty?:number|null;
+  order_available_yn:boolean;
+  source_system:string;
+  erp_synced_at?:string|null;
+};
+export type DeliverySummary = { public_id:string; erp_delivery_no:string; delivery_status:string; shipped_at?:string|null; delivered_at?:string|null; };
+export type SalesSummary = { public_id:string; erp_sales_no:string; sales_date:string; amount:number; item_code?:string|null; item_name?:string|null; quantity?:number|null; account_public_id:string; account_name:string; contract_public_id?:string|null; order_public_id?:string|null; };
+export type ReturnExchangeSummary = { public_id:string; erp_reference_no:string; transaction_type:'RETURN'|'EXCHANGE'; status:string; item_code?:string|null; quantity?:number|null; processed_at?:string|null; };
