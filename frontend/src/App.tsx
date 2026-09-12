@@ -5,6 +5,8 @@ import { AccountsPage } from './AccountsPage';
 import { ActivitiesPage } from './ActivitiesPage';
 import { ActivityReportsPage } from './ActivityReportsPage';
 import { DirectWorkPage } from './DirectWorkPage';
+import { OpportunitiesPage } from './OpportunitiesPage';
+import { PipelinePage } from './PipelinePage';
 
 const linkStyle = ({ isActive }: { isActive: boolean }) => ({
   padding: '10px 14px', textDecoration: 'none', borderRadius: 8,
@@ -16,13 +18,15 @@ export default function App() {
     <main style={{ fontFamily: 'Malgun Gothic, sans-serif', maxWidth: 1180, margin: '28px auto', padding: 20 }}>
       <header style={{ marginBottom: 20 }}>
         <h1 style={{ marginBottom: 4 }}>DIO CRM</h1>
-        <p style={{ marginTop: 0, color: '#667085' }}>Phase 3 — Sales Activity</p>
+        <p style={{ marginTop: 0, color: '#667085' }}>Phase 4 — Opportunity / Sales Pipeline</p>
         <nav style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <NavLink to="/" end style={linkStyle}>Lead</NavLink>
           <NavLink to="/accounts" style={linkStyle}>Account</NavLink>
           <NavLink to="/activities" style={linkStyle}>활동 / GPS</NavLink>
           <NavLink to="/activity-reports" style={linkStyle}>활동보고 / 승인</NavLink>
           <NavLink to="/direct-work" style={linkStyle}>직출 / 직퇴</NavLink>
+          <NavLink to="/opportunities" style={linkStyle}>Opportunity</NavLink>
+          <NavLink to="/pipeline" style={linkStyle}>Pipeline / Funnel</NavLink>
         </nav>
       </header>
       <Routes>
@@ -31,9 +35,11 @@ export default function App() {
         <Route path="/activities" element={<ActivitiesPage />} />
         <Route path="/activity-reports" element={<ActivityReportsPage />} />
         <Route path="/direct-work" element={<DirectWorkPage />} />
+        <Route path="/opportunities" element={<OpportunitiesPage />} />
+        <Route path="/pipeline" element={<PipelinePage />} />
       </Routes>
       <footer style={{ marginTop: 28, color: '#667085', fontSize: 12 }}>
-        DB Migration/외부 Adapter 적용은 별도 환경 Gate입니다. GPS Mock/정확도 차단정책은 GAP-002 확정 전 수집만 하고 차단하지 않습니다.
+        실제 DB Migration/ERP Product Sync는 별도 환경 Gate입니다. Opportunity 관리자 승인정책은 GAP-009 확정 전 임의 구현하지 않습니다.
       </footer>
     </main>
   );

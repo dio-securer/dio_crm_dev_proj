@@ -18,60 +18,30 @@ export type AuthUser = {
 };
 
 export type PageQuery = { page?: number; pageSize?: number };
-
 export type LeadStatus = 'NEW' | 'FIRST_VISIT' | 'KEYMAN_MEETING' | 'CONTACT_EXCLUDED' | 'CONVERTED';
-
-export type LeadSummary = {
-  public_id: string;
-  hospital_name: string;
-  status: LeadStatus;
-  owner_user_id?: number | null;
-  owner_name?: string | null;
-  phone?: string | null;
-  address?: string | null;
-  sido?: string | null;
-  sigungu?: string | null;
-  business_no?: string | null;
-};
-
-export type AccountSummary = {
-  public_id: string;
-  account_name: string;
-  account_status: string;
-  business_no?: string | null;
-  erp_customer_code?: string | null;
-  erp_approved_yn: boolean;
-  integration_status: string;
-};
-
+export type LeadSummary = { public_id:string; hospital_name:string; status:LeadStatus; owner_user_id?:number|null; owner_name?:string|null; phone?:string|null; address?:string|null; sido?:string|null; sigungu?:string|null; business_no?:string|null; };
+export type AccountSummary = { public_id:string; account_name:string; account_status:string; business_no?:string|null; erp_customer_code?:string|null; erp_approved_yn:boolean; integration_status:string; };
 export type ActivityStatus = 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED';
 export type ActivityRelatedType = 'LEAD' | 'ACCOUNT' | 'OPPORTUNITY';
-export type DirectWorkType = 'DIRECT_WORK' | 'DIRECT_LEAVE';
+export type ActivitySummary = { public_id:string; subject:string; planned_at:string; status:ActivityStatus; related_type:ActivityRelatedType; related_id:number; visit_purpose:string; in_at?:string|null; out_at?:string|null; };
 export type ActivityReportStatus = 'DRAFT' | 'REQUESTED' | 'BRANCH_APPROVED' | 'FINAL_APPROVED';
-export type DirectWorkStatus = 'DRAFT' | 'REQUESTED' | 'BRANCH_APPROVED' | 'DIVISION_APPROVED' | 'BRANCH_REJECTED' | 'DIVISION_REJECTED';
+export type DirectWorkStatus = 'DRAFT' | 'REQUESTED' | 'BRANCH_APPROVED' | 'FINAL_APPROVED' | 'REJECTED_BRANCH' | 'REJECTED_DIVISION';
+export type DirectWorkType = 'DIRECT_WORK' | 'DIRECT_LEAVE';
 
-export type ActivityCalendarItem = {
-  event_public_id: string;
-  activity_public_id: string;
-  subject: string;
-  start_at: string;
-  end_at: string;
-  status: ActivityStatus;
-  related_type: ActivityRelatedType;
-  related_name_snapshot: string;
-  visit_purpose?: string | null;
-  in_at?: string | null;
-  out_at?: string | null;
-  direct_work_type?: DirectWorkType | null;
-  direct_work_status?: DirectWorkStatus | null;
+export type OpportunityStage = 'NEEDS_ANALYSIS' | 'PROPOSAL' | 'NEGOTIATION' | 'CLOSED_WON' | 'CLOSED_LOST';
+export type OpportunitySummary = {
+  public_id:string;
+  opportunity_name:string;
+  account_public_id:string;
+  account_name:string;
+  stage:OpportunityStage;
+  record_type:'NEW'|'EXISTING'|'RECONTRACT';
+  amount:number;
+  expected_close_date?:string|null;
+  success_probability?:number|null;
+  forecast_category?:'PIPELINE'|'BEST_CASE'|'COMMIT'|'OMITTED'|null;
+  erp_approved_yn:boolean;
+  contract_created_yn:boolean;
 };
-
-export type ActivityMapHospital = {
-  related_type: 'LEAD' | 'ACCOUNT';
-  public_id: string;
-  name: string;
-  latitude: number;
-  longitude: number;
-  address?: string | null;
-  distance_m: number;
-};
+export type ProductPackageSummary = { public_id:string; item_type:'PACKAGE'|'PRODUCT'; item_name:string; erp_item_code?:string|null; category?:string|null; base_price:number; source_system:string; };
+export type PipelineStageSummary = { stage:OpportunityStage; opportunity_count:number; amount:number; weighted_amount:number; };

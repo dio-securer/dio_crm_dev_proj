@@ -11,6 +11,8 @@ import { ActivityController, ActivityReportController, DirectWorkController } fr
 import { ActivityService } from './modules/activity/activity.service';
 import { ApprovalRouteController } from './modules/activity/approval-route.controller';
 import { ApprovalRouteService } from './modules/activity/approval-route.service';
+import { OpportunityController, ProductPackageController } from './modules/opportunity/opportunity.controller';
+import { OpportunityService } from './modules/opportunity/opportunity.service';
 import { AuthGuard, PermissionGuard } from './security/security';
 import { InterfaceService } from './integration/interface.service';
 
@@ -26,7 +28,9 @@ import { InterfaceService } from './integration/interface.service';
     ActivityController,
     ActivityReportController,
     DirectWorkController,
-    ApprovalRouteController
+    ApprovalRouteController,
+    OpportunityController,
+    ProductPackageController
   ],
   providers: [
     DatabaseService,
@@ -35,6 +39,7 @@ import { InterfaceService } from './integration/interface.service';
     CustomerService,
     ActivityService,
     ApprovalRouteService,
+    OpportunityService,
     AuthGuard,
     PermissionGuard,
     InterfaceService
