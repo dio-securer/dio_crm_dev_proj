@@ -1,6 +1,8 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
-import sql, { ConnectionPool, IResult } from 'mssql';
+import sql, { ConnectionPool, IResult, Request, Transaction } from 'mssql';
 import { env } from '../config/env';
+
+export type DbQuery = <T>(text: string, params?: Record<string, unknown>) => Promise<IResult<T>>;
 
 @Injectable()
 export class DatabaseService implements OnModuleDestroy {
@@ -22,7 +24,26 @@ export class DatabaseService implements OnModuleDestroy {
 
   async query<T>(text: string, params: Record<string, unknown> = {}): Promise<IResult<T>> {
     const pool = await this.getPool();
-    const request = pool.request();
+    return this.executeRequest<T>(pool.request(), text, params);
+  }
+
+  async transaction<T>(work: (query: DbQuery) => Promise<T>): Promise<T> {
+    const pool = await this.getPool();
+    const tx = new Transaction(pool);
+    await tx.begin();
+    const query: DbQuery = <R>(text: string, params: Record<string, unknown> = {}) =>
+      this.executeRequest<R>(new Request(tx), text, params);
+    try {
+      const result = await work(query);
+      await tx.commit();
+      return result;
+    } catch (error) {
+      await tx.rollback();
+      throw error;
+    }
+  }
+
+  private executeRequest<T>(request: Request, text: string, params: Record<string, unknown>): Promise<IResult<T>> {
     for (const [key, value] of Object.entries(params)) request.input(key, value as never);
     return request.query<T>(text);
   }
