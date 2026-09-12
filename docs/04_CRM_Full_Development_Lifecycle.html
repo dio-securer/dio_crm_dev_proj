@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DIO CRM 전체 개발 단계</title>
+<style>
+:root{--navy:#14365d;--blue:#1f5a8a;--green:#177245;--greenBg:#eaf7ef;--purple:#6d28d9;--purpleBg:#f3efff;--orange:#b54708;--orangeBg:#fff7ed;--red:#b42318;--redBg:#fff1f0;--text:#172033;--muted:#667085;--line:#dfe4ea;--bg:#f4f6f9;--card:#fff}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:'Malgun Gothic','Segoe UI',Arial,sans-serif;line-height:1.62}
+a{color:#175cd3;text-decoration:none} a:hover{text-decoration:underline}.wrap{max-width:1500px;margin:auto;padding:28px}.hero{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;border-radius:18px;padding:34px;box-shadow:0 10px 30px rgba(20,54,93,.16)}
+.hero h1{margin:0 0 6px;font-size:30px}.hero p{margin:4px 0;color:#e8eef6}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:24px}.kpi{background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:14px}.kpi b{display:block;font-size:22px}.kpi span{font-size:13px;color:#e8eef6}
+.section{margin-top:26px}.section h2{font-size:23px;margin:0 0 12px}.section h3{margin:0 0 8px}.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:0 2px 10px rgba(16,24,40,.04)}
+.badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700}.done{background:var(--greenBg);color:var(--green)}.wait{background:#eef1f5;color:#475467}.run{background:var(--purpleBg);color:var(--purple)}.warn{background:var(--orangeBg);color:var(--orange)}.block{background:var(--redBg);color:var(--red)}
+.notice{border-left:5px solid var(--green);background:var(--greenBg);padding:16px 18px;border-radius:10px}.warning{border-left:5px solid var(--orange);background:var(--orangeBg);padding:16px 18px;border-radius:10px}.mono,code,pre{font-family:Consolas,'Courier New',monospace}pre{white-space:pre-wrap;background:#101828;color:#f2f4f7;padding:16px;border-radius:12px;overflow:auto;font-size:13px}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}th,td{padding:10px 12px;border-bottom:1px solid #eaecf0;text-align:left;vertical-align:top}th{background:#f8fafc;font-size:13px}tr:last-child td{border-bottom:0}.small{font-size:13px;color:var(--muted)}
+.timeline{position:relative;margin-left:18px}.timeline:before{content:'';position:absolute;left:13px;top:0;bottom:0;width:3px;background:#d0d5dd}.phase{position:relative;margin:0 0 18px 44px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px}.phase:before{content:'';position:absolute;left:-39px;top:22px;width:17px;height:17px;border-radius:50%;background:var(--green);border:4px solid var(--bg)}.phase.env:before{background:var(--orange)}.phase-title{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.phase-title h3{margin:0;font-size:19px}.wp{display:grid;grid-template-columns:150px 1fr;gap:8px;margin-top:10px}.wp div{padding:4px 0;border-bottom:1px dashed #eaecf0}.flow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.flow .node{background:#fff;border:1px solid #cfd8e3;border-radius:10px;padding:9px 12px;font-weight:700}.flow .arrow{font-weight:700;color:#667085}.footer{margin:30px 0 8px;text-align:center;color:var(--muted);font-size:12px}.toc{display:flex;gap:8px;flex-wrap:wrap}.toc a{background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 11px;font-size:13px;color:var(--navy)}
+@media(max-width:950px){.kpis,.grid3{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}}@media(max-width:620px){.wrap{padding:14px}.hero{padding:22px}.hero h1{font-size:24px}.kpis,.grid3{grid-template-columns:1fr}.wp{grid-template-columns:1fr}.phase{margin-left:34px}.timeline:before{left:8px}.phase:before{left:-34px}}
+@media print{body{background:#fff}.wrap{max-width:none}.card,.phase,.hero{box-shadow:none}.toc{display:none}.section{break-inside:avoid}.phase{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <h1>DIO CRM 전체 개발 단계</h1>
+    <p>AI Orchestration 기반 자체 CRM — Specification → Platform → Customer → Activity → Pipeline → ERP Contract → Order/Sales → Analytics → Hardening/Rollout</p>
+    <p><b>기준일:</b> 2026-09-13 · <b>Repository:</b> dio-securer/dio_crm_dev_proj · <b>현재상태:</b> Phase 0~8 Source Baseline 승인 및 main 병합 완료, Environment Rollout 대기</p>
+    <div class="kpis">
+      <div class="kpi"><b>9</b><span>Phase 0 ~ Phase 8</span></div>
+      <div class="kpi"><b>APPROVED</b><span>Source / Human Gate</span></div>
+      <div class="kpi"><b>CI PASS</b><span>Build / Test / Security Audit</span></div>
+      <div class="kpi"><b>PENDING</b><span>DEV/UAT → Pilot → Production</span></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="toc">
+      <a href="#status">전체 현황</a><a href="#architecture">기술 구조</a><a href="#business-flow">업무 흐름</a><a href="#phases">Phase 상세</a><a href="#db">DB Migration</a><a href="#quality">품질/CI</a><a href="#deferred">Deferred</a><a href="#rollout">환경 적용</a>
+    </div>
+  </section>
+
+  <section class="section" id="status">
+    <h2>1. 전체 개발 현황</h2>
+    <div class="notice"><b>Source 개발은 Phase 8까지 완료되었습니다.</b> Phase 0의 Canonical Spec부터 Phase 8 Security/Performance/Resilience/운영 Runbook까지 승인 및 main 병합이 완료되었습니다. 단, 실제 SQL Migration, ERP 실연동, Restore Drill, UAT/Pilot, Production Cutover는 별도 Environment Gate입니다.</div>
+    <div style="height:12px"></div>
+    <table>
+      <thead><tr><th>Phase</th><th>영역</th><th>핵심 결과</th><th>Source 상태</th><th>환경 적용</th></tr></thead>
+      <tbody>
+        <tr><td>P0</td><td>Specification Baseline</td><td>Process/Entity/State/Rule/Permission/Interface/Gap Canonical Spec</td><td><span class="badge done">APPROVED</span></td><td>해당없음</td></tr>
+        <tr><td>P1</td><td>Platform Foundation</td><td>Auth, User/Org, RBAC, Audit, Interface, File/Notification Foundation</td><td><span class="badge done">APPROVED</span></td><td><span class="badge wait">DB Deferred</span></td></tr>
+        <tr><td>P2</td><td>Customer / Lead / Account</td><td>HIRA Import, Lead, Assignment, Account/Contact, Merge, Convert</td><td><span class="badge done">APPROVED</span></td><td><span class="badge wait">HIRA/ERP Deferred</span></td></tr>
+        <tr><td>P3</td><td>Sales Activity</td><td>Plan, Map/GPS IN, Consultation/OUT, Report, Approval, Direct Work/Leave</td><td><span class="badge done">APPROVED</span></td><td><span class="badge wait">Map/ERP Deferred</span></td></tr>
+        <tr><td>P4</td><td>Opportunity / Pipeline</td><td>Opportunity, Stage, Product/Package, Negotiation, Won Validation, Funnel</td><td><span class="badge done">APPROVED</span></td><td><span class="badge wait">ERP Product Sync Deferred</span></td></tr>
+        <tr><td>P5</td><td>ERP Account / Contract / Collection</td><td>ERP Account Queue, Contract, Collection Plan, Actual Collection, Arrears</td><td><span class="badge done">APPROVED</span></td><td><span class="badge wait">ERP Transport Deferred</span></td></tr>
+        <tr><td>P6</td><td>Order / Delivery / Sales / Return</td><td>Order, Delivery, Sales, Return/Exchange Inbound Read Model</td><td><span class="badge done">APPROVED</span></td><td><span class="badge wait">ERP Transport Deferred</span></td></tr>
+        <tr><td>P7</td><td>Ledger / Statement / Account360 / Analytics</td><td>Ledger, XLSX, Statement PDF, Account 360, Dashboard</td><td><span class="badge done">APPROVED</span></td><td><span class="badge wait">Storage/Font Deferred</span></td></tr>
+        <tr><td>P8</td><td>Hardening / Rollout</td><td>Security, Performance, Resilience, Backup, Monitoring, Pilot/Cutover Runbooks</td><td><span class="badge done">SOURCE APPROVED</span></td><td><span class="badge warn">Environment Gate</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="section" id="architecture">
+    <h2>2. 기술 구조 및 개발 원칙</h2>
+    <div class="grid3">
+      <div class="card"><h3>Frontend</h3><p><b>React + TypeScript + Vite</b></p><p class="small">업무 Workspace, 활동/GPS, Opportunity/Pipeline, 계약/수금, 주문/이행, Account360, Analytics, Ops Status.</p></div>
+      <div class="card"><h3>Backend</h3><p><b>NestJS + TypeScript</b></p><p class="small">Module/DI/Guard 구조, REST API, Zod Validation, JWT Access/Refresh, explicit business rule validation.</p></div>
+      <div class="card"><h3>Database / Integration</h3><p><b>Microsoft SQL Server + mssql</b></p><p class="small">CRM 내부 DB와 ERP SOR를 분리하고 Integration Adapter / Interface Log로 연결. 운영 ERP 직접 수정 금지.</p></div>
+    </div>
+    <div style="height:12px"></div>
+    <pre>React Web / PWA
+      ↓ REST/JSON + JWT
+NestJS API
+      ├─ Customer / Activity / Opportunity / Contract / Order / Analytics
+      ├─ RBAC / Audit / Approval / Ops
+      └─ Integration Framework
+              ↓ Adapter / Queue / Retry / Timeout / Circuit Breaker
+       ERP / HIRA / File Storage
+
+CRM SQL Server
+  └─ bigint IDENTITY + public_id(UUID) + company_id</pre>
+    <div class="grid2">
+      <div class="card"><h3>확정된 Baseline</h3><p>GPS IN 기본 200m(설정값), User/Organization Master는 ERP, 승인경로는 영업담당자 → 지점장 → 본부장, 승인 요청 시 Snapshot, Lead CONVERTED Terminal, 계약생성 후 Won Opportunity 재오픈 금지, 외부/API 식별자는 UUID.</p></div>
+      <div class="card"><h3>AI Orchestration 공통 흐름</h3><p><span class="mono">Orchestrator → Requirement → Domain → Architect → Data/Integration → Backend/Frontend → QA → Review → Human Gate → Merge</span></p><p class="small">Spec에 없는 규칙은 임의 구현하지 않고 SPEC GAP으로 관리.</p></div>
+    </div>
+  </section>
+
+  <section class="section" id="business-flow">
+    <h2>3. 전체 업무 E2E 흐름</h2>
+    <div class="card">
+      <div class="flow">
+        <span class="node">HIRA 신규병원</span><span class="arrow">→</span>
+        <span class="node">Lead</span><span class="arrow">→</span>
+        <span class="node">Account / Contact</span><span class="arrow">→</span>
+        <span class="node">Opportunity</span><span class="arrow">→</span>
+        <span class="node">Closed Won</span><span class="arrow">→</span>
+        <span class="node">Contract</span><span class="arrow">→</span>
+        <span class="node">Collection Plan</span><span class="arrow">→</span>
+        <span class="node">Order</span><span class="arrow">→</span>
+        <span class="node">Delivery / Sales</span><span class="arrow">→</span>
+        <span class="node">Ledger / Analytics</span>
+      </div>
+      <hr style="border:0;border-top:1px solid #eaecf0;margin:18px 0">
+      <div class="flow">
+        <span class="node">Activity Plan</span><span class="arrow">→</span>
+        <span class="node">Map / GPS IN</span><span class="arrow">→</span>
+        <span class="node">Consultation</span><span class="arrow">→</span>
+        <span class="node">OUT</span><span class="arrow">→</span>
+        <span class="node">Activity Report</span><span class="arrow">→</span>
+        <span class="node">Branch Approval</span><span class="arrow">→</span>
+        <span class="node">HQ Approval</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="phases">
+    <h2>4. Phase별 상세 개발 단계</h2>
+    <div class="timeline">
+      <article class="phase">
+        <div class="phase-title"><h3>Phase 0 — Specification Baseline</h3><span class="badge done">APPROVED</span></div>
+        <p>두 CRM 교육자료와 오케스트레이션 설계를 Canonical Spec으로 변환하여 AI가 임의 해석하지 않도록 개발 기준을 고정.</p>
+        <div class="wp"><div><b>P0-01~03</b></div><div>전체 프로세스 분해, Entity Dictionary, ERD</div><div><b>P0-04~06</b></div><div>State Transition, Business Rule ID, Role/Permission Matrix</div><div><b>P0-07~09</b></div><div>Interface Catalog, Screen Catalog, Spec Gap 등록/결정</div></div>
+        <p class="small">주요 결정: GPS 200m 설정값, ERP User/Org Master, 승인 Snapshot, 상태 역전이 정책, bigint+UUID+company_id.</p>
+      </article>
+
+      <article class="phase">
+        <div class="phase-title"><h3>Phase 1 — Platform Foundation</h3><span class="badge done">APPROVED</span></div>
+        <p>모든 업무모듈이 공통으로 사용할 인증/권한/감사/연동 기반 구축.</p>
+        <div class="wp"><div><b>P1-00</b></div><div>기술스택 확정: React/Vite + NestJS + SQL Server + pnpm + GitHub Actions</div><div><b>P1-01~04</b></div><div>Skeleton, Authentication, User/Organization, Role/Permission</div><div><b>P1-05~08</b></div><div>Common Code, Audit Log, Interface Framework, File/Notification Foundation</div></div>
+        <p class="small">JWT Access/Refresh rotation, RBAC/Data Scope, Request ID, Retry/Timeout, Interface Log 구축. 실제 DB Migration은 Deferred.</p>
+      </article>
+
+      <article class="phase">
+        <div class="phase-title"><h3>Phase 2 — Customer / Lead / Account</h3><span class="badge done">APPROVED</span></div>
+        <p>신규 병원 수신부터 영업 Lead 관리, 거래처 전환까지 Customer Domain 구현.</p>
+        <div class="wp"><div><b>P2-01~03</b></div><div>HIRA Hospital Import, Lead 관리, 지역 담당자 자동할당</div><div><b>P2-04~05</b></div><div>Lead 상태전이, Account / Contact</div><div><b>P2-06~07</b></div><div>중복 Account 검사/병합, Lead Convert Transaction</div></div>
+        <p class="small">Convert는 Account/Contact/Opportunity를 하나의 Transaction으로 생성하며 실패 시 Rollback.</p>
+      </article>
+
+      <article class="phase">
+        <div class="phase-title"><h3>Phase 3 — Sales Activity</h3><span class="badge done">APPROVED</span></div>
+        <p>현장 영업활동의 계획 → GPS IN → 상담 → OUT → 보고 → 승인 → 직출/직퇴 전 과정을 자체 CRM으로 구현.</p>
+        <div class="wp"><div><b>P3-01~03</b></div><div>Activity Plan, Calendar/Event, Map Read Model</div><div><b>P3-04~05</b></div><div>GPS IN(200m), Consultation / OUT</div><div><b>P3-06~08</b></div><div>Activity Report, 지점장→본부장 승인, Direct Work / Leave</div></div>
+        <p class="small">다른 IN_PROGRESS 활동 존재 시 신규 IN 차단. 최종 승인 보고 포함 활동은 수정 차단. ERP DirectWork는 실제 Adapter 전까지 REQUESTING Queue.</p>
+      </article>
+
+      <article class="phase">
+        <div class="phase-title"><h3>Phase 4 — Opportunity / Sales Pipeline</h3><span class="badge done">APPROVED</span></div>
+        <p>영업기회 생성부터 제안·협상·수주/실주, 제품/패키지, Funnel 분석을 구현.</p>
+        <div class="wp"><div><b>P4-01~02</b></div><div>Opportunity CRUD, Stage Management</div><div><b>P4-03~04</b></div><div>Product/Package, Negotiation Information</div><div><b>P4-05~06</b></div><div>Closed Won Validation, Pipeline / Funnel</div></div>
+        <p class="small">Stage: NEEDS_ANALYSIS → PROPOSAL → NEGOTIATION → CLOSED_WON/CLOSED_LOST. ERP 미승인 Account는 Closed Won 차단.</p>
+      </article>
+
+      <article class="phase">
+        <div class="phase-title"><h3>Phase 5 — ERP Account / Contract / Collection</h3><span class="badge done">APPROVED</span></div>
+        <p>CRM 영업기회를 ERP 거래처/계약/수금 흐름으로 연결하는 Source Baseline 구현.</p>
+        <div class="wp"><div><b>P5-01~02</b></div><div>ERP Account Request Queue, Closed Won → Contract</div><div><b>P5-03~05</b></div><div>Initial Collection Plan, ERP Contract Queue, ERP Result Handler</div><div><b>P5-06~07</b></div><div>Actual Collection, Arrears / Collection Plan Versioning</div></div>
+        <p class="small">ERP 실제 성공을 가정하지 않으며 Adapter 미연결 상태는 InterfaceLog REQUESTING으로 유지.</p>
+      </article>
+
+      <article class="phase">
+        <div class="phase-title"><h3>Phase 6 — Order / Delivery / Sales / Return</h3><span class="badge done">APPROVED</span></div>
+        <p>ERP 승인 계약 기준 주문부터 납품/매출/반품·교환 결과 조회까지 구현.</p>
+        <div class="wp"><div><b>P6-01~03</b></div><div>제품/가격/재고 Read Model, Cart, 배송지/특송</div><div><b>P6-04~06</b></div><div>ERP Order Request, Delivery Status, Sales</div><div><b>P6-07</b></div><div>Return / Exchange ERP 결과 수신 Read Model</div></div>
+        <p class="small">ERP_APPROVED + 미마감 Contract만 주문 가능. 반품/교환 발신 승인 Workflow는 미확정 Spec이라 임의 구현하지 않음.</p>
+      </article>
+
+      <article class="phase">
+        <div class="phase-title"><h3>Phase 7 — Ledger / Statement / Account 360 / Analytics</h3><span class="badge done">APPROVED</span></div>
+        <p>영업담당자와 관리자에게 거래현황/문서/360 View/분석 기능 제공.</p>
+        <div class="wp"><div><b>P7-01</b></div><div>Package Ledger + XLSX</div><div><b>P7-02</b></div><div>Monthly Statement + PDF + 생성이력</div><div><b>P7-03</b></div><div>Account 360</div><div><b>P7-04</b></div><div>전사 Analytics Dashboard</div></div>
+        <p class="small">PDF Storage Adapter 미연결 시 storage_status=NOT_STORED로 기록. Customer Center/Service Domain은 별도 미구현 상태로 명시.</p>
+      </article>
+
+      <article class="phase">
+        <div class="phase-title"><h3>Phase 8 — Hardening / Rollout</h3><span class="badge done">SOURCE APPROVED</span></div>
+        <p>운영 가능 수준의 보안/성능/장애내성/백업/모니터링 및 Pilot/Cutover Runbook을 준비.</p>
+        <div class="wp"><div><b>P8-01~03</b></div><div>Security, Performance, Resilience</div><div><b>P8-04~05</b></div><div>Backup/Recovery Script & Runbook, Monitoring/Ops API</div><div><b>P8-06~07</b></div><div>Pilot Plan/Smoke, Cutover/Rollback/Hyper-care Runbook</div></div>
+        <p class="small">Build/Test/Security Audit PASS. 실제 Migration/Restore/Pilot/Cutover는 Environment Gate로 분리.</p>
+      </article>
+
+      <article class="phase env">
+        <div class="phase-title"><h3>Environment Rollout — 실제 환경 적용</h3><span class="badge warn">PENDING</span></div>
+        <p>Source 개발 이후 실제 DEV/UAT/Production 환경에서 수행해야 하는 운영 전환 단계.</p>
+        <div class="wp"><div><b>E1</b></div><div>Phase 1~8 SQL Migration DEV/UAT 순차 적용 및 Seed 검증</div><div><b>E2</b></div><div>실 ERP/HIRA/Storage Adapter 연결 및 Interface 검증</div><div><b>E3</b></div><div>Backup + RESTORE VERIFYONLY + Restore Drill + DBCC CHECKDB</div><div><b>E4</b></div><div>UAT / Pilot + GO / CONDITIONAL GO / NO-GO 판정</div><div><b>E5</b></div><div>Production Cutover 별도 승인 → Backup → Migration → Sync → Deploy → Smoke → Open</div><div><b>E6</b></div><div>24~72시간 Hyper-care / Monitoring / Rollback 판단</div></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="section" id="db">
+    <h2>5. Database Migration Baseline</h2>
+    <table>
+      <thead><tr><th>Migration</th><th>Phase</th><th>주요 범위</th><th>실제 DB 적용</th></tr></thead>
+      <tbody>
+        <tr><td><code>001_phase1_foundation.sql</code></td><td>P1</td><td>Company, User/Org, RBAC, Code, Refresh Token, Audit, Interface, File, Notification</td><td><span class="badge wait">Deferred</span></td></tr>
+        <tr><td><code>002_phase2_customer.sql</code></td><td>P2</td><td>Lead, Account, Contact, Assignment, Merge, Conversion</td><td><span class="badge wait">Deferred</span></td></tr>
+        <tr><td><code>003_phase3_activity.sql</code></td><td>P3</td><td>Activity/Event, Report, Approval, DirectWork, System Setting</td><td><span class="badge wait">Deferred</span></td></tr>
+        <tr><td><code>004_phase4_opportunity.sql</code></td><td>P4</td><td>Opportunity 확장, Stage History, Product/Package, Opportunity Product</td><td><span class="badge wait">Deferred</span></td></tr>
+        <tr><td><code>005_phase5_contract_collection.sql</code></td><td>P5</td><td>Contract, Contract Product, Collection Plan/Actual</td><td><span class="badge wait">Deferred</span></td></tr>
+        <tr><td><code>006_phase6_order_delivery_sales.sql</code></td><td>P6</td><td>Order, OrderItem, Delivery, Sales, ReturnExchange</td><td><span class="badge wait">Deferred</span></td></tr>
+        <tr><td><code>007_phase7_analytics.sql</code></td><td>P7</td><td>Statement Generation / Analytics supporting schema</td><td><span class="badge wait">Deferred</span></td></tr>
+        <tr><td><code>008_phase8_hardening.sql</code></td><td>P8</td><td>Performance Index, Release Event / Ops permissions</td><td><span class="badge wait">Deferred</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="section" id="quality">
+    <h2>6. 품질 Gate / CI / Review</h2>
+    <div class="grid3">
+      <div class="card"><h3>Build / Test</h3><p><span class="badge done">PASS</span></p><p>Shared contracts, NestJS backend, React/Vite frontend, Jest Domain Rule tests를 GitHub Actions에서 검증.</p></div>
+      <div class="card"><h3>Security</h3><p><span class="badge done">PASS</span></p><p>Phase 8에서 Production Secret validation, CORS allowlist, HSTS/security headers, rate limiting, critical dependency audit 적용.</p></div>
+      <div class="card"><h3>Human Gate</h3><p><span class="badge done">APPROVED</span></p><p>Architecture/Domain/Source Review를 Phase별로 사용자 승인 후 main 병합.</p></div>
+    </div>
+    <div style="height:12px"></div>
+    <pre>Work Package
+   ↓
+Acceptance Criteria / Business Rule
+   ↓
+Source + Migration Baseline
+   ↓
+Unit / Build / CI
+   ↓
+Human Review
+   ↓
+PR Merge to main
+   ↓
+다음 Phase</pre>
+  </section>
+
+  <section class="section" id="deferred">
+    <h2>7. 미실행 / Deferred / Open 항목</h2>
+    <div class="warning"><b>중요:</b> 아래 항목은 Source 개발 완료와 별개입니다. 실제 환경정보 또는 추가 업무규칙이 필요하므로 완료로 표시하지 않습니다.</div>
+    <div style="height:12px"></div>
+    <table>
+      <thead><tr><th>구분</th><th>항목</th><th>현재 처리</th></tr></thead>
+      <tbody>
+        <tr><td>DB</td><td>Phase 1~8 SQL Migration DEV/UAT 실제 적용</td><td>Environment Gate</td></tr>
+        <tr><td>ERP</td><td>실제 API/SP/DB 방식, 인증, Payload/Error Contract, Transport Adapter</td><td>실연동 시 확정</td></tr>
+        <tr><td>Master Sync</td><td>User/Org, Product/Package, 가격/재고 Sync</td><td>ERP Adapter 필요</td></tr>
+        <tr><td>Activity</td><td>GPS Mock/Accuracy 차단기준, 지도 Provider/SDK</td><td>상세정책/환경 결정 필요</td></tr>
+        <tr><td>Opportunity</td><td>관리자 승인 프로세스 조건</td><td>Spec Gap</td></tr>
+        <tr><td>Order</td><td>주문취소/정정 상세규칙</td><td>Spec Gap</td></tr>
+        <tr><td>Return</td><td>반품/교환 CRM 발신 요청·승인·취소 Workflow</td><td>Spec Gap</td></tr>
+        <tr><td>File/PDF</td><td>File Storage 영구저장, 배포환경 한글 PDF Font</td><td>환경 연결 필요</td></tr>
+        <tr><td>Customer Center</td><td>Service / 문의접수 Domain</td><td>별도 Phase 필요</td></tr>
+        <tr><td>Recovery</td><td>실 Backup/Restore Drill</td><td>DB 환경 필요</td></tr>
+        <tr><td>Rollout</td><td>UAT/Pilot/Production Cutover</td><td>별도 운영 승인 필요</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="section" id="rollout">
+    <h2>8. 다음 실제 실행 순서</h2>
+    <div class="card">
+      <div class="flow">
+        <span class="node">DEV/UAT Migration</span><span class="arrow">→</span>
+        <span class="node">ERP/Storage 연동</span><span class="arrow">→</span>
+        <span class="node">Backup/Restore Drill</span><span class="arrow">→</span>
+        <span class="node">UAT/Pilot</span><span class="arrow">→</span>
+        <span class="node">Production Approval</span><span class="arrow">→</span>
+        <span class="node">Cutover</span><span class="arrow">→</span>
+        <span class="node">Hyper-care</span>
+      </div>
+    </div>
+    <div style="height:12px"></div>
+    <div class="grid2">
+      <div class="card"><h3>Production Go/No-Go 기본조건</h3><p>Migration 검증, DB Integrity, API Health/Readiness, ERP 핵심 인터페이스, 권한/승인 E2E, Backup/Restore Drill, Pilot Acceptance가 모두 확인되어야 함.</p></div>
+      <div class="card"><h3>운영 원칙</h3><p>Production Cutover는 별도 명시적 승인 전 실행하지 않으며, 문제 발생 시 Rollback Runbook과 <code>crm_release_event</code>를 기준으로 변경 이력을 추적.</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>9. Repository 기준 문서</h2>
+    <table>
+      <thead><tr><th>문서</th><th>용도</th></tr></thead>
+      <tbody>
+        <tr><td><a href="01_CRM_AI_Orchestration_Design.md">01_CRM_AI_Orchestration_Design.md</a></td><td>AI 오케스트레이션 / 아키텍처 기준</td></tr>
+        <tr><td><a href="02_CRM_Phased_Work_Instructions.md">02_CRM_Phased_Work_Instructions.md</a></td><td>Phase 0~8 작업지시 기준</td></tr>
+        <tr><td><a href="03_CRM_Project_Progress.html">03_CRM_Project_Progress.html</a></td><td>현재 진행상태 Dashboard</td></tr>
+        <tr><td><a href="P1-01_08_phase1_execution_report.md">Phase 1 Report</a> ~ <a href="P8-01_07_phase8_execution_report.md">Phase 8 Report</a></td><td>Phase별 실제 구현/CI/Gate 기록</td></tr>
+        <tr><td><code>spec/</code></td><td>Process, Entity, State, Business Rule, Permission, Interface, Gap Canonical Spec</td></tr>
+        <tr><td><code>database/migrations/001~008</code></td><td>DB 변경 Baseline</td></tr>
+        <tr><td><code>docs/operations/</code>, <code>docs/rollout/</code></td><td>Security/Performance/Recovery/Monitoring/Pilot/Cutover Runbook</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="footer">DIO CRM Full Development Lifecycle · Generated from the approved repository phase specifications and execution reports · 2026-09-13</div>
+</div>
+</body>
+</html>
