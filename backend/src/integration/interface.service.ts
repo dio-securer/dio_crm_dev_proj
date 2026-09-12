@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import crypto from 'node:crypto';
 import { DatabaseService } from '../database/database.service';
+import { env } from '../config/env';
+import { CircuitBreaker } from './circuit-breaker';
 
 export type InterfaceCall<T> = {
   companyId: number;
@@ -17,11 +19,13 @@ export type InterfaceCall<T> = {
 
 @Injectable()
 export class InterfaceService {
+  private readonly breaker = new CircuitBreaker(env.INTERFACE_CIRCUIT_FAILURES, env.INTERFACE_CIRCUIT_RESET_MS);
+
   constructor(private readonly db: DatabaseService) {}
 
   /**
    * Creates an auditable REQUESTING record without pretending that an external
-   * ERP transport exists. Phase 5 uses this until the real ERP adapter is bound.
+   * ERP transport exists. Until a real transport adapter is bound, callers remain REQUESTING.
    */
   async enqueuePending(input: Omit<InterfaceCall<unknown>, 'execute' | 'timeoutMs' | 'maxAttempts' | 'retryDelayMs'>) {
     const requestId = crypto.randomUUID();
@@ -57,7 +61,10 @@ export class InterfaceService {
     let lastError: unknown;
     for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
       try {
-        const result = await this.withTimeout(call.execute(requestId, attempt), timeoutMs);
+        const result = await this.withTimeout(
+          this.breaker.execute(call.interfaceCode, () => call.execute(requestId, attempt)),
+          timeoutMs
+        );
         await this.db.query(`
           UPDATE crm_interface_log
              SET status='SUCCESS', response_json=@responseJson, responded_at=SYSUTCDATETIME(), retry_count=@retryCount
@@ -89,6 +96,10 @@ export class InterfaceService {
       retryCount: maxAttempts - 1
     });
     throw lastError instanceof Error ? lastError : new Error(String(lastError));
+  }
+
+  circuitStatus(interfaceCode: string) {
+    return this.breaker.snapshot(interfaceCode);
   }
 
   private withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {

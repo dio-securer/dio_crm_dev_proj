@@ -19,6 +19,8 @@ import { ErpFulfillmentController, OrderController, OrderProductController, Sale
 import { OrderService } from './modules/order/order.service';
 import { AnalyticsController } from './modules/analytics/analytics.controller';
 import { AnalyticsService } from './modules/analytics/analytics.service';
+import { HealthController, OpsController } from './modules/ops/ops.controller';
+import { OpsService } from './modules/ops/ops.service';
 import { AuthGuard, PermissionGuard } from './security/security';
 import { InterfaceService } from './integration/interface.service';
 
@@ -44,7 +46,9 @@ import { InterfaceService } from './integration/interface.service';
     OrderController,
     SalesController,
     ErpFulfillmentController,
-    AnalyticsController
+    AnalyticsController,
+    HealthController,
+    OpsController
   ],
   providers: [
     DatabaseService,
@@ -57,6 +61,7 @@ import { InterfaceService } from './integration/interface.service';
     ContractService,
     OrderService,
     AnalyticsService,
+    OpsService,
     AuthGuard,
     PermissionGuard,
     InterfaceService
