@@ -2,9 +2,9 @@
 
 ## Status
 
-`IMPLEMENTED / CI_PASS / HUMAN_REVIEW_PENDING / DB_MIGRATION_DEFERRED`
+`APPROVED / CI_PASS / HUMAN_REVIEW_APPROVED / DB_MIGRATION_DEFERRED`
 
-Phase 5 P5-01~P5-07 Source Baseline 구현과 GitHub Actions Build/Test 검증을 완료했다. 실제 ERP Transport/API/SP 상세와 DEV DB Migration은 별도 환경 Gate로 유지한다.
+Phase 5 P5-01~P5-07 Source Baseline 구현과 GitHub Actions Build/Test 검증을 완료했고, 2026-09-12 사용자 Human Domain Review 승인으로 Phase 5를 최종 승인한다. 실제 ERP Transport/API/SP 상세와 DEV DB Migration은 별도 환경 Gate로 유지한다.
 
 ## P5-01 ERP Account Request
 - Account 필수정보 검증 후 IF-ERP-002 Queue 생성
@@ -51,32 +51,6 @@ Phase 5 P5-01~P5-07 Source Baseline 구현과 GitHub Actions Build/Test 검증�
 - 변경계획은 `ARREARS_REALLOCATION`으로 이력 보존
 - IF-ERP-011 Queue 생성 후 `erp_sync_status=REQUESTING`
 
-## Database Baseline
-- `database/migrations/005_phase5_contract_collection.sql`
-- `database/seeds/005_phase5_seed.sql`
-
-신규/확장:
-- crm_account ERP 요청 추적 컬럼
-- crm_contract
-- crm_contract_product
-- crm_collection_plan (Versioned)
-- crm_collection_actual
-
-## Backend
-- `backend/src/modules/contract/contract.controller.ts`
-- `backend/src/modules/contract/contract.service.ts`
-- `backend/src/modules/contract/contract.rules.ts`
-- `backend/src/modules/contract/contract.rules.spec.ts`
-- `backend/src/integration/interface.service.ts` — 실제 Adapter 미연결 상태를 위한 `enqueuePending`
-
-## Frontend
-- Account ERP 등록요청 Action
-- Contract / Collection Workspace
-- Closed Won Opportunity → Contract 생성
-- 최초 수금계획
-- ERP 계약 등록요청
-- 수금대사 조회
-
 ## CI Result
 GitHub Actions Run `34678277112` PASS.
 - pnpm install: PASS
@@ -103,7 +77,7 @@ GitHub Actions Run `34678277112` PASS.
 - [x] P5-07 Arrears / Plan Change
 - [x] Domain Rule Unit Test
 - [x] GitHub Actions Build/Test PASS
-- [ ] Human Domain Review
+- [x] Human Domain Review — 사용자 승인 2026-09-12
 
-## Next after approval
+## Next
 `Phase 6 — Order / Delivery / Sales / Return`
