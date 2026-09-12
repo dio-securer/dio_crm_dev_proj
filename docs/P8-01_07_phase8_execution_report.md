@@ -2,9 +2,9 @@
 
 ## Status
 
-`SOURCE_BASELINE_COMPLETE / CI_PASS / ENVIRONMENT_GATES_PENDING / PRODUCTION_NOT_EXECUTED`
+`SOURCE_APPROVED / CI_PASS / SOURCE_REVIEW_APPROVED / ENVIRONMENT_GATES_PENDING / PRODUCTION_NOT_EXECUTED`
 
-Phase 8 P8-01~P8-07에 대해 코드/DB Baseline/운영 Runbook/검증 Script 구현과 GitHub Actions Build/Test/Security Audit 검증을 완료했다. 실제 DEV/UAT DB 적용, Restore Drill, Pilot, Production Cutover는 접속환경과 Production Gate가 필요하므로 실행 완료로 간주하지 않는다.
+Phase 8 P8-01~P8-07에 대해 코드/DB Baseline/운영 Runbook/검증 Script 구현과 GitHub Actions Build/Test/Security Audit 검증을 완료했다. 사용자 Phase 8 Source Review 승인에 따라 Source Baseline은 APPROVED 처리하고 main 병합 대상으로 확정한다. 실제 DEV/UAT DB 적용, Restore Drill, Pilot, Production Cutover는 접속환경과 별도 운영 Gate가 필요하므로 실행 완료로 간주하지 않는다.
 
 ## P8-01 Security
 구현:
@@ -114,13 +114,27 @@ Production Cutover는 명시적 Production Gate 없이는 실행하지 않는다
 - `OPS.READ`, `RELEASE.READ`, `RELEASE.MANAGE`
 
 ## CI Result
-GitHub Actions Run `34686372372` PASS.
+GitHub Actions Build/Test/Security Audit PASS.
 - dependency install: PASS
 - shared contracts/backend/frontend build: PASS
 - Jest tests: PASS
 - `pnpm audit:critical`: PASS
 
 초기 Phase 8 CI에서 CORS callback parameter의 TypeScript implicit `any` 오류를 발견했고 명시적 타입을 적용한 뒤 재검증했다.
+
+## Source Review
+사용자 승인일: 2026-09-12
+
+승인 범위:
+- P8-01 Security Hardening Source Baseline
+- P8-02 Performance Hardening Source Baseline
+- P8-03 Resilience Source Baseline
+- P8-04 Backup / Recovery Script + Runbook
+- P8-05 Monitoring Source Baseline
+- P8-06 Pilot Plan + Smoke Script
+- P8-07 Cutover / Rollback / Hyper-care Runbook
+
+결정: Phase 8 Source Baseline을 승인하고 PR #8을 main에 병합한다. 실제 환경 작업은 별도 Environment Gate로 유지한다.
 
 ## Phase 8 Gate
 - [x] P8-01 Security Source Baseline
@@ -131,6 +145,7 @@ GitHub Actions Run `34686372372` PASS.
 - [x] P8-06 Pilot Plan + Smoke Script
 - [x] P8-07 Cutover Runbook
 - [x] GitHub Actions Build/Test/Security Audit PASS
+- [x] Phase 8 Source Review
 - [ ] Phase 1~8 Migration DEV/UAT 적용
 - [ ] Backup + Restore Drill PASS
 - [ ] UAT/Pilot GO
@@ -138,12 +153,12 @@ GitHub Actions Run `34686372372` PASS.
 - [ ] Production Cutover 실행
 
 ## Current Decision
-DB Migration을 나중에 수행한다는 기존 사용자 결정에 따라 Production/UAT 환경 작업은 Deferred 상태를 유지한다. Source/CI 단계와 실제 환경 실행 단계를 명확히 분리한다.
+Source/CI 범위는 APPROVED 처리한다. DB Migration은 나중에 수행한다는 기존 사용자 결정에 따라 Production/UAT 환경 작업은 Deferred 상태를 유지하며, Source 승인과 실제 운영 전환 완료를 명확히 분리한다.
 
-## Next
-1. Phase 8 Source Review
-2. DEV/UAT DB Migration 적용
-3. Backup/Restore Drill
-4. UAT/Pilot
-5. Production Cutover 승인
-6. Production Cutover 및 Hyper-care
+## Next Environment Sequence
+1. DEV/UAT DB Migration 적용
+2. Backup / Restore Drill
+3. UAT / Pilot
+4. Production Cutover 별도 승인
+5. Production Cutover
+6. 24~72시간 Hyper-care
