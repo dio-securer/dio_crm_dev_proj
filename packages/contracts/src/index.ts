@@ -87,3 +87,40 @@ export type OrderProductSummary = {
 export type DeliverySummary = { public_id:string; erp_delivery_no:string; delivery_status:string; shipped_at?:string|null; delivered_at?:string|null; };
 export type SalesSummary = { public_id:string; erp_sales_no:string; sales_date:string; amount:number; item_code?:string|null; item_name?:string|null; quantity?:number|null; account_public_id:string; account_name:string; contract_public_id?:string|null; order_public_id?:string|null; };
 export type ReturnExchangeSummary = { public_id:string; erp_reference_no:string; transaction_type:'RETURN'|'EXCHANGE'; status:string; item_code?:string|null; quantity?:number|null; processed_at?:string|null; };
+
+export type LedgerTransactionType = 'SALE' | 'COLLECTION' | 'RETURN' | 'EXCHANGE';
+export type LedgerRow = { public_id:string; txn_date?:string|null; txn_type:LedgerTransactionType; reference_no?:string|null; item_code?:string|null; item_name?:string|null; quantity?:number|null; amount?:number|null; status?:string|null; };
+export type PackageLedger = {
+  account:{ publicId:string; accountName:string; erpCustomerCode?:string|null };
+  scope:{ type:'GENERAL'|'CONTRACT'; publicId?:string; contractName?:string; erpContractNo?:string|null; contractAmount?:number };
+  period:{ from?:string|null; to?:string|null };
+  summary:{ salesAmount:number; collectionAmount:number; returnExchangeCount:number; rowCount:number };
+  rows:LedgerRow[];
+};
+export type MonthlyStatement = {
+  account:{ publicId:string; accountName:string; businessNo?:string|null; address?:string|null; erpCustomerCode?:string|null };
+  scope:{ type:'GENERAL'|'CONTRACT'; publicId?:string; contractName?:string; erpContractNo?:string|null };
+  period:{ from:string; to:string };
+  rows:Array<{ public_id:string; erp_sales_no:string; sales_date:string; item_code?:string|null; item_name?:string|null; quantity?:number|null; amount:number; order_public_id?:string|null; erp_order_no?:string|null }>;
+  summary:{ lineCount:number; totalAmount:number };
+};
+export type Account360 = {
+  account:Record<string,unknown>;
+  contacts:Record<string,unknown>[];
+  sales:{ opportunities:Record<string,unknown>[]; contracts:Record<string,unknown>[]; sales:Record<string,unknown>[]; collections:Record<string,unknown>[] };
+  order:{ orders:Record<string,unknown>[]; deliveries:Record<string,unknown>[]; returns:Record<string,unknown>[] };
+  activity:Record<string,unknown>[];
+  service:{ available:boolean; reason:string };
+  analysis:{ opportunityCount:number; contractCount:number; orderCount:number; salesTotal:number; collectionTotal:number; outstandingObserved:number; activityCount:number };
+};
+export type AnalyticsDashboard = {
+  period:{ from?:string|null; to?:string|null };
+  leads:Array<{status:string;count:number}>;
+  activities:Array<{status:string;count:number}>;
+  pipeline:Array<{stage:string;opportunity_count:number;amount:number;weighted_amount:number}>;
+  contracts:Array<{status:string;count:number;amount:number}>;
+  orders:Array<{status:string;count:number}>;
+  sales:{count:number;amount:number};
+  collections:{count:number;amount:number};
+  topAccounts:Array<{account_public_id:string;account_name:string;sales_amount:number}>;
+};
