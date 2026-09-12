@@ -5,6 +5,7 @@ MERGE dbo.crm_permission AS t
 USING (VALUES
  ('LEAD.READ',N'Lead 조회'),
  ('LEAD.WRITE',N'Lead 생성/수정'),
+ ('LEAD.MANAGE',N'Lead 재할당/관리'),
  ('LEAD.CONVERT',N'Lead Convert'),
  ('LEAD.STATUS.REVERSE',N'Lead 상태 역전이'),
  ('ACCOUNT.READ',N'Account 조회'),
