@@ -1,26 +1,26 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DIO CRM Project Progress</title>
-<style>body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#f4f6f9;color:#172033;margin:0}.wrap{max-width:1440px;margin:auto;padding:28px}.hero{background:linear-gradient(135deg,#14365d,#1f5a8a);color:#fff;padding:28px;border-radius:16px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px}.card,.panel{background:#fff;border:1px solid #dfe4ea;border-radius:12px;padding:16px}.ok{border-top:4px solid #177245}.next{border-top:4px solid #6d28d9}.warn{border-top:4px solid #b54708}h1,h2,h3{margin-top:0}table{width:100%;border-collapse:collapse;background:#fff}th,td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left}th{background:#f8fafc}.badge{display:inline-block;padding:3px 9px;border-radius:999px;font-weight:700;font-size:12px}.done{background:#e8f5ee;color:#177245}.run{background:#f1ebff;color:#6d28d9}.wait{background:#eef1f5;color:#667085}.good{background:#effaf3;border:1px solid #b7dec7;padding:16px;border-radius:12px;margin-top:18px}.block{background:#fff7ed;border:1px solid #fed7aa;padding:16px;border-radius:12px;margin-top:18px}@media(max-width:900px){.grid{grid-template-columns:1fr}}</style></head>
+<style>body{font-family:'Malgun Gothic','Segoe UI',sans-serif;background:#f4f6f9;color:#172033;margin:0}.wrap{max-width:1440px;margin:auto;padding:28px}.hero{background:linear-gradient(135deg,#14365d,#1f5a8a);color:#fff;padding:28px;border-radius:16px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px}.card{background:#fff;border:1px solid #dfe4ea;border-radius:12px;padding:16px}.ok{border-top:4px solid #177245}.next{border-top:4px solid #6d28d9}.warn{border-top:4px solid #b54708}h1,h2,h3{margin-top:0}table{width:100%;border-collapse:collapse;background:#fff}th,td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left}th{background:#f8fafc}.badge{display:inline-block;padding:3px 9px;border-radius:999px;font-weight:700;font-size:12px}.done{background:#e8f5ee;color:#177245}.run{background:#f1ebff;color:#6d28d9}.wait{background:#eef1f5;color:#667085}.good{background:#effaf3;border:1px solid #b7dec7;padding:16px;border-radius:12px;margin-top:18px}.block{background:#fff7ed;border:1px solid #fed7aa;padding:16px;border-radius:12px;margin-top:18px}@media(max-width:900px){.grid{grid-template-columns:1fr}}</style></head>
 <body><div class="wrap">
-<section class="hero"><h1>DIO CRM AI Orchestration — 프로젝트 진행현황</h1><p>Last Updated: 2026-09-12 · Phase 1 APPROVED / Phase 2 착수</p><div class="grid">
-<div class="card ok"><h3>CURRENT</h3><b>Phase 2 — Customer / Lead / Account</b><p>Phase 1 최종 승인 완료. Customer Domain 개발 착수.</p></div>
-<div class="card next"><h3>NEXT</h3><b>P2-01 → P2-07 순차 실행</b><p>심평원 수신 → Lead → 자동할당 → 상태전이 → Account/Contact → 중복/병합 → Convert</p></div>
-<div class="card warn"><h3>DEFERRED</h3><b>DEV DB Migration</b><p>Phase 1 DB 적용은 환경 준비 후 Runbook에 따라 별도 실행.</p></div>
+<section class="hero"><h1>DIO CRM AI Orchestration — 프로젝트 진행현황</h1><p>Last Updated: 2026-09-12 · Phase 2 Source Baseline 구현</p><div class="grid">
+<div class="card ok"><h3>CURRENT</h3><b>Phase 2 P2-01~P2-07 구현 완료</b><p>Customer / Lead / Account 소스 Baseline 및 Unit Test 작성 완료.</p></div>
+<div class="card next"><h3>NEXT</h3><b>GitHub Actions Build/Test</b><p>CI 통과 후 Human Domain Review 및 Phase 2 승인.</p></div>
+<div class="card warn"><h3>DEFERRED</h3><b>DB/External Integration</b><p>DEV DB 적용, ERP 지역담당자 Sync, 실제 심평원 Transport는 환경 준비 후 연결.</p></div>
 </div></section>
 <section style="margin-top:24px"><h2>Phase 진행률</h2><div class="grid">
-<div class="card ok"><span class="badge done">APPROVED</span><h3>Phase 0</h3><p>9/9 완료</p></div>
-<div class="card ok"><span class="badge done">APPROVED</span><h3>Phase 1</h3><p>8/8 + CI/Human Gate 완료 · DB 적용 Deferred</p></div>
-<div class="card next"><span class="badge run">IN PROGRESS</span><h3>Phase 2</h3><p>Customer / Lead / Account</p></div>
+<div class="card ok"><span class="badge done">APPROVED</span><h3>Phase 0</h3><p>9/9</p></div>
+<div class="card ok"><span class="badge done">APPROVED</span><h3>Phase 1</h3><p>8/8 · DB Gate Deferred</p></div>
+<div class="card next"><span class="badge run">CI PENDING</span><h3>Phase 2</h3><p>7/7 Source Baseline</p></div>
 </div></section>
-<section class="good"><h2>Phase 1 최종결정</h2><p>Product Owner 결정에 따라 DEV SQL Server Migration은 Phase 1 종료 Gate에서 제외하고 추후 환경검증으로 관리한다. 소스 구현, CI, Human Architecture Review는 모두 완료되어 Phase 1을 <b>APPROVED</b> 처리했다.</p></section>
 <section style="margin-top:24px"><h2>Phase 2 Work Package</h2><table><thead><tr><th>ID</th><th>내용</th><th>상태</th></tr></thead><tbody>
-<tr><td>P2-01</td><td>심평원 신규병원 수신</td><td><span class="badge run">NEXT</span></td></tr>
-<tr><td>P2-02</td><td>Lead 관리</td><td><span class="badge wait">WAIT</span></td></tr>
-<tr><td>P2-03</td><td>지역/조직 기준 담당자 자동할당</td><td><span class="badge wait">WAIT</span></td></tr>
-<tr><td>P2-04</td><td>Lead 상태전이</td><td><span class="badge wait">WAIT</span></td></tr>
-<tr><td>P2-05</td><td>Account / Contact</td><td><span class="badge wait">WAIT</span></td></tr>
-<tr><td>P2-06</td><td>중복 Account 검사/병합</td><td><span class="badge wait">WAIT</span></td></tr>
-<tr><td>P2-07</td><td>Lead Convert</td><td><span class="badge wait">WAIT</span></td></tr>
+<tr><td>P2-01</td><td>심평원 신규병원 수신 + Inbox/Upsert</td><td><span class="badge done">구현</span></td></tr>
+<tr><td>P2-02</td><td>Lead 목록/상세/수정 + Frontend Workspace</td><td><span class="badge done">구현</span></td></tr>
+<tr><td>P2-03</td><td>시도/시군구 기준 담당자 자동할당</td><td><span class="badge done">구현</span></td></tr>
+<tr><td>P2-04</td><td>Lead 상태전이/역전이 통제/이력</td><td><span class="badge done">구현</span></td></tr>
+<tr><td>P2-05</td><td>Account / Contact Foundation</td><td><span class="badge done">구현</span></td></tr>
+<tr><td>P2-06</td><td>사업자번호 중복검사 / 최대 3개 병합</td><td><span class="badge done">구현</span></td></tr>
+<tr><td>P2-07</td><td>Lead Convert Transaction → Account/Contact/Opportunity</td><td><span class="badge done">구현</span></td></tr>
 </tbody></table></section>
-<section class="block"><h2>Deferred Environment Gate</h2><p><code>database/migrations/001_phase1_foundation.sql</code>과 Seed는 아직 DEV/운영 DB에 실제 적용되지 않았다. 이는 별도 추적하며 Phase 2 코드는 Migration 파일 기준으로 계속 작성한다.</p></section>
+<section class="block"><h2>의도적으로 미구현한 외부의존성</h2><ul><li>심평원 실제 수신방식: GAP-016 확정 후 Adapter 연결</li><li>ERP 지역담당자 실제 동기화: ERP Interface 상세 확정 후 연결</li><li>Lead Convert 시 기존 Activity 이관: Activity Entity가 생성되는 Phase 3에서 연결</li><li>Phase 1/2 SQL Migration 실제 DEV DB 적용: 별도 환경 Gate</li></ul></section>
+<section style="margin-top:24px"><h2>다음</h2><p>CI Build/Test → Human Domain Review → Phase 2 APPROVED → <b>Phase 3 Sales Activity</b>.</p></section>
 </div></body></html>
