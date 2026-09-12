@@ -2,9 +2,9 @@
 
 ## Status
 
-`IMPLEMENTED / CI_PENDING / HUMAN_REVIEW_PENDING / DB_MIGRATION_DEFERRED`
+`IMPLEMENTED / CI_PASS / HUMAN_REVIEW_PENDING / DB_MIGRATION_DEFERRED`
 
-Phase 4 P4-01~P4-06 Source Baseline을 구현한다. 운영/DEV DB에는 Migration을 아직 적용하지 않는다.
+Phase 4 P4-01~P4-06 Source Baseline 구현과 GitHub Actions Build/Test 검증을 완료했다. 운영/DEV DB에는 Migration을 아직 적용하지 않는다.
 
 ## P4-01 Opportunity CRUD
 - Lead Convert 생성 Opportunity와 기존 Account 신규 Opportunity를 동일 Domain에서 관리
@@ -73,6 +73,17 @@ Phase 4 P4-01~P4-06 Source Baseline을 구현한다. 운영/DEV DB에는 Migrati
 - 제안 패키지/제품
 - Pipeline/Funnel
 
+## CI Result
+GitHub Actions Run `34674235441` PASS.
+- pnpm install: PASS
+- shared contracts build: PASS
+- NestJS backend build: PASS
+- React/Vite frontend build: PASS
+- Jest tests: PASS
+- Opportunity Domain Rule tests: PASS
+
+초기 CI에서 Phase 3 `ActivityCalendarItem` 공유타입이 누락된 회귀를 검출했고, 기존 Phase 3 contract를 보존하도록 수정한 뒤 최종 PASS했다.
+
 ## Deferred / Open
 - Phase 1~4 SQL Migration 실제 DB 적용
 - GAP-009 Opportunity 관리자 승인 조건/프로세스
@@ -87,7 +98,7 @@ Phase 4 P4-01~P4-06 Source Baseline을 구현한다. 운영/DEV DB에는 Migrati
 - [x] P4-05 Closed Won Validation
 - [x] P4-06 Pipeline / Funnel
 - [x] Domain Rule Unit Test
-- [ ] GitHub Actions Build/Test PASS
+- [x] GitHub Actions Build/Test PASS
 - [ ] Human Domain Review
 
 ## Next after approval
