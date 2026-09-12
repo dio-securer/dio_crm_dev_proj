@@ -13,6 +13,8 @@ import { ApprovalRouteController } from './modules/activity/approval-route.contr
 import { ApprovalRouteService } from './modules/activity/approval-route.service';
 import { OpportunityController, ProductPackageController } from './modules/opportunity/opportunity.controller';
 import { OpportunityService } from './modules/opportunity/opportunity.service';
+import { ContractController, ErpAccountController, ErpResultController } from './modules/contract/contract.controller';
+import { ContractService } from './modules/contract/contract.service';
 import { AuthGuard, PermissionGuard } from './security/security';
 import { InterfaceService } from './integration/interface.service';
 
@@ -30,7 +32,10 @@ import { InterfaceService } from './integration/interface.service';
     DirectWorkController,
     ApprovalRouteController,
     OpportunityController,
-    ProductPackageController
+    ProductPackageController,
+    ContractController,
+    ErpAccountController,
+    ErpResultController
   ],
   providers: [
     DatabaseService,
@@ -40,6 +45,7 @@ import { InterfaceService } from './integration/interface.service';
     ActivityService,
     ApprovalRouteService,
     OpportunityService,
+    ContractService,
     AuthGuard,
     PermissionGuard,
     InterfaceService
