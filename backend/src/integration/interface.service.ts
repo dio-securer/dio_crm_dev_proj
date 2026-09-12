@@ -19,6 +19,21 @@ export type InterfaceCall<T> = {
 export class InterfaceService {
   constructor(private readonly db: DatabaseService) {}
 
+  /**
+   * Creates an auditable REQUESTING record without pretending that an external
+   * ERP transport exists. Phase 5 uses this until the real ERP adapter is bound.
+   */
+  async enqueuePending(input: Omit<InterfaceCall<unknown>, 'execute' | 'timeoutMs' | 'maxAttempts' | 'retryDelayMs'>) {
+    const requestId = crypto.randomUUID();
+    await this.db.query(`INSERT INTO crm_interface_log(company_id,request_id,interface_code,direction,entity_type,entity_id,request_json,status,retry_count,requested_at)
+      VALUES(@companyId,@requestId,@interfaceCode,@direction,@entityType,@entityId,@requestJson,'REQUESTING',0,SYSUTCDATETIME())`, {
+      companyId: input.companyId, requestId, interfaceCode: input.interfaceCode, direction: input.direction,
+      entityType: input.entityType ?? null, entityId: input.entityId ?? null,
+      requestJson: JSON.stringify(input.payload)
+    });
+    return { requestId, status: 'REQUESTING' as const };
+  }
+
   async execute<T>(call: InterfaceCall<T>): Promise<T> {
     const requestId = crypto.randomUUID();
     const maxAttempts = Math.max(1, call.maxAttempts ?? 3);
