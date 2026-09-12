@@ -2,98 +2,41 @@
 
 ## Status
 
-`IMPLEMENTED / CI_PASS / HUMAN_REVIEW_PENDING / DB_MIGRATION_DEFERRED`
+`APPROVED / CI_PASS / HUMAN_REVIEW_APPROVED / DB_MIGRATION_DEFERRED`
 
-Phase 6 P6-01~P6-07 Source Baseline 구현과 GitHub Actions Build/Test 검증을 완료했다. 실제 ERP 주문/출고/매출/반품 Transport 및 DEV DB Migration은 환경 Gate로 유지한다.
+Phase 6 P6-01~P6-07 Source Baseline 구현과 GitHub Actions Build/Test 검증을 완료했고, 2026-09-12 사용자 Human Domain Review 승인을 받았다. 실제 ERP 주문/출고/매출/반품 Transport 및 DEV DB Migration은 환경 Gate로 유지한다.
 
-## P6-01 Product Search
-- `crm_product_package`를 주문용 Catalog로 재사용
-- 품목명/ERP 품목코드/유형 검색
-- 단가, 재고수량, 주문가능 여부 표시 필드 추가
-- 실제 ERP 실시간 가격/재고 조회 방식은 GAP-015 및 ERP Interface 상세 확정 후 Adapter 연결
+## 승인 범위
+- P6-01 Product Search / 가격·재고 Read Model
+- P6-02 Cart / Quantity / Order Item
+- P6-03 Delivery Address / Express
+- P6-04 ERP Order Request Queue
+- P6-05 Order / Delivery Status
+- P6-06 Sales
+- P6-07 Return / Exchange ERP Result Read Model
 
-## P6-02 Cart / Quantity
-- ERP 승인 Contract 기준 Order Draft 생성
-- Order Item 추가/수정
-- 수량은 양의 정수 검증
-- 주문불가 품목은 ERP 제출 차단
-- 품목 Snapshot(ERP code/name/type/category/unit price)을 Order Item에 보존
-
-## P6-03 Delivery / Express
-- 배송지 유형 `ACCOUNT` / `DIRECT`
-- 거래처 주소 사용 또는 직접 배송지 입력
-- 특송 여부
-- 비고
-- ERP 요청 전 배송지 필수 검증
-
-## P6-04 ERP Order Request
-- `ERP_APPROVED` + `close_yn=0` Contract만 주문 가능
+## 핵심 업무규칙
+- `ERP_APPROVED` + `close_yn=0` Contract만 Order Draft/ERP 주문요청 가능
 - ERP 승인 Account 재검증
-- 주문 품목 최소 1건
-- IF-ERP-007 요청 payload Queue 생성
-- 실제 ERP 성공을 가정하지 않고 Order/InterfaceLog를 `REQUESTING` 상태로 유지
-
-## P6-05 Order / Delivery Status
-- ERP 주문 결과에서 ERP 주문번호/상태 반영
-- ERP Delivery 결과를 `erp_delivery_no` 기준 Idempotent Upsert
-- 출고/납품 상태 및 일시 조회
-- 배송 완료 결과 수신 시 Order 완료상태 반영 가능
-
-## P6-06 Sales
-- ERP 매출결과를 `erp_sales_no` 기준 Idempotent Upsert
-- Account/Contract/Order 연결
-- 매출일자, 금액, 품목, 수량 조회
-- Account 360 및 Phase 7 Ledger/Analytics가 재사용할 수 있는 기준 데이터 제공
-
-## P6-07 Return / Exchange
-- ERP 반품/교환 결과를 `erp_reference_no` 기준 Upsert
-- 유형 `RETURN` / `EXCHANGE`
-- 상태/품목/수량/처리일 조회
-- 교육자료에 정확한 반품/교환 요청·승인·취소 절차가 정의되지 않아 CRM 발신 Workflow는 임의 구현하지 않음
-- Phase 6에서는 ERP 실행결과 수신/조회 Baseline만 구현
+- 주문 품목 최소 1건 필요
+- 주문불가 품목은 ERP 제출 차단
+- 실제 ERP Transport 미연결 상태에서는 외부 성공을 가정하지 않고 `REQUESTING` 유지
+- Delivery/Sales/ReturnExchange 수신은 ERP 고유번호 기준 Idempotent Upsert
+- 반품/교환의 CRM 발신 요청·승인·취소 Workflow는 원본 교육자료에 확정되지 않아 임의 구현하지 않음
 
 ## Database Baseline
 - `database/migrations/006_phase6_order_delivery_sales.sql`
 - `database/seeds/006_phase6_seed.sql`
+- `crm_product_package` 주문단가/재고/주문가능 필드 확장
+- `crm_order`, `crm_order_item`, `crm_delivery`, `crm_sales`, `crm_return_exchange`
 
-신규/확장:
-- crm_product_package: 주문 단가/재고/주문가능/ERP Sync 시각
-- crm_order
-- crm_order_item
-- crm_delivery
-- crm_sales
-- crm_return_exchange
-
-## Backend
-- `backend/src/modules/order/order.controller.ts`
-- `backend/src/modules/order/order.service.ts`
-- `backend/src/modules/order/order.rules.ts`
-- `backend/src/modules/order/order.rules.spec.ts`
-
-주요 API:
-- `GET /api/order-products`
-- `GET /api/orders/eligible-contracts`
-- `POST /api/orders`
-- `POST /api/orders/:id/items`
-- `PATCH /api/orders/:id/delivery`
-- `POST /api/orders/:id/submit`
-- `GET /api/orders/:id/fulfillment`
-- `GET /api/sales`
-- `POST /api/erp-fulfillment/order-result`
-- `POST /api/erp-fulfillment/deliveries`
-- `POST /api/erp-fulfillment/sales`
-- `POST /api/erp-fulfillment/return-exchanges`
-
-## Frontend
+## Backend / Frontend
+- `backend/src/modules/order/*`
 - 주문 Workspace
-- 주문가능 Contract 선택
-- 품목/재고/단가 확인
-- 수량/배송지/특송 설정
-- ERP 주문 Queue 생성
 - 납품/매출/반품·교환 통합현황
 
 ## CI Result
-GitHub Actions Run `34679162667` PASS.
+GitHub Actions Build/Test PASS.
 - pnpm install: PASS
 - shared contracts build: PASS
 - NestJS backend build: PASS
@@ -119,7 +62,7 @@ GitHub Actions Run `34679162667` PASS.
 - [x] P6-07 Return / Exchange inbound/read model
 - [x] Domain Rule Unit Test
 - [x] GitHub Actions Build/Test PASS
-- [ ] Human Domain Review
+- [x] Human Domain Review — 사용자 승인 2026-09-12
 
-## Next after approval
-`Phase 7 — Ledger / Statement / Analytics`
+## Next
+`Phase 7 — Ledger / Statement / Account 360 / Analytics`
