@@ -2,9 +2,9 @@
 
 ## Status
 
-`IMPLEMENTED / CI_PENDING / HUMAN_REVIEW_PENDING / DB_MIGRATION_DEFERRED`
+`IMPLEMENTED / CI_PASS / HUMAN_REVIEW_PENDING / DB_MIGRATION_DEFERRED`
 
-Phase 7 P7-01~P7-04 Source Baseline을 구현한다. 영업 판매프로세스 교육자료의 패키지원장, 월합 거래명세서, 거래처 360, 현황분석 요구를 기준으로 한다.
+Phase 7 P7-01~P7-04 Source Baseline 구현과 GitHub Actions Build/Test 검증을 완료했다. 영업 판매프로세스 교육자료의 패키지원장, 월합 거래명세서, 거래처 360, 현황분석 요구를 기준으로 한다.
 
 ## P7-01 Package Ledger
 - 거래처 기준 패키지 계약 선택 또는 일반 거래내역 선택
@@ -94,6 +94,16 @@ Phase 7 P7-01~P7-04 Source Baseline을 구현한다. 영업 판매프로세스 �
 - `Account360Page` — Account 360
 - `AnalyticsDashboardPage` — 영업 분석 Dashboard
 
+## CI Result
+GitHub Actions Build/Test PASS.
+- pnpm install: PASS
+- shared contracts build: PASS
+- NestJS backend build: PASS
+- React/Vite frontend build: PASS
+- Jest / Phase 7 Domain Rule tests: PASS
+
+초기 CI에서 동적 SQL Read Model의 TypeScript row type이 `unknown`으로 추론되는 오류가 발견되어 `DatabaseService.query<T = any>` 기본 타입을 명시적으로 부여한 뒤 재검증했다.
+
 ## Deferred / Open
 - Phase 1~7 SQL Migration 실제 DEV DB 적용
 - Statement PDF 실제 File Storage 영구저장 / Account File Section 연결
@@ -109,7 +119,7 @@ Phase 7 P7-01~P7-04 Source Baseline을 구현한다. 영업 판매프로세스 �
 - [x] P7-04 Dashboard Source Baseline
 - [x] XLSX / PDF Export Source 구현
 - [x] Domain Rule Unit Test 작성
-- [ ] GitHub Actions Build/Test PASS
+- [x] GitHub Actions Build/Test PASS
 - [ ] Human Domain Review
 
 ## Next after approval
