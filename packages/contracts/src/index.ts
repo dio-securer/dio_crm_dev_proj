@@ -43,3 +43,35 @@ export type AccountSummary = {
   erp_approved_yn: boolean;
   integration_status: string;
 };
+
+export type ActivityStatus = 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED';
+export type ActivityRelatedType = 'LEAD' | 'ACCOUNT' | 'OPPORTUNITY';
+export type DirectWorkType = 'DIRECT_WORK' | 'DIRECT_LEAVE';
+export type ActivityReportStatus = 'DRAFT' | 'REQUESTED' | 'BRANCH_APPROVED' | 'FINAL_APPROVED';
+export type DirectWorkStatus = 'DRAFT' | 'REQUESTED' | 'BRANCH_APPROVED' | 'DIVISION_APPROVED' | 'BRANCH_REJECTED' | 'DIVISION_REJECTED';
+
+export type ActivityCalendarItem = {
+  event_public_id: string;
+  activity_public_id: string;
+  subject: string;
+  start_at: string;
+  end_at: string;
+  status: ActivityStatus;
+  related_type: ActivityRelatedType;
+  related_name_snapshot: string;
+  visit_purpose?: string | null;
+  in_at?: string | null;
+  out_at?: string | null;
+  direct_work_type?: DirectWorkType | null;
+  direct_work_status?: DirectWorkStatus | null;
+};
+
+export type ActivityMapHospital = {
+  related_type: 'LEAD' | 'ACCOUNT';
+  public_id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  address?: string | null;
+  distance_m: number;
+};
