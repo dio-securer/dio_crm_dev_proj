@@ -22,16 +22,20 @@ export function validateStatementRange(from: string, to: string) {
   return { allowed: true as const };
 }
 
-export function statementFilename(periodTo: string, contractNo?: string | null, general = false) {
+export function statementFilename(periodTo: string, contractNo?: string | null, general = false, locale = 'ko-KR') {
   const ym = /^\d{4}-\d{2}/.test(periodTo) ? periodTo.slice(0, 7) : 'unknown';
   const raw = general ? 'GENERAL' : (contractNo || 'CONTRACT');
   const safe = raw.replace(/[\\/:*?"<>|\s]+/g, '_').slice(0, 80);
-  return `${ym}_월합_거래명세서_${safe}.pdf`;
+  return locale.toLowerCase().startsWith('ko')
+    ? `${ym}_월합_거래명세서_${safe}.pdf`
+    : `${ym}_monthly_statement_${safe}.pdf`;
 }
 
-export function ledgerFilename(accountName: string, contractNo?: string | null, general = false) {
+export function ledgerFilename(accountName: string, contractNo?: string | null, general = false, locale = 'ko-KR') {
   const scope = general ? 'GENERAL' : (contractNo || 'CONTRACT');
   const safeAccount = accountName.replace(/[\\/:*?"<>|\s]+/g, '_').slice(0, 80);
   const safeScope = scope.replace(/[\\/:*?"<>|\s]+/g, '_').slice(0, 80);
-  return `${safeAccount}_패키지원장_${safeScope}.xlsx`;
+  return locale.toLowerCase().startsWith('ko')
+    ? `${safeAccount}_패키지원장_${safeScope}.xlsx`
+    : `${safeAccount}_package_ledger_${safeScope}.xlsx`;
 }
