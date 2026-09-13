@@ -21,7 +21,7 @@
    - CRM-GL-001 G0~G9 실행 결과
    - CI 결과와 수정 이력
    - Environment Gate / SPEC GAP
-   - Human Review Gate 상태
+   - Human Review 및 Merge 결과
 
 ## 핵심 원칙
 
@@ -50,14 +50,18 @@ DIO CRM Core
 
 ## 현재 상태
 
-`CRM-GL-001 / SOURCE_COMPLETE / CI_PASS / HUMAN_REVIEW_PENDING`
+`CRM-GL-001 / SOURCE_COMPLETE / CI_PASS / HUMAN_REVIEW_APPROVED / MAIN_MERGED`
 
-현재 `globalization/foundation` 브랜치와 PR #9에서 Globalization Source Baseline과 CI 검증을 완료했다.
+PR #9은 2026-09-13 Human Review 승인 후 `main`에 병합되었다.
+
+```text
+PR #9 Merge Commit
+a609b26cbc70c64cecdf9a8bc8e593aa764a7462
+```
 
 다음은 아직 실행하지 않았다.
 
 ```text
-PR #9 main Merge
 DEV/UAT Migration 009 적용
 국가별 실제 Workflow / Identifier / ERP / Map 활성화
 Responsive UI Completion
@@ -71,12 +75,10 @@ Production Rollout
 ## 다음 실행 순서
 
 ```text
-CRM-GL-001 Human Review
- → PR #9 main Merge
- → DIO UI Completion
+DIO UI Completion
  → Responsive Mobile UI
  → PWA Foundation
- → DEV/UAT
+ → DEV/UAT Migration 009
  → 국가별 ERP/Map 연동
  → Country Pilot
  → Production Rollout
