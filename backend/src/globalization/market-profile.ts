@@ -1,4 +1,4 @@
-import type { GlobalizationContext, MarketFeatureKey } from '@dio-crm/contracts/globalization';
+import type { GlobalizationContext, MarketFeatureKey } from '@dio-crm/contracts';
 
 export type MarketProfileDefinition = Omit<GlobalizationContext, 'locale'> & {
   defaultLocale: string;
