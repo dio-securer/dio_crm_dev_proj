@@ -1,5 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable, SetMetadata } from '@nestjs/common';
-import type { MarketFeatureKey } from '@dio-crm/contracts/globalization';
+import type { MarketFeatureKey } from '@dio-crm/contracts';
 import type { AuthenticatedRequest } from '../security/security';
 import { GlobalizationService } from './globalization.service';
 
