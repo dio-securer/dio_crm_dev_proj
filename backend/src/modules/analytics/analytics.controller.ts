@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { AuthenticatedRequest, AuthGuard, PermissionGuard, RequirePermission } from '../../security/security';
 import { MarketFeatureGuard, RequireMarketFeature } from '../../globalization/feature.guard';
 import { AnalyticsService } from './analytics.service';
+import { LocalizedExportService } from './localized-export.service';
 
 const bool = (value?: string) => value === '1' || value === 'true';
 const statementBody = z.object({
@@ -17,7 +18,7 @@ const statementBody = z.object({
 @Controller('api/analytics')
 @UseGuards(AuthGuard, PermissionGuard)
 export class AnalyticsController {
-  constructor(private readonly service: AnalyticsService) {}
+  constructor(private readonly service: AnalyticsService, private readonly localizedExport: LocalizedExportService) {}
 
   @Get('accounts/:accountPublicId/contracts')
   @RequirePermission('LEDGER.READ')
@@ -38,7 +39,7 @@ export class AnalyticsController {
   async ledgerExcel(@Req() req: AuthenticatedRequest, @Param('accountPublicId') accountPublicId: string,
     @Res() res: Response, @Query('contractPublicId') contractPublicId?: string, @Query('general') general?: string,
     @Query('from') from?: string, @Query('to') to?: string) {
-    const out = await this.service.packageLedgerExcel(req.authUser!.companyId, accountPublicId, { contractPublicId, general: bool(general), from, to });
+    const out = await this.localizedExport.packageLedgerExcel(req.authUser!.companyId, req.authUser!.sub, accountPublicId, { contractPublicId, general: bool(general), from, to });
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(out.filename)}`);
     res.send(out.buffer);
@@ -60,9 +61,11 @@ export class AnalyticsController {
   @RequirePermission('STATEMENT.EXPORT')
   async statementPdf(@Req() req: AuthenticatedRequest, @Param('accountPublicId') accountPublicId: string, @Body() body: unknown, @Res() res: Response) {
     const input = statementBody.parse(body);
-    const out = await this.service.statementPdf(req.authUser!.companyId, accountPublicId, input, req.authUser!.sub);
+    const out = await this.localizedExport.statementPdf(req.authUser!.companyId, req.authUser!.sub, accountPublicId, input);
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(out.filename)}`);
+    res.setHeader('X-DIO-Export-Locale', out.locale);
+    res.setHeader('X-DIO-PDF-Locale', out.pdfLocale);
     res.send(out.buffer);
   }
 
