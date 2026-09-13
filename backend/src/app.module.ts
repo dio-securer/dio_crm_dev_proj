@@ -19,10 +19,14 @@ import { ErpFulfillmentController, OrderController, OrderProductController, Sale
 import { OrderService } from './modules/order/order.service';
 import { AnalyticsController } from './modules/analytics/analytics.controller';
 import { AnalyticsService } from './modules/analytics/analytics.service';
+import { LocalizedExportService } from './modules/analytics/localized-export.service';
 import { HealthController, OpsController } from './modules/ops/ops.controller';
 import { OpsService } from './modules/ops/ops.service';
 import { AuthGuard, PermissionGuard } from './security/security';
 import { InterfaceService } from './integration/interface.service';
+import { GlobalizationController } from './globalization/globalization.controller';
+import { GlobalizationService } from './globalization/globalization.service';
+import { MarketFeatureGuard } from './globalization/feature.guard';
 
 @Module({
   imports: [JwtModule.register({})],
@@ -48,7 +52,8 @@ import { InterfaceService } from './integration/interface.service';
     ErpFulfillmentController,
     AnalyticsController,
     HealthController,
-    OpsController
+    OpsController,
+    GlobalizationController
   ],
   providers: [
     DatabaseService,
@@ -61,10 +66,13 @@ import { InterfaceService } from './integration/interface.service';
     ContractService,
     OrderService,
     AnalyticsService,
+    LocalizedExportService,
     OpsService,
     AuthGuard,
     PermissionGuard,
-    InterfaceService
+    InterfaceService,
+    GlobalizationService,
+    MarketFeatureGuard
   ]
 })
 export class AppModule {}

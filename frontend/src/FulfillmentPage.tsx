@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { apiGet } from './api';
 import type { DeliverySummary, OrderSummary, ReturnExchangeSummary, SalesSummary } from '@dio-crm/contracts';
+import { useGlobalization } from './market/globalization-context';
+import { formatCurrency } from './formatting/currency';
 
 type Fulfillment = { order:OrderSummary; deliveries:DeliverySummary[]; sales:SalesSummary[]; returnExchanges:ReturnExchangeSummary[] };
 
 export function FulfillmentPage() {
+  const { t } = useTranslation();
+  const { globalization } = useGlobalization();
+  const money=(value:number)=>formatCurrency(Number(value||0),globalization.locale,globalization.currencyCode);
   const [orders,setOrders] = useState<OrderSummary[]>([]);
   const [selected,setSelected] = useState('');
   const [detail,setDetail] = useState<Fulfillment|null>(null);
@@ -28,40 +34,40 @@ export function FulfillmentPage() {
   };
 
   return <section>
-    <h2>주문 / 납품 / 매출 / 반품·교환</h2>
-    <p style={{color:'#667085'}}>ERP 실행결과를 CRM에서 조회하는 통합 현황입니다. 반품/교환 요청 프로세스는 미확정이므로 Phase 6에서는 ERP 결과 수신/조회만 제공합니다.</p>
+    <h2>{t('fulfillment.title')}</h2>
+    <p style={{color:'#667085'}}>{t('fulfillment.subtitle')}</p>
     {message && <div style={{padding:10,background:'#fff4e5',marginBottom:12}}>{message}</div>}
     <div style={{display:'grid',gridTemplateColumns:'1fr 2fr',gap:14}}>
       <div style={{border:'1px solid #dde3ea',borderRadius:10,padding:12}}>
-        <h3>주문</h3>
+        <h3>{t('fulfillment.orders')}</h3>
         {orders.map(o=><button key={o.public_id} onClick={()=>void open(o.public_id)} style={{display:'block',width:'100%',textAlign:'left',padding:8,marginBottom:6,background:selected===o.public_id?'#eef4fb':'white',border:'1px solid #ddd'}}>
-          {o.account_name} · {o.status} · {o.erp_order_no??'ERP번호 대기'}
+          {o.account_name} · {o.status} · {o.erp_order_no??t('fulfillment.erpWaiting')}
         </button>)}
       </div>
       <div>
         <div style={{border:'1px solid #dde3ea',borderRadius:10,padding:12,marginBottom:12}}>
-          <h3>납품/출고</h3>
-          <table style={{width:'100%'}}><thead><tr><th>ERP 납품번호</th><th>상태</th><th>출고</th><th>납품</th></tr></thead><tbody>
+          <h3>{t('fulfillment.delivery')}</h3>
+          <table style={{width:'100%'}}><thead><tr><th>{t('fulfillment.erpDeliveryNo')}</th><th>{t('common.status')}</th><th>{t('fulfillment.shipped')}</th><th>{t('fulfillment.delivered')}</th></tr></thead><tbody>
             {(detail?.deliveries??[]).map(x=><tr key={x.public_id}><td>{x.erp_delivery_no}</td><td>{x.delivery_status}</td><td>{x.shipped_at??'-'}</td><td>{x.delivered_at??'-'}</td></tr>)}
           </tbody></table>
         </div>
         <div style={{border:'1px solid #dde3ea',borderRadius:10,padding:12,marginBottom:12}}>
-          <h3>주문 관련 매출</h3>
-          <table style={{width:'100%'}}><thead><tr><th>ERP 매출번호</th><th>일자</th><th>품목</th><th>금액</th></tr></thead><tbody>
-            {(detail?.sales??[]).map(x=><tr key={x.public_id}><td>{x.erp_sales_no}</td><td>{x.sales_date}</td><td>{x.item_name??x.item_code??'-'}</td><td>{Number(x.amount||0).toLocaleString()}</td></tr>)}
+          <h3>{t('fulfillment.orderSales')}</h3>
+          <table style={{width:'100%'}}><thead><tr><th>{t('fulfillment.erpSalesNo')}</th><th>{t('common.date')}</th><th>{t('common.item')}</th><th>{t('common.amount')}</th></tr></thead><tbody>
+            {(detail?.sales??[]).map(x=><tr key={x.public_id}><td>{x.erp_sales_no}</td><td>{x.sales_date}</td><td>{x.item_name??x.item_code??'-'}</td><td>{money(x.amount)}</td></tr>)}
           </tbody></table>
         </div>
         <div style={{border:'1px solid #dde3ea',borderRadius:10,padding:12}}>
-          <h3>반품 / 교환</h3>
-          <table style={{width:'100%'}}><thead><tr><th>유형</th><th>ERP 참조번호</th><th>상태</th><th>품목</th><th>수량</th></tr></thead><tbody>
+          <h3>{t('fulfillment.returnExchange')}</h3>
+          <table style={{width:'100%'}}><thead><tr><th>{t('fulfillment.type')}</th><th>{t('fulfillment.erpReference')}</th><th>{t('common.status')}</th><th>{t('common.item')}</th><th>{t('common.quantity')}</th></tr></thead><tbody>
             {(detail?.returnExchanges??[]).map(x=><tr key={x.public_id}><td>{x.transaction_type}</td><td>{x.erp_reference_no}</td><td>{x.status}</td><td>{x.item_code??'-'}</td><td>{x.quantity??'-'}</td></tr>)}
           </tbody></table>
         </div>
       </div>
     </div>
-    <h3 style={{marginTop:20}}>전체 매출</h3>
-    <table style={{width:'100%'}}><thead><tr><th>Account</th><th>ERP 매출번호</th><th>일자</th><th>품목</th><th>금액</th></tr></thead><tbody>
-      {sales.map(x=><tr key={x.public_id}><td>{x.account_name}</td><td>{x.erp_sales_no}</td><td>{x.sales_date}</td><td>{x.item_name??x.item_code??'-'}</td><td>{Number(x.amount||0).toLocaleString()}</td></tr>)}
+    <h3 style={{marginTop:20}}>{t('fulfillment.allSales')}</h3>
+    <table style={{width:'100%'}}><thead><tr><th>Account</th><th>{t('fulfillment.erpSalesNo')}</th><th>{t('common.date')}</th><th>{t('common.item')}</th><th>{t('common.amount')}</th></tr></thead><tbody>
+      {sales.map(x=><tr key={x.public_id}><td>{x.account_name}</td><td>{x.erp_sales_no}</td><td>{x.sales_date}</td><td>{x.item_name??x.item_code??'-'}</td><td>{money(x.amount)}</td></tr>)}
     </tbody></table>
   </section>;
 }

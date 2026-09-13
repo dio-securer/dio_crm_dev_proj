@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { z } from 'zod';
 import { AuthenticatedRequest, AuthGuard, PermissionGuard, RequirePermission } from '../../security/security';
+import { MarketFeatureGuard, RequireMarketFeature } from '../../globalization/feature.guard';
 import { ContractService } from './contract.service';
 
 const collectionPlanRow = z.object({
@@ -89,7 +90,8 @@ export class ContractController {
 }
 
 @Controller('api/erp-accounts')
-@UseGuards(AuthGuard, PermissionGuard)
+@UseGuards(AuthGuard, PermissionGuard, MarketFeatureGuard)
+@RequireMarketFeature('ERP_ACCOUNT_APPROVAL')
 export class ErpAccountController {
   constructor(private readonly service: ContractService) {}
 

@@ -1,7 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import type { ActivityCalendarItem, AccountSummary, LeadSummary } from '@dio-crm/contracts';
 import { apiGet, apiPatch, apiPost } from './api';
+import { useGlobalization } from './market/globalization-context';
 
 const box: React.CSSProperties = { border: '1px solid #dfe4ea', borderRadius: 12, padding: 16, background: '#fff' };
 const input: React.CSSProperties = { padding: '8px 10px', border: '1px solid #ccd3dd', borderRadius: 8, minWidth: 160 };
@@ -24,6 +26,8 @@ function position(): Promise<{ latitude: number; longitude: number; accuracyM: n
 }
 
 export function ActivitiesPage() {
+  const { t } = useTranslation();
+  const { featureEnabled } = useGlobalization();
   const qc = useQueryClient();
   const today = localDate();
   const [relatedType, setRelatedType] = useState<'LEAD'|'ACCOUNT'>('LEAD');
@@ -34,6 +38,8 @@ export function ActivitiesPage() {
   const [directWorkReason, setDirectWorkReason] = useState('');
   const [message, setMessage] = useState('');
   const [mapResult, setMapResult] = useState<any>(null);
+  const directEnabled = featureEnabled('DIRECT_WORK');
+  const gpsEnabled = featureEnabled('GPS_CHECKIN');
 
   const calendar = useQuery({
     queryKey: ['activity-calendar', today],
@@ -47,92 +53,64 @@ export function ActivitiesPage() {
     : (accounts.data ?? []).map(x => ({ id: x.public_id, name: x.account_name })), [relatedType, leads.data, accounts.data]);
 
   async function createPlan(e: React.FormEvent) {
-    e.preventDefault();
-    setMessage('');
+    e.preventDefault(); setMessage('');
     try {
       await apiPost('/api/activities/plans', {
         relatedType, relatedPublicId, plannedAt, visitPurpose: visitPurpose || undefined,
-        directWorkType: directWorkType || undefined,
-        directWorkReason: directWorkReason || undefined
+        directWorkType: directEnabled ? (directWorkType || undefined) : undefined,
+        directWorkReason: directEnabled ? (directWorkReason || undefined) : undefined
       });
-      setMessage('활동계획이 등록되었습니다.');
+      setMessage(t('activity.planCreated'));
       await qc.invalidateQueries({ queryKey: ['activity-calendar'] });
     } catch (err) { setMessage(err instanceof Error ? err.message : String(err)); }
   }
 
   async function check(action: 'check-in'|'check-out', publicId: string) {
-    setMessage('위치 확인 중...');
+    setMessage(t('activity.gpsChecking'));
     try {
       const gps = await position();
       const r = await apiPost<any>(`/api/activities/${publicId}/${action}`, gps);
-      setMessage(action === 'check-in' ? `IN 완료 · 병원과 약 ${r.distanceM ?? '-'}m` : 'OUT 완료');
+      setMessage(action === 'check-in' ? `${t('activity.checkIn')} · ${r.distanceM ?? '-'}m` : t('activity.checkOut'));
       await qc.invalidateQueries({ queryKey: ['activity-calendar'] });
     } catch (err) { setMessage(err instanceof Error ? err.message : String(err)); }
   }
 
   async function updateConsultation(publicId: string) {
-    const text = window.prompt('상담내용을 입력하세요.');
+    const text = window.prompt(t('activity.consultationPrompt'));
     if (text == null) return;
-    try {
-      await apiPatch(`/api/activities/${publicId}`, { consultationContent: text });
-      setMessage('상담내용을 저장했습니다.');
-    } catch (err) { setMessage(err instanceof Error ? err.message : String(err)); }
+    try { await apiPatch(`/api/activities/${publicId}`, { consultationContent: text }); setMessage(t('activity.consultationSaved')); }
+    catch (err) { setMessage(err instanceof Error ? err.message : String(err)); }
   }
 
   async function loadMap() {
-    setMessage('현재 위치 확인 중...');
+    setMessage(t('activity.gpsChecking'));
     try {
       const gps = await position();
       const r = await apiGet<any>(`/api/activities/map/today?date=${today}&latitude=${gps.latitude}&longitude=${gps.longitude}&radiusKm=10`);
-      setMapResult(r);
-      setMessage(`주변 병원 ${r.nearbyHospitals?.length ?? 0}건을 조회했습니다.`);
+      setMapResult(r); setMessage(t('activity.nearbyLoaded',{count:r.nearbyHospitals?.length ?? 0}));
     } catch (err) { setMessage(err instanceof Error ? err.message : String(err)); }
   }
 
   return <div style={{ display: 'grid', gap: 16 }}>
     <section style={box}>
-      <h2>활동계획</h2>
+      <h2>{t('activity.title')}</h2>
       <form onSubmit={createPlan} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'end' }}>
-        <label>대상<br/><select style={input} value={relatedType} onChange={e => { setRelatedType(e.target.value as 'LEAD'|'ACCOUNT'); setRelatedPublicId(''); }}>
-          <option value="LEAD">Lead</option><option value="ACCOUNT">Account</option>
-        </select></label>
-        <label>병원<br/><select style={{ ...input, minWidth: 240 }} required value={relatedPublicId} onChange={e => setRelatedPublicId(e.target.value)}>
-          <option value="">선택</option>{targets.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-        </select></label>
-        <label>방문일정<br/><input style={input} type="datetime-local" required value={plannedAt} onChange={e => setPlannedAt(e.target.value)} /></label>
-        <label>방문목적<br/><input style={input} value={visitPurpose} onChange={e => setVisitPurpose(e.target.value)} /></label>
-        <label>직출/직퇴<br/><select style={input} value={directWorkType} onChange={e => setDirectWorkType(e.target.value)}>
-          <option value="">없음</option><option value="DIRECT_WORK">직출</option><option value="DIRECT_LEAVE">직퇴</option>
-        </select></label>
-        {directWorkType && <label>사유<br/><input style={input} required value={directWorkReason} onChange={e => setDirectWorkReason(e.target.value)} /></label>}
-        <button type="submit" style={input}>등록</button>
+        <label>{t('activity.target')}<br/><select style={input} value={relatedType} onChange={e => { setRelatedType(e.target.value as 'LEAD'|'ACCOUNT'); setRelatedPublicId(''); }}><option value="LEAD">Lead</option><option value="ACCOUNT">Account</option></select></label>
+        <label>{t('activity.hospital')}<br/><select style={{ ...input, minWidth: 240 }} required value={relatedPublicId} onChange={e => setRelatedPublicId(e.target.value)}><option value="">{t('common.selectNone')}</option>{targets.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
+        <label>{t('activity.schedule')}<br/><input style={input} type="datetime-local" required value={plannedAt} onChange={e => setPlannedAt(e.target.value)} /></label>
+        <label>{t('activity.purpose')}<br/><input style={input} value={visitPurpose} onChange={e => setVisitPurpose(e.target.value)} /></label>
+        {directEnabled&&<><label>{t('activity.direct')}<br/><select style={input} value={directWorkType} onChange={e => setDirectWorkType(e.target.value)}><option value="">{t('activity.none')}</option><option value="DIRECT_WORK">{t('activity.directWork')}</option><option value="DIRECT_LEAVE">{t('activity.directLeave')}</option></select></label>{directWorkType&&<label>{t('activity.reason')}<br/><input style={input} required value={directWorkReason} onChange={e=>setDirectWorkReason(e.target.value)}/></label>}</>}
+        <button type="submit" style={input}>{t('activity.register')}</button>
       </form>
-      <p style={{ color: '#667085', fontSize: 13 }}>Event 종료시간은 방문일정 + 1시간으로 자동 생성됩니다. 동일 대상/동일 일자 중복계획은 차단됩니다.</p>
+      <p style={{ color: '#667085', fontSize: 13 }}>{t('activity.eventHint')}</p>
     </section>
-
     <section style={box}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}><h2>오늘 활동</h2><button onClick={loadMap}>주변 병원 조회</button></div>
-      {calendar.isLoading && <p>불러오는 중...</p>}
-      {(calendar.data ?? []).map(a => <div key={a.activity_public_id} style={{ padding: '12px 0', borderBottom: '1px solid #eef1f5' }}>
-        <b>{a.related_name_snapshot}</b> <span style={{ color: '#667085' }}>· {a.status}</span><br/>
-        <small>{new Date(a.start_at).toLocaleString()} · {a.visit_purpose || '방문목적 미입력'}</small>
-        <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
-          {a.status === 'PLANNED' && <button onClick={() => check('check-in', a.activity_public_id)}>GPS IN</button>}
-          {a.status === 'IN_PROGRESS' && <><button onClick={() => updateConsultation(a.activity_public_id)}>상담정보</button><button onClick={() => check('check-out', a.activity_public_id)}>OUT</button></>}
-          {a.direct_work_type && <span>직출/직퇴: {a.direct_work_type} / {a.direct_work_status}</span>}
-        </div>
-      </div>)}
-      {!calendar.isLoading && !(calendar.data ?? []).length && <p>오늘 활동계획이 없습니다.</p>}
+      <div style={{display:'flex',justifyContent:'space-between',gap:8}}><h2>{t('activity.today')}</h2><button onClick={loadMap}>{t('activity.nearby')}</button></div>
+      {calendar.isLoading&&<p>{t('common.loading')}</p>}
+      {(calendar.data??[]).map(a=><div key={a.activity_public_id} style={{padding:'12px 0',borderBottom:'1px solid #eef1f5'}}><b>{a.related_name_snapshot}</b> · {t(`status.${a.status}`,{defaultValue:a.status})}<br/><small>{new Date(a.start_at).toLocaleString()} · {a.visit_purpose||'-'}</small><div style={{marginTop:8,display:'flex',gap:8}}>{gpsEnabled&&a.status==='PLANNED'&&<button onClick={()=>check('check-in',a.activity_public_id)}>{t('activity.checkIn')}</button>}{a.status==='IN_PROGRESS'&&<><button onClick={()=>updateConsultation(a.activity_public_id)}>{t('activity.consultation')}</button><button onClick={()=>check('check-out',a.activity_public_id)}>{t('activity.checkOut')}</button></>}</div></div>)}
+      {!calendar.isLoading&&!(calendar.data??[]).length&&<p>{t('activity.noToday')}</p>}
     </section>
-
-    {mapResult && <section style={box}>
-      <h2>지도 데이터 — 반경 10km</h2>
-      <p style={{ color: '#667085' }}>실제 지도 Provider 연결 전 Baseline입니다. GPS 거리순으로 병원을 표시합니다.</p>
-      {(mapResult.nearbyHospitals ?? []).slice(0, 30).map((h: any) => <div key={`${h.related_type}-${h.public_id}`} style={{ padding: '7px 0', borderBottom: '1px solid #eef1f5' }}>
-        {h.name} · {h.related_type} · <b>{h.distance_m}m</b> <span style={{ color: '#667085' }}>{h.address}</span>
-      </div>)}
-    </section>}
-
-    {message && <div style={{ ...box, background: '#f8fafc' }}>{message}</div>}
+    {mapResult&&<section style={box}><h2>{t('activity.mapTitle')}</h2><p style={{color:'#667085'}}>{t('activity.mapHint')}</p>{(mapResult.nearbyHospitals??[]).slice(0,30).map((h:any)=><div key={`${h.related_type}-${h.public_id}`} style={{padding:'7px 0',borderBottom:'1px solid #eef1f5'}}>{h.name} · {h.related_type} · <b>{h.distance_m}m</b> <span style={{color:'#667085'}}>{h.address}</span></div>)}</section>}
+    {message&&<div style={{...box,background:'#f8fafc'}}>{message}</div>}
   </div>;
 }
