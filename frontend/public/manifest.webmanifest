@@ -1,0 +1,24 @@
+{
+  "id": "/",
+  "name": "DIO CRM",
+  "short_name": "DIO CRM",
+  "description": "DIO global sales CRM workspace",
+  "lang": "ko-KR",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f7f9fc",
+  "theme_color": "#14365d",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {"src":"/icons/dio-crm.svg","sizes":"any","type":"image/svg+xml","purpose":"any"},
+    {"src":"/icons/dio-crm-maskable.svg","sizes":"any","type":"image/svg+xml","purpose":"maskable"}
+  ],
+  "shortcuts": [
+    {"name":"Activities","short_name":"Activity","url":"/activities","icons":[{"src":"/icons/dio-crm.svg","sizes":"any","type":"image/svg+xml"}]},
+    {"name":"Opportunities","short_name":"Opportunity","url":"/opportunities","icons":[{"src":"/icons/dio-crm.svg","sizes":"any","type":"image/svg+xml"}]},
+    {"name":"Orders","short_name":"Order","url":"/orders","icons":[{"src":"/icons/dio-crm.svg","sizes":"any","type":"image/svg+xml"}]}
+  ]
+}
