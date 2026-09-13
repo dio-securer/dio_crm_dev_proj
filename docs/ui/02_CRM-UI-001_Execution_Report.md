@@ -2,8 +2,9 @@
 
 - Work ID: `CRM-UI-001`
 - Branch: `ui-completion/responsive-pwa`
+- PR: `#10`
 - 작성일: 2026-09-13
-- 상태: `SOURCE_IMPLEMENTED / CI_PENDING / HUMAN_REVIEW_PENDING`
+- 상태: `SOURCE_COMPLETE / CI_PASS / HUMAN_REVIEW_PENDING / PRODUCTION_NOT_TOUCHED`
 
 ## 1. 실행 범위
 
@@ -104,9 +105,9 @@ Offline 상태에서 업무 데이터를 임의로 저장/재전송하지 않는
 - Market Feature Enforcement
 - `ko-KR` / `en-US`
 
-## 5. CI Gate
+## 5. CI 결과
 
-PR 생성 후 아래를 검증한다.
+필수 Gate:
 
 ```text
 pnpm build
@@ -117,9 +118,33 @@ pnpm pwa:check
 pnpm audit:critical
 ```
 
-현재 상태: `CI_PENDING`
+초기 PR CI run `34733051526`은 `frontend/src/pwa/register.ts`에서 `import.meta.env.PROD` 타입 정의가 없는 문제로 TypeScript Build가 실패했다.
+
+수정 commit:
+
+```text
+7d7544aef8233a3c38de35fcdac018d327c4ce0a
+```
+
+수정 후 localhost/127.0.0.1에서는 Service Worker 등록을 생략하고, 배포 환경에서는 표준 `navigator.serviceWorker.register()`를 사용하도록 변경했다.
+
+최종 Source 검증 CI run `34733137460`에서 다음 단계가 모두 성공했다.
+
+```text
+pnpm install --no-frozen-lockfile  PASS
+pnpm build                         PASS
+pnpm test                          PASS
+pnpm i18n:check                    PASS
+pnpm i18n:hardcode                 PASS
+pnpm pwa:check                     PASS
+pnpm audit:critical                PASS
+```
 
 ## 6. Human Review 대상
+
+현재 Gate: `HUMAN_REVIEW_PENDING`
+
+검토 대상:
 
 - DIO Navy UI Tone
 - Desktop Sidebar 정보구조
@@ -129,7 +154,9 @@ pnpm audit:critical
 - PWA 설치 정책
 - Offline App Shell 범위
 
-## 7. 미실행
+Human Review 승인 전 PR #10은 `main`에 병합하지 않는다.
+
+## 7. 미실행 / Environment Gate
 
 ```text
 실제 단말 Pilot
@@ -144,3 +171,14 @@ Production Deploy
 ```
 
 위 항목은 Source Review 승인 후 Environment/Pilot 단계에서 별도 실행한다.
+
+## 8. 현재 상태
+
+```text
+CRM-UI-001
+SOURCE COMPLETE
+CI PASS
+PR #10 OPEN
+HUMAN REVIEW PENDING
+PRODUCTION NOT TOUCHED
+```
