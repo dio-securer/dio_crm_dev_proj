@@ -24,7 +24,6 @@ export class LocalizedExportService {
     const l = exportLabels(context.locale);
     const workbook = new ExcelJS.Workbook();
     workbook.creator = 'DIO CRM';
-    workbook.properties.language = context.locale;
     const sheet = workbook.addWorksheet(context.locale.startsWith('ko') ? '패키지원장' : 'Package Ledger');
     sheet.addRow([l.account, ledger.account.accountName]);
     sheet.addRow([l.scope, ledger.scope.type === 'GENERAL' ? 'GENERAL' : `${ledger.scope.contractName} / ${ledger.scope.erpContractNo ?? ''}`]);
