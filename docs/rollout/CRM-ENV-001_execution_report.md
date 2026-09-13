@@ -2,8 +2,9 @@
 
 - Work ID: `CRM-ENV-001`
 - Branch: `rollout/mobile-pwa-devuat-integration`
+- PR: `#11`
 - 작성일: 2026-09-13
-- 상태: `SOURCE_PREPARED / CI_PENDING / ENVIRONMENT_INPUTS_REQUIRED / PRODUCTION_NOT_TOUCHED`
+- 상태: `SOURCE_READY / CI_PASS / ENVIRONMENT_EXECUTION_PENDING / PRODUCTION_NOT_TOUCHED`
 
 ## 1. 사용자 요청 범위
 
@@ -45,8 +46,20 @@
 
 ### CI
 
-- `pnpm env:check` 추가
-- 기본 CI에서 environment tooling의 syntax/guard 동작을 검증
+PR #11 CI run `34734290400` PASS.
+
+```text
+pnpm install --no-frozen-lockfile  PASS
+pnpm build                         PASS
+pnpm test                          PASS
+pnpm i18n:check                    PASS
+pnpm i18n:hardcode                 PASS
+pnpm pwa:check                     PASS
+pnpm env:check                     PASS
+pnpm audit:critical                PASS
+```
+
+`pnpm env:check`에서 Migration 001~009 순서, Mobile/PWA Readiness script의 non-runtime safe mode, Map/ERP Readiness script의 non-strict safe mode를 검증했다.
 
 ## 3. 실제 환경에서 아직 실행하지 않은 항목
 
@@ -117,7 +130,7 @@ Account/Contract/Order Test Data
 
 ## 6. 다음 Gate
 
-Source/CI가 PASS한 뒤 실제 Environment Execution은 다음 순서로 기록한다.
+Source/CI는 준비 완료됐다. 실제 Environment Execution은 다음 순서로 기록한다.
 
 1. DEV/UAT HTTPS Endpoint 확보
 2. Runtime Mobile/PWA Smoke
