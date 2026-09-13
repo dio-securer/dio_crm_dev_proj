@@ -15,4 +15,9 @@ describe('Phase 7 analytics rules', () => {
     expect(statementFilename('2026-08-31',null,true)).toBe('2026-08_월합_거래명세서_GENERAL.pdf');
     expect(ledgerFilename('디오 치과','PKG/001')).toContain('패키지원장');
   });
+
+  it('builds English filenames when an English locale is selected', () => {
+    expect(statementFilename('2026-08-31','PKG/001',false,'en-US')).toBe('2026-08_monthly_statement_PKG_001.pdf');
+    expect(ledgerFilename('DIO Dental','PKG/001',false,'en-US')).toContain('package_ledger');
+  });
 });
