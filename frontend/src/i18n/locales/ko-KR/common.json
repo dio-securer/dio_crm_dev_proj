@@ -1,0 +1,10 @@
+{
+  "app": {"name":"DIO CRM","phase":"Globalization Foundation","language":"언어"},
+  "nav": {
+    "lead":"Lead","account":"Account","activity":"활동 / GPS","activityReport":"활동보고 / 승인","directWork":"직출 / 직퇴","opportunity":"Opportunity","pipeline":"Pipeline / Funnel","contract":"계약 / 수금","order":"주문","fulfillment":"납품 / 매출 / 반품","ledger":"원장 / 거래명세서","account360":"Account 360","analytics":"Dashboard","ops":"운영상태"
+  },
+  "common": {"search":"조회","reset":"초기화","save":"저장","cancel":"취소","approve":"승인","reject":"반려","detail":"상세","download":"다운로드","loading":"불러오는 중...","noData":"데이터가 없습니다."},
+  "status": {"PLANNED":"예정","IN_PROGRESS":"진행중","COMPLETED":"완료","DRAFT":"작성중","REQUESTED":"승인요청","BRANCH_APPROVED":"지점장 승인","FINAL_APPROVED":"최종승인","REQUESTING":"요청중","SUCCESS":"성공","FAILED":"실패"},
+  "locale": {"ko-KR":"한국어","en-US":"English"},
+  "footer": {"globalization":"국가/언어/통화/시간대는 회사 및 사용자 설정에 따라 적용됩니다."}
+}
