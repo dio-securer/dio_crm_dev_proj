@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { z } from 'zod';
 import { AuthenticatedRequest, AuthGuard, PermissionGuard, RequirePermission } from '../../security/security';
+import { MarketFeatureGuard, RequireMarketFeature } from '../../globalization/feature.guard';
 import { CustomerService } from './customer.service';
 import type { LeadStatus } from './customer.rules';
 
@@ -96,7 +97,8 @@ export class AccountController {
 }
 
 @Controller('api/integrations/hira')
-@UseGuards(AuthGuard, PermissionGuard)
+@UseGuards(AuthGuard, PermissionGuard, MarketFeatureGuard)
+@RequireMarketFeature('HIRA_IMPORT')
 export class HiraController {
   constructor(private readonly customer: CustomerService) {}
 
