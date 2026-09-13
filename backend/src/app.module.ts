@@ -19,6 +19,7 @@ import { ErpFulfillmentController, OrderController, OrderProductController, Sale
 import { OrderService } from './modules/order/order.service';
 import { AnalyticsController } from './modules/analytics/analytics.controller';
 import { AnalyticsService } from './modules/analytics/analytics.service';
+import { LocalizedExportService } from './modules/analytics/localized-export.service';
 import { HealthController, OpsController } from './modules/ops/ops.controller';
 import { OpsService } from './modules/ops/ops.service';
 import { AuthGuard, PermissionGuard } from './security/security';
@@ -65,6 +66,7 @@ import { MarketFeatureGuard } from './globalization/feature.guard';
     ContractService,
     OrderService,
     AnalyticsService,
+    LocalizedExportService,
     OpsService,
     AuthGuard,
     PermissionGuard,
