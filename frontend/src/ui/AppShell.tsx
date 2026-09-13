@@ -86,7 +86,7 @@ export function AppShell({ links, children }: Props) {
 
   return (
     <div className="app-shell">
-      <aside className="sidebar" aria-label="Primary navigation">
+      <aside className="sidebar" aria-label={t('app.primaryNavigation')}>
         <div className="brand-block">
           <div className="brand-mark">D</div>
           <div><strong>{t('app.name')}</strong><small>{t('app.workspace')}</small></div>
