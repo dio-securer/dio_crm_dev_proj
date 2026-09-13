@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Post, Query, Req, Res, UseGuards } from '
 import type { Response } from 'express';
 import { z } from 'zod';
 import { AuthenticatedRequest, AuthGuard, PermissionGuard, RequirePermission } from '../../security/security';
+import { MarketFeatureGuard, RequireMarketFeature } from '../../globalization/feature.guard';
 import { AnalyticsService } from './analytics.service';
 
 const bool = (value?: string) => value === '1' || value === 'true';
@@ -44,6 +45,8 @@ export class AnalyticsController {
   }
 
   @Get('accounts/:accountPublicId/statements')
+  @UseGuards(MarketFeatureGuard)
+  @RequireMarketFeature('MONTHLY_STATEMENT')
   @RequirePermission('STATEMENT.READ')
   statement(@Req() req: AuthenticatedRequest, @Param('accountPublicId') accountPublicId: string,
     @Query('contractPublicId') contractPublicId?: string, @Query('general') general?: string,
@@ -52,6 +55,8 @@ export class AnalyticsController {
   }
 
   @Post('accounts/:accountPublicId/statements/pdf')
+  @UseGuards(MarketFeatureGuard)
+  @RequireMarketFeature('MONTHLY_STATEMENT')
   @RequirePermission('STATEMENT.EXPORT')
   async statementPdf(@Req() req: AuthenticatedRequest, @Param('accountPublicId') accountPublicId: string, @Body() body: unknown, @Res() res: Response) {
     const input = statementBody.parse(body);
