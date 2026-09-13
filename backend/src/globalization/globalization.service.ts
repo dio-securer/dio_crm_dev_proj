@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable, InternalServerErrorException } from '@nestjs/common';
-import type { GlobalizationContext, MarketFeatureKey, MeContextResponse } from '@dio-crm/contracts/globalization';
+import type { GlobalizationContext, MarketFeatureKey, MeContextResponse } from '@dio-crm/contracts';
 import { DatabaseService } from '../database/database.service';
 import type { JwtPayload } from '../security/security';
 import { getMarketProfile, marketFeatureEnabled } from './market-profile';
