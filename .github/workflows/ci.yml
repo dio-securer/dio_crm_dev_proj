@@ -19,4 +19,5 @@ jobs:
       - run: pnpm build
       - run: pnpm test
       - run: pnpm i18n:check
+      - run: pnpm i18n:hardcode
       - run: pnpm audit:critical
