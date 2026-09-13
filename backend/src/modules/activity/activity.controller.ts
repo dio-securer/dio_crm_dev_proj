@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { z } from 'zod';
 import { AuthenticatedRequest, AuthGuard, PermissionGuard, RequirePermission } from '../../security/security';
+import { MarketFeatureGuard, RequireMarketFeature } from '../../globalization/feature.guard';
 import { ActivityService } from './activity.service';
 
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
@@ -67,6 +68,8 @@ export class ActivityController {
   }
 
   @Post(':publicId/check-in')
+  @UseGuards(MarketFeatureGuard)
+  @RequireMarketFeature('GPS_CHECKIN')
   @RequirePermission('ACTIVITY.CHECKIN')
   checkIn(@Req() req: AuthenticatedRequest, @Param('publicId') publicId: string, @Body() body: unknown) {
     return this.activity.checkIn(req.authUser!.companyId, publicId, req.authUser!.sub, gpsSchema.parse(body));
@@ -86,7 +89,8 @@ export class ActivityController {
 }
 
 @Controller('api/activity-reports')
-@UseGuards(AuthGuard, PermissionGuard)
+@UseGuards(AuthGuard, PermissionGuard, MarketFeatureGuard)
+@RequireMarketFeature('ACTIVITY_APPROVAL')
 export class ActivityReportController {
   constructor(private readonly activity: ActivityService) {}
 
@@ -129,7 +133,8 @@ export class ActivityReportController {
 }
 
 @Controller('api/direct-work')
-@UseGuards(AuthGuard, PermissionGuard)
+@UseGuards(AuthGuard, PermissionGuard, MarketFeatureGuard)
+@RequireMarketFeature('DIRECT_WORK')
 export class DirectWorkController {
   constructor(private readonly activity: ActivityService) {}
 
