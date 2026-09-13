@@ -1,0 +1,10 @@
+{
+  "app": {"name":"DIO CRM","phase":"Globalization Foundation","language":"Language"},
+  "nav": {
+    "lead":"Lead","account":"Account","activity":"Activities / GPS","activityReport":"Activity Reports / Approval","directWork":"Direct Work / Leave","opportunity":"Opportunity","pipeline":"Pipeline / Funnel","contract":"Contract / Collection","order":"Order","fulfillment":"Delivery / Sales / Return","ledger":"Ledger / Statement","account360":"Account 360","analytics":"Dashboard","ops":"Operations"
+  },
+  "common": {"search":"Search","reset":"Reset","save":"Save","cancel":"Cancel","approve":"Approve","reject":"Reject","detail":"Details","download":"Download","loading":"Loading...","noData":"No data available."},
+  "status": {"PLANNED":"Planned","IN_PROGRESS":"In progress","COMPLETED":"Completed","DRAFT":"Draft","REQUESTED":"Requested","BRANCH_APPROVED":"Branch approved","FINAL_APPROVED":"Final approved","REQUESTING":"Requesting","SUCCESS":"Success","FAILED":"Failed"},
+  "locale": {"ko-KR":"한국어","en-US":"English"},
+  "footer": {"globalization":"Country, language, currency and timezone follow company and user settings."}
+}
