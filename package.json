@@ -9,6 +9,10 @@
     "i18n:check": "node scripts/i18n/check.mjs",
     "i18n:hardcode": "node scripts/i18n/hardcode-check.mjs",
     "pwa:check": "node scripts/pwa/check.mjs",
+    "env:check": "node scripts/deploy/devuat-migration-plan.mjs --target DEV && node scripts/pilot/mobile-pwa-readiness.mjs && node scripts/integration/external-readiness.mjs",
+    "pilot:mobile": "node scripts/pilot/mobile-pwa-readiness.mjs",
+    "devuat:plan": "node scripts/deploy/devuat-migration-plan.mjs --target DEV",
+    "integration:check": "node scripts/integration/external-readiness.mjs",
     "audit:critical": "pnpm audit --audit-level=critical",
     "dev:api": "pnpm --filter @dio-crm/api start:dev",
     "dev:web": "pnpm --filter @dio-crm/web dev"

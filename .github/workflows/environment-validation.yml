@@ -1,0 +1,76 @@
+name: environment-validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: DEV or UAT
+        required: true
+        type: choice
+        options: [DEV, UAT]
+      web_base_url:
+        description: Deployed CRM HTTPS web URL
+        required: true
+        type: string
+      api_base_url:
+        description: Deployed CRM API base URL
+        required: true
+        type: string
+      map_provider:
+        description: Map provider code, for example GOOGLE or KAKAO
+        required: false
+        type: string
+      map_probe_url:
+        description: Non-secret provider probe URL
+        required: false
+        type: string
+      erp_base_url:
+        description: ERP test base URL
+        required: false
+        type: string
+      erp_health_path:
+        description: ERP test health path
+        required: false
+        type: string
+      strict_external:
+        description: Fail when Map/ERP validation configuration is missing
+        required: true
+        default: false
+        type: boolean
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target_environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: pnpm install --no-frozen-lockfile
+      - run: pnpm build
+      - run: pnpm test
+      - run: pnpm pwa:check
+      - name: Verify migration order without executing SQL
+        run: node scripts/deploy/devuat-migration-plan.mjs --target "${{ inputs.target_environment }}"
+      - name: Mobile/PWA runtime readiness
+        env:
+          CRM_WEB_BASE_URL: ${{ inputs.web_base_url }}
+          CRM_API_BASE_URL: ${{ inputs.api_base_url }}
+        run: node scripts/pilot/mobile-pwa-readiness.mjs --strict
+      - name: Map and ERP external readiness
+        env:
+          CRM_MAP_PROVIDER: ${{ inputs.map_provider }}
+          CRM_MAP_PROBE_URL: ${{ inputs.map_probe_url }}
+          CRM_ERP_BASE_URL: ${{ inputs.erp_base_url }}
+          CRM_ERP_HEALTH_PATH: ${{ inputs.erp_health_path }}
+          CRM_ERP_VALIDATION_TOKEN: ${{ secrets.CRM_ERP_VALIDATION_TOKEN }}
+        run: |
+          if [ "${{ inputs.strict_external }}" = "true" ]; then
+            node scripts/integration/external-readiness.mjs --strict
+          else
+            node scripts/integration/external-readiness.mjs
+          fi
