@@ -8,13 +8,13 @@ describe('GlobalizationService', () => {
     preferred_locale:null, timezone_override:null
   };
 
-  function service(row: any) {
+  function createService(row: any) {
     const db = { query: jest.fn().mockResolvedValue({ recordset: row ? [row] : [] }) } as any;
     return { service:new GlobalizationService(db), db };
   }
 
   it('uses user locale/timezone overrides without accepting a client country switch', async () => {
-    const { service, db } = service({ ...base, preferred_locale:'en-US', timezone_override:'America/New_York' });
+    const { service, db } = createService({ ...base, preferred_locale:'en-US', timezone_override:'America/New_York' });
     const context = await service.resolveCompany(1, 10);
     expect(context.locale).toBe('en-US');
     expect(context.countryCode).toBe('KR');
@@ -23,18 +23,18 @@ describe('GlobalizationService', () => {
   });
 
   it('falls back to the approved KR profile default locale', async () => {
-    const { service } = service({ ...base, default_locale:'', preferred_locale:null });
+    const { service } = createService({ ...base, default_locale:'', preferred_locale:null });
     const context = await service.resolveCompany(1, 10);
     expect(context.locale).toBe('ko-KR');
   });
 
   it('rejects an unknown market profile', async () => {
-    const { service } = service({ ...base, market_profile_code:'UNAPPROVED_MARKET' });
+    const { service } = createService({ ...base, market_profile_code:'UNAPPROVED_MARKET' });
     await expect(service.resolveCompany(1,10)).rejects.toBeInstanceOf(InternalServerErrorException);
   });
 
   it('rejects a missing company context', async () => {
-    const { service } = service(null);
+    const { service } = createService(null);
     await expect(service.resolveCompany(999,10)).rejects.toBeInstanceOf(ForbiddenException);
   });
 });
