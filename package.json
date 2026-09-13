@@ -7,6 +7,7 @@
     "build": "pnpm -r build",
     "test": "pnpm -r test --if-present",
     "i18n:check": "node scripts/i18n/check.mjs",
+    "i18n:hardcode": "node scripts/i18n/hardcode-check.mjs",
     "audit:critical": "pnpm audit --audit-level=critical",
     "dev:api": "pnpm --filter @dio-crm/api start:dev",
     "dev:web": "pnpm --filter @dio-crm/web dev"
