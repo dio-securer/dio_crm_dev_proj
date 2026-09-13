@@ -26,5 +26,10 @@ export function formatExportAmount(amount: number, context: Pick<GlobalizationCo
 }
 
 export function formatExportDate(value: string | Date, context: Pick<GlobalizationContext,'locale'|'timezone'>) {
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}(?:T00:00:00Z)?$/.test(value)) {
+    const [y,m,d] = value.slice(0,10).split('-').map(Number);
+    return new Intl.DateTimeFormat(context.locale, { year:'numeric', month:'2-digit', day:'2-digit', timeZone:'UTC' })
+      .format(new Date(Date.UTC(y,m-1,d)));
+  }
   return new Intl.DateTimeFormat(context.locale, { year:'numeric', month:'2-digit', day:'2-digit', timeZone:context.timezone }).format(new Date(value));
 }
