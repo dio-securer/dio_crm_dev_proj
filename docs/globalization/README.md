@@ -17,6 +17,12 @@
    - 산출물, 테스트, Human Gate, 완료기준
    - UI Completion / Responsive / PWA 이전에 수행할 작업 정의
 
+3. `03_CRM-GL-001_Execution_Report.md`
+   - CRM-GL-001 G0~G9 실행 결과
+   - CI 결과와 수정 이력
+   - Environment Gate / SPEC GAP
+   - Human Review Gate 상태
+
 ## 핵심 원칙
 
 ```text
@@ -44,20 +50,34 @@ DIO CRM Core
 
 ## 현재 상태
 
-`DESIGN_BASELINE_CREATED / IMPLEMENTATION_NOT_STARTED`
+`CRM-GL-001 / SOURCE_COMPLETE / CI_PASS / HUMAN_REVIEW_PENDING`
 
-본 폴더의 문서는 설계/작업 기준이며, 아직 실제 i18n Library 추가, DB Migration, 국가별 UI 변경, PWA/앱 적용을 완료했다는 의미가 아니다.
+현재 `globalization/foundation` 브랜치와 PR #9에서 Globalization Source Baseline과 CI 검증을 완료했다.
+
+다음은 아직 실행하지 않았다.
+
+```text
+PR #9 main Merge
+DEV/UAT Migration 009 적용
+국가별 실제 Workflow / Identifier / ERP / Map 활성화
+Responsive UI Completion
+PWA / App
+Country Pilot
+Production Rollout
+```
+
+특히 Migration 009는 Source Draft만 존재하며 실제 DEV/UAT/Production DB에는 적용하지 않았다.
 
 ## 다음 실행 순서
 
 ```text
-Globalization Design Review
- → i18n Foundation
- → Market/Profile Foundation
- → DB/Backend Enforcement
- → 공통 UI Design System
- → 국가별 UI Variation
- → Responsive
- → PWA / App
- → 국가별 Pilot
+CRM-GL-001 Human Review
+ → PR #9 main Merge
+ → DIO UI Completion
+ → Responsive Mobile UI
+ → PWA Foundation
+ → DEV/UAT
+ → 국가별 ERP/Map 연동
+ → Country Pilot
+ → Production Rollout
 ```
