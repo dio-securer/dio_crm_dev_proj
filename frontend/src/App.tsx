@@ -1,6 +1,5 @@
 import React from 'react';
-import { NavLink, Route, Routes } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import type { MarketFeatureKey } from '@dio-crm/contracts';
 import { LeadsPage } from './LeadsPage';
 import { AccountsPage } from './AccountsPage';
@@ -16,47 +15,32 @@ import { LedgerStatementsPage } from './LedgerStatementsPage';
 import { Account360Page } from './Account360Page';
 import { AnalyticsDashboardPage } from './AnalyticsDashboardPage';
 import { OpsStatusPage } from './OpsStatusPage';
-import { changeLocale } from './i18n';
-import { SUPPORTED_LOCALES, type SupportedLocale } from './i18n/locale-resolver';
 import { useGlobalization } from './market/globalization-context';
+import { AppShell, type ShellNavItem } from './ui/AppShell';
 
-const linkStyle = ({ isActive }: { isActive: boolean }) => ({
-  padding: '10px 14px', textDecoration: 'none', borderRadius: 8,
-  background: isActive ? '#14365d' : '#eef2f6', color: isActive ? '#fff' : '#172033'
-});
-
-type NavItem = readonly [to:string, key:string, end:boolean, feature?:MarketFeatureKey];
+const navigation: Array<ShellNavItem & { feature?: MarketFeatureKey }> = [
+  { to: '/', labelKey: 'nav.lead', icon: 'lead', end: true, mobilePrimary: true },
+  { to: '/accounts', labelKey: 'nav.account', icon: 'account' },
+  { to: '/activities', labelKey: 'nav.activity', icon: 'activity', mobilePrimary: true },
+  { to: '/activity-reports', labelKey: 'nav.activityReport', icon: 'report', feature: 'ACTIVITY_APPROVAL' },
+  { to: '/direct-work', labelKey: 'nav.directWork', icon: 'direct', feature: 'DIRECT_WORK' },
+  { to: '/opportunities', labelKey: 'nav.opportunity', icon: 'opportunity', mobilePrimary: true },
+  { to: '/pipeline', labelKey: 'nav.pipeline', icon: 'pipeline' },
+  { to: '/contracts', labelKey: 'nav.contract', icon: 'contract' },
+  { to: '/orders', labelKey: 'nav.order', icon: 'order', mobilePrimary: true },
+  { to: '/fulfillment', labelKey: 'nav.fulfillment', icon: 'fulfillment' },
+  { to: '/ledger-statements', labelKey: 'nav.ledger', icon: 'ledger' },
+  { to: '/account360', labelKey: 'nav.account360', icon: 'account360' },
+  { to: '/analytics', labelKey: 'nav.analytics', icon: 'analytics', mobilePrimary: true },
+  { to: '/ops', labelKey: 'nav.ops', icon: 'ops' }
+];
 
 export default function App() {
-  const { t, i18n } = useTranslation();
-  const { globalization, featureEnabled } = useGlobalization();
-  const links: NavItem[] = [
-    ['/', 'nav.lead', true], ['/accounts', 'nav.account', false], ['/activities', 'nav.activity', false],
-    ['/activity-reports', 'nav.activityReport', false, 'ACTIVITY_APPROVAL'], ['/direct-work', 'nav.directWork', false, 'DIRECT_WORK'],
-    ['/opportunities', 'nav.opportunity', false], ['/pipeline', 'nav.pipeline', false], ['/contracts', 'nav.contract', false],
-    ['/orders', 'nav.order', false], ['/fulfillment', 'nav.fulfillment', false], ['/ledger-statements', 'nav.ledger', false],
-    ['/account360', 'nav.account360', false], ['/analytics', 'nav.analytics', false], ['/ops', 'nav.ops', false]
-  ];
+  const { featureEnabled } = useGlobalization();
+  const links = navigation.filter(item => !item.feature || featureEnabled(item.feature));
 
   return (
-    <main style={{ fontFamily: 'Malgun Gothic, Segoe UI, sans-serif', maxWidth: 1240, margin: '28px auto', padding: 20 }}>
-      <header style={{ marginBottom: 20 }}>
-        <div style={{ display:'flex', justifyContent:'space-between', gap:16, alignItems:'start', flexWrap:'wrap' }}>
-          <div>
-            <h1 style={{ marginBottom: 4 }}>{t('app.name')}</h1>
-            <p style={{ marginTop: 0, color: '#667085' }}>{t('app.phase')} · {globalization.countryCode} · {globalization.currencyCode} · {globalization.timezone}</p>
-          </div>
-          <label style={{ display:'flex', alignItems:'center', gap:8 }}>{t('app.language')}
-            <select value={i18n.language} onChange={e => void changeLocale(e.target.value as SupportedLocale)}>
-              {SUPPORTED_LOCALES.map(locale => <option key={locale} value={locale}>{t(`locale.${locale}`)}</option>)}
-            </select>
-          </label>
-        </div>
-        <nav style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {links.filter(([, , , feature]) => !feature || featureEnabled(feature)).map(([to, key, end]) =>
-            <NavLink key={to} to={to} end={end} style={linkStyle}>{t(key)}</NavLink>)}
-        </nav>
-      </header>
+    <AppShell links={links}>
       <Routes>
         <Route path="/" element={<LeadsPage />} />
         <Route path="/accounts" element={<AccountsPage />} />
@@ -72,8 +56,8 @@ export default function App() {
         <Route path="/account360" element={<Account360Page />} />
         <Route path="/analytics" element={<AnalyticsDashboardPage />} />
         <Route path="/ops" element={<OpsStatusPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-      <footer style={{ marginTop: 28, color: '#667085', fontSize: 12 }}>{t('footer.globalization')}</footer>
-    </main>
+    </AppShell>
   );
 }

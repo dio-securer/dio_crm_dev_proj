@@ -20,4 +20,5 @@ jobs:
       - run: pnpm test
       - run: pnpm i18n:check
       - run: pnpm i18n:hardcode
+      - run: pnpm pwa:check
       - run: pnpm audit:critical
