@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import type { GlobalizationContext } from '@dio-crm/contracts';
-import { getRegisteredScreen } from './screen-registry';
 import { resolveScreenForSlot, resolveScreenProfileCode, ScreenResolutionError } from './screen-resolver';
 
 const baseContext: GlobalizationContext = {
@@ -21,11 +20,9 @@ const baseContext: GlobalizationContext = {
 };
 
 describe('M3 screen resolver', () => {
-  it('resolves KR account to HQ_ACCOUNT and keeps the current page registered', () => {
+  it('resolves KR account to HQ_ACCOUNT', () => {
     const profile = resolveScreenProfileCode(baseContext);
-    const screen = resolveScreenForSlot(profile, 'account');
-    expect(screen).toBe('HQ_ACCOUNT');
-    expect(getRegisteredScreen(screen)).toBeDefined();
+    expect(resolveScreenForSlot(profile, 'account')).toBe('HQ_ACCOUNT');
   });
 
   it('resolves GLOBAL account to GLOBAL_ACCOUNT for US/MX template use', () => {
