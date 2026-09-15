@@ -1,4 +1,11 @@
-import type { MarketProfile } from '../types';
+import type { CountryProfile, MarketProfile } from '../types';
+
+export const KR_COUNTRY_PROFILE: CountryProfile = {
+  countryCode: 'KR',
+  marketTemplateCode: 'HQ_TEMPLATE',
+  status: 'ACTIVE',
+  marketProfileCode: 'KR_SALES'
+};
 
 export const KR_MARKET_PROFILE: MarketProfile = {
   code: 'KR_SALES',
