@@ -4,7 +4,7 @@
 - Parent: `RM-MKT-001`
 - Branch: `rm-mkt-001-m1-contract`
 - Baseline main: `5ac77bac171ba5ce16d1faf016cc832e9df23e73`
-- Status: `SOURCE_READY / CI_PASS / REVIEW_PENDING`
+- Status: `SOURCE_READY / CI_PASS / HUMAN_REVIEW_APPROVED / READY_TO_MERGE`
 
 ## 1. Objective
 
@@ -137,19 +137,19 @@ Frontend
 - malformed profile/feature rejection
 ```
 
-CI Run `34946066159`에서 다음 검증이 모두 통과했다.
+## 8. CI
+
+Final Head: `19c0a5f000c4993754bf5e5a89a49ab29ee46057`
 
 ```text
-build           PASS
-test            PASS
-i18n:check      PASS
-i18n:hardcode   PASS
-pwa:check       PASS
-env:check       PASS
-audit:critical  PASS
+Run 34946181018
+Job 104306003019
+Result PASS
 ```
 
-## 8. Explicit Non-Scope
+build / test / i18n / hardcode / PWA / env check / critical audit 모두 PASS.
+
+## 9. Explicit Non-Scope
 
 M1에서는 다음 작업을 하지 않는다.
 
@@ -164,13 +164,19 @@ DB Migration 생성/실행
 DEV/UAT/Production 변경
 ```
 
-## 9. Gate
+## 10. Human Review
+
+2026-09-15 KST 사용자 승인 수신.
+
+Result: `APPROVED`
+
+## 11. Gate
 
 ```text
 Shared Contract Extension       COMPLETE
 KR Context Compatibility        COMPLETE
 Runtime Contract Validation     COMPLETE
-Source Build/Test               PASS
-Human Review                    PENDING
-Main Merge                      NOT YET
+Source Build/Test               CI PASS
+Human Review                    APPROVED
+Main Merge                      READY
 ```
