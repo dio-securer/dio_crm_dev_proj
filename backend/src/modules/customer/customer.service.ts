@@ -1,5 +1,6 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import crypto from 'node:crypto';
+import type { AccountWriteInput } from '@dio-crm/contracts';
 import { DatabaseService, DbQuery } from '../../database/database.service';
 import { canTransitionLead, LeadStatus } from './customer.rules';
 
@@ -16,6 +17,12 @@ export type HiraHospitalInput = {
   providerNo?: string;
   openDate?: string;
 };
+
+const ACCOUNT_SELECT = `a.account_id, CONVERT(varchar(36),a.public_id) public_id, a.account_name, a.account_status, a.account_grade,
+  a.business_no, a.business_name, a.ceo_name, a.phone, a.fax, a.homepage, a.address, a.address_line1, a.address_line2,
+  a.hospital_address, a.zip_code, a.tax_email, a.provider_no, a.encrypted_provider_no, CONVERT(varchar(10),a.open_date,23) open_date,
+  a.doctor_license_no, a.account_type, a.erp_customer_code, a.erp_approved_yn, a.integration_status, a.erp_trade_code,
+  a.erp_approval_code, a.use_yn, a.churn_risk_yn, a.account_stat_code, a.owner_user_id, u.user_name owner_name, a.updated_at`;
 
 @Injectable()
 export class CustomerService {
@@ -121,13 +128,70 @@ export class CustomerService {
     });
   }
 
-  async listAccounts(companyId: number, search?: string) {
-    const r = await this.db.query(`SELECT TOP 500 account_id, CONVERT(varchar(36),public_id) public_id, account_name, account_status, business_no,
-      erp_customer_code, erp_approved_yn, integration_status, owner_user_id, updated_at
-      FROM crm_account WHERE company_id=@companyId AND deleted_yn=0
-      AND (@search IS NULL OR account_name LIKE '%' + @search + '%' OR business_no LIKE '%' + @search + '%')
-      ORDER BY account_id DESC`, { companyId, search: search?.trim() || null });
-    return r.recordset;
+  async listAccounts(companyId: number, search?: string, scope = 'managed', ownerUserId?: number) {
+    const r = await this.db.query(`SELECT TOP 500 ${ACCOUNT_SELECT}
+      FROM crm_account a LEFT JOIN crm_user u ON u.user_id=a.owner_user_id
+      WHERE a.company_id=@companyId AND a.deleted_yn=0
+      AND (@scope <> 'mine' OR a.owner_user_id=@ownerUserId)
+      AND (@scope <> 'managed' OR (ISNULL(a.use_yn,'1') <> '0' AND a.account_status <> 'MERGED'))
+      AND (@search IS NULL OR a.account_name LIKE '%' + @search + '%' OR a.business_no LIKE '%' + @search + '%'
+        OR a.phone LIKE '%' + @search + '%' OR a.hospital_address LIKE '%' + @search + '%' OR a.provider_no LIKE '%' + @search + '%')
+      ORDER BY a.account_id DESC`, {
+      companyId,
+      search: search?.trim() || null,
+      scope: scope || 'managed',
+      ownerUserId: ownerUserId ?? null
+    });
+    return r.recordset.map(row => this.mapAccount(row));
+  }
+
+  async getAccount(companyId: number, publicId: string) {
+    const r = await this.db.query(`SELECT TOP 1 ${ACCOUNT_SELECT}
+      FROM crm_account a LEFT JOIN crm_user u ON u.user_id=a.owner_user_id
+      WHERE a.company_id=@companyId AND a.public_id=@publicId AND a.deleted_yn=0`, { companyId, publicId });
+    if (!r.recordset[0]) throw new NotFoundException('Account not found');
+    return this.mapAccount(r.recordset[0]);
+  }
+
+  async createAccount(companyId: number, input: AccountWriteInput, userId: number) {
+    const values = this.accountWriteValues(input);
+    if (values.businessNo) {
+      const dup = await this.duplicateAccounts(companyId, values.businessNo);
+      if (dup.length) throw new ConflictException('Duplicate account exists for business number');
+    }
+    const r = await this.db.query<{ public_id: string }>(`INSERT INTO crm_account(
+        company_id,owner_user_id,account_name,account_status,account_grade,business_name,business_no,ceo_name,phone,fax,homepage,
+        address,address_line1,address_line2,hospital_address,zip_code,tax_email,provider_no,encrypted_provider_no,open_date,
+        doctor_license_no,account_type,use_yn,churn_risk_yn,account_stat_code,created_by,updated_by)
+      OUTPUT CONVERT(varchar(36),inserted.public_id) public_id
+      VALUES(@companyId,@userId,@accountName,@accountStatus,@accountGrade,@businessName,@businessNo,@ceoName,@phone,@fax,@homepage,
+        @address,@addressLine1,@addressLine2,@hospitalAddress,@zipCode,@taxEmail,@providerNo,@encryptedProviderNo,@openDate,
+        @doctorLicenseNo,@accountType,@useYn,@churnRiskYn,@accountStatCode,@userId,@userId)`, {
+      companyId, userId, ...values
+    });
+    return this.getAccount(companyId, r.recordset[0].public_id);
+  }
+
+  async updateAccount(companyId: number, publicId: string, input: Partial<AccountWriteInput>, userId: number, permissions: string[]) {
+    const current = await this.getAccount(companyId, publicId);
+    if (current.account_status === 'MERGED') throw new ConflictException('Merged account cannot be modified');
+    if (current.owner_user_id !== userId && !permissions.includes('ACCOUNT.MERGE')) {
+      throw new ForbiddenException('Only owner or manager can modify account');
+    }
+    const values = this.accountWriteValues(input, current);
+    if (values.businessNo && values.businessNo !== current.business_no) {
+      const dup = await this.duplicateAccounts(companyId, values.businessNo);
+      if (dup.some(x => x.public_id !== publicId)) throw new ConflictException('Duplicate account exists for business number');
+    }
+    await this.db.query(`UPDATE crm_account SET
+        account_name=@accountName, account_status=@accountStatus, account_grade=@accountGrade, business_name=@businessName,
+        business_no=@businessNo, ceo_name=@ceoName, phone=@phone, fax=@fax, homepage=@homepage, address=@address,
+        address_line1=@addressLine1, address_line2=@addressLine2, hospital_address=@hospitalAddress, zip_code=@zipCode,
+        tax_email=@taxEmail, provider_no=@providerNo, encrypted_provider_no=@encryptedProviderNo, open_date=@openDate,
+        doctor_license_no=@doctorLicenseNo, account_type=@accountType, use_yn=@useYn, churn_risk_yn=@churnRiskYn,
+        account_stat_code=@accountStatCode, updated_at=SYSUTCDATETIME(), updated_by=@userId
+      WHERE company_id=@companyId AND public_id=@publicId AND deleted_yn=0`, { companyId, publicId, userId, ...values });
+    return this.getAccount(companyId, publicId);
   }
 
   async duplicateAccounts(companyId: number, businessNo: string) {
@@ -232,5 +296,83 @@ export class CustomerService {
       FROM crm_account WHERE company_id=@companyId AND public_id=@publicId AND deleted_yn=0`, { companyId, publicId });
     if (!r.recordset[0]) throw new NotFoundException('Account not found');
     return r.recordset[0] as { account_id: number; public_id: string; account_name: string; business_no?: string; erp_customer_code?: string };
+  }
+
+  private mapAccount(row: Record<string, any>) {
+    return {
+      public_id: row.public_id,
+      account_name: row.account_name,
+      account_status: row.account_status,
+      account_grade: row.account_grade ?? null,
+      business_no: row.business_no ?? null,
+      business_name: row.business_name ?? null,
+      ceo_name: row.ceo_name ?? null,
+      phone: row.phone ?? null,
+      fax: row.fax ?? null,
+      homepage: row.homepage ?? null,
+      address: row.address ?? row.hospital_address ?? row.address_line1 ?? null,
+      address_line1: row.address_line1 ?? null,
+      address_line2: row.address_line2 ?? null,
+      hospital_address: row.hospital_address ?? row.address ?? null,
+      zip_code: row.zip_code ?? null,
+      tax_email: row.tax_email ?? null,
+      provider_no: row.provider_no ?? null,
+      encrypted_provider_no: row.encrypted_provider_no ?? null,
+      open_date: row.open_date ?? null,
+      doctor_license_no: row.doctor_license_no ?? null,
+      account_type: row.account_type ?? null,
+      erp_customer_code: row.erp_customer_code ?? null,
+      erp_approved_yn: Boolean(row.erp_approved_yn),
+      integration_status: row.integration_status,
+      erp_trade_code: row.erp_trade_code ?? null,
+      erp_approval_code: row.erp_approval_code ?? null,
+      use_yn: row.use_yn ?? '1',
+      churn_risk_yn: Boolean(row.churn_risk_yn),
+      account_stat_code: row.account_stat_code ?? null,
+      owner_user_id: row.owner_user_id ?? null,
+      owner_name: row.owner_name ?? null,
+      updated_at: row.updated_at ?? null
+    };
+  }
+
+  private accountWriteValues(input: Partial<AccountWriteInput>, current?: {
+    account_name: string; account_status: string; account_grade?: string | null; business_name?: string | null; business_no?: string | null;
+    ceo_name?: string | null; phone?: string | null; fax?: string | null; homepage?: string | null; address?: string | null;
+    address_line1?: string | null; address_line2?: string | null; hospital_address?: string | null; zip_code?: string | null;
+    tax_email?: string | null; provider_no?: string | null; encrypted_provider_no?: string | null; open_date?: string | null;
+    doctor_license_no?: string | null; account_type?: string | null; use_yn?: string | null; churn_risk_yn?: boolean | null;
+    account_stat_code?: string | null;
+  }) {
+    const hospitalAddress = this.nullableText(input.hospitalAddress) ?? this.nullableText(input.address) ?? current?.hospital_address ?? current?.address ?? null;
+    return {
+      accountName: input.accountName?.trim() || current?.account_name || '',
+      accountStatus: input.accountStatus ?? current?.account_status ?? 'ACTIVE',
+      accountGrade: this.nullableText(input.accountGrade) ?? current?.account_grade ?? 'GENERAL',
+      businessName: this.nullableText(input.businessName) ?? current?.business_name ?? null,
+      businessNo: input.businessNo === undefined ? current?.business_no ?? null : this.nullableText(input.businessNo),
+      ceoName: this.nullableText(input.ceoName) ?? current?.ceo_name ?? null,
+      phone: this.nullableText(input.phone) ?? current?.phone ?? null,
+      fax: this.nullableText(input.fax) ?? current?.fax ?? null,
+      homepage: this.nullableText(input.homepage) ?? current?.homepage ?? null,
+      address: hospitalAddress,
+      addressLine1: this.nullableText(input.addressLine1) ?? current?.address_line1 ?? null,
+      addressLine2: this.nullableText(input.addressLine2) ?? current?.address_line2 ?? null,
+      hospitalAddress,
+      zipCode: this.nullableText(input.zipCode) ?? current?.zip_code ?? null,
+      taxEmail: this.nullableText(input.taxEmail) ?? current?.tax_email ?? null,
+      providerNo: this.nullableText(input.providerNo) ?? current?.provider_no ?? null,
+      encryptedProviderNo: this.nullableText(input.encryptedProviderNo) ?? current?.encrypted_provider_no ?? null,
+      openDate: this.nullableText(input.openDate) ?? current?.open_date ?? null,
+      doctorLicenseNo: this.nullableText(input.doctorLicenseNo) ?? current?.doctor_license_no ?? null,
+      accountType: this.nullableText(input.accountType) ?? current?.account_type ?? 'BC505600',
+      useYn: this.nullableText(input.useYn) ?? current?.use_yn ?? '1',
+      churnRiskYn: input.churnRiskYn ?? current?.churn_risk_yn ?? false,
+      accountStatCode: this.nullableText(input.accountStatCode) ?? current?.account_stat_code ?? '0'
+    };
+  }
+
+  private nullableText(value?: string | null) {
+    const text = value?.trim();
+    return text ? text : null;
   }
 }

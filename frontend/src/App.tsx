@@ -20,7 +20,7 @@ import { AppShell, type ShellNavItem } from './ui/AppShell';
 
 const navigation: Array<ShellNavItem & { feature?: MarketFeatureKey }> = [
   { to: '/', labelKey: 'nav.lead', icon: 'lead', end: true, mobilePrimary: true },
-  { to: '/accounts', labelKey: 'nav.account', icon: 'account' },
+  { to: '/accounts', labelKey: 'nav.account', icon: 'account', mobilePrimary: true },
   { to: '/activities', labelKey: 'nav.activity', icon: 'activity', mobilePrimary: true },
   { to: '/activity-reports', labelKey: 'nav.activityReport', icon: 'report', feature: 'ACTIVITY_APPROVAL' },
   { to: '/direct-work', labelKey: 'nav.directWork', icon: 'direct', feature: 'DIRECT_WORK' },

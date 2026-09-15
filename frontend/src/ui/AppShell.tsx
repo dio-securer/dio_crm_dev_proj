@@ -76,6 +76,7 @@ export function AppShell({ links, children }: Props) {
 
   const mobilePrimary = links.filter(x => x.mobilePrimary).slice(0, 5);
   const mobileMore = links.filter(x => !mobilePrimary.some(p => p.to === x.to));
+  const accountRoute = location.pathname.startsWith('/accounts');
 
   const navList = (items: ShellNavItem[], mobile = false) => items.map(item => (
     <NavLink key={item.to} to={item.to} end={item.end} className={({isActive}) => `shell-nav-link${isActive ? ' active' : ''}${mobile ? ' mobile' : ''}`} onClick={() => setMobileMenu(false)}>
@@ -85,7 +86,7 @@ export function AppShell({ links, children }: Props) {
   ));
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell${accountRoute ? ' account-route' : ''}`}>
       <aside className="sidebar" aria-label={t('app.primaryNavigation')}>
         <div className="brand-block">
           <div className="brand-mark">D</div>

@@ -1,6 +1,7 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService, DbQuery } from '../../database/database.service';
 import { InterfaceService } from '../../integration/interface.service';
+import { missingErpAccountFields } from '@dio-crm/contracts';
 import { sameMoney, validateChangedPlan, validateContractCreation, validatePlanTotal } from './contract.rules';
 
 export type CollectionPlanInput = {
@@ -21,8 +22,7 @@ export class ContractService {
     if (account.integration_status === 'REQUESTING') throw new ConflictException('ERP Account request already in progress');
     if (account.integration_status === 'SUCCESS' && account.erp_approved_yn) throw new ConflictException('Account is already ERP-approved');
 
-    const required = ['business_name','business_no','ceo_name','provider_no','tax_email'];
-    const missing = required.filter(k => !String(account[k] ?? '').trim());
+    const missing = missingErpAccountFields({ ...account, company_code: 'DIO', erp_approved_yn: Boolean(account.erp_approved_yn) });
     if (missing.length) throw new BadRequestException(`Missing ERP Account fields: ${missing.join(', ')}`);
 
     const payload = {

@@ -17,6 +17,33 @@ const transitionSchema = z.object({
 });
 const assignSchema = z.object({ ownerUserId: z.number().int().positive() });
 const mergeSchema = z.object({ primaryPublicId: z.string().uuid(), duplicatePublicIds: z.array(z.string().uuid()).min(1).max(2) });
+const accountWriteSchema = z.object({
+  accountName: z.string().trim().min(1).max(300),
+  businessNo: z.string().trim().max(20).nullable().optional(),
+  businessName: z.string().trim().max(300).nullable().optional(),
+  ceoName: z.string().trim().max(50).nullable().optional(),
+  phone: z.string().trim().max(50).nullable().optional(),
+  fax: z.string().trim().max(50).nullable().optional(),
+  homepage: z.string().trim().max(100).nullable().optional(),
+  address: z.string().trim().max(500).nullable().optional(),
+  addressLine1: z.string().trim().max(400).nullable().optional(),
+  addressLine2: z.string().trim().max(400).nullable().optional(),
+  hospitalAddress: z.string().trim().max(400).nullable().optional(),
+  zipCode: z.string().trim().max(20).nullable().optional(),
+  taxEmail: z.string().trim().max(100).nullable().optional(),
+  providerNo: z.string().trim().max(50).nullable().optional(),
+  encryptedProviderNo: z.string().trim().max(100).nullable().optional(),
+  openDate: z.string().trim().max(10).nullable().optional(),
+  doctorLicenseNo: z.string().trim().max(500).nullable().optional(),
+  accountType: z.string().trim().max(20).nullable().optional(),
+  accountStatus: z.enum(['ACTIVE', 'NEW', 'NON_TRADING', 'NON_TRADING_OPP', 'CHURN_RISK', 'CHURNED', 'CLOSED']).optional(),
+  accountGrade: z.string().trim().max(30).nullable().optional(),
+  erpTradeCode: z.string().trim().max(10).nullable().optional(),
+  erpApprovalCode: z.string().trim().max(10).nullable().optional(),
+  useYn: z.enum(['0', '1']).nullable().optional(),
+  churnRiskYn: z.boolean().optional(),
+  accountStatCode: z.enum(['0', '1', '2', '3']).nullable().optional()
+});
 const convertSchema = z.object({
   accountMode: z.enum(['NEW','EXISTING']), existingAccountPublicId: z.string().uuid().optional(), opportunityName: z.string().max(200).optional()
 });
@@ -78,8 +105,8 @@ export class AccountController {
 
   @Get()
   @RequirePermission('ACCOUNT.READ')
-  list(@Req() req: AuthenticatedRequest, @Query('search') search?: string) {
-    return this.customer.listAccounts(req.authUser!.companyId, search);
+  list(@Req() req: AuthenticatedRequest, @Query('search') search?: string, @Query('scope') scope?: string) {
+    return this.customer.listAccounts(req.authUser!.companyId, search, scope || 'managed', req.authUser!.sub);
   }
 
   @Get('duplicates/:businessNo')
@@ -93,6 +120,30 @@ export class AccountController {
   merge(@Req() req: AuthenticatedRequest, @Body() body: unknown) {
     const input = mergeSchema.parse(body);
     return this.customer.mergeAccounts(req.authUser!.companyId, input.primaryPublicId, input.duplicatePublicIds, req.authUser!.sub);
+  }
+
+  @Post()
+  @RequirePermission('ACCOUNT.WRITE')
+  create(@Req() req: AuthenticatedRequest, @Body() body: unknown) {
+    return this.customer.createAccount(req.authUser!.companyId, accountWriteSchema.parse(body), req.authUser!.sub);
+  }
+
+  @Get(':publicId')
+  @RequirePermission('ACCOUNT.READ')
+  get(@Req() req: AuthenticatedRequest, @Param('publicId') publicId: string) {
+    return this.customer.getAccount(req.authUser!.companyId, publicId);
+  }
+
+  @Patch(':publicId')
+  @RequirePermission('ACCOUNT.WRITE')
+  update(@Req() req: AuthenticatedRequest, @Param('publicId') publicId: string, @Body() body: unknown) {
+    return this.customer.updateAccount(
+      req.authUser!.companyId,
+      publicId,
+      accountWriteSchema.partial().parse(body),
+      req.authUser!.sub,
+      req.authUser!.permissions
+    );
   }
 }
 

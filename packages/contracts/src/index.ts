@@ -21,7 +21,95 @@ export type PageQuery = { page?: number; pageSize?: number };
 
 export type LeadStatus = 'NEW' | 'FIRST_VISIT' | 'KEYMAN_MEETING' | 'CONTACT_EXCLUDED' | 'CONVERTED';
 export type LeadSummary = { public_id:string; hospital_name:string; status:LeadStatus; owner_user_id?:number|null; owner_name?:string|null; phone?:string|null; address?:string|null; sido?:string|null; sigungu?:string|null; business_no?:string|null; };
-export type AccountSummary = { public_id:string; account_name:string; account_status:string; business_no?:string|null; erp_customer_code?:string|null; erp_approved_yn:boolean; integration_status:string; };
+export type AccountStatus = 'ACTIVE' | 'NEW' | 'NON_TRADING' | 'NON_TRADING_OPP' | 'CHURN_RISK' | 'CHURNED' | 'CLOSED' | 'MERGED';
+export type AccountSummary = {
+  public_id: string;
+  account_name: string;
+  account_status: string;
+  account_grade?: string | null;
+  business_no?: string | null;
+  business_name?: string | null;
+  ceo_name?: string | null;
+  phone?: string | null;
+  fax?: string | null;
+  homepage?: string | null;
+  address?: string | null;
+  address_line1?: string | null;
+  address_line2?: string | null;
+  hospital_address?: string | null;
+  zip_code?: string | null;
+  tax_email?: string | null;
+  provider_no?: string | null;
+  encrypted_provider_no?: string | null;
+  open_date?: string | null;
+  doctor_license_no?: string | null;
+  account_type?: string | null;
+  erp_customer_code?: string | null;
+  erp_approved_yn: boolean;
+  integration_status: string;
+  erp_trade_code?: string | null;
+  erp_approval_code?: string | null;
+  use_yn?: string | null;
+  churn_risk_yn?: boolean | null;
+  account_stat_code?: string | null;
+  owner_user_id?: number | null;
+  owner_name?: string | null;
+  company_code?: string | null;
+  updated_at?: string | null;
+};
+export type AccountWriteInput = {
+  accountName: string;
+  accountStatus?: AccountStatus;
+  accountGrade?: string | null;
+  businessNo?: string | null;
+  businessName?: string | null;
+  ceoName?: string | null;
+  phone?: string | null;
+  fax?: string | null;
+  homepage?: string | null;
+  address?: string | null;
+  addressLine1?: string | null;
+  addressLine2?: string | null;
+  hospitalAddress?: string | null;
+  zipCode?: string | null;
+  taxEmail?: string | null;
+  providerNo?: string | null;
+  encryptedProviderNo?: string | null;
+  openDate?: string | null;
+  doctorLicenseNo?: string | null;
+  accountType?: string | null;
+  erpTradeCode?: string | null;
+  erpApprovalCode?: string | null;
+  useYn?: string | null;
+  churnRiskYn?: boolean | null;
+  accountStatCode?: string | null;
+};
+
+export {
+  ACCOUNT_INTERFACE_FIELDS,
+  ACCOUNT_STAT_CODES,
+  ACCOUNT_TYPE_CODES,
+  DESKTOP_TABLE_FIELDS,
+  ERP_APPROVAL_CODES,
+  ERP_TRADE_CODES,
+  MOBILE_BASIC_FIELDS,
+  MOBILE_LIST_FIELDS,
+  MOBILE_SUMMARY_FIELDS,
+  accountTypeName,
+  fieldValue,
+  filterAccounts,
+  missingErpAccountFields,
+  tradeStatusName
+} from './account-interface';
+export type {
+  AccountInterfaceField,
+  AccountRecord,
+  AccountScope,
+  AccountStatCode,
+  AccountTypeCode,
+  ErpApprovalCode,
+  ErpTradeCode
+} from './account-interface';
 
 export type ActivityStatus = 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED';
 export type ActivityRelatedType = 'LEAD' | 'ACCOUNT' | 'OPPORTUNITY';
