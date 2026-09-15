@@ -1,7 +1,7 @@
 import type { MarketFeatureKey } from '@dio-crm/contracts';
 
 export type FeatureDecision = boolean | 'UNCONFIRMED';
-export type FeatureProfileStatus = 'ACTIVE' | 'BASELINE_ONLY';
+export type FeatureProfileStatus = 'ACTIVE' | 'ACTIVE_CONFIRMED_ONLY' | 'BASELINE_ONLY';
 
 export type FeatureProfileDefinition = {
   code: string;
@@ -23,13 +23,13 @@ export const HQ_FEATURE_PROFILE: FeatureProfileDefinition = {
 };
 
 /**
- * GLOBAL candidate values are limited to what is explicitly supported by the
- * overseas training material. BASELINE_ONLY means it cannot be used as an
- * approved runtime profile until country onboarding confirms all gaps.
+ * M8 enables the documented GLOBAL feature subset for US/MX.
+ * UNCONFIRMED does not become a business-rule false; runtime simply fails closed
+ * and does not expose/authorize the feature until a later country requirement approves it.
  */
 export const GLOBAL_FEATURE_PROFILE: FeatureProfileDefinition = {
   code: 'GLOBAL_FEATURE_PROFILE',
-  status: 'BASELINE_ONLY',
+  status: 'ACTIVE_CONFIRMED_ONLY',
   features: {
     HIRA_IMPORT: 'UNCONFIRMED',
     DIRECT_WORK: false,
@@ -56,11 +56,17 @@ export function featureDecision(profile: FeatureProfileDefinition, feature: Mark
 export function runtimeFeatureMap(code: string): Record<MarketFeatureKey, boolean> {
   const profile = getFeatureProfile(code);
   if (!profile) throw new Error('FEATURE_PROFILE_NOT_REGISTERED');
-  if (profile.status !== 'ACTIVE') throw new Error('FEATURE_PROFILE_NOT_ACTIVE');
+  if (profile.status === 'BASELINE_ONLY') throw new Error('FEATURE_PROFILE_NOT_ACTIVE');
 
   const entries = Object.entries(profile.features) as Array<[MarketFeatureKey, FeatureDecision]>;
   const unresolved = entries.filter(([, decision]) => decision === 'UNCONFIRMED');
-  if (unresolved.length) throw new Error('FEATURE_PROFILE_HAS_UNCONFIRMED_VALUES');
+  if (profile.status === 'ACTIVE' && unresolved.length) {
+    throw new Error('FEATURE_PROFILE_HAS_UNCONFIRMED_VALUES');
+  }
 
   return Object.fromEntries(entries.map(([key, decision]) => [key, decision === true])) as Record<MarketFeatureKey, boolean>;
+}
+
+export function featureProfileAllowsRuntime(profile: FeatureProfileDefinition): boolean {
+  return profile.status === 'ACTIVE' || profile.status === 'ACTIVE_CONFIRMED_ONLY';
 }

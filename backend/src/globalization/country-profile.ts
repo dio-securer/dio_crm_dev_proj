@@ -1,13 +1,13 @@
 import type { MarketTemplateCode } from '@dio-crm/contracts';
 
-export type CountryProfileStatus = 'ACTIVE' | 'BASELINE_ONLY';
+export type CountryProfileStatus = 'ACTIVE' | 'ACTIVE_WITH_GAPS' | 'BASELINE_ONLY';
 
 export type CountryProfileDefinition = {
   countryCode: string;
   marketTemplateCode: MarketTemplateCode;
   status: CountryProfileStatus;
-  /** Existing approved runtime market profile. Undefined means M2 mapping only. */
   marketProfileCode?: string;
+  gaps?: string[];
 };
 
 export const KR_COUNTRY_PROFILE: CountryProfileDefinition = {
@@ -20,13 +20,31 @@ export const KR_COUNTRY_PROFILE: CountryProfileDefinition = {
 export const US_COUNTRY_PROFILE: CountryProfileDefinition = {
   countryCode: 'US',
   marketTemplateCode: 'GLOBAL_TEMPLATE',
-  status: 'BASELINE_ONLY'
+  status: 'ACTIVE_WITH_GAPS',
+  marketProfileCode: 'US_SALES',
+  gaps: [
+    'LOCALE_CURRENCY_TIMEZONE_REQUIRE_COMPANY_CONFIG',
+    'MAP_PROFILE_REQUIRE_COMPANY_CONFIG',
+    'ACTIVITY_REPORT_APPROVER_ORG_UNCONFIRMED',
+    'ERP_PROVIDER_ENDPOINT_UNCONFIRMED',
+    'HIRA_IMPORT_UNCONFIRMED',
+    'MONTHLY_STATEMENT_UNCONFIRMED'
+  ]
 };
 
 export const MX_COUNTRY_PROFILE: CountryProfileDefinition = {
   countryCode: 'MX',
   marketTemplateCode: 'GLOBAL_TEMPLATE',
-  status: 'BASELINE_ONLY'
+  status: 'ACTIVE_WITH_GAPS',
+  marketProfileCode: 'MX_SALES',
+  gaps: [
+    'LOCALE_CURRENCY_TIMEZONE_REQUIRE_COMPANY_CONFIG',
+    'MAP_PROFILE_REQUIRE_COMPANY_CONFIG',
+    'ACTIVITY_REPORT_APPROVER_ORG_UNCONFIRMED',
+    'ERP_PROVIDER_ENDPOINT_UNCONFIRMED',
+    'HIRA_IMPORT_UNCONFIRMED',
+    'MONTHLY_STATEMENT_UNCONFIRMED'
+  ]
 };
 
 const registry = new Map<string, CountryProfileDefinition>([

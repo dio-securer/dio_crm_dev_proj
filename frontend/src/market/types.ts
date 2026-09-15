@@ -35,12 +35,12 @@ export type MarketTemplateDefinition = {
   integrationProfileCode: IntegrationProfileCode;
 };
 
-export type CountryProfileStatus = 'ACTIVE' | 'BASELINE_ONLY';
+export type CountryProfileStatus = 'ACTIVE' | 'ACTIVE_WITH_GAPS' | 'BASELINE_ONLY';
 
 export type CountryProfile = {
   countryCode: string;
   marketTemplateCode: MarketTemplateCode;
   status: CountryProfileStatus;
-  /** Approved runtime market profile; omitted for M2-only country mappings. */
   marketProfileCode?: string;
+  gaps?: string[];
 };
