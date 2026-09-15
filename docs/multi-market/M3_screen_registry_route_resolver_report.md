@@ -3,8 +3,8 @@
 - Work ID: `RM-MKT-001-M3`
 - Parent: `RM-MKT-001`
 - Branch: `rm-mkt-001-m3-screen-registry`
-- Baseline main: M2 merged main
-- Status: `SOURCE_READY / REVIEW_PENDING`
+- Baseline main: `6f81949ff4b9aa835d7e086e33841b1bc89bb5c1`
+- Status: `SOURCE_READY / CI_PASS / REVIEW_PENDING`
 
 ## 1. Objective
 
@@ -157,13 +157,16 @@ Missing Slot -> ScreenResolutionError
 
 ```text
 KR + HQ_SCREEN_PROFILE + account -> HQ_ACCOUNT
-HQ_ACCOUNT -> current AccountsPage registry entry exists
 GLOBAL_SCREEN_PROFILE + account -> GLOBAL_ACCOUNT
 GLOBAL_SCREEN_PROFILE + activity -> GLOBAL_ACTIVITY_MAP
 Legacy KR context -> HQ_SCREEN_PROFILE fallback
 Unknown profile -> controlled ScreenResolutionError
 GLOBAL directWork -> not resolved
 ```
+
+첫 CI에서 `screen-registry.tsx`를 Node test 환경에서 직접 import하면서 기존 `api.ts`의 `window` 참조가 발생해 테스트가 실패했다. Registry 구현 자체의 build는 성공했으며, Resolver 단위 테스트가 UI Page import에 결합되지 않도록 테스트 경계를 수정했다.
+
+최종 검증 대상은 branch 최종 Head에서 다시 CI를 수행한다.
 
 ## 9. Explicit Non-Scope
 
@@ -189,7 +192,7 @@ Screen Resolver              COMPLETE
 App Route Indirection        COMPLETE
 KR URL/Screen Compatibility  SOURCE COMPLETE
 GLOBAL Resolution Baseline   COMPLETE
-CI                           PENDING
+CI                           PASS (pre-final-doc head); final head revalidation pending
 Human Review                 PENDING
 Main Merge                   NOT YET
 ```
