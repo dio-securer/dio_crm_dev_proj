@@ -4,7 +4,7 @@
 - Parent: `RM-MKT-001`
 - Branch: `rm-mkt-001-m10-regression`
 - Baseline main: M9 merged main (`8ab471dcc75b69bd5dd77dc5533acc087ce79be0`)
-- Status: `SOURCE_READY / CI_PENDING / HUMAN_REVIEW_PENDING`
+- Status: `SOURCE_READY / CI_PASS / HUMAN_REVIEW_PENDING`
 
 ## 1. Objective
 
@@ -27,16 +27,7 @@ HQ Regression              COVERED
 GLOBAL Screen Boundary     COVERED
 ```
 
-M10 신규 `frontend/src/app/multi-market-regression.spec.ts`는 다음을 고정한다.
-
-```text
-HQ 14개 Route Slot → HQ Screen 유지
-GLOBAL 승인 7개 Route만 노출
-Route Path 중복 없음
-Screen Slot 중복 없음
-GLOBAL Mobile Primary 5개 이하
-GLOBAL Direct Work / 미확정 Screen 미노출
-```
+신규 `frontend/src/app/multi-market-regression.spec.ts`는 HQ 14개 Route Slot 유지, GLOBAL 승인 7개 Route 범위, Route/Slot 중복 방지, GLOBAL Mobile Primary 5개 제한, Direct Work 및 미확정 GLOBAL Screen 미노출을 고정한다.
 
 ## 3. Source-level Regression Gate
 
@@ -44,17 +35,10 @@ GLOBAL Direct Work / 미확정 Screen 미노출
 
 ```text
 scripts/regression/multi-market-ui-check.mjs
-```
-
-Root Script:
-
-```text
 pnpm regression:multi-market
 ```
 
-CI에 위 명령을 필수 Gate로 추가한다.
-
-검증 대상:
+CI 필수 Gate로 등록했으며 다음을 검증한다.
 
 ```text
 HQ 14 Screen Profile / Registry / Manifest 정합성
@@ -69,23 +53,21 @@ Mobile Bottom Navigation / More Drawer 구조 존재
 
 ## 4. Responsive Matrix
 
-Source 기준 Responsive Matrix:
-
 | Matrix | Source Rule | M10 판정 범위 |
 | --- | --- | --- |
-| Desktop 1440+ | 기본 Desktop Sidebar / Topbar Layout | Source Gate |
-| Laptop | `max-width:1100px` | Source Gate |
-| Tablet | `max-width:920px` 및 coarse pointer | Source Gate |
-| Android Mobile | `max-width:430px`, 44px control baseline | Source Gate |
-| iOS Mobile | `max-width:430px`, Safe Area Insets | Source Gate |
+| Desktop 1440+ | 기본 Desktop Sidebar / Topbar Layout | PASS — Source |
+| Laptop | `max-width:1100px` | PASS — Source |
+| Tablet | `max-width:920px` 및 coarse pointer | PASS — Source |
+| Android Mobile | `max-width:430px`, 44px control baseline | PASS — Source |
+| iOS Mobile | `max-width:430px`, Safe Area Insets | PASS — Source |
 
-`global.css`의 Mobile layout은 Sidebar를 숨기고 Bottom Navigation과 More Drawer를 활성화하며, `env(safe-area-inset-*)`를 사용한다.
+Mobile layout은 Sidebar를 숨기고 Bottom Navigation과 More Drawer를 활성화하며 `env(safe-area-inset-*)`를 사용한다.
 
-주의: 위 판정은 CSS/Component Source 구조 검증이다. 실제 Galaxy/iPhone Viewport Rendering 결과를 검증했다고 주장하지 않는다.
+위 판정은 CSS/Component Source 구조 검증이다. 실제 Galaxy/iPhone Viewport Rendering 결과를 검증했다고 주장하지 않는다.
 
 ## 5. PWA Validation
 
-기존 `pnpm pwa:check`가 다음 Static Baseline을 검증한다.
+`pnpm pwa:check`가 아래 Static Baseline을 검증하며 CI에서 PASS했다.
 
 ```text
 Manifest 필수 Key
@@ -97,35 +79,27 @@ Non-GET Cache Exclusion
 Navigation / Offline Shell Strategy
 ```
 
-기존 Mobile/PWA Pilot Script는 실제 HTTPS DEV/UAT URL이 제공될 때 다음 Runtime 확인을 수행할 수 있다.
+Mobile/PWA Pilot Script는 실제 HTTPS DEV/UAT URL이 제공될 때 App Shell, Manifest, Service Worker, API cache bypass, liveness/readiness를 Runtime 검증할 수 있다. M10에는 해당 배포 URL/Physical Device가 제공되지 않았으므로 Runtime Pilot Gate는 완료 처리하지 않는다.
+
+## 6. CI Result
+
+Functional validation run:
 
 ```text
-App Shell
-Manifest HTTP
-Service Worker HTTP
-API Cache Bypass Marker
-API Liveness
-API Readiness
+Run : 34973417835
+Job : 104395038295
+
+pnpm build                    PASS
+pnpm test                     PASS
+pnpm regression:multi-market  PASS
+pnpm i18n:check               PASS
+pnpm i18n:hardcode            PASS
+pnpm pwa:check                PASS
+pnpm env:check                PASS
+pnpm audit:critical           PASS
 ```
 
-하지만 M10에서는 배포된 DEV/UAT URL과 실제 Physical Device가 제공되지 않았으므로 Runtime Pilot Gate를 완료 처리하지 않는다.
-
-## 6. CI Gate
-
-M10 PR CI 필수 명령:
-
-```text
-pnpm build
-pnpm test
-pnpm regression:multi-market
-pnpm i18n:check
-pnpm i18n:hardcode
-pnpm pwa:check
-pnpm env:check
-pnpm audit:critical
-```
-
-최종 Run/Job/Result는 PR CI 완료 후 기록한다.
+본 보고서 상태 갱신 Commit도 동일 CI 전체 Gate를 다시 통과해야 PR을 승인 대상으로 본다.
 
 ## 7. Environment / Device Status
 
@@ -140,48 +114,29 @@ ERP Test Transaction                  NOT EXECUTED
 Production                            NOT TOUCHED
 ```
 
-이 항목은 Source CI PASS와 구분하여 후속 Environment/Pilot Gate에서 수행한다.
-
 ## 8. Safety
 
-M10에서는 다음을 수행하지 않는다.
-
-```text
-DB Schema 실제 적용
-ERP 운영 연결
-Map Provider 운영 연결
-Production 배포
-국가별 미확정 Rule 추가
-IN/PT/TR 업무 구현
-```
+M10에서는 DB Schema 실제 적용, ERP/Map 운영 연결, Production 배포, 미확정 국가 Rule 추가, IN/PT/TR 업무 구현을 수행하지 않았다.
 
 ## 9. Acceptance
 
-M10 Source Acceptance:
-
 ```text
-[ ] Build PASS
-[ ] Test PASS
-[ ] Multi-Market Regression Gate PASS
-[ ] i18n Check PASS
-[ ] i18n Hardcode Check PASS
-[ ] PWA Static Check PASS
-[ ] Environment Plan Check PASS
-[ ] Critical Audit PASS
-[ ] HQ 14 Screen Regression PASS
-[ ] GLOBAL 7 Screen Boundary PASS
-[ ] Responsive Source Matrix PASS
-[ ] Safe Area / Mobile Navigation PASS
-[ ] Physical Device status explicitly NOT EXECUTED
-[ ] Production NOT TOUCHED
+[x] Build PASS
+[x] Test PASS
+[x] Multi-Market Regression Gate PASS
+[x] i18n Check PASS
+[x] i18n Hardcode Check PASS
+[x] PWA Static Check PASS
+[x] Environment Plan Check PASS
+[x] Critical Audit PASS
+[x] HQ 14 Screen Regression PASS
+[x] GLOBAL 7 Screen Boundary PASS
+[x] Responsive Source Matrix PASS
+[x] Safe Area / Mobile Navigation PASS
+[x] Physical Device status explicitly NOT EXECUTED
+[x] Production NOT TOUCHED
 ```
 
 ## 10. Next
 
-M10 Human Review / Merge 후 다음 단계는:
-
-```text
-M11 — India Fit/Gap 준비
-```
-
-M11에서는 인도 외부 CRM의 실제 화면/Field/Status/Approval/Integration 자료를 확보한 후 `HQ_TEMPLATE / GLOBAL_TEMPLATE / INDIA CURRENT`를 비교한다. 자료 없이 INDIA 전용 업무규칙을 추정 구현하지 않는다.
+M10 Human Review / Merge 후 다음 단계는 `M11 — India Fit/Gap 준비`다. 인도 외부 CRM의 실제 화면/Field/Status/Approval/Integration 자료를 확보한 후 `HQ_TEMPLATE / GLOBAL_TEMPLATE / INDIA CURRENT`를 비교하며, 자료 없이 INDIA 전용 업무규칙을 추정 구현하지 않는다.
