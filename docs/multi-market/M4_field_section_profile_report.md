@@ -4,7 +4,7 @@
 - Parent: `RM-MKT-001`
 - Branch: `rm-mkt-001-m4-field-profile`
 - Baseline main: M3 merged main
-- Status: `SOURCE_READY / REVIEW_PENDING`
+- Status: `SOURCE_READY / CI_PASS / HUMAN_REVIEW_APPROVED / READY_TO_MERGE`
 
 ## 1. Objective
 
@@ -181,7 +181,16 @@ IN/PT/TR Field Profile 생성 없음
 DEV/UAT/Production 변경 없음
 ```
 
-## 11. Gate
+## 11. CI / Human Review
+
+```text
+CI Run       34952427201
+CI Job       104326321211
+CI Result    PASS
+Human Review APPROVED (2026-09-15 KST)
+```
+
+## 12. Gate
 
 ```text
 Field Profile Types           COMPLETE
@@ -190,7 +199,7 @@ GLOBAL Account Profile        COMPLETE
 Profile Resolver              COMPLETE
 HQ Compatibility Adapter      COMPLETE
 Country if/else avoidance     COMPLETE
-CI                            PENDING
-Human Review                  PENDING
-Main Merge                    NOT YET
+CI                            PASS
+Human Review                  APPROVED
+Main Merge                    READY
 ```
