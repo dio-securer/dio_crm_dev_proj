@@ -85,6 +85,17 @@ describe('GlobalizationService', () => {
     expect(context.features.MONTHLY_STATEMENT).toBe(false);
   });
 
+  it('uses the Country Profile marketProfileCode when the legacy company market_profile_code is blank', async () => {
+    const { service } = createService({
+      country_code:'US', default_locale:'configured-locale', default_currency:'CFG', default_timezone:'Configured/Timezone',
+      market_profile_code:'', workflow_profile_code:null, map_profile_code:'CONFIGURED_MAP',
+      preferred_locale:null, timezone_override:null
+    });
+    const context = await service.resolveCompany(2,20);
+    expect(context.marketProfileCode).toBe('US_SALES');
+    expect(context.marketTemplateCode).toBe('GLOBAL_TEMPLATE');
+  });
+
   it('allows a confirmed GLOBAL feature and denies an unresolved GLOBAL feature', async () => {
     const globalRow = {
       country_code:'US', default_locale:'configured-locale', default_currency:'CFG', default_timezone:'Configured/Timezone',
@@ -105,14 +116,14 @@ describe('GlobalizationService', () => {
     await expect(service.resolveCompany(2,20)).rejects.toBeInstanceOf(InternalServerErrorException);
   });
 
-  it('rejects country and market-profile mismatches', async () => {
+  it('rejects configured country/market-profile mismatches instead of silently switching countries', async () => {
     const { service } = createService({ ...base, country_code:'US', market_profile_code:'MX_SALES' });
-    await expect(service.resolveCompany(2,20)).rejects.toThrow('MARKET_PROFILE_COUNTRY_MISMATCH');
+    await expect(service.resolveCompany(2,20)).rejects.toThrow('COUNTRY_MARKET_PROFILE_MISMATCH');
   });
 
-  it('rejects an unknown market profile', async () => {
+  it('rejects a tampered configured market profile for KR', async () => {
     const { service } = createService({ ...base, market_profile_code:'UNAPPROVED_MARKET' });
-    await expect(service.resolveCompany(1,10)).rejects.toBeInstanceOf(InternalServerErrorException);
+    await expect(service.resolveCompany(1,10)).rejects.toThrow('COUNTRY_MARKET_PROFILE_MISMATCH');
   });
 
   it('rejects a missing company context', async () => {
