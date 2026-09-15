@@ -26,7 +26,7 @@ const seedDir = path.resolve('database/seeds');
 const migrations = (await readdir(migrationDir)).filter(x => /^\d{3}_.*\.sql$/i.test(x)).sort();
 const seeds = (await readdir(seedDir)).filter(x => /^\d{3}_.*\.sql$/i.test(x)).sort();
 
-const expected = ['001','002','003','004','005','006','007','008','009'];
+const expected = ['001','002','003','004','005','006','007','008','009','010','011'];
 const migrationPrefixes = migrations.map(x => x.slice(0,3));
 const missing = expected.filter(x => !migrationPrefixes.includes(x));
 if (missing.length) {
