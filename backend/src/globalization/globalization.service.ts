@@ -2,6 +2,7 @@ import { ForbiddenException, Injectable, InternalServerErrorException } from '@n
 import type { GlobalizationContext, MarketFeatureKey, MeContextResponse } from '@dio-crm/contracts';
 import { DatabaseService } from '../database/database.service';
 import type { JwtPayload } from '../security/security';
+import { getCountryProfile } from './country-profile';
 import { featureDecision, featureProfileAllowsRuntime, getFeatureProfile, runtimeFeatureMap } from './feature-profile';
 import { getMarketProfile } from './market-profile';
 
@@ -33,12 +34,21 @@ export class GlobalizationService {
     const row = result.recordset[0];
     if (!row) throw new ForbiddenException('COMPANY_CONTEXT_NOT_FOUND');
 
-    const profile = getMarketProfile(row.market_profile_code);
+    const country = getCountryProfile(row.country_code || '');
+    if (!country || country.status === 'BASELINE_ONLY' || !country.marketProfileCode) {
+      throw new InternalServerErrorException('COUNTRY_PROFILE_NOT_ACTIVE');
+    }
+
+    const configuredMarketProfileCode = row.market_profile_code?.trim();
+    if (configuredMarketProfileCode && configuredMarketProfileCode !== country.marketProfileCode) {
+      throw new InternalServerErrorException('COUNTRY_MARKET_PROFILE_MISMATCH');
+    }
+    const marketProfileCode = country.marketProfileCode;
+    const profile = getMarketProfile(marketProfileCode);
     if (!profile) throw new InternalServerErrorException('INVALID_MARKET_PROFILE');
-    if (row.country_code && row.country_code.toUpperCase() !== profile.countryCode) {
+    if (profile.countryCode !== country.countryCode) {
       throw new InternalServerErrorException('MARKET_PROFILE_COUNTRY_MISMATCH');
     }
-    if (!profile.featureProfileCode) throw new InternalServerErrorException('INVALID_FEATURE_PROFILE');
 
     let features: Record<MarketFeatureKey, boolean>;
     try {
@@ -61,10 +71,10 @@ export class GlobalizationService {
 
     return {
       locale,
-      countryCode: row.country_code || profile.countryCode,
+      countryCode: country.countryCode,
       currencyCode,
       timezone,
-      marketProfileCode: row.market_profile_code,
+      marketProfileCode,
       marketTemplateCode: profile.marketTemplateCode,
       screenProfileCode: profile.screenProfileCode,
       fieldProfileCode: profile.fieldProfileCode,
