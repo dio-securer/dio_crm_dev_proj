@@ -11,6 +11,25 @@ import type {
 
 export type { MarketFeatureKey } from '@dio-crm/contracts';
 
+export type MarketTemplate = {
+  code: MarketTemplateCode;
+  screenProfileCode: ScreenProfileCode;
+  fieldProfileCode: FieldProfileCode;
+  featureProfileCode: FeatureProfileCode;
+  integrationProfileCode: IntegrationProfileCode;
+};
+
+export type CountryProfileStatus = 'ACTIVE' | 'CONFIG_BASELINE';
+
+export type CountryProfile = {
+  countryCode: string;
+  marketProfileCode: string;
+  marketTemplateCode: MarketTemplateCode;
+  workflowProfileCode?: WorkflowProfileCode;
+  mapProfileCode?: MapProfileCode;
+  status: CountryProfileStatus;
+};
+
 export type MarketProfile = {
   code: string;
   countryCode: string;
