@@ -1,21 +1,25 @@
 import type { GlobalizationContext, MarketFeatureKey } from '@dio-crm/contracts';
+import { resolveCountryProfile } from './profile-resolver';
 
 export type MarketProfileDefinition = Omit<GlobalizationContext, 'locale'> & {
   defaultLocale: string;
 };
 
+const krFoundation = resolveCountryProfile('KR');
+if (!krFoundation) throw new Error('KR_COUNTRY_PROFILE_NOT_CONFIGURED');
+
 const KR_PROFILE: MarketProfileDefinition = {
-  countryCode: 'KR',
+  countryCode: krFoundation.countryCode,
   currencyCode: 'KRW',
   timezone: 'Asia/Seoul',
-  marketProfileCode: 'KR_SALES',
-  marketTemplateCode: 'HQ_TEMPLATE',
-  screenProfileCode: 'HQ_SCREEN_PROFILE',
-  fieldProfileCode: 'HQ_FIELD_PROFILE',
-  featureProfileCode: 'HQ_FEATURE_PROFILE',
-  workflowProfileCode: 'KR_SALES_APPROVAL',
-  integrationProfileCode: 'HQ_INTEGRATION_PROFILE',
-  mapProfileCode: 'KR_DEFAULT',
+  marketProfileCode: krFoundation.marketProfileCode,
+  marketTemplateCode: krFoundation.marketTemplateCode,
+  screenProfileCode: krFoundation.screenProfileCode,
+  fieldProfileCode: krFoundation.fieldProfileCode,
+  featureProfileCode: krFoundation.featureProfileCode,
+  workflowProfileCode: krFoundation.workflowProfileCode,
+  integrationProfileCode: krFoundation.integrationProfileCode,
+  mapProfileCode: krFoundation.mapProfileCode,
   defaultLocale: 'ko-KR',
   features: {
     HIRA_IMPORT: true,
