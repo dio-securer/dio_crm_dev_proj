@@ -4,7 +4,7 @@
 - Parent: `RM-MKT-001`
 - Branch: `rm-mkt-001-m9-db-foundation`
 - Baseline main: M8 merged main (`007c70fb8a627c97a7ac5f39d7b748c51a9f1b91`)
-- Status: `SOURCE_READY / CI_PENDING / HUMAN_REVIEW_PENDING`
+- Status: `SOURCE_READY / CI_PASS / HUMAN_REVIEW_PENDING`
 
 ## 1. Objective
 
@@ -195,7 +195,26 @@ WHERE object_id = OBJECT_ID('dbo.crm_company')
   AND name = 'IX_crm_company_multi_market_profile';
 ```
 
-## 10. Acceptance
+## 10. CI Result
+
+PR 첫 Source Head 기준 CI:
+
+```text
+Run  34972075191
+Job  104390531991
+
+build           PASS
+test            PASS
+i18n check      PASS
+hardcode check  PASS
+PWA check       PASS
+env check       PASS
+critical audit  PASS
+```
+
+최종 문서 Commit 이후 CI도 동일 Gate를 다시 통과해야 M9를 Merge한다.
+
+## 11. Acceptance
 
 M9 Source Acceptance:
 
@@ -212,7 +231,7 @@ Actual DB mutation                           NOT PERFORMED
 Production mutation                          NOT PERFORMED
 ```
 
-## 11. Next
+## 12. Next
 
 M9 Human Review / Merge 후 다음 단계는:
 
