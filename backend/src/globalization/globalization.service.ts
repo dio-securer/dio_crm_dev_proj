@@ -2,7 +2,8 @@ import { ForbiddenException, Injectable, InternalServerErrorException } from '@n
 import type { GlobalizationContext, MarketFeatureKey, MeContextResponse } from '@dio-crm/contracts';
 import { DatabaseService } from '../database/database.service';
 import type { JwtPayload } from '../security/security';
-import { getMarketProfile, marketFeatureEnabled } from './market-profile';
+import { featureDecision, getFeatureProfile, runtimeFeatureMap } from './feature-profile';
+import { getMarketProfile } from './market-profile';
 
 type ContextRow = {
   country_code: string;
@@ -34,6 +35,15 @@ export class GlobalizationService {
 
     const profile = getMarketProfile(row.market_profile_code);
     if (!profile) throw new InternalServerErrorException('INVALID_MARKET_PROFILE');
+    if (!profile.featureProfileCode) throw new InternalServerErrorException('INVALID_FEATURE_PROFILE');
+
+    let features: Record<MarketFeatureKey, boolean>;
+    try {
+      features = runtimeFeatureMap(profile.featureProfileCode);
+    } catch {
+      throw new InternalServerErrorException('INVALID_FEATURE_PROFILE');
+    }
+
     return {
       locale: row.preferred_locale || row.default_locale || profile.defaultLocale,
       countryCode: row.country_code || profile.countryCode,
@@ -47,7 +57,7 @@ export class GlobalizationService {
       workflowProfileCode: row.workflow_profile_code || profile.workflowProfileCode,
       integrationProfileCode: profile.integrationProfileCode,
       mapProfileCode: row.map_profile_code || profile.mapProfileCode,
-      features: profile.features
+      features
     };
   }
 
@@ -61,8 +71,9 @@ export class GlobalizationService {
 
   async assertFeature(user: JwtPayload, feature: MarketFeatureKey) {
     const context = await this.resolveCompany(user.companyId, user.sub);
-    const profile = getMarketProfile(context.marketProfileCode);
-    if (!profile || !marketFeatureEnabled(profile, feature)) {
+    const code = context.featureProfileCode;
+    const profile = code ? getFeatureProfile(code) : undefined;
+    if (!profile || profile.status !== 'ACTIVE' || featureDecision(profile, feature) !== true) {
       throw new ForbiddenException('FEATURE_NOT_AVAILABLE_FOR_MARKET');
     }
   }
