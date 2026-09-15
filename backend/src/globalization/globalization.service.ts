@@ -40,7 +40,12 @@ export class GlobalizationService {
       currencyCode: row.default_currency || profile.currencyCode,
       timezone: row.timezone_override || row.default_timezone || profile.timezone,
       marketProfileCode: row.market_profile_code,
+      marketTemplateCode: profile.marketTemplateCode,
+      screenProfileCode: profile.screenProfileCode,
+      fieldProfileCode: profile.fieldProfileCode,
+      featureProfileCode: profile.featureProfileCode,
       workflowProfileCode: row.workflow_profile_code || profile.workflowProfileCode,
+      integrationProfileCode: profile.integrationProfileCode,
       mapProfileCode: row.map_profile_code || profile.mapProfileCode,
       features: profile.features
     };
