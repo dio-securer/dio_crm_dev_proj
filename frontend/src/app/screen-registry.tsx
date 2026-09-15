@@ -16,6 +16,15 @@ import {
   HqAnalyticsPage,
   HqOpsPage
 } from '../market/templates/hq/HqScreens';
+import {
+  GlobalLeadPage,
+  GlobalAccountPage,
+  GlobalActivityPage,
+  GlobalActivityReportPage,
+  GlobalOpportunityPage,
+  GlobalContractPage,
+  GlobalOrderPage
+} from '../market/templates/global/GlobalScreens';
 import type { ScreenKey } from './screen-profile';
 
 const screenRegistry = new Map<ScreenKey, ComponentType>([
@@ -32,7 +41,15 @@ const screenRegistry = new Map<ScreenKey, ComponentType>([
   ['HQ_LEDGER', HqLedgerPage],
   ['HQ_ACCOUNT360', HqAccount360Page],
   ['HQ_ANALYTICS', HqAnalyticsPage],
-  ['HQ_OPS', HqOpsPage]
+  ['HQ_OPS', HqOpsPage],
+
+  ['GLOBAL_LEAD', GlobalLeadPage],
+  ['GLOBAL_ACCOUNT', GlobalAccountPage],
+  ['GLOBAL_ACTIVITY_MAP', GlobalActivityPage],
+  ['GLOBAL_ACTIVITY_REPORT', GlobalActivityReportPage],
+  ['GLOBAL_OPPORTUNITY', GlobalOpportunityPage],
+  ['GLOBAL_CONTRACT', GlobalContractPage],
+  ['GLOBAL_ORDER', GlobalOrderPage]
 ]);
 
 export function ScreenNotRegistered({ screenKey }: { screenKey: ScreenKey }) {
