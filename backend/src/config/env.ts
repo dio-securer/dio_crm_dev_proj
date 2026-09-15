@@ -29,6 +29,14 @@ const schema = z.object({
 
   INTERFACE_CIRCUIT_FAILURES: z.coerce.number().int().min(2).max(100).default(5),
   INTERFACE_CIRCUIT_RESET_MS: z.coerce.number().int().min(1000).max(3600000).default(60000),
+  ERP_ADAPTER_PROVIDER: z.string().optional(),
+  ERP_ADAPTER_ENDPOINT: z.string().url().optional(),
+  MAP_ADAPTER_PROVIDER: z.string().optional(),
+  MAP_ADAPTER_ENDPOINT: z.string().url().optional(),
+  CUSTOMER_MASTER_ADAPTER_PROVIDER: z.string().optional(),
+  CUSTOMER_MASTER_ADAPTER_ENDPOINT: z.string().url().optional(),
+  PRODUCT_ADAPTER_PROVIDER: z.string().optional(),
+  PRODUCT_ADAPTER_ENDPOINT: z.string().url().optional(),
 
   FILE_STORAGE_ROOT: z.string().default('./storage'),
   DIO_CRM_PDF_FONT: z.string().optional()

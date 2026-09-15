@@ -4,6 +4,7 @@ import type { GlobalizationContext, MeContextResponse, MarketFeatureKey } from '
 import { apiGet } from '../api';
 import { changeLocale } from '../i18n';
 import { normalizeLocale } from '../i18n/locale-resolver';
+import { isFeatureVisible } from './feature-visibility';
 import { KR_MARKET_PROFILE } from './profiles/KR';
 
 const fallbackContext: GlobalizationContext = {
@@ -31,7 +32,7 @@ type ContextValue = {
 const GlobalizationContextStore = createContext<ContextValue>({
   globalization: fallbackContext,
   serverResolved: false,
-  featureEnabled: key => fallbackContext.features[key] === true
+  featureEnabled: key => isFeatureVisible(fallbackContext, key)
 });
 
 export function GlobalizationProvider({ children }: { children: React.ReactNode }) {
@@ -53,7 +54,7 @@ export function GlobalizationProvider({ children }: { children: React.ReactNode 
   const value = useMemo<ContextValue>(() => ({
     globalization,
     serverResolved: !!query.data,
-    featureEnabled: key => globalization.features[key] === true
+    featureEnabled: key => isFeatureVisible(globalization, key)
   }), [globalization, query.data]);
 
   return <GlobalizationContextStore.Provider value={value}>{children}</GlobalizationContextStore.Provider>;
