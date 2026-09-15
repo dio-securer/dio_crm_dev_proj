@@ -66,7 +66,7 @@ export function GlobalAccountPage() {
     const key = CRM_FORM_KEY[field.crmField]!;
     const value = form[key];
     if (key === 'accountType') {
-      return <select value={value} onChange={event => setField(key, event.target.value)}>{Object.entries(ACCOUNT_TYPE_CODES).map(([code, name]) => <option key={code} value={code}>{name}</option>)}</select>;
+      return <select value={value} onChange={event => setField(key, event.target.value)}>{Object.keys(ACCOUNT_TYPE_CODES).map(code => <option key={code} value={code}>{code}</option>)}</select>;
     }
     if (key === 'useYn') {
       return <select value={value} onChange={event => setField(key, event.target.value)}><option value="1">Yes</option><option value="0">No</option></select>;
@@ -75,7 +75,7 @@ export function GlobalAccountPage() {
       return <select value={value} onChange={event => setField(key, event.target.value)}><option value="0">No</option><option value="1">Yes</option></select>;
     }
     if (key === 'accountStatCode') {
-      return <select value={value} onChange={event => setField(key, event.target.value)}>{Object.entries(ACCOUNT_STAT_CODES).map(([code, name]) => <option key={code} value={code}>{name}</option>)}</select>;
+      return <select value={value} onChange={event => setField(key, event.target.value)}>{Object.keys(ACCOUNT_STAT_CODES).map(code => <option key={code} value={code}>{code}</option>)}</select>;
     }
     return <input value={value} onChange={event => setField(key, event.target.value)} />;
   }
