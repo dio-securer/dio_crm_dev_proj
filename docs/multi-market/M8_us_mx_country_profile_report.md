@@ -4,7 +4,7 @@
 - Parent: `RM-MKT-001`
 - Branch: `rm-mkt-001-m8-us-mx-country-profile`
 - Baseline main: M7 merged main (`266e9587705a75cac07ab41fbf7f9ea1b425e21b`)
-- Status: `SOURCE_READY / CI_PENDING / HUMAN_REVIEW_PENDING`
+- Status: `SOURCE_READY / CI_PASS / HUMAN_REVIEW_PENDING`
 
 ## 1. Objective
 
@@ -248,7 +248,23 @@ IN/PT/TR Profile 생성
 미확정 업무규칙 추정 구현
 ```
 
-## 10. Next
+## 10. CI
+
+초기 M8 Source Head `d021194a16edfe977f7d30ff8bdf9f11f06464d7`에서 CI Run `34970265083`, Job `104384547793`가 PASS했다.
+
+```text
+pnpm build          PASS
+pnpm test           PASS
+pnpm i18n:check     PASS
+pnpm i18n:hardcode  PASS
+pnpm pwa:check      PASS
+pnpm env:check      PASS
+pnpm audit:critical PASS
+```
+
+본 문서 상태 갱신 Commit에 대해서도 PR 최종 CI를 다시 확인한 후 Human Review Gate로 유지한다.
+
+## 11. Next
 
 M8 Human Review / Merge 후 다음 단계는 M9 DB Foundation이다.
 
