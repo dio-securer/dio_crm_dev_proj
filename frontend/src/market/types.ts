@@ -1,10 +1,15 @@
-export type MarketFeatureKey =
-  | 'HIRA_IMPORT'
-  | 'DIRECT_WORK'
-  | 'GPS_CHECKIN'
-  | 'ACTIVITY_APPROVAL'
-  | 'ERP_ACCOUNT_APPROVAL'
-  | 'MONTHLY_STATEMENT';
+import type {
+  FeatureProfileCode,
+  FieldProfileCode,
+  IntegrationProfileCode,
+  MapProfileCode,
+  MarketFeatureKey,
+  MarketTemplateCode,
+  ScreenProfileCode,
+  WorkflowProfileCode
+} from '@dio-crm/contracts';
+
+export type { MarketFeatureKey } from '@dio-crm/contracts';
 
 export type MarketProfile = {
   code: string;
@@ -12,7 +17,12 @@ export type MarketProfile = {
   defaultLocale: string;
   currencyCode: string;
   timezone: string;
-  workflowProfileCode: string;
-  mapProfileCode: string;
+  marketTemplateCode?: MarketTemplateCode;
+  screenProfileCode?: ScreenProfileCode;
+  fieldProfileCode?: FieldProfileCode;
+  featureProfileCode?: FeatureProfileCode;
+  workflowProfileCode: WorkflowProfileCode;
+  integrationProfileCode?: IntegrationProfileCode;
+  mapProfileCode: MapProfileCode;
   features: Record<MarketFeatureKey, boolean>;
 };
