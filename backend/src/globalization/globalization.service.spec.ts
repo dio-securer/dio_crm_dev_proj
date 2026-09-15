@@ -22,6 +22,18 @@ describe('GlobalizationService', () => {
     expect(db.query).toHaveBeenCalledWith(expect.stringContaining('c.company_id=@companyId'), expect.objectContaining({ companyId:1, userId:10 }));
   });
 
+  it('resolves the M1 profile-code extension from the approved KR market profile', async () => {
+    const { service } = createService(base);
+    const context = await service.resolveCompany(1, 10);
+    expect(context.marketTemplateCode).toBe('HQ_TEMPLATE');
+    expect(context.screenProfileCode).toBe('HQ_SCREEN_PROFILE');
+    expect(context.fieldProfileCode).toBe('HQ_FIELD_PROFILE');
+    expect(context.featureProfileCode).toBe('HQ_FEATURE_PROFILE');
+    expect(context.workflowProfileCode).toBe('KR_SALES_APPROVAL');
+    expect(context.integrationProfileCode).toBe('HQ_INTEGRATION_PROFILE');
+    expect(context.mapProfileCode).toBe('KR_DEFAULT');
+  });
+
   it('falls back to the approved KR profile default locale', async () => {
     const { service } = createService({ ...base, default_locale:'', preferred_locale:null });
     const context = await service.resolveCompany(1, 10);

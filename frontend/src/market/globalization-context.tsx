@@ -12,7 +12,12 @@ const fallbackContext: GlobalizationContext = {
   currencyCode: KR_MARKET_PROFILE.currencyCode,
   timezone: KR_MARKET_PROFILE.timezone,
   marketProfileCode: KR_MARKET_PROFILE.code,
+  marketTemplateCode: KR_MARKET_PROFILE.marketTemplateCode,
+  screenProfileCode: KR_MARKET_PROFILE.screenProfileCode,
+  fieldProfileCode: KR_MARKET_PROFILE.fieldProfileCode,
+  featureProfileCode: KR_MARKET_PROFILE.featureProfileCode,
   workflowProfileCode: KR_MARKET_PROFILE.workflowProfileCode,
+  integrationProfileCode: KR_MARKET_PROFILE.integrationProfileCode,
   mapProfileCode: KR_MARKET_PROFILE.mapProfileCode,
   features: KR_MARKET_PROFILE.features
 };
