@@ -70,6 +70,11 @@ export const HQ_SCREEN_PROFILE: ScreenProfileDefinition = {
   }
 };
 
+/**
+ * M7 GLOBAL baseline is intentionally limited to screens directly supported by
+ * the overseas sales/activity training material. Additional routes stay hidden
+ * until a later country requirement proves they belong in the GLOBAL template.
+ */
 export const GLOBAL_SCREEN_PROFILE: ScreenProfileDefinition = {
   code: 'GLOBAL_SCREEN_PROFILE',
   screens: {
@@ -78,14 +83,8 @@ export const GLOBAL_SCREEN_PROFILE: ScreenProfileDefinition = {
     activity: 'GLOBAL_ACTIVITY_MAP',
     activityReport: 'GLOBAL_ACTIVITY_REPORT',
     opportunity: 'GLOBAL_OPPORTUNITY',
-    pipeline: 'GLOBAL_PIPELINE',
     contract: 'GLOBAL_CONTRACT',
-    order: 'GLOBAL_ORDER',
-    fulfillment: 'GLOBAL_FULFILLMENT',
-    ledger: 'GLOBAL_LEDGER',
-    account360: 'GLOBAL_ACCOUNT360',
-    analytics: 'GLOBAL_ANALYTICS',
-    ops: 'GLOBAL_OPS'
+    order: 'GLOBAL_ORDER'
   }
 };
 
