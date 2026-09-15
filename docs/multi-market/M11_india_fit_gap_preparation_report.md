@@ -4,7 +4,7 @@
 - Parent: `RM-MKT-001`
 - Branch: `rm-mkt-001-m11-india-fitgap-prep`
 - Baseline main: M10 merged main (`bd449bd8e6068b50508fe1626d6d41ab94ae02b3`)
-- Status: `PREPARATION_READY / INDIA_INPUT_PENDING / HUMAN_REVIEW_PENDING`
+- Status: `PREPARATION_READY / CI_PASS / INDIA_INPUT_PENDING / HUMAN_REVIEW_PENDING`
 
 ## 1. Objective
 
@@ -158,7 +158,27 @@ Production                       NOT TOUCHED
 India Business Rule              NOT IMPLEMENTED
 ```
 
-## 7. M11 Acceptance
+## 7. CI Result
+
+M11 Branch는 기존 전체 CI Gate를 통과했다.
+
+```text
+Run                         34974878759
+Job                         104399975903
+Result                      PASS
+pnpm build                  PASS
+pnpm test                   PASS
+pnpm regression:multi-market PASS
+pnpm i18n:check             PASS
+pnpm i18n:hardcode          PASS
+pnpm pwa:check              PASS
+pnpm env:check              PASS
+pnpm audit:critical         PASS
+```
+
+문서 준비 단계라고 하더라도 기존 HQ/GLOBAL Source Baseline이 깨지지 않았는지 동일 CI를 유지한다.
+
+## 8. M11 Acceptance
 
 ```text
 [x] India Input Checklist 준비
@@ -169,6 +189,7 @@ India Business Rule              NOT IMPLEMENTED
 [x] Report/Mobile/Localization/Data Migration 분석 틀 준비
 [x] Open Gap Register 작성
 [x] 미확정 India Rule 구현 금지 명시
+[x] Existing Full CI PASS
 [ ] India 실제 자료 확보
 [ ] India 실제 Fit/Gap 분석
 [ ] India Template Decision
@@ -179,12 +200,13 @@ India Business Rule              NOT IMPLEMENTED
 
 ```text
 M11_PREPARATION_READY
+CI_PASS
 INDIA_INPUT_PENDING
 NO_INDIA_RULE_IMPLEMENTED
 PRODUCTION_NOT_TOUCHED
 ```
 
-## 8. Next Gate
+## 9. Next Gate
 
 Human Review 승인 후 본 문서들을 main에 병합한다.
 
