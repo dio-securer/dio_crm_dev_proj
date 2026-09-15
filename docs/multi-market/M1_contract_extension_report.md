@@ -4,7 +4,7 @@
 - Parent: `RM-MKT-001`
 - Branch: `rm-mkt-001-m1-contract`
 - Baseline main: `5ac77bac171ba5ce16d1faf016cc832e9df23e73`
-- Status: `SOURCE_READY / REVIEW_PENDING`
+- Status: `SOURCE_READY / CI_PASS / REVIEW_PENDING`
 
 ## 1. Objective
 
@@ -137,6 +137,18 @@ Frontend
 - malformed profile/feature rejection
 ```
 
+CI Run `34946066159`에서 다음 검증이 모두 통과했다.
+
+```text
+build           PASS
+test            PASS
+i18n:check      PASS
+i18n:hardcode   PASS
+pwa:check       PASS
+env:check       PASS
+audit:critical  PASS
+```
+
 ## 8. Explicit Non-Scope
 
 M1에서는 다음 작업을 하지 않는다.
@@ -154,13 +166,11 @@ DEV/UAT/Production 변경
 
 ## 9. Gate
 
-M1 완료 조건:
-
 ```text
 Shared Contract Extension       COMPLETE
 KR Context Compatibility        COMPLETE
 Runtime Contract Validation     COMPLETE
-Source Build/Test               PENDING CI
+Source Build/Test               PASS
 Human Review                    PENDING
 Main Merge                      NOT YET
 ```
