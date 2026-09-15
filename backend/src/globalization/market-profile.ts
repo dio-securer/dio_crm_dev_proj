@@ -9,7 +9,12 @@ const KR_PROFILE: MarketProfileDefinition = {
   currencyCode: 'KRW',
   timezone: 'Asia/Seoul',
   marketProfileCode: 'KR_SALES',
+  marketTemplateCode: 'HQ_TEMPLATE',
+  screenProfileCode: 'HQ_SCREEN_PROFILE',
+  fieldProfileCode: 'HQ_FIELD_PROFILE',
+  featureProfileCode: 'HQ_FEATURE_PROFILE',
   workflowProfileCode: 'KR_SALES_APPROVAL',
+  integrationProfileCode: 'HQ_INTEGRATION_PROFILE',
   mapProfileCode: 'KR_DEFAULT',
   defaultLocale: 'ko-KR',
   features: {
