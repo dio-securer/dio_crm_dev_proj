@@ -4,7 +4,7 @@
 - Parent: `RM-MKT-001`
 - Branch: `rm-mkt-001-m7-global-template`
 - Baseline main: M6 merged main
-- Status: `SOURCE_READY / CI_PENDING / HUMAN_REVIEW_PENDING`
+- Status: `SOURCE_READY / CI_PASS / HUMAN_REVIEW_PENDING`
 
 ## 1. Objective
 
@@ -229,16 +229,29 @@ Direct Work 미노출
 HQ Screen Key 혼입 금지
 ```
 
-CI:
+CI Run `34968592992` / Job `104378981437`에서 아래 항목이 PASS했다.
 
 ```text
-pnpm build
-pnpm test
-pnpm i18n:check
-pnpm i18n:hardcode
-pnpm pwa:check
-pnpm env:check
-pnpm audit:critical
+pnpm build            PASS
+pnpm test             PASS
+pnpm i18n:check       PASS
+pnpm i18n:hardcode    PASS
+pnpm pwa:check        PASS
+pnpm env:check        PASS
+pnpm audit:critical   PASS
 ```
 
-최종 상태는 PR CI 완료 후 갱신한다.
+최종 Gate:
+
+```text
+GLOBAL Sales Screen       COMPLETE
+GLOBAL Activity Screen    COMPLETE
+GLOBAL Registry           COMPLETE
+GLOBAL Navigation Scope   COMPLETE
+HQ Compatibility          COMPLETE
+DB Change                 NONE
+US/MX Runtime Activation  NOT YET (M8)
+CI                        PASS
+Human Review              PENDING
+Main Merge                NOT YET
+```
