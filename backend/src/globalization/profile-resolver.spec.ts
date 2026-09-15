@@ -1,8 +1,9 @@
 import { getCountryProfile } from './country-profile';
+import { getMarketProfile } from './market-profile';
 import { getMarketTemplate } from './market-template';
 import { resolveCountryTemplate, resolveMarketTemplateCode } from './profile-resolver';
 
- describe('multi-market template foundation', () => {
+describe('multi-market template foundation', () => {
   it('registers HQ and GLOBAL templates', () => {
     expect(getMarketTemplate('HQ_TEMPLATE')?.screenProfileCode).toBe('HQ_SCREEN_PROFILE');
     expect(getMarketTemplate('GLOBAL_TEMPLATE')?.screenProfileCode).toBe('GLOBAL_SCREEN_PROFILE');
@@ -16,13 +17,24 @@ import { resolveCountryTemplate, resolveMarketTemplateCode } from './profile-res
     expect(resolveMarketTemplateCode('kr')).toBe('HQ_TEMPLATE');
   });
 
-  it('maps US and MX to GLOBAL without inventing runtime market profiles', () => {
-    for (const countryCode of ['US', 'MX']) {
-      const profile = getCountryProfile(countryCode);
-      expect(profile?.marketTemplateCode).toBe('GLOBAL_TEMPLATE');
-      expect(profile?.status).toBe('BASELINE_ONLY');
-      expect(profile?.marketProfileCode).toBeUndefined();
+  it('connects US and MX to GLOBAL runtime market profiles while retaining explicit gaps', () => {
+    const expected = { US: 'US_SALES', MX: 'MX_SALES' } as const;
+    for (const countryCode of ['US', 'MX'] as const) {
+      const country = getCountryProfile(countryCode);
+      expect(country?.marketTemplateCode).toBe('GLOBAL_TEMPLATE');
+      expect(country?.status).toBe('ACTIVE_WITH_GAPS');
+      expect(country?.marketProfileCode).toBe(expected[countryCode]);
+      expect(country?.gaps).toContain('ACTIVITY_REPORT_APPROVER_ORG_UNCONFIRMED');
       expect(resolveCountryTemplate(countryCode)?.template.code).toBe('GLOBAL_TEMPLATE');
+
+      const market = getMarketProfile(expected[countryCode]);
+      expect(market?.countryCode).toBe(countryCode);
+      expect(market?.screenProfileCode).toBe('GLOBAL_SCREEN_PROFILE');
+      expect(market?.fieldProfileCode).toBe('GLOBAL_FIELD_PROFILE');
+      expect(market?.featureProfileCode).toBe('GLOBAL_FEATURE_PROFILE');
+      expect(market?.workflowProfileCode).toBe('GLOBAL_SALES_APPROVAL_BASELINE');
+      expect(market?.integrationProfileCode).toBe('GLOBAL_INTEGRATION_PROFILE');
+      expect(market?.requireCompanyOperationalConfig).toBe(true);
     }
   });
 
