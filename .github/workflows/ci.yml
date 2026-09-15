@@ -18,6 +18,7 @@ jobs:
       - run: pnpm install --no-frozen-lockfile
       - run: pnpm build
       - run: pnpm test
+      - run: pnpm regression:multi-market
       - run: pnpm i18n:check
       - run: pnpm i18n:hardcode
       - run: pnpm pwa:check
