@@ -1,5 +1,6 @@
 import type { AccountSummary } from '@dio-crm/contracts';
 import { listAccountActivities } from './account-relations-mock';
+import { accountCountryOverride } from './account-quick-create';
 
 export type AccountLastActivityFilter = 'ALL' | '7' | '30' | 'NONE';
 
@@ -24,6 +25,9 @@ export const EMPTY_ACCOUNT_LIST_FILTERS: AccountListFilters = {
 };
 
 export function accountCountry(row: AccountSummary): string {
+  const override = accountCountryOverride(row.public_id);
+  if (override) return override;
+
   const source = [
     row.address,
     row.address_line1,
