@@ -21,6 +21,20 @@ type Props<T> = {
   onBodyScroll?: React.UIEventHandler<HTMLDivElement>;
 };
 
+const AUTO_MOBILE_SECONDARY_KEYS = new Set([
+  'account', 'target', 'owner', 'role', 'activity', 'lastActivity', 'type',
+  'country', 'amount', 'status', 'close', 'date', 'nextAction'
+]);
+
+function mobileRoleFor(column: AbDataColumn): NonNullable<AbDataColumn['mobileRole']> {
+  if (column.mobileRole) return column.mobileRole;
+  return AUTO_MOBILE_SECONDARY_KEYS.has(column.key) ? 'secondary' : 'hide';
+}
+
+function mobileLabel(column: AbDataColumn) {
+  return typeof column.label === 'string' ? column.label : column.key;
+}
+
 export function AbDataList<T>({
   columns,
   rows,
@@ -47,6 +61,10 @@ export function AbDataList<T>({
         {rows.map(row => {
           const key = rowKey(row);
           const cells = renderCells(row);
+          const mobileSecondary = columns
+            .map((column, index) => ({ column, index, role: mobileRoleFor(column) }))
+            .filter(item => item.role === 'secondary');
+
           return (
             <button
               type="button"
@@ -55,16 +73,29 @@ export function AbDataList<T>({
               className={`ab-data-row${key === selectedKey ? ' selected' : ''}`}
               onClick={() => onRowClick?.(row)}
             >
-              {columns.map((column, index) => (
-                <span
-                  key={column.key}
-                  role="cell"
-                  data-mobile-role={column.mobileRole ?? 'hide'}
-                  className={`ab-data-cell${column.className ? ` ${column.className}` : ''}`}
-                >
-                  {cells[index] ?? null}
+              {columns.map((column, index) => {
+                const role = mobileRoleFor(column);
+                return (
+                  <span
+                    key={column.key}
+                    role="cell"
+                    data-mobile-role={role}
+                    className={`ab-data-cell${column.className ? ` ${column.className}` : ''}`}
+                  >
+                    {cells[index] ?? null}
+                  </span>
+                );
+              })}
+              {mobileSecondary.length > 0 && (
+                <span className="ab-data-mobile-meta" aria-hidden="true">
+                  {mobileSecondary.map(({ column, index }) => (
+                    <span className="ab-data-mobile-meta-item" key={`mobile-${column.key}`}>
+                      <span className="ab-data-mobile-meta-label">{mobileLabel(column)}</span>
+                      <span className="ab-data-mobile-meta-value">{cells[index] ?? null}</span>
+                    </span>
+                  ))}
                 </span>
-              ))}
+              )}
             </button>
           );
         })}
