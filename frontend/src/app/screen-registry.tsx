@@ -3,6 +3,7 @@ import type { ComponentType } from 'react';
 import {
   HqLeadPage,
   HqAccountPage,
+  HqContactPage,
   HqActivityPage,
   HqActivityReportPage,
   HqDirectWorkPage,
@@ -19,6 +20,7 @@ import {
 import {
   GlobalLeadPage,
   GlobalAccountPage,
+  GlobalContactPage,
   GlobalActivityPage,
   GlobalActivityReportPage,
   GlobalOpportunityPage,
@@ -30,6 +32,7 @@ import type { ScreenKey } from './screen-profile';
 const screenRegistry = new Map<ScreenKey, ComponentType>([
   ['HQ_LEAD', HqLeadPage],
   ['HQ_ACCOUNT', HqAccountPage],
+  ['HQ_CONTACT', HqContactPage],
   ['HQ_ACTIVITY', HqActivityPage],
   ['HQ_ACTIVITY_REPORT', HqActivityReportPage],
   ['HQ_DIRECT_WORK', HqDirectWorkPage],
@@ -45,6 +48,7 @@ const screenRegistry = new Map<ScreenKey, ComponentType>([
 
   ['GLOBAL_LEAD', GlobalLeadPage],
   ['GLOBAL_ACCOUNT', GlobalAccountPage],
+  ['GLOBAL_CONTACT', GlobalContactPage],
   ['GLOBAL_ACTIVITY_MAP', GlobalActivityPage],
   ['GLOBAL_ACTIVITY_REPORT', GlobalActivityReportPage],
   ['GLOBAL_OPPORTUNITY', GlobalOpportunityPage],
