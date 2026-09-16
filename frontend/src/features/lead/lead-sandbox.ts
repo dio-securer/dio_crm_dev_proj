@@ -124,7 +124,7 @@ export function createSandboxLead(input: LeadQuickCreate): SandboxLeadSummary {
     public_id: createPublicId(),
     hospital_name: input.hospitalName.trim(),
     status: 'NEW',
-    owner_name: input.ownerName?.trim() || null,
+    owner_name: input.ownerName?.trim() || input.contactName?.trim() || null,
     contact_name: input.contactName?.trim() || null,
     phone: input.phone.trim(),
     address: input.address?.trim() || null,
