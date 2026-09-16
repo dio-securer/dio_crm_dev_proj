@@ -3,11 +3,14 @@
     "listTitle": "Account list",
     "detailTitle": "Account detail",
     "quickCreateTitle": "Quick create Account",
+    "quickActionsLabel": "Account quick actions",
     "count": "{{count}} records",
     "searchPlaceholder": "Search name, code, owner, country",
     "tabs": {
       "summary": "Summary",
       "contacts": "Contacts",
+      "opportunities": "Opportunities",
+      "activity": "Activity",
       "trade": "Trade status",
       "manage": "Management",
       "address": "Address",
@@ -19,7 +22,11 @@
       "saveDraft": "Save draft",
       "erpRequest": "Request ERP registration",
       "quickAddContact": "Quick add contact",
-      "viewRelated": "View more"
+      "viewRelated": "View more",
+      "call": "Call",
+      "email": "Email",
+      "addActivity": "Add activity",
+      "edit": "Edit"
     },
     "fields": {
       "country": "Country",
@@ -65,12 +72,16 @@
     "empty": {
       "list": "No accounts found.",
       "detail": "Select an account from the list.",
-      "search": "No accounts match the current search or filters.",
+      "search": "No accounts match the search or filters.",
       "contacts": "No contacts registered.",
+      "opportunities": "No opportunities linked.",
+      "activities": "No Account activities registered.",
       "related": "No related data."
     },
     "toast": {
-      "draftSaved": "Draft saved."
+      "draftSaved": "Draft saved.",
+      "contactAdded": "Contact saved.",
+      "activityAdded": "Activity saved."
     },
     "quick": {
       "title": "Quick create Account",
@@ -78,7 +89,31 @@
       "create": "Quick create",
       "required": "Enter required fields."
     },
+    "activityQuick": {
+      "title": "Add Account activity",
+      "help": "Record calls, emails, meetings, visits, or notes directly on the Account.",
+      "type": "Activity type",
+      "occurredAt": "Activity time",
+      "subject": "Subject",
+      "note": "Result / note",
+      "save": "Save activity"
+    },
+    "activityTypes": {
+      "CALL": "Call",
+      "EMAIL": "Email",
+      "MEETING": "Meeting",
+      "VISIT": "Visit",
+      "NOTE": "Note"
+    },
+    "relationSource": {
+      "MANUAL": "Account entry",
+      "LEAD_CONVERSION": "Lead conversion"
+    },
+    "opportunityStage": {
+      "IDENTIFIED": "Identified"
+    },
     "related": {
+      "contacts": "Contacts",
       "opportunities": "Opportunities",
       "contracts": "Contracts",
       "orders": "Orders",
