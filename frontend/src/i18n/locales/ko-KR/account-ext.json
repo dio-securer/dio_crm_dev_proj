@@ -33,6 +33,7 @@
       "accountName": "거래처명",
       "accountCode": "거래처 코드",
       "country": "국가",
+      "type": "유형",
       "grade": "등급",
       "owner": "담당자",
       "status": "상태",
@@ -40,10 +41,31 @@
       "lastActivity": "최근 활동",
       "industry": "업종"
     },
+    "filters": {
+      "managed": "관리 거래처",
+      "mine": "내 거래처",
+      "all": "전체",
+      "allCountry": "전체 국가",
+      "allType": "전체 유형",
+      "allGrade": "전체 등급",
+      "allStatus": "전체 상태",
+      "allErp": "ERP 상태 전체",
+      "allLastActivity": "최근 활동 전체",
+      "last7Days": "최근 7일",
+      "last30Days": "최근 30일",
+      "noActivity": "활동 없음",
+      "reset": "필터 초기화"
+    },
+    "pagination": {
+      "rowsPerPage": "표시 건수",
+      "previous": "이전 페이지",
+      "next": "다음 페이지",
+      "pageStatus": "{{page}} / {{pages}} 페이지 · {{count}}건"
+    },
     "empty": {
       "list": "등록된 거래처가 없습니다.",
       "detail": "목록에서 거래처를 선택하세요.",
-      "search": "검색 결과가 없습니다.",
+      "search": "검색 또는 필터 조건에 맞는 거래처가 없습니다.",
       "contacts": "등록된 연락처가 없습니다.",
       "related": "관련 데이터가 없습니다."
     },
