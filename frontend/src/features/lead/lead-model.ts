@@ -11,7 +11,7 @@ export type LeadStage =
 
 export type LeadInterest = 'HIGH' | 'MEDIUM' | 'LOW';
 export type LeadSource = 'WEB' | 'EXHIBITION' | 'REFERRAL' | 'PHONE' | 'OTHER';
-export type LeadActivityType = 'CALL' | 'EMAIL' | 'MEETING' | 'NOTE';
+export type LeadActivityType = 'CALL' | 'EMAIL' | 'MEETING' | 'VISIT' | 'NOTE';
 
 export type LeadActivity = {
   id: string;
@@ -20,6 +20,21 @@ export type LeadActivity = {
   title: string;
   summary: string;
   ownerName: string;
+};
+
+export type LeadActivityInput = {
+  type: LeadActivityType;
+  occurredAt: string;
+  title: string;
+  summary: string;
+};
+
+export type LeadHospitalScale = {
+  hospitalType: string;
+  doctorCount?: number;
+  chairCount?: number;
+  staffCount?: number;
+  mainSpecialty: string;
 };
 
 export type LeadContact = {
@@ -53,6 +68,7 @@ export type LeadRecord = {
   lastActivityAt?: string;
   nextAction?: string;
   nextActionAt?: string;
+  hospitalScale?: LeadHospitalScale;
   tags: string[];
   noteSummary?: string;
   opportunityCount: number;
