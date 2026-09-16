@@ -10,12 +10,20 @@ import {
 
 const STORAGE_KEY = 'dio-crm:mock:leads:v2';
 
+function hospitalTypeCode(value: string) {
+  if (value === '치과병원') return 'DENTAL_HOSPITAL';
+  if (value === '종합병원') return 'GENERAL_HOSPITAL';
+  if (value === '치과의원') return 'CLINIC';
+  if (['CLINIC', 'DENTAL_HOSPITAL', 'GENERAL_HOSPITAL', 'OTHER'].includes(value)) return value;
+  return 'OTHER';
+}
+
 function defaultHospitalScale(row: LeadRecord, index: number): LeadHospitalScale {
   const seed = Number(row.leadId.replace(/\D/g, '').slice(-3)) || index + 1;
   const specialties = ['임플란트', '보철', '교정', '구강외과', '통합진료'];
   const hospital = row.organizationType.includes('병원');
   return {
-    hospitalType: row.organizationType || '치과의원',
+    hospitalType: hospitalTypeCode(row.organizationType),
     doctorCount: hospital ? 5 + (seed % 6) : 1 + (seed % 4),
     chairCount: hospital ? 12 + (seed % 10) : 4 + (seed % 8),
     staffCount: hospital ? 20 + (seed % 18) : 6 + (seed % 14),
@@ -28,7 +36,9 @@ function normalizeRows(rows: LeadRecord[]): LeadRecord[] {
     ...row,
     country: row.country || 'KR',
     region: row.region || '-',
-    hospitalScale: row.hospitalScale ?? defaultHospitalScale(row, index),
+    hospitalScale: row.hospitalScale
+      ? { ...row.hospitalScale, hospitalType: hospitalTypeCode(row.hospitalScale.hospitalType) }
+      : defaultHospitalScale(row, index),
     activities: [...(row.activities ?? [])].sort((a, b) => b.occurredAt.localeCompare(a.occurredAt))
   }));
 }
@@ -88,7 +98,7 @@ export function createMockLead(rows: LeadRecord[], input: LeadQuickCreateInput):
     ownerUserId: owner.id,
     ownerName: owner.name,
     hospitalScale: {
-      hospitalType: '치과의원',
+      hospitalType: 'CLINIC',
       doctorCount: 1,
       chairCount: 4,
       staffCount: 6,
