@@ -8,6 +8,7 @@ import {
   type AccountMockContact,
   type AccountMockOpportunity
 } from './account-relations-mock';
+import '../../styles/account-relations.css';
 
 type NavigateTarget = 'contacts' | 'opportunities' | 'activity' | 'related';
 
@@ -111,7 +112,6 @@ export function AccountActivitiesPanel({ accountId, tick = 0, onAddActivity }: B
 }
 
 export function AccountRelatedPanel({ accountId, tick = 0, onAddActivity }: BaseProps & { onAddActivity: () => void }) {
-  const { t } = useTranslation();
   return <div className="ab-overview-grid">
     <AccountOpportunitiesPanel accountId={accountId} tick={tick} />
     <AccountActivitiesPanel accountId={accountId} tick={tick} onAddActivity={onAddActivity} />
