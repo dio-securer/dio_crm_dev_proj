@@ -7,6 +7,7 @@ import './styles/tokens.css';
 import './styles/global.css';
 import './styles/workspace.css';
 import './styles/demo.css';
+import './styles/lead-account-demo.css';
 import App from './App';
 import { GlobalizationProvider } from './market/globalization-context';
 import { registerPwa } from './pwa/register';
