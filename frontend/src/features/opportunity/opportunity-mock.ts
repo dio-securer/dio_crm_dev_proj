@@ -31,7 +31,8 @@ export type OpportunityCreateInput = {
   ownerName?: string;
 };
 
-type OpportunityOverride = Partial<Pick<OpportunityMockRecord, 'stage' | 'expectedAmount' | 'probability' | 'expectedCloseDate' | 'ownerName'>> & { id: string; updatedAt: string };
+type OpportunityPatch = Partial<Pick<OpportunityMockRecord, 'stage' | 'expectedAmount' | 'probability' | 'expectedCloseDate' | 'ownerName'>>;
+type OpportunityOverride = OpportunityPatch & { id: string; updatedAt: string };
 
 let manualMemory: OpportunityMockRecord[] = [];
 let overrideMemory: OpportunityOverride[] = [];
@@ -138,22 +139,24 @@ export function addMockOpportunity(input: OpportunityCreateInput): OpportunityMo
   return row;
 }
 
-export function updateMockOpportunity(id: string, patch: Partial<Pick<OpportunityMockRecord, 'stage' | 'expectedAmount' | 'probability' | 'expectedCloseDate' | 'ownerName'>>): OpportunityMockRecord {
+export function updateMockOpportunity(id: string, patch: OpportunityPatch): OpportunityMockRecord {
   const current = listMockOpportunities().find(row => row.id === id);
   if (!current) throw new Error('OPPORTUNITY_NOT_FOUND');
   const now = new Date().toISOString();
-  const normalized = {
-    ...patch,
-    expectedAmount: patch.expectedAmount == null ? undefined : Math.max(0, Number(patch.expectedAmount)),
-    probability: patch.probability == null ? undefined : Math.max(0, Math.min(100, Number(patch.probability)))
-  };
+  const changes: OpportunityPatch = {};
+  if (patch.stage !== undefined) changes.stage = patch.stage;
+  if (patch.expectedAmount !== undefined) changes.expectedAmount = Math.max(0, Number(patch.expectedAmount));
+  if (patch.probability !== undefined) changes.probability = Math.max(0, Math.min(100, Number(patch.probability)));
+  if (patch.expectedCloseDate !== undefined) changes.expectedCloseDate = patch.expectedCloseDate;
+  if (patch.ownerName !== undefined) changes.ownerName = patch.ownerName;
+
   if (current.source === 'MANUAL') {
     const rows = readManual();
-    const next = rows.map(row => row.id === id ? { ...row, ...normalized, updatedAt: now } : row);
+    const next: OpportunityMockRecord[] = rows.map(row => row.id === id ? { ...row, ...changes, updatedAt: now } : row);
     writeManual(next);
   }
   const previous = readOverrides().find(row => row.id === id);
-  writeOverrides([{ ...previous, ...normalized, id, updatedAt: now }, ...readOverrides().filter(row => row.id !== id)]);
+  writeOverrides([{ ...previous, ...changes, id, updatedAt: now }, ...readOverrides().filter(row => row.id !== id)]);
   const updated = listMockOpportunities().find(row => row.id === id);
   if (!updated) throw new Error('OPPORTUNITY_NOT_FOUND');
   return updated;
