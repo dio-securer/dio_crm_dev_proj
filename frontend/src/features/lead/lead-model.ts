@@ -1,0 +1,91 @@
+export type LeadStage =
+  | 'NEW'
+  | 'CONTACTED'
+  | 'CONSULTING'
+  | 'PROPOSAL'
+  | 'REVIEW'
+  | 'NEGOTIATION'
+  | 'ON_HOLD'
+  | 'CONVERTED'
+  | 'DISQUALIFIED';
+
+export type LeadInterest = 'HIGH' | 'MEDIUM' | 'LOW';
+export type LeadSource = 'WEB' | 'EXHIBITION' | 'REFERRAL' | 'PHONE' | 'OTHER';
+export type LeadActivityType = 'CALL' | 'EMAIL' | 'MEETING' | 'NOTE';
+
+export type LeadActivity = {
+  id: string;
+  type: LeadActivityType;
+  occurredAt: string;
+  title: string;
+  summary: string;
+  ownerName: string;
+};
+
+export type LeadContact = {
+  id: string;
+  name: string;
+  role: string;
+  phone?: string;
+  email?: string;
+  primary?: boolean;
+};
+
+export type LeadRecord = {
+  leadId: string;
+  leadNo: string;
+  leadName: string;
+  organizationName: string;
+  organizationType: string;
+  jobTitle?: string;
+  phone?: string;
+  email?: string;
+  region: string;
+  address?: string;
+  stage: LeadStage;
+  interestLevel: LeadInterest;
+  source: LeadSource;
+  ownerUserId: string;
+  ownerName: string;
+  expectedAmount?: number;
+  expectedDate?: string;
+  lastActivityAt?: string;
+  nextAction?: string;
+  nextActionAt?: string;
+  tags: string[];
+  noteSummary?: string;
+  opportunityCount: number;
+  contacts: LeadContact[];
+  activities: LeadActivity[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type LeadQuickCreateInput = {
+  leadName: string;
+  organizationName: string;
+  phone?: string;
+  source: LeadSource;
+  ownerUserId: string;
+};
+
+export const LEAD_STAGES: LeadStage[] = [
+  'NEW',
+  'CONTACTED',
+  'CONSULTING',
+  'PROPOSAL',
+  'REVIEW',
+  'NEGOTIATION',
+  'ON_HOLD',
+  'CONVERTED',
+  'DISQUALIFIED'
+];
+
+export const LEAD_INTERESTS: LeadInterest[] = ['HIGH', 'MEDIUM', 'LOW'];
+export const LEAD_SOURCES: LeadSource[] = ['WEB', 'EXHIBITION', 'REFERRAL', 'PHONE', 'OTHER'];
+
+export const MOCK_LEAD_OWNERS = [
+  { id: 'USER001', name: '김지훈' },
+  { id: 'USER002', name: '이서연' },
+  { id: 'USER003', name: '박준호' }
+] as const;
