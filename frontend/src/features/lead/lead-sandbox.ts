@@ -1,6 +1,6 @@
 import type { LeadSummary } from '@dio-crm/contracts';
 import { createPublicId } from '../../account-sandbox';
-import type { LeadActivity, LeadActivityInput, LeadHospitalScale } from './lead-model';
+import type { LeadActivity, LeadActivityInput, LeadConversionResult, LeadHospitalScale } from './lead-model';
 
 const STORAGE_KEY = 'dio-crm:sandbox:global-leads';
 const SUPPLEMENT_KEY = 'dio-crm:sandbox:global-lead-supplements';
@@ -13,6 +13,7 @@ export type SandboxLeadSummary = LeadSummary & {
   next_action_at?: string | null;
   lead_source?: string | null;
   created_at?: string | null;
+  contact_name?: string | null;
 };
 
 export type LeadQuickCreate = {
@@ -29,6 +30,7 @@ export type LeadSupplement = {
   hospitalScale: LeadHospitalScale;
   activities: LeadActivity[];
   lastActivityAt?: string | null;
+  conversion?: LeadConversionResult | null;
 };
 
 function readAll(): SandboxLeadSummary[] {
@@ -111,7 +113,7 @@ export function listSandboxLeads(search = ''): SandboxLeadSummary[] {
   const keyword = search.trim().toLocaleLowerCase();
   return readAll().filter(row => {
     if (!keyword) return true;
-    return [row.public_id, row.hospital_name, row.phone ?? '', row.owner_name ?? '', row.business_no ?? '']
+    return [row.public_id, row.hospital_name, row.contact_name ?? '', row.phone ?? '', row.owner_name ?? '', row.business_no ?? '']
       .some(value => value.toLocaleLowerCase().includes(keyword));
   });
 }
@@ -122,7 +124,8 @@ export function createSandboxLead(input: LeadQuickCreate): SandboxLeadSummary {
     public_id: createPublicId(),
     hospital_name: input.hospitalName.trim(),
     status: 'NEW',
-    owner_name: input.ownerName?.trim() || input.contactName?.trim() || null,
+    owner_name: input.ownerName?.trim() || null,
+    contact_name: input.contactName?.trim() || null,
     phone: input.phone.trim(),
     address: input.address?.trim() || null,
     sido: input.country.trim() || null,
@@ -136,7 +139,7 @@ export function createSandboxLead(input: LeadQuickCreate): SandboxLeadSummary {
   };
   writeAll([created, ...readAll()]);
   const supplements = readSupplements();
-  supplements[created.public_id] = { hospitalScale: defaultScale(created.public_id), activities: [], lastActivityAt: null };
+  supplements[created.public_id] = { hospitalScale: defaultScale(created.public_id), activities: [], lastActivityAt: null, conversion: null };
   writeSupplements({ ...supplements });
   return created;
 }
@@ -148,10 +151,11 @@ export function getLeadSupplement(publicId: string): LeadSupplement {
     return {
       hospitalScale: current.hospitalScale ?? defaultScale(publicId),
       activities: [...(current.activities ?? [])].sort((a, b) => b.occurredAt.localeCompare(a.occurredAt)),
-      lastActivityAt: current.lastActivityAt ?? null
+      lastActivityAt: current.lastActivityAt ?? null,
+      conversion: current.conversion ?? null
     };
   }
-  return { hospitalScale: defaultScale(publicId), activities: [], lastActivityAt: null };
+  return { hospitalScale: defaultScale(publicId), activities: [], lastActivityAt: null, conversion: null };
 }
 
 export function saveLeadHospitalScaleSupplement(publicId: string, hospitalScale: LeadHospitalScale): LeadSupplement {
@@ -187,10 +191,31 @@ export function addLeadActivitySupplement(publicId: string, ownerName: string, i
   return next;
 }
 
+export function saveLeadConversionSupplement(publicId: string, conversion: LeadConversionResult): LeadSupplement {
+  const supplements = readSupplements();
+  const current = getLeadSupplement(publicId);
+  const next: LeadSupplement = { ...current, conversion };
+  writeSupplements({ ...supplements, [publicId]: next });
+
+  const leads = readAll();
+  if (leads.some(row => row.public_id === publicId)) {
+    writeAll(leads.map(row => row.public_id === publicId ? {
+      ...row,
+      status: 'CONVERTED',
+      next_action: null,
+      next_action_at: null
+    } : row));
+  }
+  return next;
+}
+
 export function applyLeadSupplement(row: SandboxLeadSummary): SandboxLeadSummary {
   const supplement = getLeadSupplement(row.public_id);
   return {
     ...row,
-    last_activity_at: supplement.lastActivityAt || row.last_activity_at || null
+    status: supplement.conversion ? 'CONVERTED' : row.status,
+    last_activity_at: supplement.lastActivityAt || row.last_activity_at || null,
+    next_action: supplement.conversion ? null : row.next_action,
+    next_action_at: supplement.conversion ? null : row.next_action_at
   };
 }
