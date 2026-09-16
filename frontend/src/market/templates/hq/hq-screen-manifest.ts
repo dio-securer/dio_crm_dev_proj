@@ -3,6 +3,7 @@ import type { ScreenKey } from '../../../app/screen-profile';
 export const HQ_SCREEN_KEYS = [
   'HQ_LEAD',
   'HQ_ACCOUNT',
+  'HQ_CONTACT',
   'HQ_ACTIVITY',
   'HQ_ACTIVITY_REPORT',
   'HQ_DIRECT_WORK',
