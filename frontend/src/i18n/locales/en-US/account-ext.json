@@ -33,6 +33,7 @@
       "accountName": "Account",
       "accountCode": "Account code",
       "country": "Country",
+      "type": "Type",
       "grade": "Grade",
       "owner": "Owner",
       "status": "Status",
@@ -40,10 +41,31 @@
       "lastActivity": "Last activity",
       "industry": "Industry"
     },
+    "filters": {
+      "managed": "Managed",
+      "mine": "Mine",
+      "all": "All",
+      "allCountry": "All countries",
+      "allType": "All types",
+      "allGrade": "All grades",
+      "allStatus": "All statuses",
+      "allErp": "All ERP statuses",
+      "allLastActivity": "All activity dates",
+      "last7Days": "Last 7 days",
+      "last30Days": "Last 30 days",
+      "noActivity": "No activity",
+      "reset": "Reset filters"
+    },
+    "pagination": {
+      "rowsPerPage": "Rows",
+      "previous": "Previous page",
+      "next": "Next page",
+      "pageStatus": "Page {{page}} / {{pages}} · {{count}} records"
+    },
     "empty": {
       "list": "No accounts found.",
       "detail": "Select an account from the list.",
-      "search": "No search results.",
+      "search": "No accounts match the current search or filters.",
       "contacts": "No contacts registered.",
       "related": "No related data."
     },
