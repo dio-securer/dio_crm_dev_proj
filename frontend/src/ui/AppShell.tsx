@@ -75,6 +75,7 @@ export function AppShell({ links, children }: Props) {
     return links.filter(x => x.to !== '/' && location.pathname.startsWith(x.to)).sort((a,b) => b.to.length - a.to.length)[0] ?? links[0];
   }, [links, location.pathname]);
 
+  const configuredMobilePrimary = links.filter(x => x.mobilePrimary).slice(0, 5);
   const mobilePrimary = useMemo(() => {
     const dashboard = links.find(x => x.icon === 'analytics');
     const ordered: Array<ShellNavItem | null> = [
@@ -84,7 +85,8 @@ export function AppShell({ links, children }: Props) {
       links.find(x => x.icon === 'activity') ?? null
     ];
     const resolved = ordered.filter((item): item is ShellNavItem => item !== null);
-    return resolved.filter((item, index) => resolved.findIndex(candidate => candidate.to === item.to) === index);
+    const unique = resolved.filter((item, index) => resolved.findIndex(candidate => candidate.to === item.to) === index);
+    return unique.length ? unique : configuredMobilePrimary;
   }, [links]);
   const mobileMore = links.filter(x => !mobilePrimary.some(p => p.to === x.to));
   const accountRoute = location.pathname.startsWith('/accounts');
