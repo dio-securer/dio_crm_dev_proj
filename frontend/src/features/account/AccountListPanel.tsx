@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { AccountSummary } from '@dio-crm/contracts';
 import { accountTypeName } from '@dio-crm/contracts';
@@ -20,6 +20,7 @@ import {
   type AccountLastActivityFilter,
   type AccountListFilters
 } from './account-list-model';
+import { loadAccountListState, saveAccountListState } from './account-view-state';
 import '../../styles/account-list-workspace.css';
 
 type Props = {
@@ -30,6 +31,7 @@ type Props = {
   onScopeChange: (scope: AccountScope) => void;
   onSelect: (row: AccountSummary) => void;
   detail: React.ReactNode;
+  stateStorageKey?: string;
 };
 
 function formatDate(value: string | undefined, locale: string) {
@@ -48,16 +50,19 @@ function statusTone(status: string) {
 
 function erpTone(status: string) {
   if (status === 'SUCCESS') return 'success';
-  if (status === 'REQUESTING') return 'warning';
+  if (status === 'REQUESTING' || status === 'REVIEWING') return 'warning';
   if (status === 'FAILED') return 'danger';
   return 'neutral';
 }
 
-export function AccountListPanel({ rows, loading = false, selectedId, scope, onScopeChange, onSelect, detail }: Props) {
+export function AccountListPanel({ rows, loading = false, selectedId, scope, onScopeChange, onSelect, detail, stateStorageKey }: Props) {
   const { t, i18n } = useTranslation();
-  const [filters, setFilters] = useState<AccountListFilters>(EMPTY_ACCOUNT_LIST_FILTERS);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const initialState = React.useMemo(() => loadAccountListState(stateStorageKey), [stateStorageKey]);
+  const [filters, setFilters] = useState<AccountListFilters>(() => ({ ...initialState.filters }));
+  const [page, setPage] = useState(initialState.page);
+  const [pageSize, setPageSize] = useState(initialState.pageSize);
+  const scrollTopRef = useRef(initialState.scrollTop);
+  const bodyRef = useRef<HTMLDivElement | null>(null);
 
   const countries = useMemo(() => [...new Set(rows.map(accountCountry))].sort(), [rows]);
   const types = useMemo(() => [...new Set(rows.map(row => row.account_type).filter((value): value is string => Boolean(value)))].sort(), [rows]);
@@ -70,17 +75,42 @@ export function AccountListPanel({ rows, loading = false, selectedId, scope, onS
   const currentPage = Math.min(page, totalPages);
   const pagedRows = filteredRows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
-  React.useEffect(() => { setPage(1); }, [scope]);
-  React.useEffect(() => { if (page !== currentPage) setPage(currentPage); }, [page, currentPage]);
+  const persist = React.useCallback((next?: Partial<{ filters: AccountListFilters; page: number; pageSize: number; scrollTop: number }>) => {
+    saveAccountListState(stateStorageKey, {
+      filters: next?.filters ?? filters,
+      page: next?.page ?? page,
+      pageSize: next?.pageSize ?? pageSize,
+      scrollTop: next?.scrollTop ?? scrollTopRef.current
+    });
+  }, [filters, page, pageSize, stateStorageKey]);
+
+  React.useEffect(() => {
+    persist();
+  }, [filters, page, pageSize, persist]);
+
+  React.useEffect(() => {
+    if (!bodyRef.current) return;
+    bodyRef.current.scrollTop = scrollTopRef.current;
+  }, [scope, currentPage]);
+
+  React.useEffect(() => {
+    if (page !== currentPage) setPage(currentPage);
+  }, [page, currentPage]);
 
   const setFilter = <K extends keyof AccountListFilters>(key: K, value: AccountListFilters[K]) => {
-    setFilters(previous => ({ ...previous, [key]: value }));
+    const next = { ...filters, [key]: value };
+    setFilters(next);
     setPage(1);
+    scrollTopRef.current = 0;
+    persist({ filters: next, page: 1, scrollTop: 0 });
   };
 
   const resetFilters = () => {
-    setFilters(EMPTY_ACCOUNT_LIST_FILTERS);
+    const next = { ...EMPTY_ACCOUNT_LIST_FILTERS };
+    setFilters(next);
     setPage(1);
+    scrollTopRef.current = 0;
+    persist({ filters: next, page: 1, scrollTop: 0 });
   };
 
   const columns: AbDataColumn[] = [
@@ -104,6 +134,11 @@ export function AccountListPanel({ rows, loading = false, selectedId, scope, onS
         selectedKey={selectedId ?? undefined}
         onRowClick={onSelect}
         ariaLabel={t('account.listTitle')}
+        bodyRef={bodyRef}
+        onBodyScroll={event => {
+          scrollTopRef.current = event.currentTarget.scrollTop;
+          persist({ scrollTop: scrollTopRef.current });
+        }}
         empty={<AbEmptyState title={filters.search ? t('account.empty.search') : t('account.empty.list')} />}
         renderCells={row => {
           const country = accountCountry(row);
@@ -125,8 +160,8 @@ export function AccountListPanel({ rows, loading = false, selectedId, scope, onS
       page={currentPage}
       pageSize={pageSize}
       totalItems={filteredRows.length}
-      onPageChange={setPage}
-      onPageSizeChange={size => { setPageSize(size); setPage(1); }}
+      onPageChange={value => { setPage(value); scrollTopRef.current = 0; persist({ page: value, scrollTop: 0 }); }}
+      onPageSizeChange={size => { setPageSize(size); setPage(1); scrollTopRef.current = 0; persist({ pageSize: size, page: 1, scrollTop: 0 }); }}
       rowsPerPageLabel={t('account.pagination.rowsPerPage')}
       previousLabel={t('account.pagination.previous')}
       nextLabel={t('account.pagination.next')}
