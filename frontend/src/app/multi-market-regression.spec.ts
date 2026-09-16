@@ -5,6 +5,7 @@ import { GLOBAL_SCREEN_PROFILE, HQ_SCREEN_PROFILE } from './screen-profile';
 const hqSlots = [
   'lead',
   'account',
+  'contact',
   'activity',
   'activityReport',
   'directWork',
@@ -22,6 +23,7 @@ const hqSlots = [
 const globalPaths = [
   '/',
   '/accounts',
+  '/contacts',
   '/activities',
   '/activity-reports',
   '/opportunities',
@@ -37,7 +39,7 @@ describe('M10 multi-market route regression', () => {
     }
   });
 
-  it('keeps the approved GLOBAL navigation scope limited to seven routes', () => {
+  it('keeps the approved GLOBAL A+B navigation scope limited to eight routes', () => {
     const visible = APP_ROUTES
       .filter(route => Boolean(GLOBAL_SCREEN_PROFILE.screens[route.slot]))
       .map(route => route.path);
@@ -59,16 +61,14 @@ describe('M10 multi-market route regression', () => {
     expect(new Set(slots).size).toBe(slots.length);
   });
 
-  it('keeps the GLOBAL mobile primary set within the five-item bottom navigation capacity', () => {
+  it('keeps GLOBAL mobile primary operational routes within the five-item bottom navigation capacity', () => {
     const mobilePrimary = APP_ROUTES.filter(
       route => route.mobilePrimary && Boolean(GLOBAL_SCREEN_PROFILE.screens[route.slot])
     );
     expect(mobilePrimary.map(route => route.path)).toEqual([
       '/',
       '/accounts',
-      '/activities',
-      '/opportunities',
-      '/orders'
+      '/activities'
     ]);
     expect(mobilePrimary.length).toBeLessThanOrEqual(5);
   });
