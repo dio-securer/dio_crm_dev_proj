@@ -31,6 +31,25 @@
   --sidebar-width:248px;
   --topbar-height:76px;
   --mobile-nav-height:68px;
+
+  /* Visual QA typography scale */
+  --font-page-title:26px;
+  --font-entity-title:24px;
+  --font-section-title:16px;
+  --font-tab:14px;
+  --font-body:14px;
+  --font-body-sm:13px;
+  --font-label:12px;
+  --font-caption:11px;
+  --font-button:13.5px;
+  --font-table-header:12.5px;
+  --font-table-body:13px;
+
+  /* Visual QA icon scale */
+  --icon-sm:16px;
+  --icon-md:18px;
+  --icon-lg:20px;
+
   font-family:"Malgun Gothic","Apple SD Gothic Neo","Segoe UI",system-ui,-apple-system,sans-serif;
   color:var(--text);
   background:var(--surface-soft);
