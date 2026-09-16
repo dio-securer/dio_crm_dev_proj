@@ -1,0 +1,46 @@
+/* Visual QA micro fixes — mobile More, empty meta, step label, detail location */
+
+/* Detail subtitle: avoid flag glyph + country code duplication on some Android fonts. */
+.ab-detail-subtitle .ab-list-country i{display:none}
+.ab-detail-subtitle .ab-list-country{display:inline-flex;align-items:center;gap:0}
+
+/* Header meta should explain empty values instead of showing a bare dash. */
+.ab-detail-empty-value{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  color:#8794a5;
+  font-size:12px;
+  font-weight:650;
+  line-height:1.3;
+}
+.ab-detail-empty-value svg{flex:0 0 auto;color:#9ba8b7}
+
+/* A raw 1/4 looked detached; make it a deliberate compact progress badge. */
+.ab-step-mobile-label.compact{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  width:max-content;
+  min-height:25px;
+  margin:0 0 10px;
+  padding:4px 9px;
+  border:1px solid #d8e3ee;
+  border-radius:999px;
+  background:#f6f9fc;
+  color:#7a899b;
+  font-size:10.5px;
+  font-weight:750;
+  letter-spacing:.045em;
+}
+.ab-step-mobile-label.compact strong{
+  color:#2f5f8d;
+  font-size:12px;
+  font-weight:850;
+  letter-spacing:0;
+}
+
+@media(max-width:920px),((hover:none) and (pointer:coarse) and (max-width:1400px)){
+  .ab-step-mobile-label.compact{margin-left:1px}
+  .ab-detail-empty-value{font-size:11.5px}
+}
