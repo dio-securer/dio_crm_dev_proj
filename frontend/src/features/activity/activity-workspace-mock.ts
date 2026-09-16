@@ -1,6 +1,7 @@
 import { listSandboxAccounts } from '../../account-sandbox';
 import { addAccountActivity, listAccountActivities, type AccountActivityType } from '../account/account-relations-mock';
 import { addMockLeadActivity, loadMockLeads, saveMockLeads } from '../lead/lead-mock-service';
+import { addLeadActivitySupplement, getLeadSupplement, listSandboxLeads } from '../lead/lead-sandbox';
 import type { LeadActivityType } from '../lead/lead-model';
 
 export type UnifiedActivitySource = 'LEAD' | 'ACCOUNT';
@@ -31,11 +32,17 @@ function normalizeLeadType(type: LeadActivityType): UnifiedActivityType {
 }
 
 export function listUnifiedActivityTargets(): UnifiedActivityTarget[] {
-  const leads = loadMockLeads().map(row => ({
+  const hqLeads = loadMockLeads().map(row => ({
     source: 'LEAD' as const,
     id: row.leadId,
     name: row.organizationName || row.leadName,
     ownerName: row.ownerName
+  }));
+  const globalLeads = listSandboxLeads().map(row => ({
+    source: 'LEAD' as const,
+    id: row.public_id,
+    name: row.hospital_name,
+    ownerName: row.owner_name || '-'
   }));
   const accounts = listSandboxAccounts('', 'all').map(row => ({
     source: 'ACCOUNT' as const,
@@ -43,11 +50,17 @@ export function listUnifiedActivityTargets(): UnifiedActivityTarget[] {
     name: row.account_name,
     ownerName: row.owner_name || '-'
   }));
-  return [...leads, ...accounts];
+  const seen = new Set<string>();
+  return [...hqLeads, ...globalLeads, ...accounts].filter(row => {
+    const key = `${row.source}:${row.id}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 export function listUnifiedActivities(): UnifiedActivity[] {
-  const leads = loadMockLeads().flatMap(row => (row.activities || []).map(activity => ({
+  const hqLeadActivities = loadMockLeads().flatMap(row => (row.activities || []).map(activity => ({
     id: activity.id,
     source: 'LEAD' as const,
     targetId: row.leadId,
@@ -58,7 +71,18 @@ export function listUnifiedActivities(): UnifiedActivity[] {
     ownerName: activity.ownerName || row.ownerName,
     occurredAt: activity.occurredAt
   })));
-  const accounts = listSandboxAccounts('', 'all').flatMap(account => listAccountActivities(account.public_id).map(activity => ({
+  const globalLeadActivities = listSandboxLeads().flatMap(row => getLeadSupplement(row.public_id).activities.map(activity => ({
+    id: activity.id,
+    source: 'LEAD' as const,
+    targetId: row.public_id,
+    targetName: row.hospital_name,
+    type: normalizeLeadType(activity.type),
+    subject: activity.title,
+    note: activity.summary || null,
+    ownerName: activity.ownerName || row.owner_name || '-',
+    occurredAt: activity.occurredAt
+  })));
+  const accountActivities = listSandboxAccounts('', 'all').flatMap(account => listAccountActivities(account.public_id).map(activity => ({
     id: activity.id,
     source: 'ACCOUNT' as const,
     targetId: account.public_id,
@@ -69,7 +93,10 @@ export function listUnifiedActivities(): UnifiedActivity[] {
     ownerName: activity.ownerName,
     occurredAt: activity.occurredAt
   })));
-  return [...leads, ...accounts].sort((a, b) => b.occurredAt.localeCompare(a.occurredAt));
+  const seen = new Set<string>();
+  return [...hqLeadActivities, ...globalLeadActivities, ...accountActivities]
+    .filter(row => !seen.has(`${row.source}:${row.id}`) && seen.add(`${row.source}:${row.id}`))
+    .sort((a, b) => b.occurredAt.localeCompare(a.occurredAt));
 }
 
 export function addUnifiedActivity(input: {
@@ -99,6 +126,29 @@ export function addUnifiedActivity(input: {
       type: row.type,
       subject: row.subject,
       note: row.note,
+      ownerName: row.ownerName,
+      occurredAt: row.occurredAt
+    };
+  }
+
+  const globalLead = listSandboxLeads().find(row => row.public_id === target.id);
+  if (globalLead) {
+    const supplement = addLeadActivitySupplement(target.id, target.ownerName, {
+      type: input.type as LeadActivityType,
+      occurredAt: input.occurredAt,
+      title: input.subject.trim(),
+      summary: input.note?.trim() || ''
+    });
+    const row = supplement.activities.find(activity => activity.title === input.subject.trim() && activity.occurredAt === input.occurredAt);
+    if (!row) throw new Error('ACTIVITY_SAVE_FAILED');
+    return {
+      id: row.id,
+      source: 'LEAD',
+      targetId: target.id,
+      targetName: target.name,
+      type: normalizeLeadType(row.type),
+      subject: row.title,
+      note: row.summary || null,
       ownerName: row.ownerName,
       occurredAt: row.occurredAt
     };
