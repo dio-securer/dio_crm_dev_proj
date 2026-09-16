@@ -22,6 +22,7 @@
       "email": "메일",
       "meeting": "미팅",
       "addActivity": "활동등록",
+      "saveHospitalScale": "병원 규모 저장",
       "back": "목록으로",
       "resetMock": "Mock 초기화",
       "resetFilters": "필터 초기화",
@@ -56,6 +57,11 @@
       "hospitalName": "병원명",
       "organizationName": "기관명",
       "organizationType": "기관 유형",
+      "hospitalType": "병원 유형",
+      "doctorCount": "진료의사 수",
+      "chairCount": "Chair 수",
+      "staffCount": "Staff 수",
+      "mainSpecialty": "주요 진료과",
       "country": "국가",
       "phone": "전화번호",
       "contactName": "담당자명",
@@ -80,6 +86,12 @@
       "mainSystem": "주요 시스템",
       "subSystem": "부가 시스템",
       "excludeReason": "컨택 제외 사유"
+    },
+    "hospitalType": {
+      "CLINIC": "치과의원",
+      "DENTAL_HOSPITAL": "치과병원",
+      "GENERAL_HOSPITAL": "종합병원",
+      "OTHER": "기타"
     },
     "status": {
       "NEW": "신규등록",
@@ -140,6 +152,15 @@
       "linkExistingAccount": "기존 Account 연결",
       "requiresKeymanMeeting": "Keyman 미팅 단계에서 Account 변환을 진행할 수 있습니다."
     },
+    "activity": {
+      "quickAdd": "활동 빠른 등록",
+      "occurredAt": "활동 일시",
+      "title": "제목",
+      "titlePlaceholder": "활동 제목을 입력하세요.",
+      "summary": "결과 / 메모",
+      "summaryPlaceholder": "통화, 방문, 미팅 결과를 간단히 기록하세요.",
+      "add": "활동 저장"
+    },
     "empty": {
       "list": "등록된 Lead가 없습니다.",
       "detail": "목록에서 Lead를 선택하세요.",
@@ -157,6 +178,8 @@
       "converted": "Account로 변환했습니다.",
       "excluded": "컨택 제외 처리했습니다.",
       "statusUpdated": "Lead 상태가 변경되었습니다.",
+      "hospitalScaleSaved": "병원 규모 정보를 저장했습니다.",
+      "activityAdded": "활동을 등록했습니다.",
       "reset": "Mock 데이터를 초기화했습니다."
     },
     "quick": {
@@ -182,6 +205,7 @@
       "CALL": "전화",
       "EMAIL": "이메일",
       "MEETING": "미팅",
+      "VISIT": "방문",
       "NOTE": "메모"
     },
     "incompleteBadge": "미완료 {{count}}",
