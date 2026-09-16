@@ -12,13 +12,18 @@ import {
 } from './features/lead/lead-model';
 import { changeMockLeadStage, createMockLead, loadMockLeads, resetMockLeads } from './features/lead/lead-mock-service';
 import {
+  AbActivityTimeline,
   AbDataList,
   AbDetailFooter,
+  AbDetailHeader,
+  AbDetailTabs,
   AbEmptyState,
   AbEntityBadges,
   AbListToolbar,
   AbMobileFab,
+  AbNextAction,
   AbPagination,
+  AbQuickActions,
   AbSectionAccordion,
   AbStepProgress,
   AbWorkspace,
@@ -27,7 +32,8 @@ import {
 } from './ui/ab-workspace';
 import './styles/lead-workspace.css';
 
-type SectionId = 'keyman' | 'hospitalScale' | 'system' | 'activity' | 'conversion';
+type DetailTab = 'overview' | 'activity' | 'keyman' | 'system' | 'conversion';
+type SectionId = 'basic' | 'nextAction' | 'recentActivity' | 'tagsNote' | 'activity' | 'keyman' | 'hospitalScale' | 'system' | 'conversion';
 type ListFilter = 'all' | 'inProgress' | 'converted' | 'excluded';
 type LastActivityFilter = 'ALL' | '7' | '30' | 'NONE';
 
@@ -42,9 +48,10 @@ function formatDate(value: string | undefined, locale: string, withTime = false)
 }
 
 function mockStageToStep(stage: LeadStage): number {
+  if (stage === 'DISQUALIFIED') return -1;
   if (stage === 'NEW') return 0;
   if (stage === 'CONTACTED' || stage === 'CONSULTING') return 1;
-  if (stage === 'PROPOSAL' || stage === 'REVIEW' || stage === 'NEGOTIATION') return 2;
+  if (stage === 'PROPOSAL' || stage === 'REVIEW' || stage === 'NEGOTIATION' || stage === 'ON_HOLD') return 2;
   if (stage === 'CONVERTED') return 3;
   return 0;
 }
@@ -63,11 +70,6 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return <div className="lead-v2-info-row"><span>{label}</span><strong>{value || '-'}</strong></div>;
 }
 
-function ActivityGlyph({ type }: { type: string }) {
-  const glyph = type === 'CALL' ? '☎' : type === 'EMAIL' ? '✉' : type === 'MEETING' ? '●' : '◆';
-  return <span className={`lead-v2-activity-glyph type-${type}`}>{glyph}</span>;
-}
-
 export function LeadsPage() {
   const { t, i18n } = useTranslation();
   const { globalization } = useGlobalization();
@@ -83,8 +85,17 @@ export function LeadsPage() {
   const [lastActivityFilter, setLastActivityFilter] = useState<LastActivityFilter>('ALL');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [activeTab, setActiveTab] = useState<DetailTab>('overview');
   const [openSections, setOpenSections] = useState<Record<SectionId, boolean>>({
-    keyman: false, hospitalScale: false, system: false, activity: false, conversion: false
+    basic: true,
+    nextAction: true,
+    recentActivity: true,
+    tagsNote: false,
+    activity: true,
+    keyman: true,
+    hospitalScale: true,
+    system: true,
+    conversion: true
   });
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
@@ -142,13 +153,33 @@ export function LeadsPage() {
     window.setTimeout(() => setToast(''), 2400);
   };
 
+  const toggleSection = (id: SectionId) => setOpenSections(prev => ({ ...prev, [id]: !prev[id] }));
+
+  const openActivityTab = () => {
+    setActiveTab('activity');
+    setOpenSections(prev => ({ ...prev, activity: true }));
+  };
+
+  const selectDetailTab = (id: string) => {
+    const tab = id as DetailTab;
+    setActiveTab(tab);
+    const sectionByTab: Record<DetailTab, SectionId> = {
+      overview: 'basic',
+      activity: 'activity',
+      keyman: 'keyman',
+      system: 'hospitalScale',
+      conversion: 'conversion'
+    };
+    setOpenSections(prev => ({ ...prev, [sectionByTab[tab]]: true }));
+  };
+
   const selectLead = (leadId: string) => {
     setSelectedId(leadId);
-    setOpenSections({ keyman: false, hospitalScale: false, system: false, activity: true, conversion: false });
+    setActiveTab('overview');
+    setOpenSections(prev => ({ ...prev, basic: true, nextAction: true, recentActivity: true }));
     setMobileDetailOpen(true);
   };
 
-  const toggleSection = (id: SectionId) => setOpenSections(prev => ({ ...prev, [id]: !prev[id] }));
   const stepLabels = API_LEAD_STEPS.map(step => ({ id: step, label: t(`lead.steps.${step}`) }));
 
   const updateStage = (stage: LeadStage) => {
@@ -183,8 +214,9 @@ export function LeadsPage() {
     setQuickSource('WEB');
     setQuickOwner('USER001');
     setPage(1);
+    setActiveTab('overview');
     setMobileDetailOpen(openDetail);
-    setOpenSections({ keyman: true, hospitalScale: false, system: false, activity: false, conversion: false });
+    setOpenSections(prev => ({ ...prev, basic: true, nextAction: true, recentActivity: true, keyman: true }));
     notify(t('lead.toast.created'));
   };
 
@@ -205,6 +237,7 @@ export function LeadsPage() {
     setRows(next);
     setSelectedId(next[0]?.leadId ?? '');
     resetFilters();
+    setActiveTab('overview');
     setMobileDetailOpen(false);
     notify(t('lead.toast.reset'));
   };
@@ -232,19 +265,63 @@ export function LeadsPage() {
     { key: 'nextAction', label: t('lead.columns.nextAction'), width: 'minmax(125px,1fr)' }
   ];
 
-  const renderConceptBDetail = (lead: LeadRecord) => (
-    <>
-      <div className="ab-basic-panel">
-        <h4>{t('lead.sections.basic')}</h4>
-        <InfoRow label={t('lead.fields.hospitalName')} value={lead.organizationName} />
-        <InfoRow label={t('lead.fields.contactName')} value={lead.leadName} />
-        <InfoRow label={t('lead.fields.phone')} value={lead.phone} />
-        <InfoRow label={t('lead.fields.country')} value={<span className="ab-list-country"><i>{countryFlag(lead.country)}</i>{lead.country}</span>} />
-        <InfoRow label={t('lead.fields.region')} value={lead.region} />
-        <InfoRow label={t('lead.fields.address')} value={lead.address} />
-        <InfoRow label={t('lead.fields.owner')} value={lead.ownerName} />
-      </div>
-      <div className="ab-sections">
+  const activityItems = (lead: LeadRecord, limit?: number) => (limit ? lead.activities.slice(0, limit) : lead.activities).map(activity => ({
+    id: activity.id,
+    typeLabel: t(`lead.activityType.${activity.type}`),
+    timeLabel: formatDate(activity.occurredAt, i18n.language, true),
+    title: activity.title,
+    summary: activity.summary,
+    owner: activity.ownerName,
+    icon: activity.type === 'CALL' ? '☎' : activity.type === 'EMAIL' ? '✉' : activity.type === 'MEETING' ? '●' : '◆'
+  }));
+
+  const renderDetailTab = (lead: LeadRecord) => {
+    if (activeTab === 'overview') {
+      return (
+        <div className="ab-overview-grid">
+          <AbSectionAccordion id="basic" title={t('lead.sections.basic')} open={openSections.basic} onToggle={() => toggleSection('basic')}>
+            <InfoRow label={t('lead.fields.hospitalName')} value={lead.organizationName} />
+            <InfoRow label={t('lead.fields.contactName')} value={lead.leadName} />
+            <InfoRow label={t('lead.fields.phone')} value={lead.phone} />
+            <InfoRow label={t('lead.fields.email')} value={lead.email} />
+            <InfoRow label={t('lead.fields.country')} value={<span className="ab-list-country"><i>{countryFlag(lead.country)}</i>{lead.country}</span>} />
+            <InfoRow label={t('lead.fields.region')} value={lead.region} />
+            <InfoRow label={t('lead.fields.address')} value={lead.address} />
+            <InfoRow label={t('lead.fields.owner')} value={lead.ownerName} />
+            <InfoRow label={t('lead.fields.source')} value={t(`lead.source.${lead.source}`)} />
+          </AbSectionAccordion>
+
+          <AbSectionAccordion id="nextAction" title={t('lead.sections.nextAction')} open={openSections.nextAction} onToggle={() => toggleSection('nextAction')} incomplete={!lead.nextAction}>
+            <AbNextAction
+              label={t('lead.fields.nextAction')}
+              title={lead.nextAction ?? '-'}
+              due={formatDate(lead.nextActionAt, i18n.language, true)}
+              action={<button type="button" className="lead-v2-button ghost" onClick={openActivityTab}>{t('lead.tabs.activity')}</button>}
+            />
+          </AbSectionAccordion>
+
+          <AbSectionAccordion id="recentActivity" title={t('lead.sections.recentActivity')} hint={lead.activities.length ? `${Math.min(lead.activities.length, 3)}` : undefined} open={openSections.recentActivity} onToggle={() => toggleSection('recentActivity')}>
+            <AbActivityTimeline items={activityItems(lead, 3)} empty={<p className="lead-v2-empty-inline">{t('lead.empty.activity')}</p>} />
+          </AbSectionAccordion>
+
+          <AbSectionAccordion id="tagsNote" title={`${t('lead.sections.tags')} / ${t('lead.sections.note')}`} open={openSections.tagsNote} onToggle={() => toggleSection('tagsNote')}>
+            <div className="ab-tag-list">{lead.tags.length ? lead.tags.map(tag => <span key={tag}>{tag}</span>) : <span>-</span>}</div>
+            <div className="ab-note-box">{lead.noteSummary || '-'}</div>
+          </AbSectionAccordion>
+        </div>
+      );
+    }
+
+    if (activeTab === 'activity') {
+      return (
+        <AbSectionAccordion id="activity" title={t('lead.sections.activity')} hint={lead.activities.length ? `${lead.activities.length}` : undefined} open={openSections.activity} onToggle={() => toggleSection('activity')}>
+          <AbActivityTimeline items={activityItems(lead)} empty={<p className="lead-v2-empty-inline">{t('lead.empty.activity')}</p>} />
+        </AbSectionAccordion>
+      );
+    }
+
+    if (activeTab === 'keyman') {
+      return (
         <AbSectionAccordion id="keyman" title={t('lead.sections.keyman')} hint={lead.contacts.length ? `${lead.contacts.length}` : undefined} open={openSections.keyman} onToggle={() => toggleSection('keyman')} incomplete={!lead.contacts.length}>
           <div className="lead-v2-contact-list">
             {lead.contacts.map(contact => (
@@ -256,31 +333,34 @@ export function LeadsPage() {
             {!lead.contacts.length && <p className="lead-v2-empty-inline">{t('lead.empty.keyman')}</p>}
           </div>
         </AbSectionAccordion>
-        <AbSectionAccordion id="hospitalScale" title={t('lead.sections.hospitalScale')} hint="—" open={openSections.hospitalScale} onToggle={() => toggleSection('hospitalScale')} incomplete>
-          <InfoRow label={t('lead.fields.bedCount')} value="-" />
-        </AbSectionAccordion>
-        <AbSectionAccordion id="system" title={t('lead.sections.system')} open={openSections.system} onToggle={() => toggleSection('system')} incomplete>
-          <InfoRow label={t('lead.fields.mainSystem')} value="-" />
-          <InfoRow label={t('lead.fields.subSystem')} value="-" />
-        </AbSectionAccordion>
-        <AbSectionAccordion id="activity" title={t('lead.sections.activity')} hint={lead.activities.length ? `${lead.activities.length}` : undefined} open={openSections.activity} onToggle={() => toggleSection('activity')}>
-          <div className="lead-v2-timeline">
-            {lead.activities.map(activity => (
-              <div className="lead-v2-timeline-item" key={activity.id}>
-                <ActivityGlyph type={activity.type} />
-                <div><span>{formatDate(activity.occurredAt, i18n.language, true)}</span><strong>{activity.title}</strong><small>{activity.summary}</small></div>
-              </div>
-            ))}
-            {!lead.activities.length && <p className="lead-v2-empty-inline">{t('lead.empty.activity')}</p>}
-          </div>
-        </AbSectionAccordion>
-        <AbSectionAccordion id="conversion" title={t('lead.sections.conversion')} open={openSections.conversion} onToggle={() => toggleSection('conversion')}>
-          <p className="lead-v2-empty-inline">{t('lead.opportunityCount', { count: lead.opportunityCount })}</p>
+      );
+    }
+
+    if (activeTab === 'system') {
+      return (
+        <div className="ab-overview-grid">
+          <AbSectionAccordion id="hospitalScale" title={t('lead.sections.hospitalScale')} open={openSections.hospitalScale} onToggle={() => toggleSection('hospitalScale')} incomplete>
+            <InfoRow label={t('lead.fields.organizationType')} value={lead.organizationType} />
+            <InfoRow label={t('lead.fields.bedCount')} value="-" />
+          </AbSectionAccordion>
+          <AbSectionAccordion id="system" title={t('lead.sections.system')} open={openSections.system} onToggle={() => toggleSection('system')} incomplete>
+            <InfoRow label={t('lead.fields.mainSystem')} value="-" />
+            <InfoRow label={t('lead.fields.subSystem')} value="-" />
+          </AbSectionAccordion>
+        </div>
+      );
+    }
+
+    return (
+      <AbSectionAccordion id="conversion" title={t('lead.sections.conversion')} open={openSections.conversion} onToggle={() => toggleSection('conversion')}>
+        <InfoRow label={t('lead.tabs.opportunities')} value={t('lead.opportunityCount', { count: lead.opportunityCount })} />
+        <div className="lead-v2-drawer-actions">
           <button type="button" className="lead-v2-button primary" onClick={() => notify(t('lead.toast.converted'))}>{t('lead.actions.convert')}</button>
-        </AbSectionAccordion>
-      </div>
-    </>
-  );
+          <button type="button" className="lead-v2-button ghost" onClick={() => updateStage('DISQUALIFIED')} disabled={lead.stage === 'CONVERTED'}>{t('lead.actions.exclude')}</button>
+        </div>
+      </AbSectionAccordion>
+    );
+  };
 
   const listPane = (
     <>
@@ -322,31 +402,58 @@ export function LeadsPage() {
       {!selected && <div className="lead-v2-empty-detail">{t('lead.empty.detail')}</div>}
       {selected && <>
         <button type="button" className="lead-v2-mobile-back" onClick={() => setMobileDetailOpen(false)}>← {t('lead.actions.back')}</button>
-        <div className="lead-v2-detail-header">
-          <div className="lead-v2-detail-identity">
-            <span>{selected.leadNo}</span>
-            <div className="lead-v2-name-line"><h3>{selected.organizationName}</h3><i className={`lead-v2-pill stage-${selected.stage}`}>{t(`leadV2.stage.${selected.stage}`)}</i></div>
-            <p>{selected.leadName} · <span className="ab-list-country"><i>{countryFlag(selected.country)}</i>{selected.country} · {selected.region}</span></p>
-            <AbEntityBadges badges={[
-              { label: t(`leadV2.stage.${selected.stage}`), tone: 'info' },
-              { label: t(`lead.interest.${selected.interestLevel}`), tone: 'neutral' }
-            ]} />
-            <small>{t('lead.lastUpdated', { date: formatDate(selected.updatedAt, i18n.language, true) })}</small>
-          </div>
-          <div className="lead-v2-detail-actions">
-            {selected.phone ? <a className="lead-v2-action-button" href={`tel:${selected.phone}`}>☎ <span>{t('lead.actions.call')}</span></a> : <button type="button" className="lead-v2-action-button" disabled>☎ <span>{t('lead.actions.call')}</span></button>}
-            {selected.email ? <a className="lead-v2-action-button" href={`mailto:${selected.email}`}>✉ <span>{t('lead.actions.email')}</span></a> : <button type="button" className="lead-v2-action-button" disabled>✉ <span>{t('lead.actions.email')}</span></button>}
-            <button type="button" className="lead-v2-action-button convert" onClick={() => notify(t('lead.toast.converted'))}>→ <span>{t('lead.actions.convert')}</span></button>
-          </div>
-        </div>
-        <AbStepProgress steps={stepLabels} currentIndex={mockStageToStep(selected.stage)} mobileLabel={`${mockStageToStep(selected.stage) + 1}/${API_LEAD_STEPS.length}`} />
-        <div className="lead-v2-summary-strip">
-          <div><span>{t('lead.fields.owner')}</span><strong>{selected.ownerName}</strong></div>
-          <div><span>{t('lead.fields.interest')}</span><strong>{t(`lead.interest.${selected.interestLevel}`)}</strong></div>
-          <div><span>{t('lead.fields.expectedAmount')}</span><strong>{money(selected.expectedAmount)}</strong></div>
+        <AbDetailHeader
+          eyebrow={selected.leadNo}
+          title={selected.leadName}
+          subtitle={<><strong>{selected.organizationName}</strong> · <span className="ab-list-country"><i>{countryFlag(selected.country)}</i>{selected.country} · {selected.region}</span></>}
+          badges={<AbEntityBadges badges={[
+            { label: t(`leadV2.stage.${selected.stage}`), tone: selected.stage === 'CONVERTED' ? 'success' : 'info' },
+            { label: t(`lead.interest.${selected.interestLevel}`), tone: 'neutral' }
+          ]} />}
+          meta={<div className="ab-detail-meta-list">
+            <div className="ab-detail-meta-item"><span>{t('lead.fields.owner')}</span><strong>{selected.ownerName}</strong></div>
+            <div className="ab-detail-meta-item"><span>{t('lead.fields.lastActivity')}</span><strong>{formatDate(selected.lastActivityAt, i18n.language, true)}</strong></div>
+            <div className="ab-detail-meta-item"><span>{t('lead.fields.nextAction')}</span><strong>{selected.nextAction ?? '-'}</strong></div>
+            <div className="ab-detail-meta-item"><span>{t('lead.fields.source')}</span><strong>{t(`lead.source.${selected.source}`)}</strong></div>
+          </div>}
+          actions={<AbQuickActions
+            ariaLabel={t('lead.quickActionsLabel')}
+            actions={[
+              { id: 'call', label: t('lead.actions.call'), icon: '☎', href: selected.phone ? `tel:${selected.phone}` : undefined, disabled: !selected.phone },
+              { id: 'email', label: t('lead.actions.email'), icon: '✉', href: selected.email ? `mailto:${selected.email}` : undefined, disabled: !selected.email },
+              { id: 'meeting', label: t('lead.actions.meeting'), icon: '◷', onClick: openActivityTab },
+              { id: 'activity', label: t('lead.actions.addActivity'), icon: '＋', onClick: openActivityTab, tone: 'primary' },
+              { id: 'more', label: t('lead.actions.more'), icon: '•••', onClick: () => selectDetailTab('conversion') }
+            ]}
+          />}
+        />
+
+        <AbStepProgress
+          steps={stepLabels}
+          currentIndex={mockStageToStep(selected.stage)}
+          mobileLabel={selected.stage === 'DISQUALIFIED' ? t('lead.status.CONTACT_EXCLUDED') : `${mockStageToStep(selected.stage) + 1}/${API_LEAD_STEPS.length}`}
+        />
+        {selected.stage === 'DISQUALIFIED' && <div className="ab-detail-terminal"><strong>{t('lead.status.CONTACT_EXCLUDED')}</strong></div>}
+
+        <div className="ab-detail-control-strip">
           <label><span>{t('lead.fields.stage')}</span><select value={selected.stage} onChange={event => updateStage(event.target.value as LeadStage)}>{LEAD_STAGES.map(stage => <option key={stage} value={stage}>{t(`leadV2.stage.${stage}`)}</option>)}</select></label>
+          <div><span>{t('lead.fields.expectedAmount')}</span><strong>{money(selected.expectedAmount)}</strong></div>
+          <div><span>{t('lead.fields.expectedDate')}</span><strong>{formatDate(selected.expectedDate, i18n.language)}</strong></div>
         </div>
-        <div className="lead-v2-detail-content">{renderConceptBDetail(selected)}</div>
+
+        <AbDetailTabs
+          ariaLabel={t('lead.detailTitle')}
+          activeId={activeTab}
+          onChange={selectDetailTab}
+          tabs={[
+            { id: 'overview', label: t('lead.tabs.overview') },
+            { id: 'activity', label: t('lead.tabs.activity'), count: selected.activities.length },
+            { id: 'keyman', label: t('lead.tabs.keyman'), count: selected.contacts.length },
+            { id: 'system', label: t('lead.tabs.system') },
+            { id: 'conversion', label: t('lead.tabs.conversion'), count: selected.opportunityCount }
+          ]}
+        />
+        <div className="ab-tab-panel" id={`ab-tab-panel-${activeTab}`} role="tabpanel">{renderDetailTab(selected)}</div>
         <AbDetailFooter draftLabel={t('lead.actions.saveDraft')} saveLabel={t('lead.actions.save')} onDraft={() => notify(t('lead.toast.draftSaved'))} onSave={() => notify(t('lead.toast.saved'))} />
       </>}
     </>
