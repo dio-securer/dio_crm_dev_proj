@@ -5,6 +5,7 @@
     "listTitle": "Lead 목록",
     "detailTitle": "Lead 상세",
     "quickCreateTitle": "Lead 빠른 등록",
+    "quickActionsLabel": "Lead 빠른 실행",
     "count": "총 {{count}}건",
     "mockMode": "Mock Mode",
     "apiPending": "API 연결 전입니다. DEV DB/Auth 연결 후 실제 Lead가 표시됩니다.",
@@ -20,6 +21,7 @@
       "call": "전화",
       "email": "메일",
       "meeting": "미팅",
+      "addActivity": "활동등록",
       "back": "목록으로",
       "resetMock": "Mock 초기화",
       "resetFilters": "필터 초기화",
@@ -130,6 +132,13 @@
       "previous": "이전 페이지",
       "next": "다음 페이지",
       "pageStatus": "{{page}} / {{pages}} 페이지 · {{count}}건"
+    },
+    "conversion": {
+      "opportunityName": "Opportunity 명",
+      "createNewAccount": "신규 Account 생성",
+      "existingAccount": "기존 Account",
+      "linkExistingAccount": "기존 Account 연결",
+      "requiresKeymanMeeting": "Keyman 미팅 단계에서 Account 변환을 진행할 수 있습니다."
     },
     "empty": {
       "list": "등록된 Lead가 없습니다.",
