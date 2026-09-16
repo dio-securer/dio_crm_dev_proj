@@ -146,11 +146,26 @@
       "pageStatus": "{{page}} / {{pages}} 페이지 · {{count}}건"
     },
     "conversion": {
+      "accountMode": "Account 연결 방식",
       "opportunityName": "Opportunity 명",
       "createNewAccount": "신규 Account 생성",
       "existingAccount": "기존 Account",
       "linkExistingAccount": "기존 Account 연결",
-      "requiresKeymanMeeting": "Keyman 미팅 단계에서 Account 변환을 진행할 수 있습니다."
+      "createContact": "Contact 함께 생성",
+      "createOpportunity": "Opportunity 함께 생성",
+      "execute": "Lead 전환 실행",
+      "requiresKeymanMeeting": "Keyman 미팅 단계에서 Account 변환을 진행할 수 있습니다.",
+      "notReady": "현재 단계에서는 전환할 수 없습니다.",
+      "selectAccountRequired": "연결할 기존 Account를 선택하세요.",
+      "accountNotFound": "선택한 Account를 찾을 수 없습니다.",
+      "alreadyConverted": "이미 전환된 Lead입니다.",
+      "completed": "Lead 전환 완료",
+      "completedNoDetail": "전환 완료 상태입니다. 연결 상세정보는 이전 데이터에 없습니다.",
+      "linkedAccount": "연결 Account",
+      "createdContact": "생성 Contact",
+      "createdOpportunity": "생성 Opportunity",
+      "yes": "생성됨",
+      "no": "생성 안 함"
     },
     "activity": {
       "quickAdd": "활동 빠른 등록",
@@ -187,7 +202,8 @@
       "help": "필수 정보만 입력해 저장하고, 상세 정보는 이후 섹션에서 보강합니다.",
       "create": "빠른 등록",
       "createDetail": "저장 후 상세 입력",
-      "required": "필수 항목을 입력하세요."
+      "required": "필수 항목을 입력하세요.",
+      "afterSave": "저장 후 생성된 Lead를 자동 선택하고 상세 화면으로 이동합니다."
     },
     "interest": {
       "HIGH": "높음",
