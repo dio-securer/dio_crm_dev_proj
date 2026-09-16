@@ -8,6 +8,7 @@ import {
   AbEmptyState,
   AbListToolbar,
   AbPagination,
+  AbWorkspace,
   countryFlag,
   type AbDataColumn
 } from '../../ui/ab-workspace';
@@ -28,6 +29,7 @@ type Props = {
   scope: AccountScope;
   onScopeChange: (scope: AccountScope) => void;
   onSelect: (row: AccountSummary) => void;
+  detail: React.ReactNode;
 };
 
 function formatDate(value: string | undefined, locale: string) {
@@ -51,7 +53,7 @@ function erpTone(status: string) {
   return 'neutral';
 }
 
-export function AccountListPanel({ rows, loading = false, selectedId, scope, onScopeChange, onSelect }: Props) {
+export function AccountListPanel({ rows, loading = false, selectedId, scope, onScopeChange, onSelect, detail }: Props) {
   const { t, i18n } = useTranslation();
   const [filters, setFilters] = useState<AccountListFilters>(EMPTY_ACCOUNT_LIST_FILTERS);
   const [page, setPage] = useState(1);
@@ -68,13 +70,8 @@ export function AccountListPanel({ rows, loading = false, selectedId, scope, onS
   const currentPage = Math.min(page, totalPages);
   const pagedRows = filteredRows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
-  React.useEffect(() => {
-    setPage(1);
-  }, [scope]);
-
-  React.useEffect(() => {
-    if (page !== currentPage) setPage(currentPage);
-  }, [page, currentPage]);
+  React.useEffect(() => { setPage(1); }, [scope]);
+  React.useEffect(() => { if (page !== currentPage) setPage(currentPage); }, [page, currentPage]);
 
   const setFilter = <K extends keyof AccountListFilters>(key: K, value: AccountListFilters[K]) => {
     setFilters(previous => ({ ...previous, [key]: value }));
@@ -97,16 +94,53 @@ export function AccountListPanel({ rows, loading = false, selectedId, scope, onS
     { key: 'erp', label: t('account.columns.erpStatus'), width: '92px', mobileRole: 'badge' }
   ];
 
+  const list = <>
+    <div className="lead-v2-list-header"><div><strong>{t('account.listTitle')}</strong><span>{t('account.count', { count: filteredRows.length })}</span></div></div>
+    {loading ? <AbEmptyState tone="loading" title={t('common.loading')} /> : (
+      <AbDataList
+        columns={columns}
+        rows={pagedRows}
+        rowKey={row => row.public_id}
+        selectedKey={selectedId ?? undefined}
+        onRowClick={onSelect}
+        ariaLabel={t('account.listTitle')}
+        empty={<AbEmptyState title={filters.search ? t('account.empty.search') : t('account.empty.list')} />}
+        renderCells={row => {
+          const country = accountCountry(row);
+          const lastActivity = accountLastActivity(row);
+          return [
+            <span className="ab-primary-stack" title={`${row.account_name} · ${row.erp_customer_code || row.business_no || row.public_id}`}><strong>{row.account_name}</strong><small>{row.erp_customer_code || row.business_no || '-'}</small><em>{row.business_no || row.public_id}</em></span>,
+            <span className="ab-list-country"><i>{countryFlag(country)}</i>{country}</span>,
+            <span title={row.account_type || ''}>{accountTypeName(row.account_type) || row.account_type || '-'}</span>,
+            <span>{t(`account.grades.${row.account_grade || 'GENERAL'}`, { defaultValue: row.account_grade || '-' })}</span>,
+            <span className={`account-list-pill tone-${statusTone(row.account_status)}`}>{t(`account.statuses.${row.account_status}`, { defaultValue: row.account_status })}</span>,
+            <span>{row.owner_name ?? '-'}</span>,
+            <span>{formatDate(lastActivity, i18n.language)}</span>,
+            <span className={`account-list-pill tone-${erpTone(row.integration_status)}`}>{t(`account.integrationStatus.${row.integration_status}`, { defaultValue: row.integration_status })}</span>
+          ];
+        }}
+      />
+    )}
+    <AbPagination
+      page={currentPage}
+      pageSize={pageSize}
+      totalItems={filteredRows.length}
+      onPageChange={setPage}
+      onPageSizeChange={size => { setPageSize(size); setPage(1); }}
+      rowsPerPageLabel={t('account.pagination.rowsPerPage')}
+      previousLabel={t('account.pagination.previous')}
+      nextLabel={t('account.pagination.next')}
+      pageStatus={t('account.pagination.pageStatus', { page: currentPage, pages: totalPages, count: filteredRows.length })}
+    />
+  </>;
+
   return (
     <>
       <div className="lead-v2-filter-tabs account-scope-tabs">
         {(['managed', 'mine', 'all'] as AccountScope[]).map(value => (
-          <button type="button" key={value} className={scope === value ? 'active' : ''} onClick={() => onScopeChange(value)}>
-            {t(`account.filters.${value}`)}
-          </button>
+          <button type="button" key={value} className={scope === value ? 'active' : ''} onClick={() => onScopeChange(value)}>{t(`account.filters.${value}`)}</button>
         ))}
       </div>
-
       <AbListToolbar
         searchValue={filters.search}
         onSearchChange={value => setFilter('search', value)}
@@ -115,72 +149,15 @@ export function AccountListPanel({ rows, loading = false, selectedId, scope, onS
         resetLabel={t('account.filters.reset')}
         resultSummary={t('account.count', { count: filteredRows.length })}
         filters={<>
-          <select value={filters.country} onChange={event => setFilter('country', event.target.value)}>
-            <option value="ALL">{t('account.filters.allCountry')}</option>
-            {countries.map(country => <option key={country} value={country}>{country}</option>)}
-          </select>
-          <select value={filters.accountType} onChange={event => setFilter('accountType', event.target.value)}>
-            <option value="ALL">{t('account.filters.allType')}</option>
-            {types.map(type => <option key={type} value={type}>{accountTypeName(type) || type}</option>)}
-          </select>
-          <select value={filters.grade} onChange={event => setFilter('grade', event.target.value)}>
-            <option value="ALL">{t('account.filters.allGrade')}</option>
-            {grades.map(grade => <option key={grade} value={grade}>{t(`account.grades.${grade}`, { defaultValue: grade })}</option>)}
-          </select>
-          <select value={filters.status} onChange={event => setFilter('status', event.target.value)}>
-            <option value="ALL">{t('account.filters.allStatus')}</option>
-            {statuses.map(status => <option key={status} value={status}>{t(`account.statuses.${status}`, { defaultValue: status })}</option>)}
-          </select>
-          <select value={filters.erpStatus} onChange={event => setFilter('erpStatus', event.target.value)}>
-            <option value="ALL">{t('account.filters.allErp')}</option>
-            {erpStatuses.map(status => <option key={status} value={status}>{t(`account.integrationStatus.${status}`, { defaultValue: status })}</option>)}
-          </select>
-          <select value={filters.lastActivity} onChange={event => setFilter('lastActivity', event.target.value as AccountLastActivityFilter)}>
-            <option value="ALL">{t('account.filters.allLastActivity')}</option>
-            <option value="7">{t('account.filters.last7Days')}</option>
-            <option value="30">{t('account.filters.last30Days')}</option>
-            <option value="NONE">{t('account.filters.noActivity')}</option>
-          </select>
+          <select value={filters.country} onChange={event => setFilter('country', event.target.value)}><option value="ALL">{t('account.filters.allCountry')}</option>{countries.map(country => <option key={country} value={country}>{country}</option>)}</select>
+          <select value={filters.accountType} onChange={event => setFilter('accountType', event.target.value)}><option value="ALL">{t('account.filters.allType')}</option>{types.map(type => <option key={type} value={type}>{accountTypeName(type) || type}</option>)}</select>
+          <select value={filters.grade} onChange={event => setFilter('grade', event.target.value)}><option value="ALL">{t('account.filters.allGrade')}</option>{grades.map(grade => <option key={grade} value={grade}>{t(`account.grades.${grade}`, { defaultValue: grade })}</option>)}</select>
+          <select value={filters.status} onChange={event => setFilter('status', event.target.value)}><option value="ALL">{t('account.filters.allStatus')}</option>{statuses.map(status => <option key={status} value={status}>{t(`account.statuses.${status}`, { defaultValue: status })}</option>)}</select>
+          <select value={filters.erpStatus} onChange={event => setFilter('erpStatus', event.target.value)}><option value="ALL">{t('account.filters.allErp')}</option>{erpStatuses.map(status => <option key={status} value={status}>{t(`account.integrationStatus.${status}`, { defaultValue: status })}</option>)}</select>
+          <select value={filters.lastActivity} onChange={event => setFilter('lastActivity', event.target.value as AccountLastActivityFilter)}><option value="ALL">{t('account.filters.allLastActivity')}</option><option value="7">{t('account.filters.last7Days')}</option><option value="30">{t('account.filters.last30Days')}</option><option value="NONE">{t('account.filters.noActivity')}</option></select>
         </>}
       />
-
-      <div className="lead-v2-list-header"><div><strong>{t('account.listTitle')}</strong><span>{t('account.count', { count: filteredRows.length })}</span></div></div>
-      {loading ? <AbEmptyState tone="loading" title={t('common.loading')} /> : (
-        <AbDataList
-          columns={columns}
-          rows={pagedRows}
-          rowKey={row => row.public_id}
-          selectedKey={selectedId ?? undefined}
-          onRowClick={onSelect}
-          ariaLabel={t('account.listTitle')}
-          empty={<AbEmptyState title={filters.search ? t('account.empty.search') : t('account.empty.list')} />}
-          renderCells={row => {
-            const country = accountCountry(row);
-            const lastActivity = accountLastActivity(row);
-            return [
-              <span className="ab-primary-stack" title={`${row.account_name} · ${row.erp_customer_code || row.business_no || row.public_id}`}><strong>{row.account_name}</strong><small>{row.erp_customer_code || row.business_no || '-'}</small><em>{row.business_no || row.public_id}</em></span>,
-              <span className="ab-list-country"><i>{countryFlag(country)}</i>{country}</span>,
-              <span title={row.account_type || ''}>{accountTypeName(row.account_type) || row.account_type || '-'}</span>,
-              <span>{t(`account.grades.${row.account_grade || 'GENERAL'}`, { defaultValue: row.account_grade || '-' })}</span>,
-              <span className={`account-list-pill tone-${statusTone(row.account_status)}`}>{t(`account.statuses.${row.account_status}`, { defaultValue: row.account_status })}</span>,
-              <span>{row.owner_name ?? '-'}</span>,
-              <span>{formatDate(lastActivity, i18n.language)}</span>,
-              <span className={`account-list-pill tone-${erpTone(row.integration_status)}`}>{t(`account.integrationStatus.${row.integration_status}`, { defaultValue: row.integration_status })}</span>
-            ];
-          }}
-        />
-      )}
-      <AbPagination
-        page={currentPage}
-        pageSize={pageSize}
-        totalItems={filteredRows.length}
-        onPageChange={setPage}
-        onPageSizeChange={size => { setPageSize(size); setPage(1); }}
-        rowsPerPageLabel={t('account.pagination.rowsPerPage')}
-        previousLabel={t('account.pagination.previous')}
-        nextLabel={t('account.pagination.next')}
-        pageStatus={t('account.pagination.pageStatus', { page: currentPage, pages: totalPages, count: filteredRows.length })}
-      />
+      <AbWorkspace list={list} detail={detail} />
     </>
   );
 }
