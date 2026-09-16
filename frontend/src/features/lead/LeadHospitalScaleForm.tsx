@@ -8,6 +8,8 @@ type Props = {
   onSave: (value: LeadHospitalScale) => void;
 };
 
+const HOSPITAL_TYPES = ['CLINIC', 'DENTAL_HOSPITAL', 'GENERAL_HOSPITAL', 'OTHER'] as const;
+
 export function LeadHospitalScaleForm({ value, onSave }: Props) {
   const { t } = useTranslation();
   const [draft, setDraft] = useState<LeadHospitalScale>(value);
@@ -25,10 +27,7 @@ export function LeadHospitalScaleForm({ value, onSave }: Props) {
         <label>
           <span>{t('lead.fields.hospitalType')}</span>
           <select value={draft.hospitalType} onChange={event => setDraft(prev => ({ ...prev, hospitalType: event.target.value }))}>
-            <option value="치과의원">{t('lead.hospitalType.clinic')}</option>
-            <option value="치과병원">{t('lead.hospitalType.hospital')}</option>
-            <option value="종합병원">{t('lead.hospitalType.generalHospital')}</option>
-            <option value="기타">{t('lead.hospitalType.other')}</option>
+            {HOSPITAL_TYPES.map(type => <option value={type} key={type}>{t(`lead.hospitalType.${type}`)}</option>)}
           </select>
         </label>
         <label>
