@@ -1,4 +1,5 @@
 import React from 'react';
+import { UiIcon } from '../UiIcon';
 
 type Step = { id: string; label: string };
 
@@ -21,7 +22,7 @@ export function AbStepProgress({ steps, currentIndex, mobileLabel }: Props) {
             <div key={step.id} className={`ab-step-item${active ? ' active' : ''}${current ? ' current' : ''}${done ? ' done' : ''}`} role="listitem">
               <div className="ab-step-node-wrap">
                 {index > 0 && <span className="ab-step-line ab-step-line-left" aria-hidden="true" />}
-                <span className="ab-step-node">{done ? '✓' : index + 1}</span>
+                <span className="ab-step-node">{done ? <UiIcon name="check" size="16" strokeWidth={2.5} /> : index + 1}</span>
                 {index < steps.length - 1 && <span className="ab-step-line ab-step-line-right" aria-hidden="true" />}
               </div>
               <small>{step.label}</small>
