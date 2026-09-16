@@ -9,6 +9,7 @@ import './styles/workspace.css';
 import './styles/ab-workspace.css';
 import App from './App';
 import './styles/visual-qa.css';
+import './styles/visual-qa-step34.css';
 import { GlobalizationProvider } from './market/globalization-context';
 import { registerPwa } from './pwa/register';
 
