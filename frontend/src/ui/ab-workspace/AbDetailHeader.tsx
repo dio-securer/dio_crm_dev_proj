@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { UiIcon } from '../UiIcon';
 import '../../styles/ab-workspace-extras.css';
 
@@ -19,8 +20,22 @@ function normalizeEyebrow(value: React.ReactNode) {
   return value;
 }
 
+function replaceEmptyMetaValues(node: React.ReactNode, emptyLabel: string): React.ReactNode {
+  if (node === '-') return <span className="ab-detail-empty-value"><UiIcon name="inbox" size="13" />{emptyLabel}</span>;
+  if (!React.isValidElement<{ children?: React.ReactNode }>(node)) return node;
+  if (node.props.children === undefined) return node;
+  return React.cloneElement(
+    node,
+    undefined,
+    React.Children.map(node.props.children, child => replaceEmptyMetaValues(child, emptyLabel))
+  );
+}
+
 export function AbDetailHeader({ eyebrow, title, subtitle, badges, meta, actions }: Props) {
+  const { t } = useTranslation();
   const reference = normalizeEyebrow(eyebrow);
+  const normalizedMeta = meta ? replaceEmptyMetaValues(meta, t('common.noData')) : null;
+
   return (
     <header className="ab-detail-header">
       <div className="ab-detail-header-top">
@@ -34,7 +49,7 @@ export function AbDetailHeader({ eyebrow, title, subtitle, badges, meta, actions
         </div>
         {actions && <div className="ab-detail-actions">{actions}</div>}
       </div>
-      {meta && <div className="ab-detail-header-meta">{meta}</div>}
+      {normalizedMeta && <div className="ab-detail-header-meta">{normalizedMeta}</div>}
     </header>
   );
 }
