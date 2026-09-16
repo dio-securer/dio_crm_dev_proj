@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { emptyForm, STORAGE_KEY } from '../../account-model';
 import { listSandboxAccounts, saveSandboxAccount } from '../../account-sandbox';
 import {
@@ -22,11 +22,29 @@ import {
   saveAccountPageState
 } from './account-view-state';
 
+function createMemoryStorage(): Storage {
+  const data = new Map<string, string>();
+  return {
+    get length() { return data.size; },
+    clear() { data.clear(); },
+    getItem(key: string) { return data.has(key) ? data.get(key)! : null; },
+    key(index: number) { return [...data.keys()][index] ?? null; },
+    removeItem(key: string) { data.delete(key); },
+    setItem(key: string, value: string) { data.set(key, String(value)); }
+  };
+}
+
+beforeEach(() => {
+  vi.stubGlobal('localStorage', createMemoryStorage());
+  vi.stubGlobal('sessionStorage', createMemoryStorage());
+});
+
 afterEach(() => {
   localStorage.removeItem(STORAGE_KEY);
   sessionStorage.clear();
   resetAccountProfileSupplements();
   resetAccountErpMockWorkflows();
+  vi.unstubAllGlobals();
 });
 
 describe('Account A+B workflow', () => {
