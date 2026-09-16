@@ -20,12 +20,13 @@ describe('demo GLOBAL template', () => {
     expect(context.screenProfileCode).toBe('GLOBAL_SCREEN_PROFILE');
   });
 
-  it('limits unauthenticated GLOBAL navigation to the seven approved routes', () => {
+  it('limits unauthenticated GLOBAL navigation to the eight approved A+B routes', () => {
     const context = contextFromProfile(US_MARKET_PROFILE);
     const visible = filterAppRoutes(GLOBAL_SCREEN_PROFILE.screens, key => context.features[key] === true);
     expect(visible.map(route => route.path)).toEqual([
       '/',
       '/accounts',
+      '/contacts',
       '/activities',
       '/activity-reports',
       '/opportunities',
