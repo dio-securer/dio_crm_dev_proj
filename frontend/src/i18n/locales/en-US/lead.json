@@ -148,6 +148,7 @@
     "conversion": {
       "accountMode": "Account link mode",
       "opportunityName": "Opportunity name",
+      "defaultOpportunityName": "{{account}} Opportunity",
       "createNewAccount": "Create new Account",
       "existingAccount": "Existing Account",
       "linkExistingAccount": "Link existing Account",
