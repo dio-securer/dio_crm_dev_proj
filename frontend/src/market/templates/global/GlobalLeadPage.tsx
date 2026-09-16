@@ -6,13 +6,18 @@ import { API_LEAD_STEPS, LEAD_SOURCES, type LeadSource } from '../../../features
 import { createSandboxLead, listSandboxLeads, type SandboxLeadSummary } from '../../../features/lead/lead-sandbox';
 import { apiGet, apiPatch, apiPost } from '../../../api';
 import {
+  AbActivityTimeline,
   AbDataList,
   AbDetailFooter,
+  AbDetailHeader,
+  AbDetailTabs,
   AbEmptyState,
   AbEntityBadges,
   AbListToolbar,
   AbMobileFab,
+  AbNextAction,
   AbPagination,
+  AbQuickActions,
   AbSectionAccordion,
   AbStepProgress,
   AbWorkspace,
@@ -21,8 +26,9 @@ import {
 } from '../../../ui/ab-workspace';
 import '../../../styles/lead-workspace.css';
 
+type DetailTab = 'overview' | 'activity' | 'keyman' | 'system' | 'conversion';
 type ListFilter = 'all' | 'inProgress' | 'converted' | 'excluded';
-type SectionId = 'basic' | 'keyman' | 'system' | 'activity' | 'conversion';
+type SectionId = 'basic' | 'nextAction' | 'recentActivity' | 'tagsNote' | 'activity' | 'keyman' | 'hospitalScale' | 'system' | 'conversion';
 type LastActivityFilter = 'ALL' | '7' | '30' | 'NONE';
 type LeadListRecord = SandboxLeadSummary;
 
@@ -36,8 +42,8 @@ type LeadDetail = LeadListRecord & {
   contact_exclude_reason?: string | null;
 };
 
-const STATUS_FLOW: LeadStatus[] = ['NEW', 'FIRST_VISIT', 'KEYMAN_MEETING'];
 const LEAD_STATUSES: LeadStatus[] = ['NEW', 'FIRST_VISIT', 'KEYMAN_MEETING', 'CONTACT_EXCLUDED', 'CONVERTED'];
+const EMPTY_DRAFT = { keymanName: '', keymanType: '', keymanMobile: '', keymanEmail: '', mainSystem: '', subSystem: '' };
 
 function stepIndex(status: LeadStatus): number {
   if (status === 'CONTACT_EXCLUDED') return -1;
@@ -45,11 +51,20 @@ function stepIndex(status: LeadStatus): number {
   return idx >= 0 ? idx : 0;
 }
 
-function formatDate(value: string | null | undefined, locale: string) {
+function nextStatus(status: LeadStatus): LeadStatus | null {
+  if (status === 'NEW') return 'FIRST_VISIT';
+  if (status === 'FIRST_VISIT') return 'KEYMAN_MEETING';
+  return null;
+}
+
+function formatDate(value: string | null | undefined, locale: string, withTime = false) {
   if (!value) return '-';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat(locale, { year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
+  return new Intl.DateTimeFormat(locale, withTime
+    ? { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }
+    : { year: 'numeric', month: '2-digit', day: '2-digit' }
+  ).format(date);
 }
 
 function matchesLastActivity(value: string | null | undefined, filter: LastActivityFilter) {
@@ -80,9 +95,18 @@ export function GlobalLeadPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [selectedId, setSelectedId] = useState('');
+  const [activeTab, setActiveTab] = useState<DetailTab>('overview');
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   const [openSections, setOpenSections] = useState<Record<SectionId, boolean>>({
-    basic: true, keyman: false, system: false, activity: false, conversion: false
+    basic: true,
+    nextAction: true,
+    recentActivity: true,
+    tagsNote: false,
+    activity: true,
+    keyman: true,
+    hospitalScale: true,
+    system: true,
+    conversion: true
   });
   const [reason, setReason] = useState('');
   const [existingAccountId, setExistingAccountId] = useState('');
@@ -98,7 +122,7 @@ export function GlobalLeadPage() {
   const [quickOwner, setQuickOwner] = useState('');
   const [quickSource, setQuickSource] = useState<LeadSource>('WEB');
   const [quickAddress, setQuickAddress] = useState('');
-  const [draft, setDraft] = useState({ keymanName: '', keymanType: '', keymanMobile: '', keymanEmail: '', mainSystem: '', subSystem: '' });
+  const [draft, setDraft] = useState(EMPTY_DRAFT);
 
   const leads = useQuery({
     queryKey: ['global-leads', search],
@@ -169,11 +193,32 @@ export function GlobalLeadPage() {
 
   const toggleSection = (id: SectionId) => setOpenSections(prev => ({ ...prev, [id]: !prev[id] }));
 
+  const openActivityTab = () => {
+    setActiveTab('activity');
+    setOpenSections(prev => ({ ...prev, activity: true }));
+  };
+
+  const selectDetailTab = (id: string) => {
+    const tab = id as DetailTab;
+    setActiveTab(tab);
+    const sectionByTab: Record<DetailTab, SectionId> = {
+      overview: 'basic',
+      activity: 'activity',
+      keyman: 'keyman',
+      system: 'hospitalScale',
+      conversion: 'conversion'
+    };
+    setOpenSections(prev => ({ ...prev, [sectionByTab[tab]]: true }));
+  };
+
   const selectLead = (publicId: string) => {
     setSelectedId(publicId);
-    setOpenSections({ basic: true, keyman: false, system: false, activity: false, conversion: false });
+    setActiveTab('overview');
+    setDraft(EMPTY_DRAFT);
+    setOpenSections(prev => ({ ...prev, basic: true, nextAction: true, recentActivity: true }));
     setMobileDetailOpen(true);
     setMessage('');
+    setReason('');
   };
 
   const stepLabels = API_LEAD_STEPS.map(step => ({ id: step, label: t(`lead.steps.${step}`) }));
@@ -250,9 +295,11 @@ export function GlobalLeadPage() {
     setSelectedId(created.public_id);
     setDrawerOpen(false);
     resetQuickForm();
+    setDraft(EMPTY_DRAFT);
     setPage(1);
+    setActiveTab('overview');
     setMobileDetailOpen(openDetail);
-    setOpenSections({ basic: true, keyman: true, system: false, activity: false, conversion: false });
+    setOpenSections(prev => ({ ...prev, basic: true, nextAction: true, recentActivity: true, keyman: true }));
     setMessage(t('lead.toast.created'));
   }
 
@@ -263,7 +310,7 @@ export function GlobalLeadPage() {
         toStatus,
         reason: toStatus === 'CONTACT_EXCLUDED' ? reason || undefined : undefined
       });
-      setMessage(t('lead.toast.statusUpdated'));
+      setMessage(toStatus === 'CONTACT_EXCLUDED' ? t('lead.toast.excluded') : t('lead.toast.statusUpdated'));
       setReason('');
       await qc.invalidateQueries({ queryKey: ['global-leads'] });
       await qc.invalidateQueries({ queryKey: ['global-lead-detail', selected.public_id] });
@@ -302,7 +349,7 @@ export function GlobalLeadPage() {
         existingAccountPublicId: mode === 'EXISTING' ? existingAccountId : undefined,
         opportunityName: opportunityName.trim() || undefined
       });
-      setMessage(t('lead.toast.converted', { defaultValue: `Converted: ${result.accountPublicId}` }));
+      setMessage(t('lead.toast.converted', { accountId: result.accountPublicId }));
       setOpportunityName('');
       setExistingAccountId('');
       await qc.invalidateQueries({ queryKey: ['global-leads'] });
@@ -322,29 +369,79 @@ export function GlobalLeadPage() {
     { key: 'nextAction', label: t('lead.columns.nextAction'), width: 'minmax(125px,1fr)' }
   ];
 
-  const renderConceptBDetail = () => {
+  const renderDetailTab = () => {
     if (!selected) return null;
     const d = selectedDetail;
     const region = [selected.sido, selected.sigungu].filter(Boolean).join(' ') || 'GLOBAL';
-    return (
-      <>
-        <div className="ab-basic-panel">
-          <h4>{t('lead.sections.basic')}</h4>
-          <InfoRow label={t('lead.fields.hospitalName')} value={selected.hospital_name} />
-          <InfoRow label={t('lead.fields.phone')} value={selected.phone} />
-          <InfoRow label={t('lead.fields.country')} value={<span className="ab-list-country"><i>{countryFlag(selected.sido)}</i>{region}</span>} />
-          <InfoRow label={t('lead.fields.address')} value={selected.address} />
-          <InfoRow label={t('lead.fields.businessNo')} value={selected.business_no} />
-          <InfoRow label={t('lead.fields.owner')} value={selected.owner_name} />
+
+    if (activeTab === 'overview') {
+      const recentItems = selected.last_activity_at ? [{
+        id: `last-${selected.public_id}`,
+        typeLabel: t('lead.fields.lastActivity'),
+        timeLabel: formatDate(selected.last_activity_at, i18n.language, true),
+        title: t('lead.sections.recentActivity'),
+        owner: selected.owner_name ?? '-'
+      }] : [];
+      return (
+        <div className="ab-overview-grid">
+          <AbSectionAccordion id="basic" title={t('lead.sections.basic')} open={openSections.basic} onToggle={() => toggleSection('basic')}>
+            <InfoRow label={t('lead.fields.hospitalName')} value={selected.hospital_name} />
+            <InfoRow label={t('lead.fields.phone')} value={selected.phone} />
+            <InfoRow label={t('lead.fields.country')} value={<span className="ab-list-country"><i>{countryFlag(selected.sido)}</i>{region}</span>} />
+            <InfoRow label={t('lead.fields.address')} value={selected.address} />
+            <InfoRow label={t('lead.fields.businessNo')} value={selected.business_no} />
+            <InfoRow label={t('lead.fields.owner')} value={selected.owner_name} />
+            <InfoRow label={t('lead.fields.source')} value={selected.lead_source ? t(`lead.source.${selected.lead_source}`) : '-'} />
+          </AbSectionAccordion>
+
+          <AbSectionAccordion id="nextAction" title={t('lead.sections.nextAction')} open={openSections.nextAction} onToggle={() => toggleSection('nextAction')} incomplete={!selected.next_action}>
+            <AbNextAction
+              label={t('lead.fields.nextAction')}
+              title={selected.next_action ?? '-'}
+              due={formatDate(selected.next_action_at, i18n.language, true)}
+              action={<button type="button" className="lead-v2-button ghost" onClick={openActivityTab}>{t('lead.tabs.activity')}</button>}
+            />
+          </AbSectionAccordion>
+
+          <AbSectionAccordion id="recentActivity" title={t('lead.sections.recentActivity')} open={openSections.recentActivity} onToggle={() => toggleSection('recentActivity')}>
+            <AbActivityTimeline items={recentItems} empty={<p className="lead-v2-empty-inline">{t('lead.empty.activity')}</p>} />
+          </AbSectionAccordion>
+
+          <AbSectionAccordion id="tagsNote" title={`${t('lead.sections.tags')} / ${t('lead.sections.note')}`} open={openSections.tagsNote} onToggle={() => toggleSection('tagsNote')}>
+            <div className="ab-tag-list"><span>-</span></div>
+            <div className="ab-note-box">-</div>
+          </AbSectionAccordion>
         </div>
-        <div className="ab-sections">
-          <AbSectionAccordion id="keyman" title={t('lead.sections.keyman')} open={openSections.keyman} onToggle={() => toggleSection('keyman')} incomplete={!draft.keymanName}>
-            <div className="lead-v2-form">
-              <label><span>{t('lead.fields.keymanName')}</span><input value={draft.keymanName} onChange={e => setDraft(p => ({ ...p, keymanName: e.target.value }))} /></label>
-              <label><span>{t('lead.fields.keymanType')}</span><input value={draft.keymanType} onChange={e => setDraft(p => ({ ...p, keymanType: e.target.value }))} /></label>
-              <label><span>{t('lead.fields.keymanMobile')}</span><input value={draft.keymanMobile} onChange={e => setDraft(p => ({ ...p, keymanMobile: e.target.value }))} /></label>
-              <label><span>{t('lead.fields.keymanEmail')}</span><input value={draft.keymanEmail} onChange={e => setDraft(p => ({ ...p, keymanEmail: e.target.value }))} /></label>
-            </div>
+      );
+    }
+
+    if (activeTab === 'activity') {
+      return (
+        <AbSectionAccordion id="activity" title={t('lead.sections.activity')} open={openSections.activity} onToggle={() => toggleSection('activity')}>
+          <AbEmptyState title={t('lead.empty.activity')} />
+        </AbSectionAccordion>
+      );
+    }
+
+    if (activeTab === 'keyman') {
+      return (
+        <AbSectionAccordion id="keyman" title={t('lead.sections.keyman')} open={openSections.keyman} onToggle={() => toggleSection('keyman')} incomplete={!draft.keymanName}>
+          <div className="lead-v2-form">
+            <label><span>{t('lead.fields.keymanName')}</span><input value={draft.keymanName} onChange={e => setDraft(p => ({ ...p, keymanName: e.target.value }))} /></label>
+            <label><span>{t('lead.fields.keymanType')}</span><input value={draft.keymanType} onChange={e => setDraft(p => ({ ...p, keymanType: e.target.value }))} /></label>
+            <label><span>{t('lead.fields.keymanMobile')}</span><input value={draft.keymanMobile} onChange={e => setDraft(p => ({ ...p, keymanMobile: e.target.value }))} /></label>
+            <label><span>{t('lead.fields.keymanEmail')}</span><input value={draft.keymanEmail} onChange={e => setDraft(p => ({ ...p, keymanEmail: e.target.value }))} /></label>
+          </div>
+        </AbSectionAccordion>
+      );
+    }
+
+    if (activeTab === 'system') {
+      return (
+        <div className="ab-overview-grid">
+          <AbSectionAccordion id="hospitalScale" title={t('lead.sections.hospitalScale')} open={openSections.hospitalScale} onToggle={() => toggleSection('hospitalScale')} incomplete>
+            <InfoRow label={t('lead.fields.organizationType')} value="-" />
+            <InfoRow label={t('lead.fields.bedCount')} value="-" />
           </AbSectionAccordion>
           <AbSectionAccordion id="system" title={t('lead.sections.system')} open={openSections.system} onToggle={() => toggleSection('system')} incomplete={!draft.mainSystem}>
             <div className="lead-v2-form">
@@ -352,25 +449,30 @@ export function GlobalLeadPage() {
               <label><span>{t('lead.fields.subSystem')}</span><input value={draft.subSystem} onChange={e => setDraft(p => ({ ...p, subSystem: e.target.value }))} /></label>
             </div>
           </AbSectionAccordion>
-          <AbSectionAccordion id="activity" title={t('lead.sections.activity')} open={openSections.activity} onToggle={() => toggleSection('activity')}>
-            <p className="lead-v2-empty-inline">{t('lead.empty.activity')}</p>
-          </AbSectionAccordion>
-          <AbSectionAccordion id="conversion" title={t('lead.sections.conversion')} open={openSections.conversion} onToggle={() => toggleSection('conversion')}>
-            {selected.status === 'KEYMAN_MEETING' ? (
-              <div className="lead-v2-form">
-                <input value={opportunityName} onChange={e => setOpportunityName(e.target.value)} placeholder={t('lead.fields.expectedAmount')} />
-                <button type="button" className="lead-v2-button primary" onClick={() => void convert('NEW')}>{t('lead.actions.convert')}</button>
-                <select value={existingAccountId} onChange={e => setExistingAccountId(e.target.value)}>
-                  <option value="">{t('common.selectNone')}</option>
-                  {(accounts.data ?? []).map(account => <option key={account.public_id} value={account.public_id}>{account.account_name}</option>)}
-                </select>
-                <button type="button" className="lead-v2-button secondary" onClick={() => void convert('EXISTING')}>{t('lead.actions.convert')}</button>
-              </div>
-            ) : <p className="lead-v2-empty-inline">{t('lead.status.KEYMAN_MEETING')} · {t('lead.sections.conversion')}</p>}
-            {d?.contact_exclude_reason && <InfoRow label={t('lead.fields.excludeReason')} value={d.contact_exclude_reason} />}
-          </AbSectionAccordion>
         </div>
-      </>
+      );
+    }
+
+    return (
+      <AbSectionAccordion id="conversion" title={t('lead.sections.conversion')} open={openSections.conversion} onToggle={() => toggleSection('conversion')}>
+        {selected.status === 'KEYMAN_MEETING' ? (
+          <div className="lead-v2-form">
+            <label><span>{t('lead.conversion.opportunityName')}</span><input value={opportunityName} onChange={e => setOpportunityName(e.target.value)} placeholder={t('lead.conversion.opportunityName')} /></label>
+            <button type="button" className="lead-v2-button primary" onClick={() => void convert('NEW')}>{t('lead.conversion.createNewAccount')}</button>
+            <label><span>{t('lead.conversion.existingAccount')}</span><select value={existingAccountId} onChange={e => setExistingAccountId(e.target.value)}>
+              <option value="">{t('common.selectNone')}</option>
+              {(accounts.data ?? []).map(account => <option key={account.public_id} value={account.public_id}>{account.account_name}</option>)}
+            </select></label>
+            <button type="button" className="lead-v2-button secondary" onClick={() => void convert('EXISTING')}>{t('lead.conversion.linkExistingAccount')}</button>
+          </div>
+        ) : <p className="lead-v2-empty-inline">{t('lead.conversion.requiresKeymanMeeting')}</p>}
+
+        {selected.status !== 'CONVERTED' && selected.status !== 'CONTACT_EXCLUDED' && <div className="lead-v2-form">
+          <label><span>{t('lead.fields.excludeReason')}</span><input value={reason} onChange={e => setReason(e.target.value)} placeholder={t('lead.fields.excludeReason')} /></label>
+          <button type="button" className="lead-v2-button ghost" onClick={() => void move('CONTACT_EXCLUDED')}>{t('lead.actions.exclude')}</button>
+        </div>}
+        {d?.contact_exclude_reason && <InfoRow label={t('lead.fields.excludeReason')} value={d.contact_exclude_reason} />}
+      </AbSectionAccordion>
     );
   };
 
@@ -419,23 +521,56 @@ export function GlobalLeadPage() {
       {!selected && <div className="lead-v2-empty-detail">{t('lead.empty.detail')}</div>}
       {selected && <>
         <button type="button" className="lead-v2-mobile-back" onClick={() => setMobileDetailOpen(false)}>← {t('lead.actions.back')}</button>
-        <div className="lead-v2-detail-header">
-          <div className="lead-v2-detail-identity">
-            <div className="lead-v2-name-line"><h3>{selected.hospital_name}</h3></div>
-            <p>{selected.owner_name ?? '-'} · {selected.phone ?? '-'}</p>
-            <AbEntityBadges badges={[
-              { label: t(`lead.status.${selected.status}`), tone: selected.status === 'CONVERTED' ? 'success' : 'info' },
-              { label: selected.business_no || '-', tone: 'neutral' }
-            ]} />
-          </div>
-        </div>
-        <AbStepProgress steps={stepLabels} currentIndex={Math.max(0, stepIndex(selected.status))} mobileLabel={`${Math.max(0, stepIndex(selected.status)) + 1}/${API_LEAD_STEPS.length}`} />
-        <div className="lead-v2-status-actions">
-          {STATUS_FLOW.map(status => <button key={status} type="button" className="lead-v2-button ghost" onClick={() => void move(status)} disabled={selected.status === 'CONVERTED'}>{t(`lead.status.${status}`)}</button>)}
-          <button type="button" className="lead-v2-button ghost" onClick={() => void move('CONTACT_EXCLUDED')} disabled={selected.status === 'CONVERTED'}>{t('lead.actions.exclude')}</button>
-        </div>
-        <input className="lead-v2-inline-input" value={reason} onChange={e => setReason(e.target.value)} placeholder={t('lead.fields.excludeReason')} />
-        <div className="lead-v2-detail-content">{renderConceptBDetail()}</div>
+        <AbDetailHeader
+          eyebrow={selected.public_id}
+          title={selectedDetail?.keyman_name || selected.owner_name || selected.hospital_name}
+          subtitle={<><strong>{selected.hospital_name}</strong> · <span className="ab-list-country"><i>{countryFlag(selected.sido)}</i>{selected.sido || 'GLOBAL'}{selected.sigungu ? ` · ${selected.sigungu}` : ''}</span></>}
+          badges={<AbEntityBadges badges={[
+            { label: t(`lead.status.${selected.status}`), tone: selected.status === 'CONVERTED' ? 'success' : 'info' },
+            ...(selected.business_no ? [{ label: selected.business_no, tone: 'neutral' as const }] : [])
+          ]} />}
+          meta={<div className="ab-detail-meta-list">
+            <div className="ab-detail-meta-item"><span>{t('lead.fields.owner')}</span><strong>{selected.owner_name ?? '-'}</strong></div>
+            <div className="ab-detail-meta-item"><span>{t('lead.fields.lastActivity')}</span><strong>{formatDate(selected.last_activity_at, i18n.language, true)}</strong></div>
+            <div className="ab-detail-meta-item"><span>{t('lead.fields.nextAction')}</span><strong>{selected.next_action ?? '-'}</strong></div>
+            <div className="ab-detail-meta-item"><span>{t('lead.fields.source')}</span><strong>{selected.lead_source ? t(`lead.source.${selected.lead_source}`) : '-'}</strong></div>
+          </div>}
+          actions={<AbQuickActions
+            ariaLabel={t('lead.quickActionsLabel')}
+            actions={[
+              { id: 'call', label: t('lead.actions.call'), icon: '☎', href: selected.phone ? `tel:${selected.phone}` : undefined, disabled: !selected.phone },
+              { id: 'email', label: t('lead.actions.email'), icon: '✉', href: draft.keymanEmail ? `mailto:${draft.keymanEmail}` : undefined, disabled: !draft.keymanEmail },
+              { id: 'meeting', label: t('lead.actions.meeting'), icon: '◷', onClick: openActivityTab },
+              { id: 'activity', label: t('lead.actions.addActivity'), icon: '＋', onClick: openActivityTab, tone: 'primary' },
+              { id: 'more', label: t('lead.actions.more'), icon: '•••', onClick: () => selectDetailTab('conversion') }
+            ]}
+          />}
+        />
+
+        <AbStepProgress
+          steps={stepLabels}
+          currentIndex={stepIndex(selected.status)}
+          mobileLabel={selected.status === 'CONTACT_EXCLUDED' ? t('lead.status.CONTACT_EXCLUDED') : `${stepIndex(selected.status) + 1}/${API_LEAD_STEPS.length}`}
+        />
+        {selected.status === 'CONTACT_EXCLUDED' && <div className="ab-detail-terminal"><strong>{t('lead.status.CONTACT_EXCLUDED')}</strong></div>}
+
+        {nextStatus(selected.status) && <div className="lead-v2-status-actions">
+          <button type="button" className="lead-v2-button primary" onClick={() => void move(nextStatus(selected.status)!)}>{t('lead.actions.nextStatus')} · {t(`lead.status.${nextStatus(selected.status)!}`)}</button>
+        </div>}
+
+        <AbDetailTabs
+          ariaLabel={t('lead.detailTitle')}
+          activeId={activeTab}
+          onChange={selectDetailTab}
+          tabs={[
+            { id: 'overview', label: t('lead.tabs.overview') },
+            { id: 'activity', label: t('lead.tabs.activity') },
+            { id: 'keyman', label: t('lead.tabs.keyman'), count: draft.keymanName ? 1 : 0 },
+            { id: 'system', label: t('lead.tabs.system') },
+            { id: 'conversion', label: t('lead.tabs.conversion') }
+          ]}
+        />
+        <div className="ab-tab-panel" id={`ab-tab-panel-${activeTab}`} role="tabpanel">{renderDetailTab()}</div>
         <AbDetailFooter draftLabel={t('lead.actions.saveDraft')} saveLabel={t('lead.actions.save')} onDraft={() => setMessage(t('lead.toast.draftSaved'))} onSave={() => void saveSections()} />
       </>}
     </>
