@@ -5,6 +5,7 @@
     "listTitle": "Lead list",
     "detailTitle": "Lead detail",
     "quickCreateTitle": "Quick create Lead",
+    "quickActionsLabel": "Lead quick actions",
     "count": "{{count}} records",
     "mockMode": "Mock Mode",
     "apiPending": "API is not connected yet. Actual Leads will appear after DEV DB/Auth connection.",
@@ -20,6 +21,7 @@
       "call": "Call",
       "email": "Email",
       "meeting": "Meeting",
+      "addActivity": "Add activity",
       "back": "Back to list",
       "resetMock": "Reset mock",
       "resetFilters": "Reset filters",
@@ -130,6 +132,13 @@
       "previous": "Previous page",
       "next": "Next page",
       "pageStatus": "Page {{page}} / {{pages}} · {{count}} records"
+    },
+    "conversion": {
+      "opportunityName": "Opportunity name",
+      "createNewAccount": "Create new Account",
+      "existingAccount": "Existing Account",
+      "linkExistingAccount": "Link existing Account",
+      "requiresKeymanMeeting": "Account conversion is available from the key-person meeting stage."
     },
     "empty": {
       "list": "No leads found.",
