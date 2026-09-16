@@ -26,14 +26,13 @@ import {
   GlobalOrderPage
 } from '../market/templates/global/GlobalScreens';
 import {
-  DemoGlobalLeadPage,
-  DemoGlobalAccountPage,
   DemoGlobalActivityPage,
   DemoGlobalActivityReportPage,
   DemoGlobalOpportunityPage,
   DemoGlobalContractPage,
   DemoGlobalOrderPage
 } from '../demo/GlobalExecutiveDemoScreens';
+import { DemoGlobalLeadPage, DemoGlobalAccountPage } from '../demo/LeadAccountDemoScreens';
 import { isGlobalExecutiveDemoMode } from '../demo/demo-mode';
 import type { ScreenKey } from './screen-profile';
 
