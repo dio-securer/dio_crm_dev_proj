@@ -148,6 +148,7 @@
     "conversion": {
       "accountMode": "Account 연결 방식",
       "opportunityName": "Opportunity 명",
+      "defaultOpportunityName": "{{account}} 영업기회",
       "createNewAccount": "신규 Account 생성",
       "existingAccount": "기존 Account",
       "linkExistingAccount": "기존 Account 연결",
