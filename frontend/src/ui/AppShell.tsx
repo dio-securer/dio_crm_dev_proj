@@ -17,6 +17,7 @@ export type ShellNavItem = {
 type Props = { links: ShellNavItem[]; children: React.ReactNode };
 
 const iconPaths: Record<string, React.ReactNode> = {
+  home: <><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5M9.5 20v-6h5v6"/></>,
   lead: <><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></>,
   account: <><circle cx="12" cy="8" r="3"/><path d="M5 20c.5-4 3-6 7-6s6.5 2 7 6"/></>,
   activity: <><path d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11z"/><circle cx="12" cy="10" r="2"/></>,
@@ -74,12 +75,24 @@ export function AppShell({ links, children }: Props) {
     return links.filter(x => x.to !== '/' && location.pathname.startsWith(x.to)).sort((a,b) => b.to.length - a.to.length)[0] ?? links[0];
   }, [links, location.pathname]);
 
-  const mobilePrimary = links.filter(x => x.mobilePrimary).slice(0, 5);
+  const configuredMobilePrimary = links.filter(x => x.mobilePrimary).slice(0, 5);
+  const mobilePrimary = useMemo(() => {
+    const dashboard = links.find(x => x.icon === 'analytics');
+    const ordered: Array<ShellNavItem | null> = [
+      dashboard ? { ...dashboard, labelKey: 'shellV2.home', icon: 'home' } : null,
+      links.find(x => x.icon === 'lead') ?? null,
+      links.find(x => x.icon === 'account') ?? null,
+      links.find(x => x.icon === 'activity') ?? null
+    ];
+    const resolved = ordered.filter((item): item is ShellNavItem => item !== null);
+    const unique = resolved.filter((item, index) => resolved.findIndex(candidate => candidate.to === item.to) === index);
+    return unique.length ? unique : configuredMobilePrimary;
+  }, [links]);
   const mobileMore = links.filter(x => !mobilePrimary.some(p => p.to === x.to));
   const accountRoute = location.pathname.startsWith('/accounts');
 
   const navList = (items: ShellNavItem[], mobile = false) => items.map(item => (
-    <NavLink key={item.to} to={item.to} end={item.end} className={({isActive}) => `shell-nav-link${isActive ? ' active' : ''}${mobile ? ' mobile' : ''}`} onClick={() => setMobileMenu(false)}>
+    <NavLink key={`${mobile ? 'm-' : ''}${item.to}`} to={item.to} end={item.end} className={({isActive}) => `shell-nav-link${isActive ? ' active' : ''}${mobile ? ' mobile' : ''}`} onClick={() => setMobileMenu(false)}>
       <NavIcon name={item.icon} />
       <span>{t(item.labelKey)}</span>
     </NavLink>
