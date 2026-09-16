@@ -1,116 +1,192 @@
 import React, { useMemo, useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import type { ActivityCalendarItem, AccountSummary, LeadSummary } from '@dio-crm/contracts';
-import { apiGet, apiPatch, apiPost } from './api';
-import { useGlobalization } from './market/globalization-context';
+import {
+  addUnifiedActivity,
+  listUnifiedActivities,
+  listUnifiedActivityTargets,
+  type UnifiedActivity,
+  type UnifiedActivitySource,
+  type UnifiedActivityType
+} from './features/activity/activity-workspace-mock';
+import {
+  AbActivityTimeline,
+  AbDataList,
+  AbDetailHeader,
+  AbEmptyState,
+  AbEntityBadges,
+  AbInfoGrid,
+  AbListToolbar,
+  AbMobileFab,
+  AbPagination,
+  AbQuickCreate,
+  AbWorkspace,
+  type AbDataColumn
+} from './ui/ab-workspace';
+import './styles/lead-workspace.css';
+import './styles/entity-workspaces.css';
 
-const box: React.CSSProperties = { border: '1px solid #dfe4ea', borderRadius: 12, padding: 16, background: '#fff' };
-const input: React.CSSProperties = { padding: '8px 10px', border: '1px solid #ccd3dd', borderRadius: 8, minWidth: 160 };
+const ACTIVITY_TYPES: UnifiedActivityType[] = ['CALL', 'EMAIL', 'MEETING', 'VISIT', 'NOTE'];
 
-function localDate(d = new Date()) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
+type DateFilter = 'ALL' | 'TODAY' | '7';
+
+function localDateTimeValue(date = new Date()) {
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
-function position(): Promise<{ latitude: number; longitude: number; accuracyM: number }> {
-  return new Promise((resolve, reject) => {
-    navigator.geolocation.getCurrentPosition(
-      p => resolve({ latitude: p.coords.latitude, longitude: p.coords.longitude, accuracyM: p.coords.accuracy }),
-      reject,
-      { enableHighAccuracy: true, timeout: 15000 }
-    );
-  });
+function formatDateTime(value: string, locale: string) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat(locale, {
+    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+  }).format(date);
+}
+
+function matchesDate(value: string, filter: DateFilter) {
+  if (filter === 'ALL') return true;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return false;
+  const now = new Date();
+  if (filter === 'TODAY') return date.toDateString() === now.toDateString();
+  return now.getTime() - date.getTime() <= 7 * 86400000;
 }
 
 export function ActivitiesPage() {
-  const { t } = useTranslation();
-  const { featureEnabled } = useGlobalization();
-  const qc = useQueryClient();
-  const today = localDate();
-  const [relatedType, setRelatedType] = useState<'LEAD'|'ACCOUNT'>('LEAD');
-  const [relatedPublicId, setRelatedPublicId] = useState('');
-  const [plannedAt, setPlannedAt] = useState(`${today}T09:00`);
-  const [visitPurpose, setVisitPurpose] = useState('');
-  const [directWorkType, setDirectWorkType] = useState('');
-  const [directWorkReason, setDirectWorkReason] = useState('');
+  const { t, i18n } = useTranslation();
+  const [tick, setTick] = useState(0);
+  const [sourceFilter, setSourceFilter] = useState<'ALL' | UnifiedActivitySource>('ALL');
+  const [typeFilter, setTypeFilter] = useState<'ALL' | UnifiedActivityType>('ALL');
+  const [dateFilter, setDateFilter] = useState<DateFilter>('ALL');
+  const [search, setSearch] = useState('');
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
+  const [quickOpen, setQuickOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [message, setMessage] = useState('');
-  const [mapResult, setMapResult] = useState<any>(null);
-  const directEnabled = featureEnabled('DIRECT_WORK');
-  const gpsEnabled = featureEnabled('GPS_CHECKIN');
+  const [draft, setDraft] = useState({ source: 'ACCOUNT' as UnifiedActivitySource, targetId: '', type: 'CALL' as UnifiedActivityType, occurredAt: localDateTimeValue(), subject: '', note: '' });
 
-  const calendar = useQuery({
-    queryKey: ['activity-calendar', today],
-    queryFn: () => apiGet<ActivityCalendarItem[]>(`/api/activities/calendar?from=${today}&to=${today}`)
-  });
-  const leads = useQuery({ queryKey: ['activity-leads'], queryFn: () => apiGet<LeadSummary[]>('/api/leads') });
-  const accounts = useQuery({ queryKey: ['activity-accounts'], queryFn: () => apiGet<AccountSummary[]>('/api/accounts') });
+  const targets = useMemo(() => listUnifiedActivityTargets(), [tick]);
+  const rows = useMemo(() => listUnifiedActivities(), [tick]);
+  const selected = rows.find(row => row.id === selectedId) ?? null;
 
-  const targets = useMemo(() => relatedType === 'LEAD'
-    ? (leads.data ?? []).map(x => ({ id: x.public_id, name: x.hospital_name }))
-    : (accounts.data ?? []).map(x => ({ id: x.public_id, name: x.account_name })), [relatedType, leads.data, accounts.data]);
+  const filtered = useMemo(() => {
+    const q = search.trim().toLocaleLowerCase();
+    return rows
+      .filter(row => sourceFilter === 'ALL' || row.source === sourceFilter)
+      .filter(row => typeFilter === 'ALL' || row.type === typeFilter)
+      .filter(row => matchesDate(row.occurredAt, dateFilter))
+      .filter(row => !q || [row.targetName, row.subject, row.ownerName, row.note || ''].some(value => value.toLocaleLowerCase().includes(q)));
+  }, [rows, sourceFilter, typeFilter, dateFilter, search]);
 
-  async function createPlan(e: React.FormEvent) {
-    e.preventDefault(); setMessage('');
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const paged = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const availableTargets = targets.filter(target => target.source === draft.source);
+
+  const columns: AbDataColumn[] = [
+    { key: 'subject', label: t('activityWorkspace.subject'), width: 'minmax(180px,1.5fr)', mobileRole: 'primary' },
+    { key: 'target', label: t('activityWorkspace.target'), width: 'minmax(140px,1.1fr)' },
+    { key: 'source', label: t('activityWorkspace.source'), width: '86px', mobileRole: 'badge' },
+    { key: 'type', label: t('activityWorkspace.type'), width: '80px' },
+    { key: 'owner', label: t('activityWorkspace.owner'), width: '90px' },
+    { key: 'date', label: t('activityWorkspace.occurredAt'), width: '128px' }
+  ];
+
+  const select = (row: UnifiedActivity) => {
+    setSelectedId(row.id);
+    setMobileDetailOpen(true);
+  };
+
+  const reset = () => {
+    setSearch(''); setSourceFilter('ALL'); setTypeFilter('ALL'); setDateFilter('ALL'); setPage(1);
+  };
+
+  const create = () => {
+    if (!draft.targetId || !draft.subject.trim()) {
+      setMessage(t('activityWorkspace.required'));
+      return;
+    }
     try {
-      await apiPost('/api/activities/plans', {
-        relatedType, relatedPublicId, plannedAt, visitPurpose: visitPurpose || undefined,
-        directWorkType: directEnabled ? (directWorkType || undefined) : undefined,
-        directWorkReason: directEnabled ? (directWorkReason || undefined) : undefined
+      const created = addUnifiedActivity({
+        source: draft.source,
+        targetId: draft.targetId,
+        type: draft.type,
+        subject: draft.subject,
+        note: draft.note,
+        occurredAt: new Date(draft.occurredAt).toISOString()
       });
-      setMessage(t('activity.planCreated'));
-      await qc.invalidateQueries({ queryKey: ['activity-calendar'] });
-    } catch (err) { setMessage(err instanceof Error ? err.message : String(err)); }
-  }
+      setTick(value => value + 1);
+      setSelectedId(created.id);
+      setMobileDetailOpen(true);
+      setQuickOpen(false);
+      setDraft({ source: draft.source, targetId: '', type: 'CALL', occurredAt: localDateTimeValue(), subject: '', note: '' });
+      setMessage(t('activityWorkspace.created'));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : String(error));
+    }
+  };
 
-  async function check(action: 'check-in'|'check-out', publicId: string) {
-    setMessage(t('activity.gpsChecking'));
-    try {
-      const gps = await position();
-      const r = await apiPost<any>(`/api/activities/${publicId}/${action}`, gps);
-      setMessage(action === 'check-in' ? `${t('activity.checkIn')} · ${r.distanceM ?? '-'}m` : t('activity.checkOut'));
-      await qc.invalidateQueries({ queryKey: ['activity-calendar'] });
-    } catch (err) { setMessage(err instanceof Error ? err.message : String(err)); }
-  }
+  const list = <>
+    <div className="lead-v2-list-header"><div><strong>{t('activityWorkspace.listTitle')}</strong><span>{t('activityWorkspace.count', { count: filtered.length })}</span></div></div>
+    <AbDataList
+      columns={columns}
+      rows={paged}
+      rowKey={row => row.id}
+      selectedKey={selectedId ?? undefined}
+      onRowClick={select}
+      ariaLabel={t('activityWorkspace.listTitle')}
+      empty={<AbEmptyState title={t('activityWorkspace.empty')} />}
+      renderCells={row => [
+        <span className="ab-primary-stack"><strong>{row.subject}</strong><small>{row.note || '-'}</small></span>,
+        <span>{row.targetName}</span>,
+        <span className={`account-list-pill tone-${row.source === 'LEAD' ? 'info' : 'neutral'}`}>{row.source === 'LEAD' ? t('activityWorkspace.lead') : t('activityWorkspace.account')}</span>,
+        <span>{t(`account.activityTypes.${row.type}`)}</span>,
+        <span>{row.ownerName}</span>,
+        <span>{formatDateTime(row.occurredAt, i18n.language)}</span>
+      ]}
+    />
+    <AbPagination page={currentPage} pageSize={pageSize} totalItems={filtered.length} onPageChange={setPage} onPageSizeChange={size => { setPageSize(size); setPage(1); }} rowsPerPageLabel={t('account.pagination.rowsPerPage')} previousLabel={t('account.pagination.previous')} nextLabel={t('account.pagination.next')} pageStatus={t('account.pagination.pageStatus', { page: currentPage, pages: totalPages, count: filtered.length })} />
+  </>;
 
-  async function updateConsultation(publicId: string) {
-    const text = window.prompt(t('activity.consultationPrompt'));
-    if (text == null) return;
-    try { await apiPatch(`/api/activities/${publicId}`, { consultationContent: text }); setMessage(t('activity.consultationSaved')); }
-    catch (err) { setMessage(err instanceof Error ? err.message : String(err)); }
-  }
+  const detail = <article className="lead-v2-detail-pane">
+    {!selected && <div className="lead-v2-empty-detail">{t('activityWorkspace.select')}</div>}
+    {selected && <>
+      <button type="button" className="lead-v2-mobile-back" onClick={() => setMobileDetailOpen(false)}>← {t('account.back')}</button>
+      <AbDetailHeader
+        eyebrow={selected.id}
+        title={selected.subject}
+        subtitle={selected.targetName}
+        badges={<AbEntityBadges badges={[
+          { label: selected.source === 'LEAD' ? t('activityWorkspace.sourceLead') : t('activityWorkspace.sourceAccount'), tone: selected.source === 'LEAD' ? 'info' : 'neutral' },
+          { label: t(`account.activityTypes.${selected.type}`), tone: 'success' }
+        ]} />}
+        meta={<div className="ab-detail-meta-list">
+          <div className="ab-detail-meta-item"><span>{t('activityWorkspace.target')}</span><strong>{selected.targetName}</strong></div>
+          <div className="ab-detail-meta-item"><span>{t('activityWorkspace.owner')}</span><strong>{selected.ownerName}</strong></div>
+          <div className="ab-detail-meta-item"><span>{t('activityWorkspace.occurredAt')}</span><strong>{formatDateTime(selected.occurredAt, i18n.language)}</strong></div>
+          <div className="ab-detail-meta-item"><span>{t('activityWorkspace.type')}</span><strong>{t(`account.activityTypes.${selected.type}`)}</strong></div>
+        </div>}
+      />
+      <div className="lead-v2-detail-content entity-detail-stack">
+        <AbInfoGrid columns={2} items={[
+          { label: t('activityWorkspace.source'), value: selected.source === 'LEAD' ? t('activityWorkspace.lead') : t('activityWorkspace.account') },
+          { label: t('activityWorkspace.target'), value: selected.targetName },
+          { label: t('activityWorkspace.owner'), value: selected.ownerName },
+          { label: t('activityWorkspace.occurredAt'), value: formatDateTime(selected.occurredAt, i18n.language) }
+        ]} />
+        <div className="entity-section-card"><div className="entity-section-title"><strong>{t('activityWorkspace.note')}</strong></div><p>{selected.note || '-'}</p></div>
+        <div className="entity-section-card"><div className="entity-section-title"><strong>{t('activityWorkspace.timelineSection')}</strong></div><AbActivityTimeline items={rows.filter(row => row.source === selected.source && row.targetId === selected.targetId).slice(0, 10).map(row => ({ id: row.id, typeLabel: t(`account.activityTypes.${row.type}`), timeLabel: formatDateTime(row.occurredAt, i18n.language), title: row.subject, summary: row.note || undefined, owner: row.ownerName }))} /></div>
+      </div>
+    </>}
+  </article>;
 
-  async function loadMap() {
-    setMessage(t('activity.gpsChecking'));
-    try {
-      const gps = await position();
-      const r = await apiGet<any>(`/api/activities/map/today?date=${today}&latitude=${gps.latitude}&longitude=${gps.longitude}&radiusKm=10`);
-      setMapResult(r); setMessage(t('activity.nearbyLoaded',{count:r.nearbyHospitals?.length ?? 0}));
-    } catch (err) { setMessage(err instanceof Error ? err.message : String(err)); }
-  }
-
-  return <div style={{ display: 'grid', gap: 16 }}>
-    <section style={box}>
-      <h2>{t('activity.title')}</h2>
-      <form onSubmit={createPlan} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'end' }}>
-        <label>{t('activity.target')}<br/><select style={input} value={relatedType} onChange={e => { setRelatedType(e.target.value as 'LEAD'|'ACCOUNT'); setRelatedPublicId(''); }}><option value="LEAD">Lead</option><option value="ACCOUNT">Account</option></select></label>
-        <label>{t('activity.hospital')}<br/><select style={{ ...input, minWidth: 240 }} required value={relatedPublicId} onChange={e => setRelatedPublicId(e.target.value)}><option value="">{t('common.selectNone')}</option>{targets.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
-        <label>{t('activity.schedule')}<br/><input style={input} type="datetime-local" required value={plannedAt} onChange={e => setPlannedAt(e.target.value)} /></label>
-        <label>{t('activity.purpose')}<br/><input style={input} value={visitPurpose} onChange={e => setVisitPurpose(e.target.value)} /></label>
-        {directEnabled&&<><label>{t('activity.direct')}<br/><select style={input} value={directWorkType} onChange={e => setDirectWorkType(e.target.value)}><option value="">{t('activity.none')}</option><option value="DIRECT_WORK">{t('activity.directWork')}</option><option value="DIRECT_LEAVE">{t('activity.directLeave')}</option></select></label>{directWorkType&&<label>{t('activity.reason')}<br/><input style={input} required value={directWorkReason} onChange={e=>setDirectWorkReason(e.target.value)}/></label>}</>}
-        <button type="submit" style={input}>{t('activity.register')}</button>
-      </form>
-      <p style={{ color: '#667085', fontSize: 13 }}>{t('activity.eventHint')}</p>
-    </section>
-    <section style={box}>
-      <div style={{display:'flex',justifyContent:'space-between',gap:8}}><h2>{t('activity.today')}</h2><button onClick={loadMap}>{t('activity.nearby')}</button></div>
-      {calendar.isLoading&&<p>{t('common.loading')}</p>}
-      {(calendar.data??[]).map(a=><div key={a.activity_public_id} style={{padding:'12px 0',borderBottom:'1px solid #eef1f5'}}><b>{a.related_name_snapshot}</b> · {t(`status.${a.status}`,{defaultValue:a.status})}<br/><small>{new Date(a.start_at).toLocaleString()} · {a.visit_purpose||'-'}</small><div style={{marginTop:8,display:'flex',gap:8}}>{gpsEnabled&&a.status==='PLANNED'&&<button onClick={()=>check('check-in',a.activity_public_id)}>{t('activity.checkIn')}</button>}{a.status==='IN_PROGRESS'&&<><button onClick={()=>updateConsultation(a.activity_public_id)}>{t('activity.consultation')}</button><button onClick={()=>check('check-out',a.activity_public_id)}>{t('activity.checkOut')}</button></>}</div></div>)}
-      {!calendar.isLoading&&!(calendar.data??[]).length&&<p>{t('activity.noToday')}</p>}
-    </section>
-    {mapResult&&<section style={box}><h2>{t('activity.mapTitle')}</h2><p style={{color:'#667085'}}>{t('activity.mapHint')}</p>{(mapResult.nearbyHospitals??[]).slice(0,30).map((h:any)=><div key={`${h.related_type}-${h.public_id}`} style={{padding:'7px 0',borderBottom:'1px solid #eef1f5'}}>{h.name} · {h.related_type} · <b>{h.distance_m}m</b> <span style={{color:'#667085'}}>{h.address}</span></div>)}</section>}
-    {message&&<div style={{...box,background:'#f8fafc'}}>{message}</div>}
-  </div>;
+  return <section className={`lead-v2 ab-workspace${mobileDetailOpen ? ' mobile-detail-open' : ''}`}>
+    <header className="lead-v2-page-header"><div><div className="lead-v2-title-line"><span className="lead-v2-kicker">CRM · ACTIVITY</span></div><h2>{t('activityWorkspace.title')}</h2><p>{t('activityWorkspace.subtitle')}</p></div><div className="lead-v2-header-actions"><button type="button" className="lead-v2-button primary" onClick={() => setQuickOpen(true)}>+ {t('activityWorkspace.new')}</button></div></header>
+    <div className="entity-toolbar-tabs">{(['ALL', 'LEAD', 'ACCOUNT'] as const).map(source => <button type="button" key={source} className={`lead-v2-button secondary${sourceFilter === source ? ' active' : ''}`} onClick={() => { setSourceFilter(source); setPage(1); }}>{source === 'ALL' ? t('activityWorkspace.all') : source === 'LEAD' ? t('activityWorkspace.lead') : t('activityWorkspace.account')}</button>)}</div>
+    <AbListToolbar searchValue={search} onSearchChange={value => { setSearch(value); setPage(1); }} searchPlaceholder={t('activityWorkspace.searchPlaceholder')} onReset={reset} resetLabel={t('account.filters.reset')} resultSummary={t('activityWorkspace.count', { count: filtered.length })} filters={<><select value={typeFilter} onChange={event => { setTypeFilter(event.target.value as 'ALL' | UnifiedActivityType); setPage(1); }}><option value="ALL">{t('activityWorkspace.allTypes')}</option>{ACTIVITY_TYPES.map(type => <option key={type} value={type}>{t(`account.activityTypes.${type}`)}</option>)}</select><select value={dateFilter} onChange={event => { setDateFilter(event.target.value as DateFilter); setPage(1); }}><option value="ALL">{t('activityWorkspace.allDates')}</option><option value="TODAY">{t('activityWorkspace.today')}</option><option value="7">{t('activityWorkspace.recent7')}</option></select></>} />
+    <AbWorkspace list={list} detail={detail} />
+    <AbMobileFab label={t('activityWorkspace.new')} onClick={() => setQuickOpen(true)} />
+    <AbQuickCreate open={quickOpen} title={t('activityWorkspace.quickTitle')} help={t('activityWorkspace.quickHelp')} closeLabel={t('app.close')} onClose={() => setQuickOpen(false)} footer={<div className="lead-v2-drawer-actions"><button type="button" className="lead-v2-button ghost" onClick={() => setQuickOpen(false)}>{t('common.cancel')}</button><button type="button" className="lead-v2-button primary" onClick={create}>{t('common.save')}</button></div>}><div className="entity-quick-form"><label><span>{t('activityWorkspace.source')} *</span><select value={draft.source} onChange={event => setDraft(previous => ({ ...previous, source: event.target.value as UnifiedActivitySource, targetId: '' }))}><option value="LEAD">{t('activityWorkspace.lead')}</option><option value="ACCOUNT">{t('activityWorkspace.account')}</option></select></label><label><span>{t('activityWorkspace.target')} *</span><select value={draft.targetId} onChange={event => setDraft(previous => ({ ...previous, targetId: event.target.value }))}><option value="">{t('common.selectNone')}</option>{availableTargets.map(target => <option key={`${target.source}-${target.id}`} value={target.id}>{target.name}</option>)}</select></label><label><span>{t('activityWorkspace.type')}</span><select value={draft.type} onChange={event => setDraft(previous => ({ ...previous, type: event.target.value as UnifiedActivityType }))}>{ACTIVITY_TYPES.map(type => <option key={type} value={type}>{t(`account.activityTypes.${type}`)}</option>)}</select></label><label><span>{t('activityWorkspace.occurredAt')}</span><input type="datetime-local" value={draft.occurredAt} onChange={event => setDraft(previous => ({ ...previous, occurredAt: event.target.value }))} /></label><label className="full"><span>{t('activityWorkspace.subject')} *</span><input value={draft.subject} onChange={event => setDraft(previous => ({ ...previous, subject: event.target.value }))} /></label><label className="full"><span>{t('activityWorkspace.note')}</span><textarea rows={4} value={draft.note} onChange={event => setDraft(previous => ({ ...previous, note: event.target.value }))} /></label></div></AbQuickCreate>
+    {message && <div className="lead-v2-toast" role="status">✓ {message}</div>}
+  </section>;
 }
