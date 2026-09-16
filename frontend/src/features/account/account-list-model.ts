@@ -1,4 +1,5 @@
 import type { AccountSummary } from '@dio-crm/contracts';
+import { listAccountActivities } from './account-relations-mock';
 
 export type AccountLastActivityFilter = 'ALL' | '7' | '30' | 'NONE';
 
@@ -38,12 +39,14 @@ export function accountCountry(row: AccountSummary): string {
 }
 
 /**
- * AccountSummary does not yet expose last_activity_at.
- * During the Mock-first phase updated_at is used as the list-level activity proxy.
- * Replace only this helper when the API contract exposes the real activity timestamp.
+ * Mock-first rule: prefer the newest Account activity stored in the relation repository.
+ * Until the API exposes last_activity_at, updated_at remains the fallback timestamp.
  */
 export function accountLastActivity(row: AccountSummary): string | undefined {
-  return row.updated_at || undefined;
+  const activity = listAccountActivities(row.public_id)[0]?.occurredAt;
+  if (!activity) return row.updated_at || undefined;
+  if (!row.updated_at) return activity;
+  return activity > row.updated_at ? activity : row.updated_at;
 }
 
 function matchesLastActivity(value: string | undefined, filter: AccountLastActivityFilter): boolean {
