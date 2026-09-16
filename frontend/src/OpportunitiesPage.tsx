@@ -45,7 +45,7 @@ function formatDate(value: string | null | undefined, locale: string) {
 
 function stageTone(stage: OpportunityStage) {
   if (stage === 'WON') return 'success' as const;
-  if (stage === 'LOST') return 'danger' as const;
+  if (stage === 'LOST') return 'neutral' as const;
   if (stage === 'HOLD') return 'warning' as const;
   return 'info' as const;
 }
@@ -107,25 +107,13 @@ export function OpportunitiesPage() {
     setSelectedId(row.id);
     setTab('overview');
     setMobileDetailOpen(true);
-    setForecast({
-      probability: String(row.probability),
-      expectedAmount: String(row.expectedAmount),
-      expectedCloseDate: row.expectedCloseDate || ''
-    });
+    setForecast({ probability: String(row.probability), expectedAmount: String(row.expectedAmount), expectedCloseDate: row.expectedCloseDate || '' });
   };
 
   const create = () => {
-    if (!draft.accountId || !draft.name.trim()) {
-      setMessage(t('opportunityWorkspace.required'));
-      return;
-    }
+    if (!draft.accountId || !draft.name.trim()) { setMessage(t('opportunityWorkspace.required')); return; }
     try {
-      const created = addMockOpportunity({
-        accountId: draft.accountId,
-        name: draft.name,
-        expectedAmount: Number(draft.expectedAmount || 0),
-        expectedCloseDate: draft.expectedCloseDate || undefined
-      });
+      const created = addMockOpportunity({ accountId: draft.accountId, name: draft.name, expectedAmount: Number(draft.expectedAmount || 0), expectedCloseDate: draft.expectedCloseDate || undefined });
       setTick(value => value + 1);
       setSelectedId(created.id);
       setTab('overview');
@@ -133,58 +121,33 @@ export function OpportunitiesPage() {
       setQuickOpen(false);
       setDraft({ accountId: '', name: '', expectedAmount: '', expectedCloseDate: '' });
       setMessage(t('opportunityWorkspace.created'));
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : String(error));
-    }
+    } catch (error) { setMessage(error instanceof Error ? error.message : String(error)); }
   };
 
   const changeStage = (stage: OpportunityStage) => {
     if (!selected) return;
-    try {
-      updateMockOpportunity(selected.id, { stage });
-      setTick(value => value + 1);
-      setMessage(t('opportunityWorkspace.stageSaved'));
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : String(error));
-    }
+    try { updateMockOpportunity(selected.id, { stage }); setTick(value => value + 1); setMessage(t('opportunityWorkspace.stageSaved')); }
+    catch (error) { setMessage(error instanceof Error ? error.message : String(error)); }
   };
 
   const saveForecast = () => {
     if (!selected) return;
     try {
-      updateMockOpportunity(selected.id, {
-        probability: Number(forecast.probability || 0),
-        expectedAmount: Number(forecast.expectedAmount || 0),
-        expectedCloseDate: forecast.expectedCloseDate || null
-      });
+      updateMockOpportunity(selected.id, { probability: Number(forecast.probability || 0), expectedAmount: Number(forecast.expectedAmount || 0), expectedCloseDate: forecast.expectedCloseDate || null });
       setTick(value => value + 1);
       setMessage(t('opportunityWorkspace.forecastSaved'));
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : String(error));
-    }
+    } catch (error) { setMessage(error instanceof Error ? error.message : String(error)); }
   };
 
   const stageIndex = selected ? Math.max(0, MAIN_STAGE_FLOW.indexOf(selected.stage)) : 0;
-
   const list = <>
     <div className="lead-v2-list-header"><div><strong>{t('opportunityWorkspace.listTitle')}</strong><span>{t('opportunityWorkspace.count', { count: filtered.length })}</span></div></div>
-    <AbDataList
-      columns={columns}
-      rows={paged}
-      rowKey={row => row.id}
-      selectedKey={selectedId ?? undefined}
-      onRowClick={select}
-      ariaLabel={t('opportunityWorkspace.listTitle')}
-      empty={<AbEmptyState title={t('opportunityWorkspace.empty')} />}
-      renderCells={row => [
-        <span className="ab-primary-stack"><strong>{row.name}</strong><small>{row.source === 'LEAD_CONVERSION' ? t('opportunityWorkspace.sourceLead') : t('opportunityWorkspace.sourceManual')}</small></span>,
-        <span>{row.accountName}</span>,
-        <span className={`account-list-pill tone-${stageTone(row.stage)}`}>{t(`opportunityWorkspace.stages.${row.stage}`)}</span>,
-        <span>{money(row.expectedAmount)}</span>,
-        <span>{row.ownerName}</span>,
-        <span>{formatDate(row.expectedCloseDate, i18n.language)}</span>
-      ]}
-    />
+    <AbDataList columns={columns} rows={paged} rowKey={row => row.id} selectedKey={selectedId ?? undefined} onRowClick={select} ariaLabel={t('opportunityWorkspace.listTitle')} empty={<AbEmptyState title={t('opportunityWorkspace.empty')} />} renderCells={row => [
+      <span className="ab-primary-stack"><strong>{row.name}</strong><small>{row.source === 'LEAD_CONVERSION' ? t('opportunityWorkspace.sourceLead') : t('opportunityWorkspace.sourceManual')}</small></span>,
+      <span>{row.accountName}</span>,
+      <span className={`account-list-pill tone-${stageTone(row.stage)}`}>{t(`opportunityWorkspace.stages.${row.stage}`)}</span>,
+      <span>{money(row.expectedAmount)}</span>, <span>{row.ownerName}</span>, <span>{formatDate(row.expectedCloseDate, i18n.language)}</span>
+    ]} />
     <AbPagination page={currentPage} pageSize={pageSize} totalItems={filtered.length} onPageChange={setPage} onPageSizeChange={size => { setPageSize(size); setPage(1); }} rowsPerPageLabel={t('account.pagination.rowsPerPage')} previousLabel={t('account.pagination.previous')} nextLabel={t('account.pagination.next')} pageStatus={t('account.pagination.pageStatus', { page: currentPage, pages: totalPages, count: filtered.length })} />
   </>;
 
@@ -192,47 +155,29 @@ export function OpportunitiesPage() {
     {!selected && <div className="lead-v2-empty-detail">{t('opportunityWorkspace.select')}</div>}
     {selected && <>
       <button type="button" className="lead-v2-mobile-back" onClick={() => setMobileDetailOpen(false)}>← {t('account.back')}</button>
-      <AbDetailHeader
-        eyebrow={selected.id}
-        title={selected.name}
-        subtitle={selected.accountName}
-        badges={<AbEntityBadges badges={[
-          { label: t(`opportunityWorkspace.stages.${selected.stage}`), tone: stageTone(selected.stage) },
-          { label: selected.source === 'LEAD_CONVERSION' ? t('opportunityWorkspace.sourceLead') : t('opportunityWorkspace.sourceManual'), tone: 'neutral' }
-        ]} />}
-        meta={<div className="ab-detail-meta-list">
-          <div className="ab-detail-meta-item"><span>{t('opportunityWorkspace.owner')}</span><strong>{selected.ownerName}</strong></div>
-          <div className="ab-detail-meta-item"><span>{t('opportunityWorkspace.amount')}</span><strong>{money(selected.expectedAmount)}</strong></div>
-          <div className="ab-detail-meta-item"><span>{t('opportunityWorkspace.probability')}</span><strong>{selected.probability}%</strong></div>
-          <div className="ab-detail-meta-item"><span>{t('opportunityWorkspace.expectedClose')}</span><strong>{formatDate(selected.expectedCloseDate, i18n.language)}</strong></div>
-        </div>}
-        actions={<AbQuickActions actions={[
-          { id: 'activity', label: t('account.actions.addActivity'), icon: '＋', onClick: () => setActivityOpen(true), tone: 'primary' },
-          { id: 'stage', label: t('opportunityWorkspace.stageTab'), icon: '⇢', onClick: () => setTab('stage') }
-        ]} />}
-      />
-      <nav className="lead-v2-tabs">
-        {(['overview', 'stage', 'activity'] as OpportunityTab[]).map(item => <button type="button" key={item} className={tab === item ? 'active' : ''} onClick={() => setTab(item)}>{t(`opportunityWorkspace.${item === 'stage' ? 'stageTab' : item}`)}</button>)}
-      </nav>
+      <AbDetailHeader eyebrow={selected.id} title={selected.name} subtitle={selected.accountName} badges={<AbEntityBadges badges={[
+        { label: t(`opportunityWorkspace.stages.${selected.stage}`), tone: stageTone(selected.stage) },
+        { label: selected.source === 'LEAD_CONVERSION' ? t('opportunityWorkspace.sourceLead') : t('opportunityWorkspace.sourceManual'), tone: 'neutral' }
+      ]} />} meta={<div className="ab-detail-meta-list">
+        <div className="ab-detail-meta-item"><span>{t('opportunityWorkspace.owner')}</span><strong>{selected.ownerName}</strong></div>
+        <div className="ab-detail-meta-item"><span>{t('opportunityWorkspace.amount')}</span><strong>{money(selected.expectedAmount)}</strong></div>
+        <div className="ab-detail-meta-item"><span>{t('opportunityWorkspace.probability')}</span><strong>{selected.probability}%</strong></div>
+        <div className="ab-detail-meta-item"><span>{t('opportunityWorkspace.expectedClose')}</span><strong>{formatDate(selected.expectedCloseDate, i18n.language)}</strong></div>
+      </div>} actions={<AbQuickActions actions={[
+        { id: 'activity', label: t('account.actions.addActivity'), icon: '＋', onClick: () => setActivityOpen(true), tone: 'primary' },
+        { id: 'stage', label: t('opportunityWorkspace.stageTab'), icon: '⇢', onClick: () => setTab('stage') }
+      ]} />} />
+      <nav className="lead-v2-tabs">{(['overview', 'stage', 'activity'] as OpportunityTab[]).map(item => <button type="button" key={item} className={tab === item ? 'active' : ''} onClick={() => setTab(item)}>{t(`opportunityWorkspace.${item === 'stage' ? 'stageTab' : item}`)}</button>)}</nav>
       <div className="lead-v2-detail-content entity-detail-stack">
-        {tab === 'overview' && <>
-          <AbInfoGrid columns={2} items={[
-            { label: t('opportunityWorkspace.account'), value: selected.accountName },
-            { label: t('opportunityWorkspace.owner'), value: selected.ownerName },
-            { label: t('opportunityWorkspace.amount'), value: money(selected.expectedAmount) },
-            { label: t('opportunityWorkspace.probability'), value: `${selected.probability}%` },
-            { label: t('opportunityWorkspace.expectedClose'), value: formatDate(selected.expectedCloseDate, i18n.language) },
-            { label: t('opportunityWorkspace.source'), value: selected.source === 'LEAD_CONVERSION' ? t('opportunityWorkspace.sourceLead') : t('opportunityWorkspace.sourceManual') }
-          ]} />
-          <div className="entity-section-card"><AbStepProgress steps={MAIN_STAGE_FLOW.map(stage => ({ id: stage, label: t(`opportunityWorkspace.stages.${stage}`) }))} currentIndex={stageIndex} mobileLabel={t(`opportunityWorkspace.stages.${selected.stage}`)} /></div>
-        </>}
+        {tab === 'overview' && <><AbInfoGrid columns={2} items={[
+          { label: t('opportunityWorkspace.account'), value: selected.accountName }, { label: t('opportunityWorkspace.owner'), value: selected.ownerName },
+          { label: t('opportunityWorkspace.amount'), value: money(selected.expectedAmount) }, { label: t('opportunityWorkspace.probability'), value: `${selected.probability}%` },
+          { label: t('opportunityWorkspace.expectedClose'), value: formatDate(selected.expectedCloseDate, i18n.language) },
+          { label: t('opportunityWorkspace.source'), value: selected.source === 'LEAD_CONVERSION' ? t('opportunityWorkspace.sourceLead') : t('opportunityWorkspace.sourceManual') }
+        ]} /><div className="entity-section-card"><AbStepProgress steps={MAIN_STAGE_FLOW.map(stage => ({ id: stage, label: t(`opportunityWorkspace.stages.${stage}`) }))} currentIndex={stageIndex} mobileLabel={t(`opportunityWorkspace.stages.${selected.stage}`)} /></div></>}
         {tab === 'stage' && <AbSectionAccordion id="opportunity-stage" title={t('opportunityWorkspace.stageTab')} open onToggle={() => undefined}>
           <div className="entity-stage-actions">{OPPORTUNITY_STAGES.map(stage => <button type="button" key={stage} className={`lead-v2-button secondary${selected.stage === stage ? ' active' : ''}`} onClick={() => changeStage(stage)}>{t(`opportunityWorkspace.stages.${stage}`)}</button>)}</div>
-          <div className="entity-inline-form" style={{ marginTop: 14 }}>
-            <label><span>{t('opportunityWorkspace.amount')}</span><input type="number" min="0" value={forecast.expectedAmount} onChange={event => setForecast(previous => ({ ...previous, expectedAmount: event.target.value }))} /></label>
-            <label><span>{t('opportunityWorkspace.probability')}</span><input type="number" min="0" max="100" value={forecast.probability} onChange={event => setForecast(previous => ({ ...previous, probability: event.target.value }))} /></label>
-            <label><span>{t('opportunityWorkspace.expectedClose')}</span><input type="date" value={forecast.expectedCloseDate} onChange={event => setForecast(previous => ({ ...previous, expectedCloseDate: event.target.value }))} /></label>
-          </div>
+          <div className="entity-inline-form" style={{ marginTop: 14 }}><label><span>{t('opportunityWorkspace.amount')}</span><input type="number" min="0" value={forecast.expectedAmount} onChange={event => setForecast(previous => ({ ...previous, expectedAmount: event.target.value }))} /></label><label><span>{t('opportunityWorkspace.probability')}</span><input type="number" min="0" max="100" value={forecast.probability} onChange={event => setForecast(previous => ({ ...previous, probability: event.target.value }))} /></label><label><span>{t('opportunityWorkspace.expectedClose')}</span><input type="date" value={forecast.expectedCloseDate} onChange={event => setForecast(previous => ({ ...previous, expectedCloseDate: event.target.value }))} /></label></div>
           <div className="account-relation-section-actions"><button type="button" className="lead-v2-button primary" onClick={saveForecast}>{t('common.save')}</button></div>
         </AbSectionAccordion>}
         {tab === 'activity' && <div className="entity-section-card"><div className="entity-section-title"><strong>{t('opportunityWorkspace.activity')}</strong><button type="button" className="lead-v2-button secondary" onClick={() => setActivityOpen(true)}>+ {t('account.actions.addActivity')}</button></div><AbActivityTimeline items={accountActivities.map(item => ({ id: item.id, typeLabel: t(`account.activityTypes.${item.type}`), timeLabel: formatDate(item.occurredAt, i18n.language), title: item.subject, summary: item.note || undefined, owner: item.ownerName }))} empty={<AbEmptyState title={t('activityWorkspace.empty')} />} /></div>}
