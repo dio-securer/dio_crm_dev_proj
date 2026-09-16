@@ -1,8 +1,6 @@
 import { createPublicId } from '../../account-sandbox';
-import {
-  listMockConvertedContacts,
-  listMockConvertedOpportunities
-} from '../lead/lead-conversion-mock';
+import { listMockConvertedContacts } from '../lead/lead-conversion-mock';
+import { listMockOpportunities } from '../opportunity/opportunity-mock';
 
 const CONTACT_KEY = 'dio-crm:mock:account-contacts:v1';
 const ACTIVITY_KEY = 'dio-crm:mock:account-activities:v1';
@@ -130,18 +128,16 @@ export function addAccountContact(accountId: string, input: Omit<AccountMockCont
 }
 
 export function listAccountOpportunities(accountId: string): AccountMockOpportunity[] {
-  return listMockConvertedOpportunities(accountId)
-    .map(row => ({
-      id: row.id,
-      accountId: row.accountId,
-      name: row.name,
-      stage: row.stage,
-      expectedAmount: row.expectedAmount,
-      ownerName: row.ownerName,
-      sourceLeadId: row.sourceLeadId,
-      createdAt: row.createdAt
-    }))
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return listMockOpportunities(accountId).map(row => ({
+    id: row.id,
+    accountId: row.accountId,
+    name: row.name,
+    stage: row.stage,
+    expectedAmount: row.expectedAmount,
+    ownerName: row.ownerName,
+    sourceLeadId: row.sourceLeadId,
+    createdAt: row.createdAt
+  }));
 }
 
 export function listAccountActivities(accountId: string): AccountMockActivity[] {
