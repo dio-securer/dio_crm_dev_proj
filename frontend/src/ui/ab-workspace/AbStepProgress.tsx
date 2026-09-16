@@ -9,10 +9,16 @@ type Props = {
   mobileLabel?: string;
 };
 
+function renderMobileLabel(label: string) {
+  const progress = label.match(/^(\d+)\s*\/\s*(\d+)$/);
+  if (!progress) return label;
+  return <><span>STEP</span><strong>{progress[1]} / {progress[2]}</strong></>;
+}
+
 export function AbStepProgress({ steps, currentIndex, mobileLabel }: Props) {
   return (
     <div className="ab-step-progress" role="list" aria-label="Progress">
-      {mobileLabel && <div className="ab-step-mobile-label">{mobileLabel}</div>}
+      {mobileLabel && <div className={`ab-step-mobile-label${/^\d+\s*\/\s*\d+$/.test(mobileLabel) ? ' compact' : ''}`}>{renderMobileLabel(mobileLabel)}</div>}
       <div className="ab-step-track">
         {steps.map((step, index) => {
           const done = index < currentIndex;
