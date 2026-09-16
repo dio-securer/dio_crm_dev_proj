@@ -2,6 +2,7 @@ import { MOCK_LEAD_SEED } from './lead-mock-data';
 import {
   MOCK_LEAD_OWNERS,
   type LeadActivityInput,
+  type LeadConversionResult,
   type LeadHospitalScale,
   type LeadQuickCreateInput,
   type LeadRecord,
@@ -150,6 +151,23 @@ export function addMockLeadActivity(rows: LeadRecord[], leadId: string, input: L
       activities: [activity, ...row.activities].sort((a, b) => b.occurredAt.localeCompare(a.occurredAt))
     };
   });
+  saveMockLeads(next);
+  return next;
+}
+
+export function completeMockLeadConversion(rows: LeadRecord[], leadId: string, result: LeadConversionResult): LeadRecord[] {
+  const next = rows.map(row => row.leadId === leadId ? {
+    ...row,
+    stage: 'CONVERTED' as LeadStage,
+    convertedAccountId: result.accountId,
+    convertedContactId: result.contactId,
+    convertedOpportunityId: result.opportunityId,
+    convertedAt: result.convertedAt,
+    nextAction: undefined,
+    nextActionAt: undefined,
+    opportunityCount: row.opportunityCount + (result.opportunityId ? 1 : 0),
+    updatedAt: result.convertedAt
+  } : row);
   saveMockLeads(next);
   return next;
 }
