@@ -95,8 +95,8 @@ export function LeadConversionPanel({
         <div className="lead-conversion-result-head"><span>✓</span><div><strong>{t('lead.conversion.completed')}</strong><small>{result ? formatDate(result.convertedAt, i18n.language) : t('lead.conversion.completedNoDetail')}</small></div></div>
         {result && <div className="lead-conversion-result-grid">
           <div><span>{t('lead.conversion.linkedAccount')}</span><strong>{result.accountName}</strong><small>{result.accountId}</small></div>
-          <div><span>{t('lead.conversion.createdContact')}</span><strong>{result.contactId ? t('common.yes') : t('common.no')}</strong><small>{result.contactId ?? '-'}</small></div>
-          <div><span>{t('lead.conversion.createdOpportunity')}</span><strong>{result.opportunityId ? t('common.yes') : t('common.no')}</strong><small>{result.opportunityId ?? '-'}</small></div>
+          <div><span>{t('lead.conversion.createdContact')}</span><strong>{result.contactId ? t('lead.conversion.yes') : t('lead.conversion.no')}</strong><small>{result.contactId ?? '-'}</small></div>
+          <div><span>{t('lead.conversion.createdOpportunity')}</span><strong>{result.opportunityId ? t('lead.conversion.yes') : t('lead.conversion.no')}</strong><small>{result.opportunityId ?? '-'}</small></div>
         </div>}
       </div>
     );
