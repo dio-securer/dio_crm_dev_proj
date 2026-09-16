@@ -37,6 +37,14 @@ export type LeadHospitalScale = {
   mainSpecialty: string;
 };
 
+export type LeadConversionResult = {
+  accountId: string;
+  accountName: string;
+  contactId?: string;
+  opportunityId?: string;
+  convertedAt: string;
+};
+
 export type LeadContact = {
   id: string;
   name: string;
@@ -69,6 +77,10 @@ export type LeadRecord = {
   nextAction?: string;
   nextActionAt?: string;
   hospitalScale?: LeadHospitalScale;
+  convertedAccountId?: string;
+  convertedContactId?: string;
+  convertedOpportunityId?: string;
+  convertedAt?: string;
   tags: string[];
   noteSummary?: string;
   opportunityCount: number;
