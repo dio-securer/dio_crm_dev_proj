@@ -1,4 +1,4 @@
-import type { LeadSummary } from '@dio-crm/contracts';
+import type { LeadStatus, LeadSummary } from '@dio-crm/contracts';
 import { createPublicId } from '../../account-sandbox';
 import type { LeadActivity, LeadActivityInput, LeadConversionResult, LeadHospitalScale } from './lead-model';
 
@@ -142,6 +142,20 @@ export function createSandboxLead(input: LeadQuickCreate): SandboxLeadSummary {
   supplements[created.public_id] = { hospitalScale: defaultScale(created.public_id), activities: [], lastActivityAt: null, conversion: null };
   writeSupplements({ ...supplements });
   return created;
+}
+
+export function updateSandboxLeadStatus(publicId: string, status: LeadStatus): SandboxLeadSummary {
+  const rows = readAll();
+  const index = rows.findIndex(row => row.public_id === publicId);
+  if (index < 0) throw new Error('LEAD_NOT_FOUND');
+  rows[index] = {
+    ...rows[index],
+    status,
+    next_action: status === 'CONVERTED' || status === 'CONTACT_EXCLUDED' ? null : rows[index].next_action,
+    next_action_at: status === 'CONVERTED' || status === 'CONTACT_EXCLUDED' ? null : rows[index].next_action_at
+  };
+  writeAll(rows);
+  return rows[index];
 }
 
 export function getLeadSupplement(publicId: string): LeadSupplement {
