@@ -63,7 +63,7 @@ export function AbQuickActions({ actions, ariaLabel }: Props) {
   const collapsible = actions.length > 3;
   const mobilePrimary = collapsible ? pickMobilePrimary(actions) : actions;
   const mobilePrimaryIds = new Set(mobilePrimary.map(action => action.id));
-  const mobileOverflow = actions.filter(action => !mobilePrimaryIds.has(action.id));
+  const mobileOverflow = actions.filter(action => action.id !== 'more' && !mobilePrimaryIds.has(action.id));
 
   React.useEffect(() => {
     setMobileMoreOpen(false);
@@ -134,7 +134,7 @@ export function AbQuickActions({ actions, ariaLabel }: Props) {
             <span className="ab-quick-action-icon" aria-hidden="true"><UiIcon name="more" size="var(--icon-md)" /></span>
             <strong>{t('nav.more')}</strong>
           </button>
-          {mobileMoreOpen && (
+          {mobileMoreOpen && mobileOverflow.length > 0 && (
             <div className="ab-quick-action-menu" role="menu">
               {mobileOverflow.map(renderOverflowAction)}
             </div>
