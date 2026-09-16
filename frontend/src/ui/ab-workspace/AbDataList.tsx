@@ -17,6 +17,8 @@ type Props<T> = {
   renderCells: (row: T) => React.ReactNode[];
   empty?: React.ReactNode;
   ariaLabel?: string;
+  bodyRef?: React.Ref<HTMLDivElement>;
+  onBodyScroll?: React.UIEventHandler<HTMLDivElement>;
 };
 
 export function AbDataList<T>({
@@ -27,7 +29,9 @@ export function AbDataList<T>({
   onRowClick,
   renderCells,
   empty,
-  ariaLabel
+  ariaLabel,
+  bodyRef,
+  onBodyScroll
 }: Props<T>) {
   const template = columns.map(column => column.width ?? 'minmax(0,1fr)').join(' ');
   const style = { '--ab-data-columns': template } as React.CSSProperties;
@@ -39,7 +43,7 @@ export function AbDataList<T>({
           <span key={column.key} role="columnheader" className={column.className}>{column.label}</span>
         ))}
       </div>
-      <div className="ab-data-body" role="rowgroup">
+      <div className="ab-data-body" role="rowgroup" ref={bodyRef} onScroll={onBodyScroll}>
         {rows.map(row => {
           const key = rowKey(row);
           const cells = renderCells(row);
