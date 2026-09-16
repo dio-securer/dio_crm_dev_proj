@@ -80,14 +80,51 @@
     },
     "toast": {
       "draftSaved": "Draft saved.",
+      "quickDraftSaved": "Quick-create draft saved.",
       "contactAdded": "Contact saved.",
       "activityAdded": "Activity saved."
     },
     "quick": {
       "title": "Quick create Account",
-      "help": "Save the minimum required fields now and enrich details in tabs/sections later.",
+      "help": "Save the minimum required fields now and enrich details in tabs/sections later. Mobile uses a full-screen form.",
       "create": "Quick create",
-      "required": "Enter required fields."
+      "required": "Enter account name, country, type, phone, and owner."
+    },
+    "countries": {
+      "KR": "Korea",
+      "US": "United States",
+      "MX": "Mexico",
+      "IN": "India",
+      "PT": "Portugal",
+      "TR": "Türkiye"
+    },
+    "owners": {
+      "USER001": "Jihun Kim",
+      "USER002": "Seoyeon Lee",
+      "USER003": "Junho Park"
+    },
+    "integrationStatus": {
+      "REVIEWING": "Under review"
+    },
+    "erpWorkflow": {
+      "title": "ERP registration mock workflow",
+      "progress": "ERP registration progress",
+      "requestId": "Request ID",
+      "requestedAt": "Requested at",
+      "reviewedAt": "Reviewed at",
+      "completedAt": "Completed at",
+      "moveReview": "Move to review",
+      "complete": "Mark linked",
+      "retry": "Retry",
+      "fail": "Mark failed",
+      "failureReason": "Failure reason",
+      "failed": "ERP integration failed",
+      "requested": "ERP registration request created.",
+      "reviewing": "ERP request moved to review.",
+      "completed": "ERP integration marked complete.",
+      "retried": "ERP registration requested again.",
+      "failedDone": "ERP integration marked failed.",
+      "actionFailed": "ERP mock action failed: {{message}}"
     },
     "activityQuick": {
       "title": "Add Account activity",
