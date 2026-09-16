@@ -56,7 +56,7 @@ export function AccountErpWorkflowPanel({ account, tick = 0, onChanged }: Props)
         </dl>
         {workflow.status === 'FAILED' && <div className="account-erp-failure"><strong>{t('account.erpWorkflow.failed')}</strong><span>{workflow.failureReason || '-'}</span></div>}
         <div className="account-erp-actions">
-          {workflow.status === 'NOT_REQUESTED' && <button type="button" className="lead-v2-button primary" onClick={() => run(() => { const next = requestAccountErpMock(account.public_id); }, 'account.erpWorkflow.requested')}>{t('account.actions.erpRequest')}</button>}
+          {workflow.status === 'NOT_REQUESTED' && <button type="button" className="lead-v2-button primary" onClick={() => run(() => { requestAccountErpMock(account.public_id); }, 'account.erpWorkflow.requested')}>{t('account.actions.erpRequest')}</button>}
           {workflow.status === 'REQUESTING' && <button type="button" className="lead-v2-button primary" onClick={() => run(() => { advanceAccountErpMock(account.public_id); }, 'account.erpWorkflow.reviewing')}>{t('account.erpWorkflow.moveReview')}</button>}
           {workflow.status === 'REVIEWING' && <button type="button" className="lead-v2-button primary" onClick={() => run(() => { advanceAccountErpMock(account.public_id); }, 'account.erpWorkflow.completed')}>{t('account.erpWorkflow.complete')}</button>}
           {workflow.status === 'FAILED' && <button type="button" className="lead-v2-button primary" onClick={() => run(() => { retryAccountErpMock(account.public_id); }, 'account.erpWorkflow.retried')}>{t('account.erpWorkflow.retry')}</button>}
