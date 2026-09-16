@@ -99,6 +99,7 @@ const seedAccounts: AccountSummary[] = [
     provider_no: '21123456',
     encrypted_provider_no: 'ENC-21123456',
     open_date: '2012-04-20',
+    doctor_license_no: null,
     account_type: 'BC505600',
     erp_customer_code: 'E88312',
     erp_approved_yn: true,
@@ -123,6 +124,7 @@ const seedAccounts: AccountSummary[] = [
     ceo_name: '김희원',
     phone: '041-555-3300',
     hospital_address: '충청남도 공주시 봉황로 175, 3층(중동)',
+    address: '충청남도 공주시 봉황로 175, 3층(중동)',
     address_line1: '충청남도 공주시 봉황로 175',
     address_line2: '3층(중동)',
     zip_code: '32535',
@@ -130,6 +132,7 @@ const seedAccounts: AccountSummary[] = [
     provider_no: '34111222',
     encrypted_provider_no: 'ENC-34111222',
     open_date: '2019-09-01',
+    doctor_license_no: null,
     account_type: 'BC505600',
     erp_customer_code: null,
     erp_approved_yn: false,
@@ -154,6 +157,7 @@ const seedAccounts: AccountSummary[] = [
     ceo_name: '최진웅',
     phone: '02-555-4420',
     hospital_address: '서울특별시 동대문구 천호대로 425, 3층(장안동)',
+    address: '서울특별시 동대문구 천호대로 425, 3층(장안동)',
     address_line1: '서울특별시 동대문구 천호대로 425',
     address_line2: '3층(장안동)',
     zip_code: '02631',
@@ -161,6 +165,7 @@ const seedAccounts: AccountSummary[] = [
     provider_no: '11099887',
     encrypted_provider_no: 'ENC-11099887',
     open_date: '2010-01-15',
+    doctor_license_no: null,
     account_type: 'BC505600',
     erp_customer_code: 'E22019',
     erp_approved_yn: true,
@@ -185,12 +190,15 @@ const seedAccounts: AccountSummary[] = [
     ceo_name: '테스트원장',
     phone: '051-555-8008',
     hospital_address: '부산광역시 해운대구 센텀서로 66',
+    address: '부산광역시 해운대구 센텀서로 66',
     address_line1: '부산광역시 해운대구 센텀서로 66',
+    address_line2: null,
     zip_code: '48058',
     tax_email: 'dio8@example.com',
     provider_no: '61710008',
     encrypted_provider_no: 'ENC-61710008',
     open_date: '2021-08-08',
+    doctor_license_no: null,
     account_type: 'BC505800',
     erp_customer_code: 'E80008',
     erp_approved_yn: true,
@@ -214,13 +222,18 @@ const seedAccounts: AccountSummary[] = [
     business_no: '101-86-10000',
     ceo_name: '센톨',
     phone: '02-555-1000',
-    hospital_address: '서울시 강남구 선릉로',
+    fax: null,
+    homepage: null,
+    address: '서울시 강남구 선릉로',
     address_line1: '서울시 강남구 선릉로',
+    address_line2: null,
+    hospital_address: '서울시 강남구 선릉로',
     zip_code: '06000',
     tax_email: 'sentol@example.com',
     provider_no: '10110000',
     encrypted_provider_no: 'ENC-10110000',
     open_date: '2016-11-11',
+    doctor_license_no: null,
     account_type: 'BC505600',
     erp_customer_code: null,
     erp_approved_yn: false,
@@ -282,6 +295,15 @@ export function saveSandboxAccount(publicId: string | null, input: AccountFormIn
   }, input);
   writeAll([created, ...rows]);
   return created;
+}
+
+export function setSandboxAccountOwner(publicId: string, ownerName: string): AccountSummary {
+  const rows = readAll();
+  const index = rows.findIndex(row => row.public_id === publicId);
+  if (index < 0) throw new Error('거래처를 찾을 수 없습니다.');
+  rows[index] = { ...rows[index], owner_user_id: SANDBOX_OWNER_ID, owner_name: ownerName, updated_at: new Date().toISOString() };
+  writeAll(rows);
+  return rows[index];
 }
 
 export function requestSandboxErp(publicId: string): AccountSummary {
