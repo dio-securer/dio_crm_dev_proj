@@ -1,18 +1,40 @@
 import { MOCK_LEAD_SEED } from './lead-mock-data';
-import { MOCK_LEAD_OWNERS, type LeadQuickCreateInput, type LeadRecord, type LeadStage } from './lead-model';
+import {
+  MOCK_LEAD_OWNERS,
+  type LeadActivityInput,
+  type LeadHospitalScale,
+  type LeadQuickCreateInput,
+  type LeadRecord,
+  type LeadStage
+} from './lead-model';
 
 const STORAGE_KEY = 'dio-crm:mock:leads:v2';
 
-function cloneSeed(): LeadRecord[] {
-  return JSON.parse(JSON.stringify(MOCK_LEAD_SEED)) as LeadRecord[];
+function defaultHospitalScale(row: LeadRecord, index: number): LeadHospitalScale {
+  const seed = Number(row.leadId.replace(/\D/g, '').slice(-3)) || index + 1;
+  const specialties = ['임플란트', '보철', '교정', '구강외과', '통합진료'];
+  const hospital = row.organizationType.includes('병원');
+  return {
+    hospitalType: row.organizationType || '치과의원',
+    doctorCount: hospital ? 5 + (seed % 6) : 1 + (seed % 4),
+    chairCount: hospital ? 12 + (seed % 10) : 4 + (seed % 8),
+    staffCount: hospital ? 20 + (seed % 18) : 6 + (seed % 14),
+    mainSpecialty: row.tags[0] || specialties[seed % specialties.length]
+  };
 }
 
 function normalizeRows(rows: LeadRecord[]): LeadRecord[] {
-  return rows.map(row => ({
+  return rows.map((row, index) => ({
     ...row,
     country: row.country || 'KR',
-    region: row.region || '-'
+    region: row.region || '-',
+    hospitalScale: row.hospitalScale ?? defaultHospitalScale(row, index),
+    activities: [...(row.activities ?? [])].sort((a, b) => b.occurredAt.localeCompare(a.occurredAt))
   }));
+}
+
+function cloneSeed(): LeadRecord[] {
+  return normalizeRows(JSON.parse(JSON.stringify(MOCK_LEAD_SEED)) as LeadRecord[]);
 }
 
 export function loadMockLeads(): LeadRecord[] {
@@ -65,6 +87,13 @@ export function createMockLead(rows: LeadRecord[], input: LeadQuickCreateInput):
     source: input.source,
     ownerUserId: owner.id,
     ownerName: owner.name,
+    hospitalScale: {
+      hospitalType: '치과의원',
+      doctorCount: 1,
+      chairCount: 4,
+      staffCount: 6,
+      mainSpecialty: ''
+    },
     tags: [],
     opportunityCount: 0,
     contacts: [],
@@ -81,6 +110,36 @@ export function createMockLead(rows: LeadRecord[], input: LeadQuickCreateInput):
 export function changeMockLeadStage(rows: LeadRecord[], leadId: string, stage: LeadStage): LeadRecord[] {
   const now = new Date().toISOString();
   const next = rows.map(row => row.leadId === leadId ? { ...row, stage, updatedAt: now } : row);
+  saveMockLeads(next);
+  return next;
+}
+
+export function updateMockLeadHospitalScale(rows: LeadRecord[], leadId: string, scale: LeadHospitalScale): LeadRecord[] {
+  const now = new Date().toISOString();
+  const next = rows.map(row => row.leadId === leadId ? { ...row, hospitalScale: { ...scale }, updatedAt: now } : row);
+  saveMockLeads(next);
+  return next;
+}
+
+export function addMockLeadActivity(rows: LeadRecord[], leadId: string, input: LeadActivityInput): LeadRecord[] {
+  const now = new Date().toISOString();
+  const next = rows.map(row => {
+    if (row.leadId !== leadId) return row;
+    const activity = {
+      id: `ACT-${Date.now()}`,
+      type: input.type,
+      occurredAt: input.occurredAt,
+      title: input.title,
+      summary: input.summary,
+      ownerName: row.ownerName
+    };
+    return {
+      ...row,
+      lastActivityAt: input.occurredAt,
+      updatedAt: now,
+      activities: [activity, ...row.activities].sort((a, b) => b.occurredAt.localeCompare(a.occurredAt))
+    };
+  });
   saveMockLeads(next);
   return next;
 }
