@@ -80,14 +80,51 @@
     },
     "toast": {
       "draftSaved": "임시 저장했습니다.",
+      "quickDraftSaved": "빠른 등록 작성내용을 임시 저장했습니다.",
       "contactAdded": "연락처를 저장했습니다.",
       "activityAdded": "활동을 저장했습니다."
     },
     "quick": {
       "title": "Account 빠른 등록",
-      "help": "필수 정보만 입력해 저장하고, 상세 정보는 탭/섹션에서 보강합니다.",
+      "help": "필수 정보만 입력해 저장하고, 상세 정보는 탭/섹션에서 보강합니다. 모바일에서는 전체 화면으로 표시됩니다.",
       "create": "빠른 등록",
-      "required": "필수 항목을 입력하세요."
+      "required": "거래처명, 국가, 유형, 전화번호, 담당영업을 입력하세요."
+    },
+    "countries": {
+      "KR": "대한민국",
+      "US": "미국",
+      "MX": "멕시코",
+      "IN": "인도",
+      "PT": "포르투갈",
+      "TR": "튀르키예"
+    },
+    "owners": {
+      "USER001": "김지훈",
+      "USER002": "이서연",
+      "USER003": "박준호"
+    },
+    "integrationStatus": {
+      "REVIEWING": "검토중"
+    },
+    "erpWorkflow": {
+      "title": "ERP 등록 Mock Workflow",
+      "progress": "ERP 등록 진행상태",
+      "requestId": "요청 ID",
+      "requestedAt": "요청일시",
+      "reviewedAt": "검토일시",
+      "completedAt": "완료일시",
+      "moveReview": "검토중으로 이동",
+      "complete": "연동완료 처리",
+      "retry": "재요청",
+      "fail": "실패 처리",
+      "failureReason": "실패 사유",
+      "failed": "ERP 연동 실패",
+      "requested": "ERP 등록 요청을 생성했습니다.",
+      "reviewing": "ERP 요청을 검토중으로 변경했습니다.",
+      "completed": "ERP 연동완료로 처리했습니다.",
+      "retried": "ERP 등록을 재요청했습니다.",
+      "failedDone": "ERP 연동실패로 처리했습니다.",
+      "actionFailed": "ERP Mock 처리 실패: {{message}}"
     },
     "activityQuick": {
       "title": "Account 활동 등록",
