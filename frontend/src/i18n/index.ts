@@ -6,14 +6,16 @@ import koLead from './locales/ko-KR/lead.json';
 import enLead from './locales/en-US/lead.json';
 import koAccountExt from './locales/ko-KR/account-ext.json';
 import enAccountExt from './locales/en-US/account-ext.json';
+import koWorkspaceExt from './locales/ko-KR/crm-workspace-ext.json';
+import enWorkspaceExt from './locales/en-US/crm-workspace-ext.json';
 import localeMeta from './locales/_stubs/locale-meta.json';
 import { leadMockKo } from './locales/ko-KR/lead-mock';
 import { leadMockEn } from './locales/en-US/lead-mock';
 import { mergeTranslations } from './merge-resources';
 import { FALLBACK_LOCALE, resolveInitialLocale, saveLocale, type SupportedLocale } from './locale-resolver';
 
-const koTranslation = mergeTranslations(ko, koLead, koAccountExt, leadMockKo);
-const enTranslation = mergeTranslations(en, enLead, enAccountExt, leadMockEn);
+const koTranslation = mergeTranslations(ko, koLead, koAccountExt, koWorkspaceExt, leadMockKo);
+const enTranslation = mergeTranslations(en, enLead, enAccountExt, enWorkspaceExt, leadMockEn);
 
 /** Planned locales reuse en-US copy until native translation (step 3 stub). */
 const stubTranslation = mergeTranslations(enTranslation, localeMeta);
