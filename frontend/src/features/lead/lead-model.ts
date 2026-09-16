@@ -65,9 +65,14 @@ export type LeadQuickCreateInput = {
   leadName: string;
   organizationName: string;
   phone?: string;
+  country?: string;
+  address?: string;
   source: LeadSource;
   ownerUserId: string;
 };
+
+export const API_LEAD_STEPS = ['NEW', 'FIRST_VISIT', 'KEYMAN_MEETING', 'CONVERTED'] as const;
+export type ApiLeadStep = (typeof API_LEAD_STEPS)[number];
 
 export const LEAD_STAGES: LeadStage[] = [
   'NEW',

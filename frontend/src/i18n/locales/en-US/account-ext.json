@@ -1,0 +1,89 @@
+{
+  "account": {
+    "listTitle": "Account list",
+    "detailTitle": "Account detail",
+    "quickCreateTitle": "Quick create Account",
+    "count": "{{count}} records",
+    "searchPlaceholder": "Search name, code, owner, country",
+    "tabs": {
+      "summary": "Summary",
+      "contacts": "Contacts",
+      "trade": "Trade status",
+      "manage": "Management",
+      "address": "Address",
+      "erp": "ERP",
+      "related": "Related data"
+    },
+    "actions": {
+      "create": "New registration",
+      "saveDraft": "Save draft",
+      "erpRequest": "Request ERP registration",
+      "quickAddContact": "Quick add contact",
+      "viewRelated": "View more"
+    },
+    "fields": {
+      "country": "Country",
+      "address": "Address",
+      "accountCode": "Account code",
+      "industry": "Industry",
+      "website": "Website",
+      "lastActivity": "Last activity"
+    },
+    "columns": {
+      "accountName": "Account",
+      "accountCode": "Account code",
+      "country": "Country",
+      "grade": "Grade",
+      "owner": "Owner",
+      "status": "Status",
+      "erpStatus": "ERP status",
+      "lastActivity": "Last activity",
+      "industry": "Industry"
+    },
+    "empty": {
+      "list": "No accounts found.",
+      "detail": "Select an account from the list.",
+      "search": "No search results.",
+      "contacts": "No contacts registered.",
+      "related": "No related data."
+    },
+    "toast": {
+      "draftSaved": "Draft saved."
+    },
+    "quick": {
+      "title": "Quick create Account",
+      "help": "Save the minimum required fields now and enrich details in tabs/sections later.",
+      "create": "Quick create",
+      "required": "Enter required fields."
+    },
+    "related": {
+      "opportunities": "Opportunities",
+      "contracts": "Contracts",
+      "orders": "Orders",
+      "activities": "Activities"
+    },
+    "badges": {
+      "erpLinked": "ERP linked",
+      "erpPending": "ERP pending",
+      "incomplete": "{{count}} incomplete"
+    }
+  },
+  "contact": {
+    "title": "Contacts",
+    "quickAdd": "Quick add contact",
+    "empty": "No contacts registered.",
+    "fields": {
+      "name": "Name",
+      "role": "Job title",
+      "phone": "Phone",
+      "email": "Email"
+    },
+    "actions": {
+      "add": "Add",
+      "save": "Save"
+    },
+    "toast": {
+      "added": "Contact added."
+    }
+  }
+}

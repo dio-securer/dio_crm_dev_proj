@@ -38,6 +38,21 @@ function NavIcon({ name }: { name: string }) {
   return <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{iconPaths[name] ?? iconPaths.lead}</svg>;
 }
 
+function TemplateSelect({ compact = false }: { compact?: boolean }) {
+  const { t } = useTranslation();
+  const { serverResolved, demoTemplate, setDemoTemplate } = useGlobalization();
+  if (serverResolved) return null;
+  return (
+    <label className={compact ? 'locale-select compact' : 'locale-select'}>
+      {!compact && <span>{t('app.template')}</span>}
+      <select aria-label={t('app.template')} value={demoTemplate} onChange={event => setDemoTemplate(event.target.value as 'HQ' | 'GLOBAL')}>
+        <option value="GLOBAL">{t('app.templateGlobal')}</option>
+        <option value="HQ">{t('app.templateHq')}</option>
+      </select>
+    </label>
+  );
+}
+
 function LocaleSelect({ compact = false }: { compact?: boolean }) {
   const { t, i18n } = useTranslation();
   return (
@@ -78,19 +93,16 @@ export function AppShell({ links, children }: Props) {
   const configuredMobilePrimary = links.filter(x => x.mobilePrimary).slice(0, 5);
   const mobilePrimary = useMemo(() => {
     const dashboard = links.find(x => x.icon === 'analytics');
+    if (!dashboard) return configuredMobilePrimary;
     const ordered: Array<ShellNavItem | null> = [
-      dashboard ? { ...dashboard, labelKey: 'shellV2.home', icon: 'home' } : null,
+      { ...dashboard, labelKey: 'shellV2.home', icon: 'home' },
       links.find(x => x.icon === 'lead') ?? null,
       links.find(x => x.icon === 'account') ?? null,
       links.find(x => x.icon === 'activity') ?? null
     ];
     const resolved = ordered.filter((item): item is ShellNavItem => item !== null);
-    const unique = resolved.filter((item, index) => resolved.findIndex(candidate => candidate.to === item.to) === index);
-    return unique.length ? unique : configuredMobilePrimary;
-  }, [links]);
-  const mobileMore = links.filter(x => !mobilePrimary.some(p => p.to === x.to));
-  const accountRoute = location.pathname.startsWith('/accounts');
-
+    return resolved.filter((item, index) => resolved.findIndex(candidate => candidate.to === item.to) === index);
+  }, [links, configuredMobilePrimary]);
   const navList = (items: ShellNavItem[], mobile = false) => items.map(item => (
     <NavLink key={`${mobile ? 'm-' : ''}${item.to}`} to={item.to} end={item.end} className={({isActive}) => `shell-nav-link${isActive ? ' active' : ''}${mobile ? ' mobile' : ''}`} onClick={() => setMobileMenu(false)}>
       <NavIcon name={item.icon} />
@@ -99,7 +111,7 @@ export function AppShell({ links, children }: Props) {
   ));
 
   return (
-    <div className={`app-shell${accountRoute ? ' account-route' : ''}`}>
+    <div className="app-shell">
       <aside className="sidebar" aria-label={t('app.primaryNavigation')}>
         <div className="brand-block">
           <div className="brand-mark">D</div>
@@ -111,14 +123,20 @@ export function AppShell({ links, children }: Props) {
           <div className="market-card">
             <span>{t('app.market')}</span>
             <strong>{globalization.countryCode} · {globalization.currencyCode}</strong>
-            <small>{globalization.timezone}</small>
+            <small>{globalization.marketTemplateCode || globalization.timezone}</small>
           </div>
+          <TemplateSelect />
           <LocaleSelect />
         </div>
       </aside>
 
       <div className="app-main">
         <header className="topbar">
+          <button type="button" className="icon-button mobile-menu-toggle" onClick={() => setMobileMenu(true)} aria-label={t('app.primaryNavigation')}>
+            <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+              <path d="M4 7h16M4 12h16M4 17h16" />
+            </svg>
+          </button>
           <div className="topbar-title">
             <span className="eyebrow">{t('app.workspace')}</span>
             <h1>{current ? t(current.labelKey) : t('app.name')}</h1>
@@ -146,8 +164,8 @@ export function AppShell({ links, children }: Props) {
       {mobileMenu && <div className="mobile-drawer-backdrop" onClick={() => setMobileMenu(false)}>
         <section className="mobile-drawer" onClick={e => e.stopPropagation()} aria-label={t('nav.more')}>
           <div className="mobile-drawer-header"><div><strong>{t('app.name')}</strong><small>{globalization.countryCode} · {globalization.currencyCode}</small></div><button type="button" className="icon-button" onClick={() => setMobileMenu(false)} aria-label={t('app.close')}>×</button></div>
-          <nav className="mobile-drawer-nav">{navList(mobileMore)}</nav>
-          <div className="mobile-drawer-footer"><LocaleSelect /><InstallPrompt /></div>
+          <nav className="mobile-drawer-nav">{navList(links)}</nav>
+          <div className="mobile-drawer-footer"><TemplateSelect compact /><LocaleSelect /><InstallPrompt /></div>
         </section>
       </div>}
     </div>

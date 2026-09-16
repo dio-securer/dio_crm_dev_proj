@@ -1,0 +1,163 @@
+{
+  "lead": {
+    "title": "Lead",
+    "subtitle": "Discover prospects, manage stages, and convert to Account.",
+    "listTitle": "Lead list",
+    "detailTitle": "Lead detail",
+    "quickCreateTitle": "Quick create Lead",
+    "count": "{{count}} records",
+    "mockMode": "Mock Mode",
+    "apiPending": "API is not connected yet. Actual Leads will appear after DEV DB/Auth connection.",
+    "searchPlaceholder": "Hospital, owner, phone, Lead No.",
+    "actions": {
+      "create": "New registration",
+      "edit": "Edit",
+      "save": "Save",
+      "saveDraft": "Save draft",
+      "cancel": "Cancel",
+      "convert": "Convert to Account",
+      "exclude": "Exclude contact",
+      "call": "Call",
+      "email": "Email",
+      "meeting": "Meeting",
+      "back": "Back to list",
+      "resetMock": "Reset mock",
+      "nextStatus": "Next stage",
+      "more": "More"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "activity": "Activity",
+      "keyman": "Keyman",
+      "system": "System",
+      "conversion": "Conversion",
+      "contacts": "Contacts",
+      "opportunities": "Opportunities",
+      "notes": "Notes",
+      "attachments": "Attachments"
+    },
+    "sections": {
+      "basic": "Basic information",
+      "keyman": "Keyman information",
+      "hospitalScale": "Hospital scale",
+      "system": "System information",
+      "activity": "Activity history",
+      "conversion": "Conversion",
+      "recentActivity": "Recent activity",
+      "nextAction": "Next action",
+      "tags": "Tags",
+      "note": "Note summary"
+    },
+    "fields": {
+      "hospitalName": "Hospital name",
+      "organizationName": "Organization",
+      "organizationType": "Organization type",
+      "country": "Country",
+      "phone": "Phone",
+      "contactName": "Contact name",
+      "leadName": "Lead name",
+      "email": "Email",
+      "address": "Address",
+      "region": "Region",
+      "owner": "Owner",
+      "source": "Source",
+      "businessNo": "Business no.",
+      "interest": "Interest",
+      "stage": "Stage",
+      "expectedAmount": "Expected amount",
+      "expectedDate": "Expected date",
+      "lastActivity": "Last activity",
+      "nextAction": "Next action",
+      "keymanName": "Keyman name",
+      "keymanType": "Keyman type",
+      "keymanMobile": "Keyman mobile",
+      "keymanEmail": "Keyman email",
+      "bedCount": "Bed count",
+      "mainSystem": "Main system",
+      "subSystem": "Sub system",
+      "excludeReason": "Exclude reason"
+    },
+    "status": {
+      "NEW": "New",
+      "FIRST_VISIT": "First visit",
+      "KEYMAN_MEETING": "Key-person meeting",
+      "CONTACT_EXCLUDED": "Contact excluded",
+      "CONVERTED": "Converted"
+    },
+    "steps": {
+      "NEW": "New registration",
+      "FIRST_VISIT": "First visit",
+      "KEYMAN_MEETING": "Key-person meeting",
+      "CONVERTED": "Conversion"
+    },
+    "columns": {
+      "hospitalName": "Hospital",
+      "status": "Status",
+      "owner": "Owner",
+      "phone": "Phone",
+      "lastActivity": "Last activity",
+      "country": "Country",
+      "region": "Region",
+      "businessNo": "Business no.",
+      "lead": "Lead / Organization",
+      "interest": "Interest",
+      "stage": "Stage",
+      "recent": "Recent activity"
+    },
+    "filters": {
+      "all": "All",
+      "inProgress": "In progress",
+      "converted": "Converted",
+      "allStage": "All stages",
+      "allInterest": "All interest",
+      "allOwner": "All owners"
+    },
+    "empty": {
+      "list": "No leads found.",
+      "detail": "Select a lead from the list.",
+      "search": "No search results.",
+      "activity": "No activity recorded.",
+      "contacts": "No contacts registered.",
+      "keyman": "No keyman registered.",
+      "opportunities": "No related opportunities.",
+      "attachments": "No attachments."
+    },
+    "toast": {
+      "created": "Lead created.",
+      "saved": "Lead saved.",
+      "draftSaved": "Draft saved.",
+      "converted": "Converted to Account.",
+      "excluded": "Contact excluded.",
+      "statusUpdated": "Lead status updated.",
+      "reset": "Mock data reset."
+    },
+    "quick": {
+      "title": "Quick create Lead",
+      "help": "Save the minimum required fields now and enrich details in sections later.",
+      "create": "Quick create",
+      "createDetail": "Save and open detail",
+      "required": "Enter required fields."
+    },
+    "interest": {
+      "HIGH": "High",
+      "MEDIUM": "Medium",
+      "LOW": "Low"
+    },
+    "source": {
+      "WEB": "Website",
+      "EXHIBITION": "Exhibition",
+      "REFERRAL": "Referral",
+      "PHONE": "Phone",
+      "OTHER": "Other"
+    },
+    "activityType": {
+      "CALL": "Call",
+      "EMAIL": "Email",
+      "MEETING": "Meeting",
+      "NOTE": "Note"
+    },
+    "incompleteBadge": "{{count}} incomplete",
+    "lastUpdated": "Updated {{date}}",
+    "opportunityCount": "{{count}} opportunities"
+  }
+}

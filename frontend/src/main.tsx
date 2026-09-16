@@ -6,6 +6,7 @@ import './i18n';
 import './styles/tokens.css';
 import './styles/global.css';
 import './styles/workspace.css';
+import './styles/ab-workspace.css';
 import App from './App';
 import { GlobalizationProvider } from './market/globalization-context';
 import { registerPwa } from './pwa/register';

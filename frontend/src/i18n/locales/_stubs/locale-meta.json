@@ -1,0 +1,8 @@
+{
+  "localeMeta": {
+    "es-MX": { "label": "Español (México)", "status": "stub", "fallback": "en-US" },
+    "pt-PT": { "label": "Português (Portugal)", "status": "stub", "fallback": "en-US" },
+    "tr-TR": { "label": "Türkçe", "status": "stub", "fallback": "en-US" },
+    "hi-IN": { "label": "हिन्दी (India)", "status": "stub", "fallback": "en-US" }
+  }
+}

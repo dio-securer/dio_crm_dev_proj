@@ -1,0 +1,89 @@
+{
+  "account": {
+    "listTitle": "Account 목록",
+    "detailTitle": "Account 상세",
+    "quickCreateTitle": "Account 빠른 등록",
+    "count": "총 {{count}}건",
+    "searchPlaceholder": "거래처명, 코드, 담당자, 국가 검색",
+    "tabs": {
+      "summary": "요약",
+      "contacts": "연락처",
+      "trade": "거래상태",
+      "manage": "관리정보",
+      "address": "주소",
+      "erp": "ERP",
+      "related": "관련 데이터"
+    },
+    "actions": {
+      "create": "신규 등록",
+      "saveDraft": "임시 저장",
+      "erpRequest": "ERP 등록요청",
+      "quickAddContact": "연락처 빠른 등록",
+      "viewRelated": "더보기"
+    },
+    "fields": {
+      "country": "국가",
+      "address": "주소",
+      "accountCode": "거래처 코드",
+      "industry": "업종",
+      "website": "웹사이트",
+      "lastActivity": "최근 활동"
+    },
+    "columns": {
+      "accountName": "거래처명",
+      "accountCode": "거래처 코드",
+      "country": "국가",
+      "grade": "등급",
+      "owner": "담당자",
+      "status": "상태",
+      "erpStatus": "ERP 상태",
+      "lastActivity": "최근 활동",
+      "industry": "업종"
+    },
+    "empty": {
+      "list": "등록된 거래처가 없습니다.",
+      "detail": "목록에서 거래처를 선택하세요.",
+      "search": "검색 결과가 없습니다.",
+      "contacts": "등록된 연락처가 없습니다.",
+      "related": "관련 데이터가 없습니다."
+    },
+    "toast": {
+      "draftSaved": "임시 저장했습니다."
+    },
+    "quick": {
+      "title": "Account 빠른 등록",
+      "help": "필수 정보만 입력해 저장하고, 상세 정보는 탭/섹션에서 보강합니다.",
+      "create": "빠른 등록",
+      "required": "필수 항목을 입력하세요."
+    },
+    "related": {
+      "opportunities": "Opportunity",
+      "contracts": "Contract",
+      "orders": "Order",
+      "activities": "Activity"
+    },
+    "badges": {
+      "erpLinked": "ERP 연동",
+      "erpPending": "ERP 대기",
+      "incomplete": "미완료 {{count}}"
+    }
+  },
+  "contact": {
+    "title": "연락처",
+    "quickAdd": "연락처 빠른 등록",
+    "empty": "등록된 연락처가 없습니다.",
+    "fields": {
+      "name": "이름",
+      "role": "직함",
+      "phone": "전화",
+      "email": "이메일"
+    },
+    "actions": {
+      "add": "추가",
+      "save": "저장"
+    },
+    "toast": {
+      "added": "연락처를 추가했습니다."
+    }
+  }
+}

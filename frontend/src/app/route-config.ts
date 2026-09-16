@@ -24,3 +24,13 @@ export const APP_ROUTES: AppRouteConfig[] = [
   { path: '/analytics', to: '/analytics', slot: 'analytics', labelKey: 'nav.analytics', icon: 'analytics', mobilePrimary: true },
   { path: '/ops', to: '/ops', slot: 'ops', labelKey: 'nav.ops', icon: 'ops' }
 ];
+
+export function filterAppRoutes(
+  screenSlots: Partial<Record<ScreenSlot, unknown>>,
+  featureEnabled: (key: MarketFeatureKey) => boolean
+): AppRouteConfig[] {
+  return APP_ROUTES.filter(route => {
+    if (route.feature && !featureEnabled(route.feature)) return false;
+    return Boolean(screenSlots[route.slot]);
+  });
+}
