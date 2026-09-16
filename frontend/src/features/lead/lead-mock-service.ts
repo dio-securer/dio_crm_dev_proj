@@ -7,13 +7,21 @@ function cloneSeed(): LeadRecord[] {
   return JSON.parse(JSON.stringify(MOCK_LEAD_SEED)) as LeadRecord[];
 }
 
+function normalizeRows(rows: LeadRecord[]): LeadRecord[] {
+  return rows.map(row => ({
+    ...row,
+    country: row.country || 'KR',
+    region: row.region || '-'
+  }));
+}
+
 export function loadMockLeads(): LeadRecord[] {
   if (typeof window === 'undefined') return cloneSeed();
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return cloneSeed();
     const parsed = JSON.parse(raw) as LeadRecord[];
-    return Array.isArray(parsed) && parsed.length ? parsed : cloneSeed();
+    return Array.isArray(parsed) && parsed.length ? normalizeRows(parsed) : cloneSeed();
   } catch {
     return cloneSeed();
   }
@@ -49,8 +57,9 @@ export function createMockLead(rows: LeadRecord[], input: LeadQuickCreateInput):
     organizationName: input.organizationName.trim(),
     organizationType: '치과의원',
     phone: input.phone?.trim() || undefined,
+    country: input.country?.trim() || 'KR',
+    region: '-',
     address: input.address?.trim() || undefined,
-    region: input.country?.trim() || '-',
     stage: 'NEW',
     interestLevel: 'MEDIUM',
     source: input.source,

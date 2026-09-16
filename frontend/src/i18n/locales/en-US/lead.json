@@ -8,7 +8,7 @@
     "count": "{{count}} records",
     "mockMode": "Mock Mode",
     "apiPending": "API is not connected yet. Actual Leads will appear after DEV DB/Auth connection.",
-    "searchPlaceholder": "Hospital, owner, phone, Lead No.",
+    "searchPlaceholder": "Hospital, owner, phone, Lead No., keyman",
     "actions": {
       "create": "New registration",
       "edit": "Edit",
@@ -22,6 +22,8 @@
       "meeting": "Meeting",
       "back": "Back to list",
       "resetMock": "Reset mock",
+      "resetFilters": "Reset filters",
+      "advancedFilter": "More filters",
       "nextStatus": "Next stage",
       "more": "More"
     },
@@ -96,26 +98,43 @@
       "owner": "Owner",
       "phone": "Phone",
       "lastActivity": "Last activity",
-      "country": "Country",
+      "country": "Country / Region",
       "region": "Region",
       "businessNo": "Business no.",
       "lead": "Lead / Organization",
       "interest": "Interest",
       "stage": "Stage",
-      "recent": "Recent activity"
+      "recent": "Recent activity",
+      "nextAction": "Next action",
+      "source": "Source",
+      "createdAt": "Created"
     },
     "filters": {
       "all": "All",
       "inProgress": "In progress",
       "converted": "Converted",
+      "excluded": "Contact excluded",
       "allStage": "All stages",
       "allInterest": "All interest",
-      "allOwner": "All owners"
+      "allOwner": "All owners",
+      "allCountry": "All countries",
+      "allRegion": "All regions",
+      "allSource": "All sources",
+      "allLastActivity": "All activity dates",
+      "last7Days": "Last 7 days",
+      "last30Days": "Last 30 days",
+      "noActivity": "No activity"
+    },
+    "pagination": {
+      "rowsPerPage": "Rows",
+      "previous": "Previous page",
+      "next": "Next page",
+      "pageStatus": "Page {{page}} / {{pages}} · {{count}} records"
     },
     "empty": {
       "list": "No leads found.",
       "detail": "Select a lead from the list.",
-      "search": "No search results.",
+      "search": "No leads match the current search or filters.",
       "activity": "No activity recorded.",
       "contacts": "No contacts registered.",
       "keyman": "No keyman registered.",

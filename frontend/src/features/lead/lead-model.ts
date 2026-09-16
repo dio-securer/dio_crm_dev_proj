@@ -40,6 +40,7 @@ export type LeadRecord = {
   jobTitle?: string;
   phone?: string;
   email?: string;
+  country: string;
   region: string;
   address?: string;
   stage: LeadStage;
