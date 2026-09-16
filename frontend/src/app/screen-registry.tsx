@@ -25,6 +25,15 @@ import {
   GlobalContractPage,
   GlobalOrderPage
 } from '../market/templates/global/GlobalScreens';
+import {
+  DemoGlobalActivityPage,
+  DemoGlobalActivityReportPage,
+  DemoGlobalOpportunityPage,
+  DemoGlobalContractPage,
+  DemoGlobalOrderPage
+} from '../demo/GlobalExecutiveDemoScreens';
+import { DemoGlobalLeadPage, DemoGlobalAccountPage } from '../demo/LeadAccountDemoScreens';
+import { isGlobalExecutiveDemoMode } from '../demo/demo-mode';
 import type { ScreenKey } from './screen-profile';
 
 const screenRegistry = new Map<ScreenKey, ComponentType>([
@@ -52,6 +61,16 @@ const screenRegistry = new Map<ScreenKey, ComponentType>([
   ['GLOBAL_ORDER', GlobalOrderPage]
 ]);
 
+const demoScreenRegistry = new Map<ScreenKey, ComponentType>([
+  ['GLOBAL_LEAD', DemoGlobalLeadPage],
+  ['GLOBAL_ACCOUNT', DemoGlobalAccountPage],
+  ['GLOBAL_ACTIVITY_MAP', DemoGlobalActivityPage],
+  ['GLOBAL_ACTIVITY_REPORT', DemoGlobalActivityReportPage],
+  ['GLOBAL_OPPORTUNITY', DemoGlobalOpportunityPage],
+  ['GLOBAL_CONTRACT', DemoGlobalContractPage],
+  ['GLOBAL_ORDER', DemoGlobalOrderPage]
+]);
+
 export function ScreenNotRegistered({ screenKey }: { screenKey: ScreenKey }) {
   return <div role="alert" data-screen-key={screenKey}>SCREEN_NOT_REGISTERED</div>;
 }
@@ -61,6 +80,7 @@ export function getRegisteredScreen(screenKey: ScreenKey): ComponentType | undef
 }
 
 export function renderScreen(screenKey: ScreenKey) {
-  const Screen = getRegisteredScreen(screenKey);
+  const demoScreen = isGlobalExecutiveDemoMode() ? demoScreenRegistry.get(screenKey) : undefined;
+  const Screen = demoScreen ?? getRegisteredScreen(screenKey);
   return Screen ? <Screen /> : <ScreenNotRegistered screenKey={screenKey} />;
 }

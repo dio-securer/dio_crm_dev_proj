@@ -6,6 +6,7 @@ import { changeLocale } from '../i18n';
 import { normalizeLocale } from '../i18n/locale-resolver';
 import { isFeatureVisible } from './feature-visibility';
 import { KR_MARKET_PROFILE } from './profiles/KR';
+import { GLOBAL_EXECUTIVE_DEMO_CONTEXT, isGlobalExecutiveDemoMode } from '../demo/demo-mode';
 
 const fallbackContext: GlobalizationContext = {
   locale: KR_MARKET_PROFILE.defaultLocale,
@@ -36,15 +37,16 @@ const GlobalizationContextStore = createContext<ContextValue>({
 });
 
 export function GlobalizationProvider({ children }: { children: React.ReactNode }) {
+  const demoMode = isGlobalExecutiveDemoMode();
   const hasToken = typeof window !== 'undefined' && !!localStorage.getItem('dio_crm_access_token');
   const query = useQuery({
     queryKey: ['me-context'],
     queryFn: () => apiGet<MeContextResponse>('/api/me/context'),
-    enabled: hasToken,
+    enabled: hasToken && !demoMode,
     staleTime: 5 * 60 * 1000,
     retry: false
   });
-  const globalization = query.data?.globalization ?? fallbackContext;
+  const globalization = demoMode ? GLOBAL_EXECUTIVE_DEMO_CONTEXT : query.data?.globalization ?? fallbackContext;
 
   useEffect(() => {
     const locale = normalizeLocale(globalization.locale);
@@ -53,9 +55,9 @@ export function GlobalizationProvider({ children }: { children: React.ReactNode 
 
   const value = useMemo<ContextValue>(() => ({
     globalization,
-    serverResolved: !!query.data,
+    serverResolved: demoMode || !!query.data,
     featureEnabled: key => isFeatureVisible(globalization, key)
-  }), [globalization, query.data]);
+  }), [demoMode, globalization, query.data]);
 
   return <GlobalizationContextStore.Provider value={value}>{children}</GlobalizationContextStore.Provider>;
 }
