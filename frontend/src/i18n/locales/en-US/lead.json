@@ -22,6 +22,7 @@
       "email": "Email",
       "meeting": "Meeting",
       "addActivity": "Add activity",
+      "saveHospitalScale": "Save hospital scale",
       "back": "Back to list",
       "resetMock": "Reset mock",
       "resetFilters": "Reset filters",
@@ -29,163 +30,27 @@
       "nextStatus": "Next stage",
       "more": "More"
     },
-    "tabs": {
-      "overview": "Overview",
-      "activity": "Activity",
-      "keyman": "Keyman",
-      "system": "System",
-      "conversion": "Conversion",
-      "contacts": "Contacts",
-      "opportunities": "Opportunities",
-      "notes": "Notes",
-      "attachments": "Attachments"
-    },
-    "sections": {
-      "basic": "Basic information",
-      "keyman": "Keyman information",
-      "hospitalScale": "Hospital scale",
-      "system": "System information",
-      "activity": "Activity history",
-      "conversion": "Conversion",
-      "recentActivity": "Recent activity",
-      "nextAction": "Next action",
-      "tags": "Tags",
-      "note": "Note summary"
-    },
+    "tabs": {"overview":"Overview","activity":"Activity","keyman":"Keyman","system":"System","conversion":"Conversion","contacts":"Contacts","opportunities":"Opportunities","notes":"Notes","attachments":"Attachments"},
+    "sections": {"basic":"Basic information","keyman":"Keyman information","hospitalScale":"Hospital scale","system":"System information","activity":"Activity history","conversion":"Conversion","recentActivity":"Recent activity","nextAction":"Next action","tags":"Tags","note":"Note summary"},
     "fields": {
-      "hospitalName": "Hospital name",
-      "organizationName": "Organization",
-      "organizationType": "Organization type",
-      "country": "Country",
-      "phone": "Phone",
-      "contactName": "Contact name",
-      "leadName": "Lead name",
-      "email": "Email",
-      "address": "Address",
-      "region": "Region",
-      "owner": "Owner",
-      "source": "Source",
-      "businessNo": "Business no.",
-      "interest": "Interest",
-      "stage": "Stage",
-      "expectedAmount": "Expected amount",
-      "expectedDate": "Expected date",
-      "lastActivity": "Last activity",
-      "nextAction": "Next action",
-      "keymanName": "Keyman name",
-      "keymanType": "Keyman type",
-      "keymanMobile": "Keyman mobile",
-      "keymanEmail": "Keyman email",
-      "bedCount": "Bed count",
-      "mainSystem": "Main system",
-      "subSystem": "Sub system",
-      "excludeReason": "Exclude reason"
+      "hospitalName":"Hospital name","organizationName":"Organization","organizationType":"Organization type","hospitalType":"Hospital type","doctorCount":"Doctors","chairCount":"Chairs","staffCount":"Staff","mainSpecialty":"Main specialty","country":"Country","phone":"Phone","contactName":"Contact name","leadName":"Lead name","email":"Email","address":"Address","region":"Region","owner":"Owner","source":"Source","businessNo":"Business no.","interest":"Interest","stage":"Stage","expectedAmount":"Expected amount","expectedDate":"Expected date","lastActivity":"Last activity","nextAction":"Next action","keymanName":"Keyman name","keymanType":"Keyman type","keymanMobile":"Keyman mobile","keymanEmail":"Keyman email","bedCount":"Bed count","mainSystem":"Main system","subSystem":"Sub system","excludeReason":"Exclude reason"
     },
-    "status": {
-      "NEW": "New",
-      "FIRST_VISIT": "First visit",
-      "KEYMAN_MEETING": "Key-person meeting",
-      "CONTACT_EXCLUDED": "Contact excluded",
-      "CONVERTED": "Converted"
-    },
-    "steps": {
-      "NEW": "New registration",
-      "FIRST_VISIT": "First visit",
-      "KEYMAN_MEETING": "Key-person meeting",
-      "CONVERTED": "Conversion"
-    },
-    "columns": {
-      "hospitalName": "Hospital",
-      "status": "Status",
-      "owner": "Owner",
-      "phone": "Phone",
-      "lastActivity": "Last activity",
-      "country": "Country / Region",
-      "region": "Region",
-      "businessNo": "Business no.",
-      "lead": "Lead / Organization",
-      "interest": "Interest",
-      "stage": "Stage",
-      "recent": "Recent activity",
-      "nextAction": "Next action",
-      "source": "Source",
-      "createdAt": "Created"
-    },
-    "filters": {
-      "all": "All",
-      "inProgress": "In progress",
-      "converted": "Converted",
-      "excluded": "Contact excluded",
-      "allStage": "All stages",
-      "allInterest": "All interest",
-      "allOwner": "All owners",
-      "allCountry": "All countries",
-      "allRegion": "All regions",
-      "allSource": "All sources",
-      "allLastActivity": "All activity dates",
-      "last7Days": "Last 7 days",
-      "last30Days": "Last 30 days",
-      "noActivity": "No activity"
-    },
-    "pagination": {
-      "rowsPerPage": "Rows",
-      "previous": "Previous page",
-      "next": "Next page",
-      "pageStatus": "Page {{page}} / {{pages}} · {{count}} records"
-    },
-    "conversion": {
-      "opportunityName": "Opportunity name",
-      "createNewAccount": "Create new Account",
-      "existingAccount": "Existing Account",
-      "linkExistingAccount": "Link existing Account",
-      "requiresKeymanMeeting": "Account conversion is available from the key-person meeting stage."
-    },
-    "empty": {
-      "list": "No leads found.",
-      "detail": "Select a lead from the list.",
-      "search": "No leads match the current search or filters.",
-      "activity": "No activity recorded.",
-      "contacts": "No contacts registered.",
-      "keyman": "No keyman registered.",
-      "opportunities": "No related opportunities.",
-      "attachments": "No attachments."
-    },
-    "toast": {
-      "created": "Lead created.",
-      "saved": "Lead saved.",
-      "draftSaved": "Draft saved.",
-      "converted": "Converted to Account.",
-      "excluded": "Contact excluded.",
-      "statusUpdated": "Lead status updated.",
-      "reset": "Mock data reset."
-    },
-    "quick": {
-      "title": "Quick create Lead",
-      "help": "Save the minimum required fields now and enrich details in sections later.",
-      "create": "Quick create",
-      "createDetail": "Save and open detail",
-      "required": "Enter required fields."
-    },
-    "interest": {
-      "HIGH": "High",
-      "MEDIUM": "Medium",
-      "LOW": "Low"
-    },
-    "source": {
-      "WEB": "Website",
-      "EXHIBITION": "Exhibition",
-      "REFERRAL": "Referral",
-      "PHONE": "Phone",
-      "OTHER": "Other"
-    },
-    "activityType": {
-      "CALL": "Call",
-      "EMAIL": "Email",
-      "MEETING": "Meeting",
-      "NOTE": "Note"
-    },
-    "incompleteBadge": "{{count}} incomplete",
-    "lastUpdated": "Updated {{date}}",
-    "opportunityCount": "{{count}} opportunities"
+    "hospitalType": {"CLINIC":"Dental clinic","DENTAL_HOSPITAL":"Dental hospital","GENERAL_HOSPITAL":"General hospital","OTHER":"Other"},
+    "status": {"NEW":"New","FIRST_VISIT":"First visit","KEYMAN_MEETING":"Key-person meeting","CONTACT_EXCLUDED":"Contact excluded","CONVERTED":"Converted"},
+    "steps": {"NEW":"New registration","FIRST_VISIT":"First visit","KEYMAN_MEETING":"Key-person meeting","CONVERTED":"Conversion"},
+    "columns": {"hospitalName":"Hospital","status":"Status","owner":"Owner","phone":"Phone","lastActivity":"Last activity","country":"Country / Region","region":"Region","businessNo":"Business no.","lead":"Lead / Organization","interest":"Interest","stage":"Stage","recent":"Recent activity","nextAction":"Next action","source":"Source","createdAt":"Created"},
+    "filters": {"all":"All","inProgress":"In progress","converted":"Converted","excluded":"Contact excluded","allStage":"All stages","allInterest":"All interest","allOwner":"All owners","allCountry":"All countries","allRegion":"All regions","allSource":"All sources","allLastActivity":"All activity dates","last7Days":"Last 7 days","last30Days":"Last 30 days","noActivity":"No activity"},
+    "pagination": {"rowsPerPage":"Rows","previous":"Previous page","next":"Next page","pageStatus":"Page {{page}} / {{pages}} · {{count}} records"},
+    "conversion": {"opportunityName":"Opportunity name","createNewAccount":"Create new Account","existingAccount":"Existing Account","linkExistingAccount":"Link existing Account","requiresKeymanMeeting":"Account conversion is available from the key-person meeting stage."},
+    "activity": {"quickAdd":"Quick add activity","occurredAt":"Activity time","title":"Title","titlePlaceholder":"Enter an activity title.","summary":"Result / note","summaryPlaceholder":"Record the outcome of the call, visit, or meeting.","add":"Save activity"},
+    "empty": {"list":"No leads found.","detail":"Select a lead from the list.","search":"No leads match the current search or filters.","activity":"No activity recorded.","contacts":"No contacts registered.","keyman":"No keyman registered.","opportunities":"No related opportunities.","attachments":"No attachments."},
+    "toast": {"created":"Lead created.","saved":"Lead saved.","draftSaved":"Draft saved.","converted":"Converted to Account.","excluded":"Contact excluded.","statusUpdated":"Lead status updated.","hospitalScaleSaved":"Hospital scale saved.","activityAdded":"Activity added.","reset":"Mock data reset."},
+    "quick": {"title":"Quick create Lead","help":"Save the minimum required fields now and enrich details in sections later.","create":"Quick create","createDetail":"Save and open detail","required":"Enter required fields."},
+    "interest": {"HIGH":"High","MEDIUM":"Medium","LOW":"Low"},
+    "source": {"WEB":"Website","EXHIBITION":"Exhibition","REFERRAL":"Referral","PHONE":"Phone","OTHER":"Other"},
+    "activityType": {"CALL":"Call","EMAIL":"Email","MEETING":"Meeting","VISIT":"Visit","NOTE":"Note"},
+    "incompleteBadge":"{{count}} incomplete",
+    "lastUpdated":"Updated {{date}}",
+    "opportunityCount":"{{count}} opportunities"
   }
 }
