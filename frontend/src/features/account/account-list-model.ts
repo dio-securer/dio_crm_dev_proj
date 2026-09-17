@@ -33,11 +33,21 @@ export function accountCountry(row: AccountSummary): string {
     row.address_line1,
     row.address_line2,
     row.hospital_address,
-    row.business_no
+    row.business_no,
+    row.phone
   ].filter(Boolean).join(' ');
 
   if (/[가-힣]/.test(source)) return 'KR';
-  if (/\b(MX|Mexico|México|S\.L\.P\.|XAXX)\b/i.test(source)) return 'MX';
+
+  // Mexico mock/legacy records do not always have a first-class country field.
+  // Detect the common SAT generic RFC prefix, +52 phone prefix and S.L.P./Mexico address forms.
+  if (
+    /(?:^|\s)\+?52(?:\D|$)/.test(source)
+    || /XAXX\d+/i.test(source)
+    || /Mexico|México|San\s+Luis\s+Potos[ií]/i.test(source)
+    || /S\.?\s*L\.?\s*P\.?/i.test(source)
+  ) return 'MX';
+
   if (/\b(USA|United States|US)\b/i.test(source)) return 'US';
   return row.company_code && row.company_code !== 'DIO' ? row.company_code : 'GLOBAL';
 }
