@@ -11,6 +11,7 @@ export { AbDataList, type AbDataColumn } from './AbDataList';
 export { AbEmptyState } from './AbEmptyState';
 export { AbPagination } from './AbPagination';
 export { AbDetailHeader } from './AbDetailHeader';
+export { AbHeroInsights, type AbHeroInsight } from './AbHeroInsights';
 export { AbDetailTabs, type AbDetailTab } from './AbDetailTabs';
 export { AbQuickActions, type AbQuickAction } from './AbQuickActions';
 export { AbQuickCreate } from './AbQuickCreate';
