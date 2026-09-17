@@ -31,6 +31,7 @@ export function AccountDetailHeader({ account, onEdit, onAddActivity, onErpReque
 
   return (
     <AbDetailHeader
+      entityIcon="building"
       eyebrow={account.erp_customer_code || account.public_id}
       title={account.account_name}
       subtitle={<><strong>{typeName}</strong> · <span className="ab-list-country"><i>{countryFlag(country)}</i>{country}</span></>}
