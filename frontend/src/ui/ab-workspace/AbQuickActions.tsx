@@ -43,11 +43,19 @@ function renderIcon(action: AbQuickAction) {
 }
 
 function pickMobilePrimary(actions: AbQuickAction[]) {
-  const preferredIds = ['call', 'activity'];
+  /*
+   * Read-first / edit-second rule:
+   * - Activity stays the primary CRM action.
+   * - When an entity exposes Edit (Account), surface it directly instead of
+   *   burying it in the overflow menu.
+   * - Entities without Edit fall back to Call and then their declaration order.
+   */
+  const preferredIds = ['activity', 'edit', 'call'];
   const selected: AbQuickAction[] = [];
   for (const id of preferredIds) {
     const action = actions.find(item => item.id === id);
     if (action && !selected.some(item => item.id === action.id)) selected.push(action);
+    if (selected.length >= 2) break;
   }
   for (const action of actions) {
     if (selected.length >= 2) break;
