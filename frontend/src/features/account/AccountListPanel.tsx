@@ -149,18 +149,12 @@ export function AccountListPanel({ rows, loading = false, selectedId, scope, onS
           return [
             <span className="account-card-primary" title={`${row.account_name} · ${row.erp_customer_code || row.business_no || row.public_id}`}>
               <strong className="account-card-name">{row.account_name}</strong>
-              <span className="account-card-context-line">
-                <b>{accountCode}</b>
+              <span className="account-card-contact-line">
+                <span>{row.phone || '-'}</span>
                 <span className="account-mobile-dot">·</span>
-                <span className="ab-list-country"><i>{countryFlag(country)}</i>{country}</span>
+                <span>{row.owner_name ?? '-'}</span>
                 <span className="account-mobile-dot">·</span>
-                <span>{accountType}</span>
-              </span>
-              <span className="account-card-work-line">
-                <span className={`account-list-pill tone-${statusTone(row.account_status)}`}>{accountStatus}</span>
-                <span className="account-card-owner">{t('account.columns.owner')} <b>{row.owner_name ?? '-'}</b></span>
-                <span className="account-mobile-dot">·</span>
-                <span className="account-card-activity">{t('account.columns.lastActivity')} <b>{formatDate(lastActivity, i18n.language)}</b></span>
+                <span>{formatDate(lastActivity, i18n.language)}</span>
               </span>
               <small className="account-card-desktop-code">{accountCode}</small>
               <em className="account-card-desktop-id">{row.business_no || row.public_id}</em>
