@@ -17,6 +17,9 @@
       "erp": "ERP",
       "related": "관련 데이터"
     },
+    "mobileTabs": {
+      "sales": "영업"
+    },
     "actions": {
       "create": "신규 등록",
       "saveDraft": "임시 저장",
@@ -165,6 +168,8 @@
   "contact": {
     "title": "연락처",
     "quickAdd": "연락처 빠른 등록",
+    "quickHelp": "조회 화면은 유지하고, 필요한 경우에만 연락처 등록 화면을 엽니다.",
+    "viewHint": "연락처를 추가하면 이 영역에서 바로 확인할 수 있습니다.",
     "empty": "등록된 연락처가 없습니다.",
     "fields": {
       "name": "이름",
