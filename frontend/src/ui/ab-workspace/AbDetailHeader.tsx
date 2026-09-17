@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { UiIcon } from '../UiIcon';
+import { UiIcon, type UiIconName } from '../UiIcon';
 import '../../styles/ab-workspace-extras.css';
 
 type Props = {
@@ -10,6 +10,7 @@ type Props = {
   badges?: React.ReactNode;
   meta?: React.ReactNode;
   actions?: React.ReactNode;
+  entityIcon?: UiIconName;
 };
 
 function normalizeEyebrow(value: React.ReactNode) {
@@ -31,7 +32,7 @@ function replaceEmptyMetaValues(node: React.ReactNode, emptyLabel: string): Reac
   );
 }
 
-export function AbDetailHeader({ eyebrow, title, subtitle, badges, meta, actions }: Props) {
+export function AbDetailHeader({ eyebrow, title, subtitle, badges, meta, actions, entityIcon = 'building' }: Props) {
   const { t } = useTranslation();
   const reference = normalizeEyebrow(eyebrow);
   const normalizedMeta = meta ? replaceEmptyMetaValues(meta, t('common.noData')) : null;
@@ -40,7 +41,7 @@ export function AbDetailHeader({ eyebrow, title, subtitle, badges, meta, actions
     <header className="ab-detail-header">
       <div className="ab-detail-header-top">
         <div className="ab-detail-identity">
-          <span className="ab-detail-entity-icon" aria-hidden="true"><UiIcon name="building" size="var(--icon-lg)" /></span>
+          <span className={`ab-detail-entity-icon entity-${entityIcon}`} aria-hidden="true"><UiIcon name={entityIcon} size="var(--icon-lg)" /></span>
           <div className="ab-detail-header-main">
             {reference && <div className="ab-detail-eyebrow">{reference}</div>}
             <div className="ab-detail-title-line"><h3>{title}</h3>{badges}</div>
