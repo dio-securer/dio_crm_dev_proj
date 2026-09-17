@@ -1,5 +1,10 @@
 {
   "nav": { "contact": "Contact" },
+  "designSystem": {
+    "filters": "Filters",
+    "apply": "Apply",
+    "activeFilters": "Active filters"
+  },
   "contactWorkspace": {
     "title": "Contact",
     "subtitle": "Manage Account contacts and key people with their related activity.",
