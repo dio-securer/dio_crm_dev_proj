@@ -1,5 +1,10 @@
 {
   "nav": { "contact": "Contact" },
+  "designSystem": {
+    "filters": "필터",
+    "apply": "적용",
+    "activeFilters": "활성 필터"
+  },
   "contactWorkspace": {
     "title": "연락처 / Contact",
     "subtitle": "Account에 연결된 담당자와 Keyman을 조회·등록하고 관련 활동을 관리합니다.",
