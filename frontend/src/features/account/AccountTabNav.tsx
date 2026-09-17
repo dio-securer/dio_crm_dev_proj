@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { UiIcon, type UiIconName } from '../../ui/UiIcon';
+import { ACCOUNT_EDIT_REQUEST_EVENT } from './AccountDetailHeader';
 
 export type AccountTabId = 'summary' | 'contacts' | 'opportunities' | 'activity' | 'trade' | 'manage' | 'address' | 'erp' | 'related';
 type MobileAccountGroup = 'summary' | 'sales' | 'activity' | 'erp' | 'more';
@@ -33,6 +34,13 @@ function activeGroup(tab: AccountTabId): MobileAccountGroup {
 export function AccountTabNav({ activeTab, onChange }: Props) {
   const { t } = useTranslation();
   const group = activeGroup(activeTab);
+
+  React.useEffect(() => {
+    const openEdit = () => onChange('manage');
+    window.addEventListener(ACCOUNT_EDIT_REQUEST_EVENT, openEdit);
+    return () => window.removeEventListener(ACCOUNT_EDIT_REQUEST_EVENT, openEdit);
+  }, [onChange]);
+
   const groups: Array<{ id: MobileAccountGroup; label: string; defaultTab: AccountTabId }> = [
     { id: 'summary', label: t('account.tabs.summary'), defaultTab: 'summary' },
     { id: 'sales', label: t('account.mobileTabs.sales'), defaultTab: SALES_TABS.includes(activeTab) ? activeTab : 'contacts' },
