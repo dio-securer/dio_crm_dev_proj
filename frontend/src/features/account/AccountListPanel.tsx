@@ -35,8 +35,6 @@ type Props = {
   stateStorageKey?: string;
 };
 
-const MOBILE_ACCOUNT_LIST_QUERY = '(max-width: 820px), ((hover: none) and (pointer: coarse) and (max-width: 1400px))';
-
 function formatDate(value: string | undefined, locale: string) {
   if (!value) return '-';
   const date = new Date(value);
@@ -66,15 +64,23 @@ function erpTone(status: string) {
 }
 
 function useMobileAccountList() {
-  const getMatch = () => typeof window !== 'undefined' && window.matchMedia(MOBILE_ACCOUNT_LIST_QUERY).matches;
+  const getMatch = () => typeof window !== 'undefined' && (
+    window.matchMedia('(max-width: 820px)').matches ||
+    window.matchMedia('((hover: none) and (pointer: coarse) and (max-width: 1400px))').matches
+  );
   const [mobile, setMobile] = useState(getMatch);
 
   React.useEffect(() => {
-    const media = window.matchMedia(MOBILE_ACCOUNT_LIST_QUERY);
-    const update = () => setMobile(media.matches);
+    const widthMedia = window.matchMedia('(max-width: 820px)');
+    const touchMedia = window.matchMedia('((hover: none) and (pointer: coarse) and (max-width: 1400px))');
+    const update = () => setMobile(widthMedia.matches || touchMedia.matches);
     update();
-    media.addEventListener('change', update);
-    return () => media.removeEventListener('change', update);
+    widthMedia.addEventListener('change', update);
+    touchMedia.addEventListener('change', update);
+    return () => {
+      widthMedia.removeEventListener('change', update);
+      touchMedia.removeEventListener('change', update);
+    };
   }, []);
 
   return mobile;
@@ -225,7 +231,7 @@ export function AccountListPanel({ rows, loading = false, selectedId, scope, onS
   </>;
 
   return (
-    <>
+    <div className="account-desktop-ab">
       <div className="lead-v2-filter-tabs account-scope-tabs">
         {(['managed', 'mine', 'all'] as AccountScope[]).map(value => (
           <button type="button" key={value} className={scope === value ? 'active' : ''} onClick={() => onScopeChange(value)}>{t(`account.filters.${value}`)}</button>
@@ -248,6 +254,6 @@ export function AccountListPanel({ rows, loading = false, selectedId, scope, onS
         </>}
       />
       <AbWorkspace list={list} detail={detail} />
-    </>
+    </div>
   );
 }
