@@ -2,8 +2,9 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import type { AccountSummary } from '@dio-crm/contracts';
 import { accountTypeName } from '@dio-crm/contracts';
-import { AbDetailHeader, AbEntityBadges, AbQuickActions, countryFlag } from '../../ui/ab-workspace';
+import { AbDetailHeader, AbEntityBadges, AbHeroInsights, AbQuickActions, countryFlag } from '../../ui/ab-workspace';
 import { accountCountry, accountLastActivity } from './account-list-model';
+import { getAccountRelationSummary } from './account-relations-mock';
 
 function formatDateTime(value: string | undefined, locale: string) {
   if (!value) return '-';
@@ -16,18 +17,20 @@ function formatDateTime(value: string | undefined, locale: string) {
 
 type Props = {
   account: AccountSummary;
+  relationTick?: number;
   onEdit: () => void;
   onAddActivity: () => void;
   onErpRequest?: () => void;
   erpRequestDisabled?: boolean;
 };
 
-export function AccountDetailHeader({ account, onEdit, onAddActivity, onErpRequest, erpRequestDisabled = false }: Props) {
+export function AccountDetailHeader({ account, relationTick = 0, onEdit, onAddActivity, onErpRequest, erpRequestDisabled = false }: Props) {
   const { t, i18n } = useTranslation();
   const country = accountCountry(account);
   const typeName = accountTypeName(account.account_type) || account.account_type || '-';
   const lastActivity = accountLastActivity(account);
   const email = account.tax_email || '';
+  const relations = React.useMemo(() => getAccountRelationSummary(account.public_id), [account.public_id, relationTick]);
 
   return (
     <AbDetailHeader
@@ -39,6 +42,11 @@ export function AccountDetailHeader({ account, onEdit, onAddActivity, onErpReque
         { label: t(`account.grades.${account.account_grade || 'GENERAL'}`, { defaultValue: account.account_grade || '-' }), tone: 'info' },
         { label: t(`account.statuses.${account.account_status}`, { defaultValue: account.account_status }), tone: account.account_status === 'ACTIVE' ? 'success' : 'neutral' },
         { label: account.erp_approved_yn ? t('account.badges.erpLinked') : t('account.badges.erpPending'), tone: account.erp_approved_yn ? 'success' : 'warning' }
+      ]} />}
+      insights={<AbHeroInsights items={[
+        { id: 'contacts', label: t('account.related.contacts'), value: relations.contactCount, icon: 'users' },
+        { id: 'opportunities', label: t('account.related.opportunities'), value: relations.opportunityCount, icon: 'briefcase', tone: relations.opportunityCount > 0 ? 'primary' : 'default' },
+        { id: 'activities', label: t('account.related.activities'), value: relations.activityCount, icon: 'activity', meta: formatDateTime(relations.latestActivityAt, i18n.language), tone: relations.activityCount > 0 ? 'success' : 'default' }
       ]} />}
       meta={<div className="ab-detail-meta-list">
         <div className="ab-detail-meta-item"><span>{t('account.owner')}</span><strong>{account.owner_name ?? '-'}</strong></div>
