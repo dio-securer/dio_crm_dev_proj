@@ -55,6 +55,21 @@ function erpTone(status: string) {
   return 'neutral';
 }
 
+function useMobileAccountList() {
+  const getMatch = () => typeof window !== 'undefined' && window.matchMedia('(max-width: 820px)').matches;
+  const [mobile, setMobile] = useState(getMatch);
+
+  React.useEffect(() => {
+    const media = window.matchMedia('(max-width: 820px)');
+    const update = () => setMobile(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+
+  return mobile;
+}
+
 export function AccountListPanel({ rows, loading = false, selectedId, scope, onScopeChange, onSelect, detail, stateStorageKey }: Props) {
   const { t, i18n } = useTranslation();
   const initialState = React.useMemo(() => loadAccountListState(stateStorageKey), [stateStorageKey]);
@@ -63,6 +78,7 @@ export function AccountListPanel({ rows, loading = false, selectedId, scope, onS
   const [pageSize, setPageSize] = useState(initialState.pageSize);
   const scrollTopRef = useRef(initialState.scrollTop);
   const bodyRef = useRef<HTMLDivElement | null>(null);
+  const mobileList = useMobileAccountList();
 
   const countries = useMemo(() => [...new Set(rows.map(accountCountry))].sort(), [rows]);
   const types = useMemo(() => [...new Set(rows.map(row => row.account_type).filter((value): value is string => Boolean(value)))].sort(), [rows]);
@@ -149,15 +165,23 @@ export function AccountListPanel({ rows, loading = false, selectedId, scope, onS
           return [
             <span className="account-card-primary" title={`${row.account_name} · ${row.erp_customer_code || row.business_no || row.public_id}`}>
               <strong className="account-card-name">{row.account_name}</strong>
-              <span className="account-card-contact-line">
-                <span>{row.phone || '-'}</span>
-                <span className="account-mobile-dot">·</span>
-                <span>{row.owner_name ?? '-'}</span>
-                <span className="account-mobile-dot">·</span>
-                <span>{formatDate(lastActivity, i18n.language)}</span>
-              </span>
-              <small className="account-card-desktop-code">{accountCode}</small>
-              <em className="account-card-desktop-id">{row.business_no || row.public_id}</em>
+              {mobileList ? (
+                <span
+                  className="account-card-contact-line"
+                  style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, overflow: 'hidden', whiteSpace: 'nowrap' }}
+                >
+                  <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.phone || '-'}</span>
+                  <span className="account-mobile-dot">·</span>
+                  <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.owner_name ?? '-'}</span>
+                  <span className="account-mobile-dot">·</span>
+                  <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{formatDate(lastActivity, i18n.language)}</span>
+                </span>
+              ) : (
+                <>
+                  <small className="account-card-desktop-code">{accountCode}</small>
+                  <em className="account-card-desktop-id">{row.business_no || row.public_id}</em>
+                </>
+              )}
             </span>,
             <span className="ab-list-country"><i>{countryFlag(country)}</i>{country}</span>,
             <span title={row.account_type || ''}>{accountType}</span>,
