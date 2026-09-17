@@ -17,6 +17,7 @@ import {
   AbActivityTimeline,
   AbDataList,
   AbDetailHeader,
+  AbDetailTabs,
   AbEmptyState,
   AbEntityBadges,
   AbInfoGrid,
@@ -151,11 +152,11 @@ export function OpportunitiesPage() {
     <AbPagination page={currentPage} pageSize={pageSize} totalItems={filtered.length} onPageChange={setPage} onPageSizeChange={size => { setPageSize(size); setPage(1); }} rowsPerPageLabel={t('account.pagination.rowsPerPage')} previousLabel={t('account.pagination.previous')} nextLabel={t('account.pagination.next')} pageStatus={t('account.pagination.pageStatus', { page: currentPage, pages: totalPages, count: filtered.length })} />
   </>;
 
-  const detail = <article className="lead-v2-detail-pane">
-    {!selected && <div className="lead-v2-empty-detail">{t('opportunityWorkspace.select')}</div>}
+  const detail = <article className="lead-v2-detail-pane entity-ab-detail">
+    {!selected && <div className="lead-v2-empty-detail"><AbEmptyState title={t('opportunityWorkspace.select')} /></div>}
     {selected && <>
       <button type="button" className="lead-v2-mobile-back" onClick={() => setMobileDetailOpen(false)}>← {t('account.back')}</button>
-      <AbDetailHeader eyebrow={selected.id} title={selected.name} subtitle={selected.accountName} badges={<AbEntityBadges badges={[
+      <AbDetailHeader entityIcon="briefcase" eyebrow={selected.id} title={selected.name} subtitle={selected.accountName} badges={<AbEntityBadges badges={[
         { label: t(`opportunityWorkspace.stages.${selected.stage}`), tone: stageTone(selected.stage) },
         { label: selected.source === 'LEAD_CONVERSION' ? t('opportunityWorkspace.sourceLead') : t('opportunityWorkspace.sourceManual'), tone: 'neutral' }
       ]} />} meta={<div className="ab-detail-meta-list">
@@ -167,14 +168,18 @@ export function OpportunitiesPage() {
         { id: 'activity', label: t('account.actions.addActivity'), icon: '＋', onClick: () => setActivityOpen(true), tone: 'primary' },
         { id: 'stage', label: t('opportunityWorkspace.stageTab'), icon: '⇢', onClick: () => setTab('stage') }
       ]} />} />
-      <nav className="lead-v2-tabs">{(['overview', 'stage', 'activity'] as OpportunityTab[]).map(item => <button type="button" key={item} className={tab === item ? 'active' : ''} onClick={() => setTab(item)}>{t(`opportunityWorkspace.${item === 'stage' ? 'stageTab' : item}`)}</button>)}</nav>
-      <div className="lead-v2-detail-content entity-detail-stack">
+      <AbDetailTabs ariaLabel={t('opportunityWorkspace.title')} activeId={tab} onChange={id => setTab(id as OpportunityTab)} tabs={[
+        { id: 'overview', label: t('opportunityWorkspace.overview'), icon: 'layout' },
+        { id: 'stage', label: t('opportunityWorkspace.stageTab'), icon: 'target' },
+        { id: 'activity', label: t('opportunityWorkspace.activity'), icon: 'activity', count: accountActivities.length }
+      ]} />
+      <div className="ab-tab-panel entity-detail-stack" role="tabpanel">
         {tab === 'overview' && <><AbInfoGrid columns={2} items={[
           { label: t('opportunityWorkspace.account'), value: selected.accountName }, { label: t('opportunityWorkspace.owner'), value: selected.ownerName },
           { label: t('opportunityWorkspace.amount'), value: money(selected.expectedAmount) }, { label: t('opportunityWorkspace.probability'), value: `${selected.probability}%` },
           { label: t('opportunityWorkspace.expectedClose'), value: formatDate(selected.expectedCloseDate, i18n.language) },
           { label: t('opportunityWorkspace.source'), value: selected.source === 'LEAD_CONVERSION' ? t('opportunityWorkspace.sourceLead') : t('opportunityWorkspace.sourceManual') }
-        ]} /><div className="entity-section-card"><AbStepProgress steps={MAIN_STAGE_FLOW.map(stage => ({ id: stage, label: t(`opportunityWorkspace.stages.${stage}`) }))} currentIndex={stageIndex} mobileLabel={t(`opportunityWorkspace.stages.${selected.stage}`)} /></div></>}
+        ]} /><div className="entity-section-card entity-stage-summary"><AbStepProgress steps={MAIN_STAGE_FLOW.map(stage => ({ id: stage, label: t(`opportunityWorkspace.stages.${stage}`) }))} currentIndex={stageIndex} mobileLabel={t(`opportunityWorkspace.stages.${selected.stage}`)} /></div></>}
         {tab === 'stage' && <AbSectionAccordion id="opportunity-stage" title={t('opportunityWorkspace.stageTab')} open onToggle={() => undefined}>
           <div className="entity-stage-actions">{OPPORTUNITY_STAGES.map(stage => <button type="button" key={stage} className={`lead-v2-button secondary${selected.stage === stage ? ' active' : ''}`} onClick={() => changeStage(stage)}>{t(`opportunityWorkspace.stages.${stage}`)}</button>)}</div>
           <div className="entity-inline-form" style={{ marginTop: 14 }}><label><span>{t('opportunityWorkspace.amount')}</span><input type="number" min="0" value={forecast.expectedAmount} onChange={event => setForecast(previous => ({ ...previous, expectedAmount: event.target.value }))} /></label><label><span>{t('opportunityWorkspace.probability')}</span><input type="number" min="0" max="100" value={forecast.probability} onChange={event => setForecast(previous => ({ ...previous, probability: event.target.value }))} /></label><label><span>{t('opportunityWorkspace.expectedClose')}</span><input type="date" value={forecast.expectedCloseDate} onChange={event => setForecast(previous => ({ ...previous, expectedCloseDate: event.target.value }))} /></label></div>
@@ -185,7 +190,7 @@ export function OpportunitiesPage() {
     </>}
   </article>;
 
-  return <section className={`lead-v2 ab-workspace${mobileDetailOpen ? ' mobile-detail-open' : ''}`}>
+  return <section className={`lead-v2 ab-workspace entity-workspace opportunity-workspace${mobileDetailOpen ? ' mobile-detail-open' : ''}`}>
     <header className="lead-v2-page-header"><div><div className="lead-v2-title-line"><span className="lead-v2-kicker">CRM · OPPORTUNITY</span></div><h2>{t('opportunityWorkspace.title')}</h2><p>{t('opportunityWorkspace.subtitle')}</p></div><div className="lead-v2-header-actions"><button type="button" className="lead-v2-button primary" onClick={() => setQuickOpen(true)}>+ {t('opportunityWorkspace.new')}</button></div></header>
     <AbListToolbar searchValue={search} onSearchChange={value => { setSearch(value); setPage(1); }} searchPlaceholder={t('opportunityWorkspace.searchPlaceholder')} onReset={reset} resetLabel={t('account.filters.reset')} resultSummary={t('opportunityWorkspace.count', { count: filtered.length })} filters={<><select value={stageFilter} onChange={event => { setStageFilter(event.target.value); setPage(1); }}><option value="ALL">{t('opportunityWorkspace.allStages')}</option>{OPPORTUNITY_STAGES.map(stage => <option key={stage} value={stage}>{t(`opportunityWorkspace.stages.${stage}`)}</option>)}</select><select value={accountFilter} onChange={event => { setAccountFilter(event.target.value); setPage(1); }}><option value="ALL">{t('contactWorkspace.allAccounts')}</option>{accounts.map(account => <option key={account.public_id} value={account.public_id}>{account.account_name}</option>)}</select><select value={ownerFilter} onChange={event => { setOwnerFilter(event.target.value); setPage(1); }}><option value="ALL">{t('opportunityWorkspace.allOwners')}</option>{owners.map(owner => <option key={owner} value={owner}>{owner}</option>)}</select></>} />
     <AbWorkspace list={list} detail={detail} />
