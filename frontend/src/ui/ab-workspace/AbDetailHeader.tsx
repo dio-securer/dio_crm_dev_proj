@@ -32,7 +32,7 @@ function replaceEmptyMetaValues(node: React.ReactNode, emptyLabel: string): Reac
   );
 }
 
-export function AbDetailHeader({ eyebrow, title, subtitle, badges, meta, actions, entityIcon = 'building' }: Props) {
+export function AbDetailHeader({ eyebrow, title, subtitle, badges, meta, actions, entityIcon = 'target' }: Props) {
   const { t } = useTranslation();
   const reference = normalizeEyebrow(eyebrow);
   const normalizedMeta = meta ? replaceEmptyMetaValues(meta, t('common.noData')) : null;
