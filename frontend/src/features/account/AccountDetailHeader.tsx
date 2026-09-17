@@ -17,20 +17,19 @@ function formatDateTime(value: string | undefined, locale: string) {
 
 type Props = {
   account: AccountSummary;
-  relationTick?: number;
   onEdit: () => void;
   onAddActivity: () => void;
   onErpRequest?: () => void;
   erpRequestDisabled?: boolean;
 };
 
-export function AccountDetailHeader({ account, relationTick = 0, onEdit, onAddActivity, onErpRequest, erpRequestDisabled = false }: Props) {
+export function AccountDetailHeader({ account, onEdit, onAddActivity, onErpRequest, erpRequestDisabled = false }: Props) {
   const { t, i18n } = useTranslation();
   const country = accountCountry(account);
   const typeName = accountTypeName(account.account_type) || account.account_type || '-';
   const lastActivity = accountLastActivity(account);
   const email = account.tax_email || '';
-  const relations = React.useMemo(() => getAccountRelationSummary(account.public_id), [account.public_id, relationTick]);
+  const relations = getAccountRelationSummary(account.public_id);
 
   return (
     <AbDetailHeader
