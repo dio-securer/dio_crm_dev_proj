@@ -21,6 +21,7 @@ import './styles/design-system-v2-step3.css';
 import './styles/design-system-v2-step4.css';
 import './styles/design-system-v2-step5-signal.css';
 import './styles/design-system-v2-step6-type-nav.css';
+import './styles/design-system-v2-step7-common-lists.css';
 import { GlobalizationProvider } from './market/globalization-context';
 import { registerPwa } from './pwa/register';
 
