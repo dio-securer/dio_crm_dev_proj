@@ -7,6 +7,7 @@ import {
   AbActivityTimeline,
   AbDataList,
   AbDetailHeader,
+  AbDetailTabs,
   AbEmptyState,
   AbEntityBadges,
   AbInfoGrid,
@@ -22,6 +23,7 @@ import './styles/lead-workspace.css';
 import './styles/entity-workspaces.css';
 
 type ContactRow = AccountMockContact & { accountName: string; ownerName: string };
+type ContactTab = 'overview' | 'activity';
 
 function formatDate(value: string, locale: string) {
   const date = new Date(value);
@@ -36,6 +38,7 @@ export function ContactsPage() {
   const [sourceFilter, setSourceFilter] = useState('ALL');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
+  const [tab, setTab] = useState<ContactTab>('overview');
   const [quickOpen, setQuickOpen] = useState(false);
   const [activityOpen, setActivityOpen] = useState(false);
   const [page, setPage] = useState(1);
@@ -74,12 +77,13 @@ export function ContactsPage() {
   ];
 
   const reset = () => { setSearch(''); setAccountFilter('ALL'); setSourceFilter('ALL'); setPage(1); };
-  const select = (row: ContactRow) => { setSelectedId(row.id); setMobileDetailOpen(true); };
+  const select = (row: ContactRow) => { setSelectedId(row.id); setTab('overview'); setMobileDetailOpen(true); };
   const create = () => {
     if (!draft.accountId || !draft.name.trim()) { setMessage(t('contactWorkspace.required')); return; }
     const created = addAccountContact(draft.accountId, { name: draft.name, role: draft.role, phone: draft.phone, email: draft.email });
     setTick(value => value + 1);
     setSelectedId(created.id);
+    setTab('overview');
     setMobileDetailOpen(true);
     setQuickOpen(false);
     setDraft({ accountId: '', name: '', role: '', phone: '', email: '' });
@@ -107,11 +111,12 @@ export function ContactsPage() {
     <AbPagination page={currentPage} pageSize={pageSize} totalItems={filtered.length} onPageChange={setPage} onPageSizeChange={size => { setPageSize(size); setPage(1); }} rowsPerPageLabel={t('account.pagination.rowsPerPage')} previousLabel={t('account.pagination.previous')} nextLabel={t('account.pagination.next')} pageStatus={t('account.pagination.pageStatus', { page: currentPage, pages: totalPages, count: filtered.length })} />
   </>;
 
-  const detail = <article className="lead-v2-detail-pane">
-    {!selected && <div className="lead-v2-empty-detail">{t('contactWorkspace.select')}</div>}
+  const detail = <article className="lead-v2-detail-pane entity-ab-detail">
+    {!selected && <div className="lead-v2-empty-detail"><AbEmptyState title={t('contactWorkspace.select')} /></div>}
     {selected && <>
       <button type="button" className="lead-v2-mobile-back" onClick={() => setMobileDetailOpen(false)}>← {t('account.back')}</button>
       <AbDetailHeader
+        entityIcon="user"
         eyebrow={selected.id}
         title={selected.name}
         subtitle={selected.accountName}
@@ -128,19 +133,28 @@ export function ContactsPage() {
           { id: 'activity', label: t('contactWorkspace.addActivity'), icon: '＋', onClick: () => setActivityOpen(true), tone: 'primary' }
         ]} />}
       />
-      <div className="lead-v2-detail-content entity-detail-stack">
-        <AbInfoGrid columns={2} items={[
+      <AbDetailTabs ariaLabel={t('contactWorkspace.title')} activeId={tab} onChange={id => setTab(id as ContactTab)} tabs={[
+        { id: 'overview', label: t('contactWorkspace.overview'), icon: 'layout' },
+        { id: 'activity', label: t('contactWorkspace.activity'), icon: 'activity', count: activities.length }
+      ]} />
+      <div className="ab-tab-panel entity-detail-stack" role="tabpanel">
+        {tab === 'overview' && <AbInfoGrid columns={2} items={[
           { label: t('contactWorkspace.account'), value: selected.accountName },
           { label: t('account.owner'), value: selectedAccount?.owner_name ?? '-' },
+          { label: t('contactWorkspace.role'), value: selected.role || '-' },
+          { label: t('contactWorkspace.createdAt'), value: formatDate(selected.createdAt, i18n.language) },
           { label: t('contactWorkspace.phone'), value: selected.phone || '-' },
           { label: t('contactWorkspace.email'), value: selected.email || '-' }
-        ]} />
-        <div className="entity-section-card"><div className="entity-section-title"><strong>{t('contactWorkspace.activity')}</strong><small>{t('contactWorkspace.accountActivityHint')}</small></div><AbActivityTimeline items={activities.slice(0, 8).map(item => ({ id: item.id, typeLabel: t(`account.activityTypes.${item.type}`), timeLabel: formatDate(item.occurredAt, i18n.language), title: item.subject, summary: item.note || undefined, owner: item.ownerName }))} empty={<AbEmptyState title={t('activityWorkspace.empty')} />} /></div>
+        ]} />}
+        {tab === 'activity' && <div className="entity-section-card">
+          <div className="entity-section-title"><div><strong>{t('contactWorkspace.activity')}</strong><small>{t('contactWorkspace.accountActivityHint')}</small></div><button type="button" className="lead-v2-button secondary" onClick={() => setActivityOpen(true)}>+ {t('contactWorkspace.addActivity')}</button></div>
+          <AbActivityTimeline items={activities.slice(0, 8).map(item => ({ id: item.id, typeLabel: t(`account.activityTypes.${item.type}`), timeLabel: formatDate(item.occurredAt, i18n.language), title: item.subject, summary: item.note || undefined, owner: item.ownerName }))} empty={<AbEmptyState title={t('activityWorkspace.empty')} />} />
+        </div>}
       </div>
     </>}
   </article>;
 
-  return <section className={`lead-v2 ab-workspace${mobileDetailOpen ? ' mobile-detail-open' : ''}`}>
+  return <section className={`lead-v2 ab-workspace entity-workspace contact-workspace${mobileDetailOpen ? ' mobile-detail-open' : ''}`}>
     <header className="lead-v2-page-header"><div><div className="lead-v2-title-line"><span className="lead-v2-kicker">CRM · CONTACT</span></div><h2>{t('contactWorkspace.title')}</h2><p>{t('contactWorkspace.subtitle')}</p></div><div className="lead-v2-header-actions"><button type="button" className="lead-v2-button primary" onClick={() => setQuickOpen(true)}>+ {t('contactWorkspace.new')}</button></div></header>
     <AbListToolbar searchValue={search} onSearchChange={value => { setSearch(value); setPage(1); }} searchPlaceholder={t('contactWorkspace.searchPlaceholder')} onReset={reset} resetLabel={t('account.filters.reset')} resultSummary={t('contactWorkspace.count', { count: filtered.length })} filters={<><select value={accountFilter} onChange={event => { setAccountFilter(event.target.value); setPage(1); }}><option value="ALL">{t('contactWorkspace.allAccounts')}</option>{accounts.map(account => <option key={account.public_id} value={account.public_id}>{account.account_name}</option>)}</select><select value={sourceFilter} onChange={event => { setSourceFilter(event.target.value); setPage(1); }}><option value="ALL">{t('contactWorkspace.allSources')}</option><option value="MANUAL">{t('contactWorkspace.manual')}</option><option value="LEAD_CONVERSION">{t('contactWorkspace.leadConversion')}</option></select></>} />
     <AbWorkspace list={list} detail={detail} />
