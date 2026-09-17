@@ -35,6 +35,8 @@ type Props = {
   stateStorageKey?: string;
 };
 
+const MOBILE_ACCOUNT_LIST_QUERY = '(max-width: 820px), ((hover: none) and (pointer: coarse) and (max-width: 1400px))';
+
 function formatDate(value: string | undefined, locale: string) {
   if (!value) return '-';
   const date = new Date(value);
@@ -64,11 +66,11 @@ function erpTone(status: string) {
 }
 
 function useMobileAccountList() {
-  const getMatch = () => typeof window !== 'undefined' && window.matchMedia('(max-width: 820px)').matches;
+  const getMatch = () => typeof window !== 'undefined' && window.matchMedia(MOBILE_ACCOUNT_LIST_QUERY).matches;
   const [mobile, setMobile] = useState(getMatch);
 
   React.useEffect(() => {
-    const media = window.matchMedia('(max-width: 820px)');
+    const media = window.matchMedia(MOBILE_ACCOUNT_LIST_QUERY);
     const update = () => setMobile(media.matches);
     update();
     media.addEventListener('change', update);
