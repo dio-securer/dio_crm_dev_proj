@@ -39,7 +39,7 @@ export function AbDetailHeader({ eyebrow, title, subtitle, badges, meta, insight
   const normalizedMeta = meta ? replaceEmptyMetaValues(meta, t('common.noData')) : null;
 
   return (
-    <header className="ab-detail-header">
+    <header className={`ab-detail-header entity-${entityIcon}`}>
       <div className="ab-detail-header-top">
         <div className="ab-detail-identity">
           <span className={`ab-detail-entity-icon entity-${entityIcon}`} aria-hidden="true"><UiIcon name={entityIcon} size="var(--icon-lg)" /></span>
