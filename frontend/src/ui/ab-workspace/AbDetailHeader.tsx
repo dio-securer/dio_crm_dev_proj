@@ -9,6 +9,7 @@ type Props = {
   subtitle?: React.ReactNode;
   badges?: React.ReactNode;
   meta?: React.ReactNode;
+  insights?: React.ReactNode;
   actions?: React.ReactNode;
   entityIcon?: UiIconName;
 };
@@ -32,7 +33,7 @@ function replaceEmptyMetaValues(node: React.ReactNode, emptyLabel: string): Reac
   );
 }
 
-export function AbDetailHeader({ eyebrow, title, subtitle, badges, meta, actions, entityIcon = 'target' }: Props) {
+export function AbDetailHeader({ eyebrow, title, subtitle, badges, meta, insights, actions, entityIcon = 'target' }: Props) {
   const { t } = useTranslation();
   const reference = normalizeEyebrow(eyebrow);
   const normalizedMeta = meta ? replaceEmptyMetaValues(meta, t('common.noData')) : null;
@@ -50,6 +51,7 @@ export function AbDetailHeader({ eyebrow, title, subtitle, badges, meta, actions
         </div>
         {actions && <div className="ab-detail-actions">{actions}</div>}
       </div>
+      {insights && <div className="ab-detail-header-insights">{insights}</div>}
       {normalizedMeta && <div className="ab-detail-header-meta">{normalizedMeta}</div>}
     </header>
   );
