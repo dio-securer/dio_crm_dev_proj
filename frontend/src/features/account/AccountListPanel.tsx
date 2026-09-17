@@ -115,12 +115,12 @@ export function AccountListPanel({ rows, loading = false, selectedId, scope, onS
 
   const columns: AbDataColumn[] = [
     { key: 'account', label: t('account.columns.accountName'), width: 'minmax(170px,1.55fr)', mobileRole: 'primary', className: 'primary-cell' },
-    { key: 'country', label: t('account.columns.country'), width: '76px' },
-    { key: 'type', label: t('account.columns.type'), width: '94px' },
-    { key: 'grade', label: t('account.columns.grade'), width: '66px' },
-    { key: 'status', label: t('account.columns.status'), width: '88px' },
-    { key: 'owner', label: t('account.columns.owner'), width: '86px' },
-    { key: 'activity', label: t('account.columns.lastActivity'), width: '88px' },
+    { key: 'country', label: t('account.columns.country'), width: '76px', mobileRole: 'hide' },
+    { key: 'type', label: t('account.columns.type'), width: '94px', mobileRole: 'hide' },
+    { key: 'grade', label: t('account.columns.grade'), width: '66px', mobileRole: 'hide' },
+    { key: 'status', label: t('account.columns.status'), width: '88px', mobileRole: 'hide' },
+    { key: 'owner', label: t('account.columns.owner'), width: '86px', mobileRole: 'hide' },
+    { key: 'activity', label: t('account.columns.lastActivity'), width: '88px', mobileRole: 'hide' },
     { key: 'erp', label: t('account.columns.erpStatus'), width: '92px', mobileRole: 'badge' }
   ];
 
@@ -143,12 +143,30 @@ export function AccountListPanel({ rows, loading = false, selectedId, scope, onS
         renderCells={row => {
           const country = accountCountry(row);
           const lastActivity = accountLastActivity(row);
+          const accountType = accountTypeName(row.account_type) || row.account_type || '-';
+          const accountStatus = t(`account.statuses.${row.account_status}`, { defaultValue: row.account_status });
           return [
-            <span className="ab-primary-stack" title={`${row.account_name} · ${row.erp_customer_code || row.business_no || row.public_id}`}><strong>{row.account_name}</strong><small>{row.erp_customer_code || row.business_no || '-'}</small><em>{row.business_no || row.public_id}</em></span>,
+            <span className="ab-primary-stack account-mobile-card-main" title={`${row.account_name} · ${row.erp_customer_code || row.business_no || row.public_id}`}>
+              <strong>{row.account_name}</strong>
+              <small>{row.erp_customer_code || row.business_no || '-'}</small>
+              <em>{row.business_no || row.public_id}</em>
+              <span className="account-mobile-card-lines" aria-hidden="true">
+                <span className="account-mobile-card-context">
+                  <span className="ab-list-country"><i>{countryFlag(country)}</i>{country}</span>
+                  <span className="account-mobile-dot">·</span>
+                  <span>{accountType}</span>
+                </span>
+                <span className="account-mobile-card-work">
+                  <span className={`account-list-pill tone-${statusTone(row.account_status)}`}>{accountStatus}</span>
+                  <span className="account-mobile-owner">{t('account.columns.owner')} <b>{row.owner_name ?? '-'}</b></span>
+                </span>
+                <span className="account-mobile-activity">{t('account.columns.lastActivity')} <b>{formatDate(lastActivity, i18n.language)}</b></span>
+              </span>
+            </span>,
             <span className="ab-list-country"><i>{countryFlag(country)}</i>{country}</span>,
-            <span title={row.account_type || ''}>{accountTypeName(row.account_type) || row.account_type || '-'}</span>,
+            <span title={row.account_type || ''}>{accountType}</span>,
             <span>{t(`account.grades.${row.account_grade || 'GENERAL'}`, { defaultValue: row.account_grade || '-' })}</span>,
-            <span className={`account-list-pill tone-${statusTone(row.account_status)}`}>{t(`account.statuses.${row.account_status}`, { defaultValue: row.account_status })}</span>,
+            <span className={`account-list-pill tone-${statusTone(row.account_status)}`}>{accountStatus}</span>,
             <span>{row.owner_name ?? '-'}</span>,
             <span>{formatDate(lastActivity, i18n.language)}</span>,
             <span className={`account-list-pill tone-${erpTone(row.integration_status)}`}>{t(`account.integrationStatus.${row.integration_status}`, { defaultValue: row.integration_status })}</span>
