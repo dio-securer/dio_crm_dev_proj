@@ -145,23 +145,25 @@ export function AccountListPanel({ rows, loading = false, selectedId, scope, onS
           const lastActivity = accountLastActivity(row);
           const accountType = accountTypeName(row.account_type) || row.account_type || '-';
           const accountStatus = t(`account.statuses.${row.account_status}`, { defaultValue: row.account_status });
+          const accountCode = row.erp_customer_code || row.business_no || '-';
           return [
-            <span className="ab-primary-stack account-mobile-card-main" title={`${row.account_name} · ${row.erp_customer_code || row.business_no || row.public_id}`}>
-              <strong>{row.account_name}</strong>
-              <small>{row.erp_customer_code || row.business_no || '-'}</small>
-              <em>{row.business_no || row.public_id}</em>
-              <span className="account-mobile-card-lines" aria-hidden="true">
-                <span className="account-mobile-card-context">
-                  <span className="ab-list-country"><i>{countryFlag(country)}</i>{country}</span>
-                  <span className="account-mobile-dot">·</span>
-                  <span>{accountType}</span>
-                </span>
-                <span className="account-mobile-card-work">
-                  <span className={`account-list-pill tone-${statusTone(row.account_status)}`}>{accountStatus}</span>
-                  <span className="account-mobile-owner">{t('account.columns.owner')} <b>{row.owner_name ?? '-'}</b></span>
-                </span>
-                <span className="account-mobile-activity">{t('account.columns.lastActivity')} <b>{formatDate(lastActivity, i18n.language)}</b></span>
+            <span className="account-card-primary" title={`${row.account_name} · ${row.erp_customer_code || row.business_no || row.public_id}`}>
+              <strong className="account-card-name">{row.account_name}</strong>
+              <span className="account-card-context-line">
+                <b>{accountCode}</b>
+                <span className="account-mobile-dot">·</span>
+                <span className="ab-list-country"><i>{countryFlag(country)}</i>{country}</span>
+                <span className="account-mobile-dot">·</span>
+                <span>{accountType}</span>
               </span>
+              <span className="account-card-work-line">
+                <span className={`account-list-pill tone-${statusTone(row.account_status)}`}>{accountStatus}</span>
+                <span className="account-card-owner">{t('account.columns.owner')} <b>{row.owner_name ?? '-'}</b></span>
+                <span className="account-mobile-dot">·</span>
+                <span className="account-card-activity">{t('account.columns.lastActivity')} <b>{formatDate(lastActivity, i18n.language)}</b></span>
+              </span>
+              <small className="account-card-desktop-code">{accountCode}</small>
+              <em className="account-card-desktop-id">{row.business_no || row.public_id}</em>
             </span>,
             <span className="ab-list-country"><i>{countryFlag(country)}</i>{country}</span>,
             <span title={row.account_type || ''}>{accountType}</span>,
