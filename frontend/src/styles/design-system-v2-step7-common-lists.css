@@ -1,0 +1,335 @@
+/* DIO CRM Design System v2 — STEP 7
+   Compact mobile business-list pattern shared by Lead / Contact / Opportunity / Activity.
+   Account keeps its dedicated 3-row card implementation. */
+
+@media (max-width:820px), ((hover:none) and (pointer:coarse) and (max-width:1400px)) {
+  :where(
+    .lead-v2:not(.account-desktop-ab):not(.entity-workspace),
+    .contact-workspace,
+    .opportunity-workspace,
+    .activity-workspace
+  ) .ab-data-body {
+    gap:9px!important;
+    padding:10px 11px 14px!important;
+  }
+
+  :where(
+    .lead-v2:not(.account-desktop-ab):not(.entity-workspace),
+    .contact-workspace,
+    .opportunity-workspace,
+    .activity-workspace
+  ) .ab-data-row {
+    position:relative!important;
+    display:block!important;
+    height:auto!important;
+    max-height:none!important;
+    min-height:94px!important;
+    padding:12px 13px!important;
+    border:1px solid #dce5ee!important;
+    border-radius:14px!important;
+    background:#fff!important;
+    overflow:visible!important;
+    text-align:left!important;
+    box-shadow:0 3px 12px rgba(16,40,68,.055)!important;
+  }
+
+  :where(
+    .lead-v2:not(.account-desktop-ab):not(.entity-workspace),
+    .contact-workspace,
+    .opportunity-workspace,
+    .activity-workspace
+  ) .ab-data-row.selected {
+    border-color:#a9cbea!important;
+    background:linear-gradient(90deg,#f1f8ff,#fff 62%)!important;
+    box-shadow:inset 4px 0 0 #2f73d9,0 4px 14px rgba(16,40,68,.07)!important;
+  }
+
+  :where(
+    .lead-v2:not(.account-desktop-ab):not(.entity-workspace),
+    .contact-workspace,
+    .opportunity-workspace,
+    .activity-workspace
+  ) .ab-data-cell {
+    min-width:0!important;
+  }
+
+  :where(
+    .lead-v2:not(.account-desktop-ab):not(.entity-workspace),
+    .contact-workspace,
+    .opportunity-workspace,
+    .activity-workspace
+  ) .ab-data-cell[data-mobile-role="primary"] {
+    display:block!important;
+    width:100%!important;
+    padding:0 92px 0 0!important;
+    overflow:visible!important;
+    white-space:normal!important;
+  }
+
+  :where(
+    .lead-v2:not(.account-desktop-ab):not(.entity-workspace),
+    .contact-workspace,
+    .opportunity-workspace,
+    .activity-workspace
+  ) .ab-data-cell[data-mobile-role="badge"] {
+    position:absolute!important;
+    display:block!important;
+    top:11px!important;
+    right:12px!important;
+    width:auto!important;
+    max-width:86px!important;
+    padding:0!important;
+    z-index:2;
+  }
+
+  :where(
+    .lead-v2:not(.account-desktop-ab):not(.entity-workspace),
+    .contact-workspace,
+    .opportunity-workspace,
+    .activity-workspace
+  ) .ab-data-cell[data-mobile-role="secondary"],
+  :where(
+    .lead-v2:not(.account-desktop-ab):not(.entity-workspace),
+    .contact-workspace,
+    .opportunity-workspace,
+    .activity-workspace
+  ) .ab-data-cell[data-mobile-role="hide"] {
+    display:none!important;
+  }
+
+  :where(
+    .lead-v2:not(.account-desktop-ab):not(.entity-workspace),
+    .contact-workspace,
+    .opportunity-workspace,
+    .activity-workspace
+  ) .ab-primary-stack {
+    display:block!important;
+    min-width:0!important;
+  }
+
+  :where(
+    .lead-v2:not(.account-desktop-ab):not(.entity-workspace),
+    .contact-workspace,
+    .opportunity-workspace,
+    .activity-workspace
+  ) .ab-primary-stack strong {
+    display:-webkit-box!important;
+    overflow:hidden!important;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+    color:#0b2743!important;
+    font-size:17px!important;
+    font-weight:900!important;
+    line-height:1.24!important;
+    white-space:normal!important;
+    letter-spacing:-.25px!important;
+  }
+
+  /* Mobile list identity should stay clean: secondary identity is represented below. */
+  :where(
+    .lead-v2:not(.account-desktop-ab):not(.entity-workspace),
+    .contact-workspace,
+    .opportunity-workspace,
+    .activity-workspace
+  ) .ab-primary-stack > small,
+  :where(
+    .lead-v2:not(.account-desktop-ab):not(.entity-workspace),
+    .contact-workspace,
+    .opportunity-workspace,
+    .activity-workspace
+  ) .ab-primary-stack > em {
+    display:none!important;
+  }
+
+  :where(
+    .lead-v2:not(.account-desktop-ab):not(.entity-workspace),
+    .contact-workspace,
+    .opportunity-workspace,
+    .activity-workspace
+  ) .ab-data-cell[data-mobile-role="badge"] .account-list-pill,
+  :where(
+    .lead-v2:not(.account-desktop-ab):not(.entity-workspace),
+    .contact-workspace,
+    .opportunity-workspace,
+    .activity-workspace
+  ) .ab-data-cell[data-mobile-role="badge"] .lead-v2-pill {
+    min-height:24px!important;
+    max-width:86px!important;
+    padding:3px 8px!important;
+    font-size:11px!important;
+    font-weight:850!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+  }
+
+  :where(
+    .lead-v2:not(.account-desktop-ab):not(.entity-workspace),
+    .contact-workspace,
+    .opportunity-workspace,
+    .activity-workspace
+  ) .ab-data-mobile-meta {
+    display:grid!important;
+    grid-template-columns:minmax(0,1.35fr) minmax(0,.9fr)!important;
+    gap:5px 12px!important;
+    width:100%!important;
+    margin-top:8px!important;
+    padding:0!important;
+    border:0!important;
+    background:transparent!important;
+  }
+
+  :where(
+    .lead-v2:not(.account-desktop-ab):not(.entity-workspace),
+    .contact-workspace,
+    .opportunity-workspace,
+    .activity-workspace
+  ) .ab-data-mobile-meta-item {
+    display:none!important;
+    min-width:0!important;
+    align-items:center!important;
+    gap:5px!important;
+    padding:0!important;
+    border:0!important;
+    background:transparent!important;
+  }
+
+  :where(
+    .lead-v2:not(.account-desktop-ab):not(.entity-workspace),
+    .contact-workspace,
+    .opportunity-workspace,
+    .activity-workspace
+  ) .ab-data-mobile-meta-label {
+    flex:0 0 auto!important;
+    color:#6f8297!important;
+    font-size:10.5px!important;
+    font-weight:750!important;
+    white-space:nowrap!important;
+  }
+
+  :where(
+    .lead-v2:not(.account-desktop-ab):not(.entity-workspace),
+    .contact-workspace,
+    .opportunity-workspace,
+    .activity-workspace
+  ) .ab-data-mobile-meta-value {
+    min-width:0!important;
+    overflow:hidden!important;
+    color:#254a6b!important;
+    font-size:13px!important;
+    font-weight:850!important;
+    line-height:1.25!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+  }
+
+  :where(
+    .lead-v2:not(.account-desktop-ab):not(.entity-workspace),
+    .contact-workspace,
+    .opportunity-workspace,
+    .activity-workspace
+  ) .ab-data-mobile-meta-value > span,
+  :where(
+    .lead-v2:not(.account-desktop-ab):not(.entity-workspace),
+    .contact-workspace,
+    .opportunity-workspace,
+    .activity-workspace
+  ) .ab-data-mobile-meta-value > strong {
+    min-width:0!important;
+    max-width:100%!important;
+  }
+
+  /* Lead: title + stage / phone + owner / recent activity */
+  .lead-v2:not(.account-desktop-ab):not(.entity-workspace) .ab-data-mobile-meta-item[data-column-key="phone"],
+  .lead-v2:not(.account-desktop-ab):not(.entity-workspace) .ab-data-mobile-meta-item[data-column-key="owner"],
+  .lead-v2:not(.account-desktop-ab):not(.entity-workspace) .ab-data-mobile-meta-item[data-column-key="lastActivity"] {
+    display:flex!important;
+  }
+  .lead-v2:not(.account-desktop-ab):not(.entity-workspace) .ab-data-mobile-meta-item[data-column-key="lastActivity"] {
+    grid-column:1/-1!important;
+  }
+
+  /* Contact: name + source / account + role / phone */
+  .contact-workspace .ab-data-mobile-meta-item[data-column-key="account"],
+  .contact-workspace .ab-data-mobile-meta-item[data-column-key="role"],
+  .contact-workspace .ab-data-mobile-meta-item[data-column-key="phone"] {
+    display:flex!important;
+  }
+  .contact-workspace .ab-data-mobile-meta-item[data-column-key="phone"] {
+    grid-column:1/-1!important;
+  }
+
+  /* Opportunity: name + stage / account + amount / owner + close */
+  .opportunity-workspace .ab-data-mobile-meta-item[data-column-key="account"],
+  .opportunity-workspace .ab-data-mobile-meta-item[data-column-key="amount"],
+  .opportunity-workspace .ab-data-mobile-meta-item[data-column-key="owner"],
+  .opportunity-workspace .ab-data-mobile-meta-item[data-column-key="close"] {
+    display:flex!important;
+  }
+
+  /* Activity: subject + source / target + type / owner + occurred date */
+  .activity-workspace .ab-data-mobile-meta-item[data-column-key="target"],
+  .activity-workspace .ab-data-mobile-meta-item[data-column-key="type"],
+  .activity-workspace .ab-data-mobile-meta-item[data-column-key="owner"],
+  .activity-workspace .ab-data-mobile-meta-item[data-column-key="date"] {
+    display:flex!important;
+  }
+
+  /* Full-width metadata must use the whole card, never the badge-reserved title width. */
+  :where(
+    .lead-v2:not(.account-desktop-ab):not(.entity-workspace),
+    .contact-workspace,
+    .opportunity-workspace,
+    .activity-workspace
+  ) .ab-data-mobile-meta {
+    padding-right:0!important;
+  }
+}
+
+@media (max-width:390px) {
+  :where(
+    .lead-v2:not(.account-desktop-ab):not(.entity-workspace),
+    .contact-workspace,
+    .opportunity-workspace,
+    .activity-workspace
+  ) .ab-data-cell[data-mobile-role="primary"] {
+    padding-right:82px!important;
+  }
+
+  :where(
+    .lead-v2:not(.account-desktop-ab):not(.entity-workspace),
+    .contact-workspace,
+    .opportunity-workspace,
+    .activity-workspace
+  ) .ab-primary-stack strong {
+    font-size:16px!important;
+  }
+
+  :where(
+    .lead-v2:not(.account-desktop-ab):not(.entity-workspace),
+    .contact-workspace,
+    .opportunity-workspace,
+    .activity-workspace
+  ) .ab-data-mobile-meta {
+    grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr)!important;
+    gap:5px 9px!important;
+  }
+
+  :where(
+    .lead-v2:not(.account-desktop-ab):not(.entity-workspace),
+    .contact-workspace,
+    .opportunity-workspace,
+    .activity-workspace
+  ) .ab-data-mobile-meta-label {
+    font-size:10px!important;
+  }
+
+  :where(
+    .lead-v2:not(.account-desktop-ab):not(.entity-workspace),
+    .contact-workspace,
+    .opportunity-workspace,
+    .activity-workspace
+  ) .ab-data-mobile-meta-value {
+    font-size:12.5px!important;
+  }
+}
