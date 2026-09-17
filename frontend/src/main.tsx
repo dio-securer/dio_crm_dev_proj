@@ -16,6 +16,7 @@ import './styles/visual-qa-step78.css';
 import './styles/visual-qa-entity-final.css';
 import './styles/visual-qa-mobile-final.css';
 import './styles/design-system-v2-step1.css';
+import './styles/design-system-v2-step2.css';
 import { GlobalizationProvider } from './market/globalization-context';
 import { registerPwa } from './pwa/register';
 
