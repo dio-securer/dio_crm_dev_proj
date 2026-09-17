@@ -16,6 +16,7 @@ export type UiIconName =
   | 'pencil'
   | 'link'
   | 'search'
+  | 'filter'
   | 'chevron-down'
   | 'chevron-right'
   | 'inbox'
@@ -52,6 +53,7 @@ const paths: Record<UiIconName, React.ReactNode> = {
   pencil: <><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z" /></>,
   link: <><path d="M10 13a5 5 0 0 0 7.07.07l2-2A5 5 0 0 0 12 4l-1.14 1.14" /><path d="M14 11a5 5 0 0 0-7.07-.07l-2 2A5 5 0 0 0 12 20l1.14-1.14" /></>,
   search: <><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></>,
+  filter: <><path d="M4 5h16l-6.5 7.2V19l-3 1v-7.8Z" /></>,
   'chevron-down': <><path d="m6 9 6 6 6-6" /></>,
   'chevron-right': <><path d="m9 18 6-6-6-6" /></>,
   inbox: <><path d="M4 4h16l2 9v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6Z" /><path d="M2 13h6l2 3h4l2-3h6" /></>,
