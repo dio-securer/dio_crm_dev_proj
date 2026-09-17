@@ -12,6 +12,7 @@ import './styles/visual-qa.css';
 import './styles/visual-qa-step34.css';
 import './styles/visual-qa-step56.css';
 import './styles/visual-qa-microfix.css';
+import './styles/visual-qa-step78.css';
 import { GlobalizationProvider } from './market/globalization-context';
 import { registerPwa } from './pwa/register';
 
