@@ -1,0 +1,188 @@
+{
+  "account": {
+    "listTitle": "Account 목록",
+    "detailTitle": "Account 상세",
+    "quickCreateTitle": "Account 빠른 등록",
+    "quickActionsLabel": "Account 빠른 작업",
+    "count": "총 {{count}}건",
+    "searchPlaceholder": "거래처명, 코드, 담당자, 국가 검색",
+    "tabs": {
+      "summary": "요약",
+      "contacts": "연락처",
+      "opportunities": "기회",
+      "activity": "활동",
+      "trade": "거래상태",
+      "manage": "관리정보",
+      "address": "주소",
+      "erp": "ERP",
+      "related": "관련 데이터"
+    },
+    "mobileTabs": {
+      "sales": "영업"
+    },
+    "actions": {
+      "create": "신규 등록",
+      "saveDraft": "임시 저장",
+      "erpRequest": "ERP 등록요청",
+      "quickAddContact": "연락처 빠른 등록",
+      "viewRelated": "더보기",
+      "call": "전화",
+      "email": "메일",
+      "addActivity": "활동등록",
+      "edit": "편집"
+    },
+    "fields": {
+      "country": "국가",
+      "address": "주소",
+      "accountCode": "거래처 코드",
+      "industry": "업종",
+      "website": "웹사이트",
+      "lastActivity": "최근 활동"
+    },
+    "columns": {
+      "accountName": "거래처명",
+      "accountCode": "거래처 코드",
+      "country": "국가",
+      "type": "유형",
+      "grade": "등급",
+      "owner": "담당자",
+      "status": "상태",
+      "erpStatus": "ERP 상태",
+      "lastActivity": "최근 활동",
+      "industry": "업종"
+    },
+    "filters": {
+      "managed": "관리 거래처",
+      "mine": "내 거래처",
+      "all": "전체",
+      "allCountry": "전체 국가",
+      "allType": "전체 유형",
+      "allGrade": "전체 등급",
+      "allStatus": "전체 상태",
+      "allErp": "ERP 상태 전체",
+      "allLastActivity": "최근 활동 전체",
+      "last7Days": "최근 7일",
+      "last30Days": "최근 30일",
+      "noActivity": "활동 없음",
+      "reset": "필터 초기화"
+    },
+    "pagination": {
+      "rowsPerPage": "표시 건수",
+      "previous": "이전 페이지",
+      "next": "다음 페이지",
+      "pageStatus": "{{page}} / {{pages}} 페이지 · {{count}}건"
+    },
+    "empty": {
+      "list": "등록된 거래처가 없습니다.",
+      "detail": "목록에서 거래처를 선택하세요.",
+      "search": "검색 또는 필터 조건에 맞는 거래처가 없습니다.",
+      "contacts": "등록된 연락처가 없습니다.",
+      "opportunities": "연결된 Opportunity가 없습니다.",
+      "activities": "등록된 Account 활동이 없습니다.",
+      "related": "관련 데이터가 없습니다."
+    },
+    "toast": {
+      "draftSaved": "임시 저장했습니다.",
+      "quickDraftSaved": "빠른 등록 작성내용을 임시 저장했습니다.",
+      "contactAdded": "연락처를 저장했습니다.",
+      "activityAdded": "활동을 저장했습니다."
+    },
+    "quick": {
+      "title": "Account 빠른 등록",
+      "help": "필수 정보만 입력해 저장하고, 상세 정보는 탭/섹션에서 보강합니다. 모바일에서는 전체 화면으로 표시됩니다.",
+      "create": "빠른 등록",
+      "required": "거래처명, 국가, 유형, 전화번호, 담당영업을 입력하세요."
+    },
+    "countries": {
+      "KR": "대한민국",
+      "US": "미국",
+      "MX": "멕시코",
+      "IN": "인도",
+      "PT": "포르투갈",
+      "TR": "튀르키예"
+    },
+    "owners": {
+      "USER001": "김지훈",
+      "USER002": "이서연",
+      "USER003": "박준호"
+    },
+    "integrationStatus": {
+      "REVIEWING": "검토중"
+    },
+    "erpWorkflow": {
+      "title": "ERP 등록 Mock Workflow",
+      "progress": "ERP 등록 진행상태",
+      "requestId": "요청 ID",
+      "requestedAt": "요청일시",
+      "reviewedAt": "검토일시",
+      "completedAt": "완료일시",
+      "moveReview": "검토중으로 이동",
+      "complete": "연동완료 처리",
+      "retry": "재요청",
+      "fail": "실패 처리",
+      "failureReason": "실패 사유",
+      "failed": "ERP 연동 실패",
+      "requested": "ERP 등록 요청을 생성했습니다.",
+      "reviewing": "ERP 요청을 검토중으로 변경했습니다.",
+      "completed": "ERP 연동완료로 처리했습니다.",
+      "retried": "ERP 등록을 재요청했습니다.",
+      "failedDone": "ERP 연동실패로 처리했습니다.",
+      "actionFailed": "ERP Mock 처리 실패: {{message}}"
+    },
+    "activityQuick": {
+      "title": "Account 활동 등록",
+      "help": "전화·메일·미팅·방문·메모 활동을 Account에 바로 기록합니다.",
+      "type": "활동 유형",
+      "occurredAt": "활동 일시",
+      "subject": "제목",
+      "note": "결과 / 메모",
+      "save": "활동 저장"
+    },
+    "activityTypes": {
+      "CALL": "전화",
+      "EMAIL": "메일",
+      "MEETING": "미팅",
+      "VISIT": "방문",
+      "NOTE": "메모"
+    },
+    "relationSource": {
+      "MANUAL": "Account 등록",
+      "LEAD_CONVERSION": "Lead 전환"
+    },
+    "opportunityStage": {
+      "IDENTIFIED": "기회 식별"
+    },
+    "related": {
+      "contacts": "Contact",
+      "opportunities": "Opportunity",
+      "contracts": "Contract",
+      "orders": "Order",
+      "activities": "Activity"
+    },
+    "badges": {
+      "erpLinked": "ERP 연동",
+      "erpPending": "ERP 대기",
+      "incomplete": "미완료 {{count}}"
+    }
+  },
+  "contact": {
+    "title": "연락처",
+    "quickAdd": "연락처 빠른 등록",
+    "quickHelp": "조회 화면은 유지하고, 필요한 경우에만 연락처 등록 화면을 엽니다.",
+    "viewHint": "연락처를 추가하면 이 영역에서 바로 확인할 수 있습니다.",
+    "empty": "등록된 연락처가 없습니다.",
+    "fields": {
+      "name": "이름",
+      "role": "직함",
+      "phone": "전화",
+      "email": "이메일"
+    },
+    "actions": {
+      "add": "추가",
+      "save": "저장"
+    },
+    "toast": {
+      "added": "연락처를 추가했습니다."
+    }
+  }
+}

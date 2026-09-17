@@ -1,0 +1,190 @@
+/* Final Visual QA — Lead/Account baseline extended to Contact/Opportunity/Activity. */
+
+.entity-workspace .lead-v2-page-header{
+  border-bottom:1px solid #e1e8f0;
+}
+.entity-workspace .lead-v2-page-header h2{
+  font-size:var(--font-page-size);
+  line-height:1.2;
+}
+.entity-workspace .lead-v2-page-header p{
+  max-width:760px;
+  font-size:13.5px;
+  line-height:1.55;
+}
+
+/* Entity identity: same geometry, semantic icon only. */
+.ab-detail-entity-icon.entity-target{background:linear-gradient(145deg,#e9f3ff,#dcecff);color:#2769a7}
+.ab-detail-entity-icon.entity-building{background:linear-gradient(145deg,#e9f3ff,#dcecff);color:#2769a7}
+.ab-detail-entity-icon.entity-user{background:linear-gradient(145deg,#eef4fb,#e4edf7);color:#3c668e}
+.ab-detail-entity-icon.entity-briefcase{background:linear-gradient(145deg,#edf3fa,#e1ebf5);color:#315f8b}
+.ab-detail-entity-icon.entity-activity{background:linear-gradient(145deg,#edf5fb,#e1edf7);color:#2f698e}
+
+.entity-ab-detail .ab-tab-panel,
+.activity-detail-stack{
+  padding-top:14px;
+}
+.entity-workspace .entity-detail-stack{
+  gap:14px;
+}
+.entity-workspace .entity-section-card{
+  padding:16px 17px;
+  border-color:#dfe7ef;
+  border-radius:12px;
+  box-shadow:0 3px 12px rgba(16,40,68,.045);
+}
+.entity-workspace .entity-section-title{
+  align-items:center;
+  margin-bottom:13px;
+}
+.entity-workspace .entity-section-title>div{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+.entity-workspace .entity-section-title strong{
+  font-size:15px;
+  line-height:1.35;
+  color:var(--dio-navy-900);
+}
+.entity-workspace .entity-section-title small{
+  font-size:11.5px;
+  line-height:1.35;
+  color:#748296;
+}
+.entity-workspace .entity-section-card>p{
+  margin:0;
+  font-size:13.5px;
+  line-height:1.65;
+  color:#405267;
+  white-space:pre-wrap;
+}
+.entity-workspace .entity-note-card .ab-empty-state{
+  min-height:118px;
+}
+
+/* Contact/Opportunity tabs now use the same A+B navigation hierarchy as Lead. */
+.contact-workspace .ab-detail-tabs,
+.opportunity-workspace .ab-detail-tabs{
+  position:sticky;
+  top:0;
+  z-index:3;
+}
+
+/* Opportunity stage editing is an intentional work mode, not a permanent form. */
+.opportunity-workspace .entity-stage-actions{
+  gap:8px;
+}
+.opportunity-workspace .entity-stage-actions .lead-v2-button{
+  min-height:36px;
+  padding:0 12px;
+  font-size:12px;
+}
+.opportunity-workspace .entity-inline-form span{
+  font-size:12px;
+}
+.opportunity-workspace .entity-inline-form input,
+.opportunity-workspace .entity-inline-form select{
+  min-height:40px;
+  font-size:13px;
+}
+
+/* Activity scope filter behaves like compact primary segmentation. */
+.activity-workspace .entity-toolbar-tabs{
+  padding:10px 14px 0;
+  gap:7px;
+  background:#fff;
+}
+.activity-workspace .entity-toolbar-tabs .lead-v2-button{
+  min-height:34px;
+  padding:0 14px;
+  font-size:12px;
+}
+
+/* Empty detail is a finished state rather than loose placeholder text. */
+.entity-workspace .lead-v2-empty-detail:has(.ab-empty-state){
+  display:grid;
+  place-items:center;
+  min-height:340px;
+  padding:22px;
+  background:#fafcfe;
+}
+.entity-workspace .lead-v2-empty-detail>.ab-empty-state{
+  width:min(430px,100%);
+}
+
+@media(max-width:920px),((hover:none) and (pointer:coarse) and (max-width:1400px)){
+  .entity-workspace .lead-v2-page-header h2{font-size:22px}
+  .entity-workspace .lead-v2-page-header p{font-size:13px}
+  .entity-workspace .entity-section-card{
+    padding:14px;
+    border-radius:11px;
+  }
+  .entity-workspace .entity-section-title{
+    flex-direction:row;
+    align-items:center;
+  }
+  .entity-workspace .entity-section-title strong{font-size:15px}
+  .entity-workspace .entity-section-title small{font-size:11px;text-align:left}
+  .entity-workspace .entity-section-title .lead-v2-button{
+    min-height:36px;
+    padding:0 10px;
+    flex:0 0 auto;
+  }
+
+  .contact-workspace .ab-detail-tabs,
+  .opportunity-workspace .ab-detail-tabs{
+    position:static;
+  }
+  .contact-workspace .ab-detail-tabs button,
+  .opportunity-workspace .ab-detail-tabs button{
+    flex:1 0 auto;
+    justify-content:center;
+  }
+
+  .opportunity-workspace .entity-stage-summary{
+    overflow-x:auto;
+    overscroll-behavior-x:contain;
+    scrollbar-width:thin;
+  }
+  .opportunity-workspace .entity-stage-summary .ab-step-progress{
+    min-width:690px;
+  }
+  .opportunity-workspace .entity-stage-actions{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .opportunity-workspace .entity-stage-actions .lead-v2-button{
+    width:100%;
+    min-height:42px;
+  }
+  .opportunity-workspace .entity-inline-form{
+    grid-template-columns:1fr;
+  }
+
+  .activity-workspace .entity-toolbar-tabs{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    padding:9px 10px 0;
+  }
+  .activity-workspace .entity-toolbar-tabs .lead-v2-button{
+    width:100%;
+    min-width:0;
+    padding:0 7px;
+  }
+  .activity-workspace .entity-note-card .ab-empty-state{
+    min-height:100px;
+  }
+}
+
+@media(max-width:430px){
+  .entity-workspace .entity-section-title{
+    align-items:flex-start;
+  }
+  .entity-workspace .entity-section-title .lead-v2-button{
+    font-size:11px;
+  }
+  .opportunity-workspace .entity-stage-actions{
+    grid-template-columns:1fr 1fr;
+  }
+}

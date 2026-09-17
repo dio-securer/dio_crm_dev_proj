@@ -1,5 +1,7 @@
 # CRM-UI-001 — DIO UI Completion / Responsive Mobile / PWA 설계
 
+> **확정 Design Model:** [`00_UI_Design_Confirmed_Baseline.md`](./00_UI_Design_Confirmed_Baseline.md) — 운영 화면 A+B, 대시보드 C, i18n 전제
+
 ## 1. 목표
 
 Globalization Foundation이 적용된 단일 React Frontend를 기준으로 다음 3개 작업을 하나의 연속 단계로 수행한다.

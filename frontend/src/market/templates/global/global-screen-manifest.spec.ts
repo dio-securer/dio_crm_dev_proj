@@ -5,6 +5,7 @@ import { GLOBAL_SCREEN_MANIFEST } from './global-screen-manifest';
 const expected = [
   'GLOBAL_LEAD',
   'GLOBAL_ACCOUNT',
+  'GLOBAL_CONTACT',
   'GLOBAL_ACTIVITY_MAP',
   'GLOBAL_ACTIVITY_REPORT',
   'GLOBAL_OPPORTUNITY',
@@ -12,8 +13,8 @@ const expected = [
   'GLOBAL_ORDER'
 ];
 
-describe('M7 GLOBAL screen baseline', () => {
-  it('contains only the overseas sales/activity screens supported by the source material', () => {
+describe('A+B GLOBAL screen baseline', () => {
+  it('contains the approved overseas sales/activity screens including Contact', () => {
     expect(GLOBAL_SCREEN_MANIFEST).toEqual(expected);
     expect(Object.values(GLOBAL_SCREEN_PROFILE.screens)).toEqual(expected);
   });

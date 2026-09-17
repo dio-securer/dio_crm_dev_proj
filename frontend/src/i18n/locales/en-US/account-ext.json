@@ -1,0 +1,188 @@
+{
+  "account": {
+    "listTitle": "Account list",
+    "detailTitle": "Account detail",
+    "quickCreateTitle": "Quick create Account",
+    "quickActionsLabel": "Account quick actions",
+    "count": "{{count}} records",
+    "searchPlaceholder": "Search name, code, owner, country",
+    "tabs": {
+      "summary": "Summary",
+      "contacts": "Contacts",
+      "opportunities": "Opportunities",
+      "activity": "Activity",
+      "trade": "Trade status",
+      "manage": "Management",
+      "address": "Address",
+      "erp": "ERP",
+      "related": "Related data"
+    },
+    "mobileTabs": {
+      "sales": "Sales"
+    },
+    "actions": {
+      "create": "New registration",
+      "saveDraft": "Save draft",
+      "erpRequest": "Request ERP registration",
+      "quickAddContact": "Quick add contact",
+      "viewRelated": "View more",
+      "call": "Call",
+      "email": "Email",
+      "addActivity": "Add activity",
+      "edit": "Edit"
+    },
+    "fields": {
+      "country": "Country",
+      "address": "Address",
+      "accountCode": "Account code",
+      "industry": "Industry",
+      "website": "Website",
+      "lastActivity": "Last activity"
+    },
+    "columns": {
+      "accountName": "Account",
+      "accountCode": "Account code",
+      "country": "Country",
+      "type": "Type",
+      "grade": "Grade",
+      "owner": "Owner",
+      "status": "Status",
+      "erpStatus": "ERP status",
+      "lastActivity": "Last activity",
+      "industry": "Industry"
+    },
+    "filters": {
+      "managed": "Managed",
+      "mine": "Mine",
+      "all": "All",
+      "allCountry": "All countries",
+      "allType": "All types",
+      "allGrade": "All grades",
+      "allStatus": "All statuses",
+      "allErp": "All ERP statuses",
+      "allLastActivity": "All activity dates",
+      "last7Days": "Last 7 days",
+      "last30Days": "Last 30 days",
+      "noActivity": "No activity",
+      "reset": "Reset filters"
+    },
+    "pagination": {
+      "rowsPerPage": "Rows",
+      "previous": "Previous page",
+      "next": "Next page",
+      "pageStatus": "Page {{page}} / {{pages}} · {{count}} records"
+    },
+    "empty": {
+      "list": "No accounts found.",
+      "detail": "Select an account from the list.",
+      "search": "No accounts match the search or filters.",
+      "contacts": "No contacts registered.",
+      "opportunities": "No opportunities linked.",
+      "activities": "No Account activities registered.",
+      "related": "No related data."
+    },
+    "toast": {
+      "draftSaved": "Draft saved.",
+      "quickDraftSaved": "Quick-create draft saved.",
+      "contactAdded": "Contact saved.",
+      "activityAdded": "Activity saved."
+    },
+    "quick": {
+      "title": "Quick create Account",
+      "help": "Save the minimum required fields now and enrich details in tabs/sections later. Mobile uses a full-screen form.",
+      "create": "Quick create",
+      "required": "Enter account name, country, type, phone, and owner."
+    },
+    "countries": {
+      "KR": "Korea",
+      "US": "United States",
+      "MX": "Mexico",
+      "IN": "India",
+      "PT": "Portugal",
+      "TR": "Türkiye"
+    },
+    "owners": {
+      "USER001": "Jihun Kim",
+      "USER002": "Seoyeon Lee",
+      "USER003": "Junho Park"
+    },
+    "integrationStatus": {
+      "REVIEWING": "Under review"
+    },
+    "erpWorkflow": {
+      "title": "ERP registration mock workflow",
+      "progress": "ERP registration progress",
+      "requestId": "Request ID",
+      "requestedAt": "Requested at",
+      "reviewedAt": "Reviewed at",
+      "completedAt": "Completed at",
+      "moveReview": "Move to review",
+      "complete": "Mark linked",
+      "retry": "Retry",
+      "fail": "Mark failed",
+      "failureReason": "Failure reason",
+      "failed": "ERP integration failed",
+      "requested": "ERP registration request created.",
+      "reviewing": "ERP request moved to review.",
+      "completed": "ERP integration marked complete.",
+      "retried": "ERP registration requested again.",
+      "failedDone": "ERP integration marked failed.",
+      "actionFailed": "ERP mock action failed: {{message}}"
+    },
+    "activityQuick": {
+      "title": "Add Account activity",
+      "help": "Record calls, emails, meetings, visits, or notes directly on the Account.",
+      "type": "Activity type",
+      "occurredAt": "Activity time",
+      "subject": "Subject",
+      "note": "Result / note",
+      "save": "Save activity"
+    },
+    "activityTypes": {
+      "CALL": "Call",
+      "EMAIL": "Email",
+      "MEETING": "Meeting",
+      "VISIT": "Visit",
+      "NOTE": "Note"
+    },
+    "relationSource": {
+      "MANUAL": "Account entry",
+      "LEAD_CONVERSION": "Lead conversion"
+    },
+    "opportunityStage": {
+      "IDENTIFIED": "Identified"
+    },
+    "related": {
+      "contacts": "Contacts",
+      "opportunities": "Opportunities",
+      "contracts": "Contracts",
+      "orders": "Orders",
+      "activities": "Activities"
+    },
+    "badges": {
+      "erpLinked": "ERP linked",
+      "erpPending": "ERP pending",
+      "incomplete": "{{count}} incomplete"
+    }
+  },
+  "contact": {
+    "title": "Contacts",
+    "quickAdd": "Quick add contact",
+    "quickHelp": "Keep the detail view clean and open the contact form only when it is needed.",
+    "viewHint": "Added contacts will appear here immediately.",
+    "empty": "No contacts registered.",
+    "fields": {
+      "name": "Name",
+      "role": "Job title",
+      "phone": "Phone",
+      "email": "Email"
+    },
+    "actions": {
+      "add": "Add",
+      "save": "Save"
+    },
+    "toast": {
+      "added": "Contact added."
+    }
+  }
+}

@@ -3,75 +3,75 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import type { AccountSummary } from '@dio-crm/contracts';
 import {
-  ACCOUNT_STAT_CODES, ACCOUNT_TYPE_CODES, DESKTOP_TABLE_FIELDS, ERP_APPROVAL_CODES,
+  ACCOUNT_STAT_CODES, ACCOUNT_TYPE_CODES, ERP_APPROVAL_CODES,
   accountTypeName, tradeStatusName, type AccountInterfaceField
 } from '@dio-crm/contracts';
 import { apiGet, apiPatch, apiPost } from './api';
 import { useGlobalization } from './market/globalization-context';
 import {
-  ACCOUNT_STATUSES, CRM_FORM_KEY, FORM_SECTIONS, MOBILE_ACCOUNT_MQ, emptyForm, erpMissingCodes, fieldsByCodes,
+  ACCOUNT_STATUSES, CRM_FORM_KEY, FORM_SECTIONS, emptyForm, erpMissingCodes, fieldsByCodes,
   formFromAccount, listVisibleAccounts, toWritePayload, type AccountFormInput, type AccountScope
 } from './account-model';
-import { listSandboxAccounts, requestSandboxErp, saveSandboxAccount } from './account-sandbox';
+import { listSandboxAccounts, saveSandboxAccount, setSandboxAccountOwner } from './account-sandbox';
+import { AccountListPanel } from './features/account/AccountListPanel';
+import { AccountDetailHeader } from './features/account/AccountDetailHeader';
+import { AccountActivityQuickAdd } from './features/account/AccountActivityQuickAdd';
+import { AccountQuickCreatePanel } from './features/account/AccountQuickCreatePanel';
+import { AccountErpWorkflowPanel } from './features/account/AccountErpWorkflowPanel';
+import { AccountTabNav, type AccountTabId } from './features/account/AccountTabNav';
+import {
+  ACCOUNT_OWNER_NAMES,
+  accountOwnerOverride,
+  accountQuickDraftToForm,
+  saveAccountProfileSupplement,
+  type AccountQuickCreateDraft
+} from './features/account/account-quick-create';
+import { requestAccountErpMock } from './features/account/account-erp-mock';
+import { loadAccountPageState, saveAccountPageState } from './features/account/account-view-state';
+import {
+  AccountActivitiesPanel,
+  AccountContactsPanel,
+  AccountOpportunitiesPanel,
+  AccountRelatedPanel,
+  AccountRelationKpis
+} from './features/account/AccountRelationsView';
+import { accountCountry } from './features/account/account-list-model';
+import {
+  AbDetailFooter, AbInfoGrid, AbMobileFab, AbSectionAccordion, countryFlag
+} from './ui/ab-workspace';
+import './styles/lead-workspace.css';
+import './styles/account-quick-erp.css';
 
-function useIsMobile() {
-  const [mobile, setMobile] = useState(() => typeof window !== 'undefined' && window.matchMedia(MOBILE_ACCOUNT_MQ).matches);
-  React.useEffect(() => {
-    const mq = window.matchMedia(MOBILE_ACCOUNT_MQ);
-    const onChange = () => setMobile(mq.matches);
-    mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
-  }, []);
-  return mobile;
-}
-
-function statusClass(status: string) {
-  if (status === 'ACTIVE' || status === 'NEW') return 'success';
-  if (status === 'CHURN_RISK' || status === 'NON_TRADING_OPP') return 'warning';
-  if (status === 'CHURNED' || status === 'CLOSED') return 'danger';
-  return 'neutral';
-}
-
-function ActionIcon({ name }: { name: 'plan' | 'order' | 'erp' | 'edit' }) {
-  const paths = {
-    plan: <path d="M13 3 4 14h7l-1 7 9-11h-7z" />,
-    order: <><circle cx="12" cy="12" r="8" /><path d="M12 8v8M8 12h8" /></>,
-    erp: <path d="M13 3 4 14h7l-1 7 9-11h-7z" />,
-    edit: <path d="M4 20h4L19 9l-4-4L4 16v4zM13 7l4 4" />
-  };
-  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
-}
-
-function ListFilterIcon() {
-  return (
-    <svg className="mob-filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-      <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
-    </svg>
-  );
-}
+type AccountTab = AccountTabId;
+const PAGE_STATE_KEY = 'dio-crm:account:view:hq:v1';
+const LIST_STATE_KEY = 'dio-crm:account:list:hq:v1';
+const QUICK_DRAFT_KEY = 'dio-crm:account:quick:hq:v1';
+const DEFAULT_PAGE_STATE = { scope: 'managed' as AccountScope, selectedId: null, tab: 'summary' as AccountTab, mobileDetailOpen: false };
 
 export function AccountsPage() {
   const { t } = useTranslation();
-  const mobile = useIsMobile();
   const { featureEnabled } = useGlobalization();
-  const [search, setSearch] = useState('');
-  const [scope, setScope] = useState<AccountScope>('managed');
+  const restored = React.useMemo(() => loadAccountPageState(PAGE_STATE_KEY, DEFAULT_PAGE_STATE), []);
+  const [scope, setScope] = useState<AccountScope>(restored.scope);
   const [message, setMessage] = useState('');
   const [localMode, setLocalMode] = useState(false);
   const [localTick, setLocalTick] = useState(0);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [screen, setScreen] = useState<'list' | 'detail' | 'form'>('list');
+  const [relationTick, setRelationTick] = useState(0);
+  const [selectedId, setSelectedId] = useState<string | null>(restored.selectedId);
+  const [mobileDetailOpen, setMobileDetailOpen] = useState(restored.mobileDetailOpen);
   const [form, setForm] = useState<AccountFormInput>(emptyForm);
   const [saving, setSaving] = useState(false);
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(FORM_SECTIONS.map(section => [section.id, true]))
-  );
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => Object.fromEntries(FORM_SECTIONS.map(section => [section.id, true])));
+  const [accountTab, setAccountTab] = useState<AccountTab>(restored.tab);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [editingDesktop, setEditingDesktop] = useState(false);
+  const [activityComposerOpen, setActivityComposerOpen] = useState(false);
   const erpEnabled = featureEnabled('ERP_ACCOUNT_APPROVAL');
 
   const query = useQuery({
-    queryKey: ['accounts', search, scope],
+    queryKey: ['accounts', scope],
     enabled: !localMode,
-    queryFn: () => apiGet<AccountSummary[]>(`/api/accounts?scope=${scope}${search ? `&search=${encodeURIComponent(search)}` : ''}`),
+    queryFn: () => apiGet<AccountSummary[]>(`/api/accounts?scope=${scope}`),
     retry: false
   });
 
@@ -84,59 +84,83 @@ export function AccountsPage() {
 
   const sandbox = localMode || Boolean(query.isError);
   const rows = useMemo(() => {
-    const source = sandbox ? listSandboxAccounts(search, scope) : listVisibleAccounts(query.data ?? [], search, scope);
-    return source;
-  }, [sandbox, search, scope, query.data, localTick]);
+    const source = sandbox ? listSandboxAccounts('', scope) : listVisibleAccounts(query.data ?? [], '', scope);
+    return source.map(row => {
+      const owner = accountOwnerOverride(row.public_id);
+      return owner ? { ...row, owner_name: owner } : row;
+    });
+  }, [sandbox, scope, query.data, localTick]);
   const selected = rows.find(x => x.public_id === selectedId) ?? null;
-  const creating = screen === 'form' && !selectedId;
+
+  React.useEffect(() => {
+    saveAccountPageState(PAGE_STATE_KEY, { scope, selectedId, tab: accountTab, mobileDetailOpen });
+  }, [scope, selectedId, accountTab, mobileDetailOpen]);
+
+  React.useEffect(() => {
+    if (selected && !form.accountName) setForm(formFromAccount(selected));
+  }, [selected, form.accountName]);
 
   const setField = (key: keyof AccountFormInput, value: string) => setForm(prev => ({ ...prev, [key]: value }));
 
-  const openCreate = () => {
+  const changeScope = (value: AccountScope) => {
+    setScope(value);
     setSelectedId(null);
+    setMobileDetailOpen(false);
+    setEditingDesktop(false);
+    setAccountTab('summary');
     setForm(emptyForm());
-    setScreen('form');
   };
+
+  const openCreate = () => {
+    setDrawerOpen(true);
+    setMessage('');
+  };
+
   const openDetail = (row: AccountSummary) => {
     setSelectedId(row.public_id);
     setForm(formFromAccount(row));
-    setScreen(mobile ? 'detail' : 'form');
-    setOpenSections(Object.fromEntries(FORM_SECTIONS.map(section => [section.id, true])));
-  };
-  const openEdit = (row?: AccountSummary) => {
-    const target = row ?? selected;
-    if (!target) return openCreate();
-    setSelectedId(target.public_id);
-    setForm(formFromAccount(target));
-    setScreen('form');
-  };
-  const closeScreen = () => {
-    setScreen('list');
-    setSelectedId(null);
-    setForm(emptyForm());
+    setAccountTab('summary');
+    setEditingDesktop(false);
+    setMobileDetailOpen(true);
+    setOpenSections(Object.fromEntries(FORM_SECTIONS.map(section => [section.id, section.id === 'basic'])));
   };
 
-  React.useEffect(() => {
-    if (screen === 'list') return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = previous; };
-  }, [screen]);
+  const relationChanged = (toastKey?: string) => {
+    setRelationTick(value => value + 1);
+    setLocalTick(value => value + 1);
+    if (toastKey) setMessage(t(toastKey));
+  };
 
-  React.useEffect(() => {
-    if (!mobile && screen === 'detail') setScreen('form');
-  }, [mobile, screen]);
-
-  React.useEffect(() => {
-    if (screen === 'list') return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-      if (mobile && screen === 'form' && selectedId) setScreen('detail');
-      else closeScreen();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [screen, mobile, selectedId]);
+  const saveQuickCreate = async (draft: AccountQuickCreateDraft) => {
+    setSaving(true);
+    try {
+      const quickForm = accountQuickDraftToForm(draft);
+      let publicId = '';
+      if (sandbox) {
+        const saved = saveSandboxAccount(null, quickForm);
+        const owned = draft.ownerCode ? setSandboxAccountOwner(saved.public_id, ACCOUNT_OWNER_NAMES[draft.ownerCode]) : saved;
+        publicId = owned.public_id;
+        setLocalTick(value => value + 1);
+      } else {
+        const created = await apiPost<AccountSummary>('/api/accounts', toWritePayload(quickForm));
+        publicId = created.public_id;
+        await query.refetch();
+      }
+      saveAccountProfileSupplement(publicId, draft);
+      setSelectedId(publicId);
+      setForm(quickForm);
+      setAccountTab('summary');
+      setEditingDesktop(false);
+      setMobileDetailOpen(true);
+      setDrawerOpen(false);
+      setMessage(t('account.createDone'));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : String(error));
+      throw error;
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const save = async (event?: React.FormEvent) => {
     event?.preventDefault();
@@ -153,15 +177,12 @@ export function AccountsPage() {
       } else if (selectedId) {
         await apiPatch(`/api/accounts/${selectedId}`, toWritePayload(form));
         await query.refetch();
-      } else {
-        const created = await apiPost<AccountSummary>('/api/accounts', toWritePayload(form));
-        await query.refetch();
-        setSelectedId(created.public_id);
       }
-      setMessage(selectedId ? t('account.updateDone') : t('account.createDone'));
-      setScreen(mobile ? 'detail' : 'list');
-    } catch (e) {
-      setMessage(String(e));
+      setMessage(t('account.updateDone'));
+      setEditingDesktop(false);
+      setMobileDetailOpen(true);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : String(error));
     } finally {
       setSaving(false);
     }
@@ -178,26 +199,27 @@ export function AccountsPage() {
     }
     try {
       if (sandbox) {
-        requestSandboxErp(publicId);
+        const workflow = requestAccountErpMock(publicId);
         setLocalTick(n => n + 1);
-        setMessage(t('account.queueCreated', { requestId: 'LOCAL-TEST' }));
+        setMessage(t('account.queueCreated', { requestId: workflow.requestId || '-' }));
         return;
       }
-      const r = await apiPost<{ requestId: string }>(`/api/erp-accounts/${publicId}/request`);
-      setMessage(t('account.queueCreated', { requestId: r.requestId }));
+      const result = await apiPost<{ requestId: string }>(`/api/erp-accounts/${publicId}/request`);
+      setMessage(t('account.queueCreated', { requestId: result.requestId }));
       await query.refetch();
-    } catch (e) {
-      setMessage(String(e));
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : String(error));
     }
   };
 
+  const erpWorkflowChanged = (messageKey: string, options?: Record<string, unknown>) => {
+    setLocalTick(value => value + 1);
+    setMessage(t(messageKey, options));
+  };
+
   const fieldInput = (field: Pick<AccountInterfaceField, 'code' | 'crmField'>, disabled = false) => {
-    if (field.code === 'trade_bc_nm') {
-      return <div className="readonly-value">{tradeStatusName(selected?.erp_trade_code) || '-'}</div>;
-    }
-    if (field.code === 'co_cd') {
-      return <div className="readonly-value">{selected?.company_code || 'DIO'}</div>;
-    }
+    if (field.code === 'trade_bc_nm') return <div className="readonly-value">{tradeStatusName(selected?.erp_trade_code) || '-'}</div>;
+    if (field.code === 'co_cd') return <div className="readonly-value">{selected?.company_code || 'DIO'}</div>;
     const crmField = field.crmField ?? '';
     const key = CRM_FORM_KEY[crmField];
     if (!key) {
@@ -212,18 +234,10 @@ export function AccountsPage() {
       return <div className="readonly-value">{String(raw || '-')}</div>;
     }
     const value = form[key];
-    if (key === 'accountType') {
-      return <select value={value} disabled={disabled} onChange={e => setField(key, e.target.value)}>{Object.entries(ACCOUNT_TYPE_CODES).map(([code, name]) => <option key={code} value={code}>{name}</option>)}</select>;
-    }
-    if (key === 'useYn') {
-      return <select value={value} disabled={disabled} onChange={e => setField(key, e.target.value)}><option value="1">{t('account.yes')}</option><option value="0">{t('account.no')}</option></select>;
-    }
-    if (key === 'churnRiskYn') {
-      return <select value={value} disabled={disabled} onChange={e => setField(key, e.target.value)}><option value="1">{t('account.churnYes')}</option><option value="0">{t('account.churnNo')}</option></select>;
-    }
-    if (key === 'accountStatCode') {
-      return <select value={value} disabled={disabled} onChange={e => setField(key, e.target.value)}>{Object.entries(ACCOUNT_STAT_CODES).map(([code, name]) => <option key={code} value={code}>{name}</option>)}</select>;
-    }
+    if (key === 'accountType') return <select value={value} disabled={disabled} onChange={e => setField(key, e.target.value)}>{Object.entries(ACCOUNT_TYPE_CODES).map(([code, name]) => <option key={code} value={code}>{name}</option>)}</select>;
+    if (key === 'useYn') return <select value={value} disabled={disabled} onChange={e => setField(key, e.target.value)}><option value="1">{t('account.yes')}</option><option value="0">{t('account.no')}</option></select>;
+    if (key === 'churnRiskYn') return <select value={value} disabled={disabled} onChange={e => setField(key, e.target.value)}><option value="1">{t('account.churnYes')}</option><option value="0">{t('account.churnNo')}</option></select>;
+    if (key === 'accountStatCode') return <select value={value} disabled={disabled} onChange={e => setField(key, e.target.value)}>{Object.entries(ACCOUNT_STAT_CODES).map(([code, name]) => <option key={code} value={code}>{name}</option>)}</select>;
     if (key === 'openDate') return <input type="date" value={value} disabled={disabled} onChange={e => setField(key, e.target.value)} />;
     return <input value={value} disabled={disabled} onChange={e => setField(key, e.target.value)} />;
   };
@@ -253,17 +267,8 @@ export function AccountsPage() {
   const formSections = (compact = false) => (
     <div className={`account-form-sections${compact ? ' compact' : ''}`}>
       <label className="full">{t('account.name')}<input value={form.accountName} onChange={e => setField('accountName', e.target.value)} required /></label>
-      <label>{t('account.crmStatus')}
-        <select value={form.accountStatus} onChange={e => setField('accountStatus', e.target.value)}>
-          {ACCOUNT_STATUSES.map(status => <option key={status} value={status}>{t(`account.statuses.${status}`)}</option>)}
-        </select>
-      </label>
-      <label>{t('account.grade')}
-        <select value={form.accountGrade} onChange={e => setField('accountGrade', e.target.value)}>
-          <option value="GENERAL">{t('account.grades.GENERAL')}</option>
-          <option value="KEY">{t('account.grades.KEY')}</option>
-        </select>
-      </label>
+      <label>{t('account.crmStatus')}<select value={form.accountStatus} onChange={e => setField('accountStatus', e.target.value)}>{ACCOUNT_STATUSES.map(status => <option key={status} value={status}>{t(`account.statuses.${status}`)}</option>)}</select></label>
+      <label>{t('account.grade')}<select value={form.accountGrade} onChange={e => setField('accountGrade', e.target.value)}><option value="GENERAL">{t('account.grades.GENERAL')}</option><option value="KEY">{t('account.grades.KEY')}</option></select></label>
       {FORM_SECTIONS.map(section => (
         <fieldset key={section.id}>
           <legend>{t(section.titleKey)}</legend>
@@ -280,189 +285,68 @@ export function AccountsPage() {
     </div>
   );
 
-  const formWindow = (
-    <form className={mobile ? 'mob-edit-form' : 'pc-window-form'} onSubmit={e => void save(e)}>
-      {formSections(mobile)}
-      <div className="account-form-actions">
-        <button type="button" onClick={() => (mobile && selectedId ? setScreen('detail') : closeScreen())}>{t('common.cancel')}</button>
-        <button type="submit" className="button-primary" disabled={saving}>{t('common.save')}</button>
-      </div>
-    </form>
-  );
+  const renderDesktopTab = () => {
+    if (!selected) return null;
+    if (accountTab === 'summary') {
+      const country = accountCountry(selected);
+      return <>
+        <AbInfoGrid columns={2} items={[
+          { label: t('account.fields.accountName'), value: selected.account_name },
+          { label: t('account.fields.accountCode'), value: selected.erp_customer_code || '-' },
+          { label: t('account.fields.country'), value: <span className="ab-list-country"><i>{countryFlag(country)}</i>{country}</span> },
+          { label: t('account.crmStatus'), value: t(`account.statuses.${selected.account_status}`, { defaultValue: selected.account_status }) },
+          { label: t('account.grade'), value: t(`account.grades.${selected.account_grade || 'GENERAL'}`, { defaultValue: selected.account_grade || '-' }) },
+          { label: t('account.owner'), value: selected.owner_name ?? '-' },
+          { label: t('account.phone'), value: selected.phone ?? '-' },
+          { label: t('account.integration'), value: t(`account.integrationStatus.${selected.integration_status}`, { defaultValue: selected.integration_status }) }
+        ]} />
+        <AccountRelationKpis accountId={selected.public_id} tick={relationTick} onNavigate={target => setAccountTab(target)} />
+      </>;
+    }
+    if (accountTab === 'contacts') return <AccountContactsPanel accountId={selected.public_id} tick={relationTick} onChanged={() => relationChanged('account.toast.contactAdded')} />;
+    if (accountTab === 'opportunities') return <AccountOpportunitiesPanel accountId={selected.public_id} tick={relationTick} />;
+    if (accountTab === 'activity') return <AccountActivitiesPanel accountId={selected.public_id} tick={relationTick} onAddActivity={() => setActivityComposerOpen(true)} />;
+    if (accountTab === 'related') return <AccountRelatedPanel accountId={selected.public_id} tick={relationTick} onAddActivity={() => setActivityComposerOpen(true)} />;
 
-  if (mobile) {
-    return (
-      <section className="account-mobile">
-        <header className="mob-list-header">
-          <h2>{t('account.shortTitle')}</h2>
-          <button type="button" className="text-link mob-new" onClick={openCreate}>{t('account.new')}</button>
-        </header>
-        <label className="mob-search-wrap">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
-          <input className="mob-search" value={search} onChange={e => setSearch(e.target.value)} placeholder={t('account.search')} />
-        </label>
-        <div className="mob-filters">
-          {([['managed', 'account.filters.managed', true], ['mine', 'account.filters.mine', true], ['all', 'account.filters.all', false]] as const).map(([id, key, showIcon]) => (
-            <button type="button" key={id} className={scope === id ? 'active' : ''} onClick={() => setScope(id)}>
-              {showIcon && <ListFilterIcon />}
-              <span className={showIcon ? '' : 'mob-filter-plain'}>{t(key)}</span>
-            </button>
-          ))}
-        </div>
-        {sandbox && <p className="notice info mob-banner">{t('account.localMode')}</p>}
-        {message && <p className="notice info mob-banner">{message}</p>}
-        <div className="mob-recent-label">{t('account.recent')}</div>
-        <div className="mob-account-list">
-          {rows.map(row => (
-            <button type="button" key={row.public_id} className="mob-account-row" onClick={() => openDetail(row)}>
-              <strong>{row.account_name}</strong>
-              <small>{t('account.hospitalAddressShort')} {row.hospital_address || row.address || '-'}</small>
-            </button>
-          ))}
-          {!rows.length && <p className="notice info mob-banner">{t('common.noData')}</p>}
-        </div>
+    const sectionMap: Partial<Record<AccountTab, string>> = { trade: 'erp', manage: 'manage', address: 'address', erp: 'erp' };
+    const sectionId = sectionMap[accountTab];
+    if (!sectionId) return null;
+    const section = FORM_SECTIONS.find(item => item.id === sectionId);
+    if (!section) return null;
+    const content = <AbSectionAccordion id={sectionId} title={t(`account.tabs.${accountTab}`)} open onToggle={() => undefined}>
+      {editingDesktop ? formSections(true) : <dl className="mob-summary">{fieldsByCodes(section.codes).map(field => field && <div key={field.code}><dt>{field.nameKo}</dt><dd>{interfaceDisplay(selected, field)}</dd></div>)}</dl>}
+    </AbSectionAccordion>;
+    if (accountTab === 'erp' && sandbox) return <><AccountErpWorkflowPanel account={selected} tick={localTick} onChanged={erpWorkflowChanged} />{content}</>;
+    return content;
+  };
 
-        {screen !== 'list' && (
-          <div className="mob-layer" role="dialog" aria-modal="true">
-            <header className="mob-detail-top">
-              <button type="button" className="text-link" onClick={() => (screen === 'form' && selectedId ? setScreen('detail') : closeScreen())}>{t('account.back')}</button>
-              <strong>{creating ? t('account.new') : selected?.account_name}</strong>
-              {screen === 'detail' && selected ? <button type="button" className="text-link" onClick={() => openEdit(selected)}>{t('account.edit')}</button> : <span />}
-            </header>
-            {screen === 'detail' && selected && (
-              <>
-                <div className="mob-actions">
-                  <button type="button" disabled><ActionIcon name="plan" />{t('account.actions.plan')}</button>
-                  <button type="button" disabled><ActionIcon name="order" />{t('account.actions.order')}</button>
-                  {(erpEnabled || sandbox) && (
-                    <button type="button" className="is-erp" onClick={() => void requestErp(selected.public_id)} disabled={selected.erp_approved_yn || selected.integration_status === 'REQUESTING'}>
-                      <ActionIcon name="erp" />{t('account.actions.erp')}
-                    </button>
-                  )}
-                  <button type="button" onClick={() => openEdit(selected)}><ActionIcon name="edit" />{t('account.edit')}</button>
-                </div>
-                <div className="mob-hero">
-                  <div className="mob-hero-mark" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 10h8M8 14h5"/></svg>
-                  </div>
-                  <div>
-                    <small>{t('account.shortTitle')}</small>
-                    <h3>{selected.account_name}</h3>
-                  </div>
-                </div>
-                <dl className="mob-summary">
-                  <div><dt>{t('account.fields.erpCode')}</dt><dd>{selected.erp_customer_code || '-'}</dd></div>
-                  <div><dt>{t('account.crmStatus')}</dt><dd><i className={`dot ${statusClass(selected.account_status)}`} />{t(`account.statuses.${selected.account_status}`, { defaultValue: selected.account_status })}</dd></div>
-                  <div><dt>{t('account.grade')}</dt><dd>{t(`account.grades.${selected.account_grade || 'GENERAL'}`, { defaultValue: selected.account_grade || '-' })}</dd></div>
-                  <div><dt>{t('account.integration')}</dt><dd>{t(`account.integrationStatus.${selected.integration_status}`, { defaultValue: selected.integration_status })}</dd></div>
-                  <div><dt>{t('account.owner')}</dt><dd><span className="mob-owner">{selected.owner_name || '-'}</span></dd></div>
-                </dl>
-                {FORM_SECTIONS.map(section => (
-                  <div key={section.id}>
-                    <button type="button" className="mob-accordion" onClick={() => setOpenSections(prev => ({ ...prev, [section.id]: !prev[section.id] }))}>
-                      <span>{openSections[section.id] ? 'v' : '>'}</span> {t(section.titleKey)}
-                    </button>
-                    {openSections[section.id] && (
-                      <dl className="mob-summary">
-                        {fieldsByCodes(section.codes).map(field => field && (
-                          <div key={field.code}>
-                            <dt>{field.nameKo}{field.requiredOut ? <em className="mob-req"> *</em> : ''}</dt>
-                            <dd>{interfaceDisplay(selected, field)}</dd>
-                          </div>
-                        ))}
-                      </dl>
-                    )}
-                  </div>
-                ))}
-                {message && <p className="notice info mob-banner">{message}</p>}
-              </>
-            )}
-            {screen === 'form' && formWindow}
-          </div>
-        )}
-      </section>
-    );
-  }
+  const detailPane = <article className="lead-v2-detail-pane">
+    {!selected && <div className="lead-v2-empty-detail">{t('account.empty.detail')}</div>}
+    {selected && <>
+      <button type="button" className="lead-v2-mobile-back" onClick={() => setMobileDetailOpen(false)}>← {t('account.back')}</button>
+      <AccountDetailHeader
+        account={selected}
+        onEdit={() => setEditingDesktop(value => !value)}
+        onAddActivity={() => setActivityComposerOpen(true)}
+        onErpRequest={(erpEnabled || sandbox) ? () => void requestErp(selected.public_id) : undefined}
+        erpRequestDisabled={selected.erp_approved_yn || ['REQUESTING', 'REVIEWING'].includes(selected.integration_status)}
+      />
+      <AccountTabNav activeTab={accountTab} onChange={setAccountTab} />
+      <div className="lead-v2-detail-content">{renderDesktopTab()}</div>
+      <AbDetailFooter draftLabel={t('account.actions.saveDraft')} saveLabel={t('common.save')} onDraft={() => setMessage(t('account.toast.draftSaved'))} onSave={() => void save()} saving={saving} />
+    </>}
+  </article>;
 
-  return (
-    <section className="workspace-page account-desktop">
-      <div className="page-header">
-        <div>
-          <span className="page-kicker">CRM · ACCOUNT</span>
-          <h2>{t('account.title')}</h2>
-          <small>{t('account.manageSubtitle')}</small>
-        </div>
-        <div className="page-actions">
-          <input className="search-input" value={search} onChange={e => setSearch(e.target.value)} placeholder={t('account.search')} />
-          <button type="button" className="button-primary" onClick={openCreate}>{t('account.register')}</button>
-        </div>
-      </div>
-      <div className="pc-filter-row">
-        {([['managed', 'account.filters.managed'], ['mine', 'account.filters.mine'], ['all', 'account.filters.all']] as const).map(([id, key]) => (
-          <button type="button" key={id} className={`pc-chip${scope === id ? ' active' : ''}`} onClick={() => setScope(id)}>{t(key)}</button>
-        ))}
-      </div>
-      {sandbox && <p className="notice info">{t('account.localMode')}</p>}
-      {message && screen === 'list' && <p className="notice info">{message}</p>}
-      <div className="data-card pc-table-card">
-        <div className="data-card-header"><div><strong>{t('account.title')}</strong><small>{rows.length} · {t('account.selectRow')}</small></div></div>
-        <div className="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                {DESKTOP_TABLE_FIELDS.map(field => <th key={field}>{t(`account.table.${field}`)}</th>)}
-                {(erpEnabled || sandbox) && <th>{t('account.erpRegistration')}</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {query.isLoading && !sandbox && <tr><td colSpan={12}>{t('common.loading')}</td></tr>}
-              {!query.isLoading && !rows.length && <tr><td colSpan={12}>{t('common.noData')}</td></tr>}
-              {rows.map(row => (
-                <tr key={row.public_id} className={selectedId === row.public_id ? 'is-selected' : ''} onClick={() => openDetail(row)}>
-                  <td><strong>{row.account_name}</strong></td>
-                  <td>{row.hospital_address || row.address || '-'}</td>
-                  <td>{row.business_no || '-'}</td>
-                  <td>{row.provider_no || '-'}</td>
-                  <td>{accountTypeName(row.account_type) || '-'}</td>
-                  <td><span className={`status-pill ${statusClass(row.account_status)}`}>{t(`account.statuses.${row.account_status}`, { defaultValue: row.account_status })}</span></td>
-                  <td>{t(`account.grades.${row.account_grade || 'GENERAL'}`, { defaultValue: row.account_grade || '-' })}</td>
-                  <td>{row.erp_customer_code || '-'}</td>
-                  <td>{t(`account.integrationStatus.${row.integration_status}`, { defaultValue: row.integration_status })}</td>
-                  <td>{row.owner_name || '-'}</td>
-                  {(erpEnabled || sandbox) && (
-                    <td>
-                      <button type="button" disabled={row.erp_approved_yn || row.integration_status === 'REQUESTING'} onClick={e => { e.stopPropagation(); void requestErp(row.public_id); }}>
-                        {t('account.request')}
-                      </button>
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {screen === 'form' && (
-        <div className="pc-window-backdrop" role="presentation" onClick={closeScreen}>
-          <div className="pc-window" role="dialog" aria-modal="true" aria-labelledby="account-form-title" onClick={e => e.stopPropagation()}>
-            <header className="pc-window-header">
-              <div>
-                <span className="page-kicker">{t('account.formWindow')}</span>
-                <h3 id="account-form-title">{creating ? t('account.register') : selected?.account_name}</h3>
-              </div>
-              <div className="pc-window-actions">
-                {selected && (erpEnabled || sandbox) && (
-                  <button type="button" onClick={() => void requestErp(selected.public_id)}>{t('account.actions.erp')}</button>
-                )}
-                <button type="button" className="icon-button" onClick={closeScreen} aria-label={t('app.close')}>×</button>
-              </div>
-            </header>
-            {message && <p className="notice info">{message}</p>}
-            {formWindow}
-          </div>
-        </div>
-      )}
-    </section>
-  );
+  return <section className={`lead-v2 ab-workspace account-desktop-ab${mobileDetailOpen ? ' mobile-detail-open' : ''}`}>
+    <header className="lead-v2-page-header">
+      <div><div className="lead-v2-title-line"><span className="lead-v2-kicker">CRM · ACCOUNT</span></div><h2>{t('account.title')}</h2><p>{t('account.manageSubtitle')}</p></div>
+      <div className="lead-v2-header-actions"><button type="button" className="lead-v2-button primary" onClick={openCreate}>+ {t('account.actions.create')}</button></div>
+    </header>
+    {sandbox && <p className="notice info">{t('account.localMode')}</p>}
+    <AccountListPanel rows={rows} loading={query.isLoading && !sandbox} selectedId={selectedId} scope={scope} onScopeChange={changeScope} onSelect={openDetail} detail={detailPane} stateStorageKey={LIST_STATE_KEY} />
+    <AbMobileFab label={t('account.actions.create')} onClick={openCreate} />
+    {selected && <AccountActivityQuickAdd open={activityComposerOpen} accountId={selected.public_id} ownerName={selected.owner_name ?? '-'} onClose={() => setActivityComposerOpen(false)} onSaved={() => relationChanged('account.toast.activityAdded')} />}
+    <AccountQuickCreatePanel open={drawerOpen} saving={saving} storageKey={QUICK_DRAFT_KEY} onClose={() => setDrawerOpen(false)} onSubmit={saveQuickCreate} onDraftSaved={() => setMessage(t('account.toast.quickDraftSaved'))} />
+    {message && <div className="lead-v2-toast" role="status">✓ {message}</div>}
+  </section>;
 }

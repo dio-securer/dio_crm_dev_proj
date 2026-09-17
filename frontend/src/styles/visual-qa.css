@@ -1,0 +1,155 @@
+/* Visual QA STEP 1/2 — typography and shared icon presentation.
+   Loaded last so the approved A+B structure stays intact while readability improves. */
+
+body{font-size:var(--font-body);line-height:1.45}
+
+/* Page hierarchy */
+.route-surface h2,.lead-v2-page-header h2{font-size:var(--font-page-title)!important;line-height:1.25;letter-spacing:-.55px}
+.lead-v2-page-header p{font-size:var(--font-body);line-height:1.55}
+.lead-v2-kicker{font-size:var(--font-label);letter-spacing:.09em}
+.lead-v2-mock-badge{font-size:var(--font-caption);padding:4px 8px}
+
+/* Buttons and form controls */
+.route-surface button,.lead-v2-button,.ab-btn{font-size:var(--font-button);min-height:42px}
+.route-surface input,.route-surface select,.route-surface textarea{font-size:var(--font-body-sm)}
+.ab-list-search,.ab-list-filters select,.ab-list-filters input,.ab-toolbar-reset{min-height:42px;height:42px}
+.ab-list-search input,.ab-list-filters select,.ab-list-filters input,.ab-toolbar-reset{font-size:var(--font-body-sm)}
+.ab-toolbar-summary{font-size:var(--font-label)}
+.ab-list-search>span{display:grid;place-items:center;font-size:var(--icon-md)}
+
+/* List readability */
+.lead-v2-list-header strong{font-size:15px}
+.lead-v2-list-header span{font-size:var(--font-label)}
+.ab-data-header{min-height:40px;font-size:var(--font-table-header);padding-top:9px;padding-bottom:9px}
+.ab-data-row{min-height:58px;padding-top:10px;padding-bottom:10px}
+.ab-data-cell{font-size:var(--font-table-body);line-height:1.35}
+.ab-primary-stack{gap:3px}
+.ab-primary-stack strong{font-size:14px;line-height:1.35}
+.ab-primary-stack small{font-size:var(--font-label)}
+.ab-primary-stack em{font-size:var(--font-caption)}
+.ab-cell-stack strong{font-size:var(--font-body-sm)}
+.ab-cell-stack small{font-size:var(--font-caption)}
+.ab-next-action-cell strong{font-size:var(--font-body-sm)}
+.ab-next-action-cell small{font-size:var(--font-caption)}
+.account-list-pill,.lead-v2-pill{font-size:11.5px;padding:5px 9px}
+
+/* Pagination */
+.ab-pagination{min-height:56px}
+.ab-page-size,.ab-page-status{font-size:var(--font-caption)}
+.ab-page-size select,.ab-page-controls button{font-size:var(--font-label);min-height:34px;height:34px}
+
+/* Detail header */
+.ab-detail-header{padding:22px 22px 18px}
+.ab-detail-eyebrow{font-size:var(--font-caption)}
+.ab-detail-title-line{gap:10px;margin-top:5px}
+.ab-detail-title-line h3{font-size:var(--font-entity-title);line-height:1.25;letter-spacing:-.45px}
+.ab-detail-subtitle{font-size:var(--font-body-sm);margin-top:7px}
+.ab-detail-meta{font-size:var(--font-label);margin-top:12px}
+.ab-detail-meta-list{gap:8px;max-width:780px}
+.ab-detail-meta-item{gap:4px;padding:9px 11px;border-radius:9px}
+.ab-detail-meta-item span{font-size:var(--font-caption)}
+.ab-detail-meta-item strong{font-size:var(--font-body-sm);line-height:1.35}
+
+/* Quick actions — same icon language across Lead/Account/Contact/Opportunity */
+.ab-quick-actions{gap:7px}
+.ab-quick-action{min-height:42px;padding:0 12px;gap:7px;border-radius:9px}
+.ab-quick-action-icon{display:grid;place-items:center;width:var(--icon-md);height:var(--icon-md);font-size:var(--icon-md)}
+.ab-quick-action-icon svg{display:block}
+.ab-quick-action strong{font-size:var(--font-button);font-weight:700}
+
+/* Tabs */
+.ab-detail-tabs{padding:0 18px;gap:4px}
+.ab-detail-tabs button{min-height:48px;padding:0 14px}
+.ab-detail-tabs button span{font-size:var(--font-tab);font-weight:700}
+.ab-detail-tabs button em{min-width:21px;height:21px;border-radius:11px;font-size:var(--font-caption)}
+.lead-v2-tabs button,.ab-workspace .lead-v2-tabs button{font-size:var(--font-tab);min-height:48px;padding:13px 14px}
+
+/* Step progress */
+.ab-step-progress{padding:18px 22px 14px}
+.ab-step-node{width:32px;height:32px;font-size:var(--font-label)}
+.ab-step-item{gap:8px}
+.ab-step-item small{font-size:13px;max-width:112px;line-height:1.3}
+.ab-step-line-left{right:calc(50% + 18px)}
+.ab-step-line-right{left:calc(50% + 18px)}
+.ab-step-mobile-label{font-size:var(--font-body-sm)}
+
+/* Sections and cards */
+.ab-sections{gap:12px}
+.ab-section-head{min-height:50px;padding:15px 17px;gap:11px}
+.ab-section-chevron{display:grid;place-items:center;width:18px;font-size:var(--icon-sm)}
+.ab-section-head strong{font-size:var(--font-section-title);line-height:1.35}
+.ab-section-head em{font-size:var(--font-label)}
+.ab-section-body{padding:4px 17px 18px}
+.entity-section-title strong,.lead-v2-card-title strong{font-size:var(--font-section-title)}
+.entity-section-title small{font-size:var(--font-label);line-height:1.45}
+.entity-inline-form span,.entity-quick-form span{font-size:var(--font-label)}
+.lead-v2-info-row span{font-size:var(--font-label)}
+.lead-v2-info-row strong{font-size:var(--font-body-sm)}
+.lead-v2-note,.lead-v2-empty-inline{font-size:var(--font-body-sm)}
+
+/* Information blocks */
+.ab-info-item{gap:5px;padding:14px 16px}
+.ab-info-item dt{font-size:var(--font-label)}
+.ab-info-item dd{font-size:var(--font-body);line-height:1.45}
+.ab-kpi-card span{font-size:var(--font-label)}
+.ab-kpi-card strong{font-size:24px}
+.ab-kpi-link{font-size:var(--font-label)}
+
+/* Timeline / next action */
+.ab-activity-item{grid-template-columns:34px 1fr;gap:10px;padding-bottom:15px}
+.ab-activity-node{width:32px;height:32px;font-size:var(--font-label)}
+.ab-activity-item:not(:last-child):before{left:15px;top:31px}
+.ab-activity-meta{font-size:var(--font-caption)}
+.ab-activity-content strong{font-size:var(--font-body);line-height:1.35}
+.ab-activity-content small{font-size:var(--font-body-sm);line-height:1.5}
+.ab-activity-owner{font-size:var(--font-caption)}
+.ab-next-action{grid-template-columns:40px 1fr auto;padding:14px 16px}
+.ab-next-action-icon{width:38px;height:38px;font-size:var(--icon-md)}
+.ab-next-action-main small{font-size:var(--font-label)}
+.ab-next-action-main strong{font-size:var(--font-body);line-height:1.4}
+.ab-next-action-main em{font-size:var(--font-label)}
+
+/* Related / empty states */
+.ab-related-row{padding:13px 14px}
+.ab-related-main strong{font-size:var(--font-body)}
+.ab-related-main small,.ab-related-status{font-size:var(--font-label)}
+.ab-related-meta{font-size:var(--font-caption)}
+.ab-empty-state{gap:8px;min-height:190px}
+.ab-empty-icon{width:42px;height:42px;font-size:var(--icon-lg)}
+.ab-empty-state strong{font-size:var(--font-section-title);color:var(--dio-navy-900)}
+.ab-empty-state p{font-size:var(--font-body-sm);line-height:1.55}
+
+/* Quick create */
+.ab-quick-create-header strong{font-size:20px}
+.ab-quick-create-header p{font-size:var(--font-body-sm)}
+
+/* Global shell readability */
+.shell-nav-link{font-size:14px}
+.topbar-title h1{font-size:22px}
+.topbar-title .eyebrow{font-size:var(--font-caption)}
+
+/* Mobile */
+@media(max-width:920px),((hover:none) and (pointer:coarse) and (max-width:1400px)){
+  :root{--font-page-title:22px;--font-entity-title:23px;--font-section-title:16px;--font-tab:14px;--font-body:15px;--font-body-sm:14px;--font-label:12.5px;--font-caption:11.5px;--font-button:14px}
+  .route-surface h2,.lead-v2-page-header h2{font-size:var(--font-page-title)!important}
+  .ab-detail-header{padding:16px 15px 14px}
+  .ab-detail-title-line h3{font-size:var(--font-entity-title)}
+  .ab-detail-meta-list{gap:8px}
+  .ab-detail-meta-item{padding:10px}
+  .ab-quick-actions{gap:5px}
+  .ab-quick-action{height:54px;min-height:54px;padding:4px 5px;gap:4px}
+  .ab-quick-action strong{font-size:10.5px;line-height:1.2}
+  .ab-detail-tabs button{min-height:50px}
+  .ab-step-progress{padding:16px 12px 13px}
+  .ab-step-node{width:32px;height:32px}
+  .ab-step-item small{font-size:12px;max-width:82px}
+  .ab-section-head{min-height:54px;padding:15px}
+  .ab-section-head strong{font-size:15px}
+  .ab-data-row{min-height:72px;padding:12px}
+  .ab-primary-stack strong{font-size:15px}
+  .ab-primary-stack small{font-size:12.5px}
+  .ab-page-status{font-size:var(--font-caption)}
+  .mobile-bottom-nav .shell-nav-link.mobile,.mobile-more-button{font-size:11px;gap:4px}
+  .mobile-bottom-nav .shell-nav-link.mobile .nav-icon,.mobile-more-button .nav-icon{width:22px;height:22px}
+  .ab-mobile-fab{width:58px;height:58px}
+}
