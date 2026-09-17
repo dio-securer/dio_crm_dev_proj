@@ -17,6 +17,9 @@
       "erp": "ERP",
       "related": "Related data"
     },
+    "mobileTabs": {
+      "sales": "Sales"
+    },
     "actions": {
       "create": "New registration",
       "saveDraft": "Save draft",
@@ -165,6 +168,8 @@
   "contact": {
     "title": "Contacts",
     "quickAdd": "Quick add contact",
+    "quickHelp": "Keep the detail view clean and open the contact form only when it is needed.",
+    "viewHint": "Added contacts will appear here immediately.",
     "empty": "No contacts registered.",
     "fields": {
       "name": "Name",
