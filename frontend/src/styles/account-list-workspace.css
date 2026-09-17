@@ -10,7 +10,7 @@
 .account-card-desktop-id{font-size:9px;color:var(--text-soft);font-style:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .account-card-mobile-details{display:none}
 
-@media(max-width:820px){
+@media(max-width:820px),((hover:none) and (pointer:coarse) and (max-width:1400px)){
   .account-scope-tabs{margin-bottom:0}
 
   .account-desktop-ab .ab-data-body{
