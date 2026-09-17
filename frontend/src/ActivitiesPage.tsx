@@ -148,11 +148,13 @@ export function ActivitiesPage() {
     <AbPagination page={currentPage} pageSize={pageSize} totalItems={filtered.length} onPageChange={setPage} onPageSizeChange={size => { setPageSize(size); setPage(1); }} rowsPerPageLabel={t('account.pagination.rowsPerPage')} previousLabel={t('account.pagination.previous')} nextLabel={t('account.pagination.next')} pageStatus={t('account.pagination.pageStatus', { page: currentPage, pages: totalPages, count: filtered.length })} />
   </>;
 
-  const detail = <article className="lead-v2-detail-pane">
-    {!selected && <div className="lead-v2-empty-detail">{t('activityWorkspace.select')}</div>}
+  const targetTimeline = selected ? rows.filter(row => row.source === selected.source && row.targetId === selected.targetId).slice(0, 10) : [];
+  const detail = <article className="lead-v2-detail-pane entity-ab-detail">
+    {!selected && <div className="lead-v2-empty-detail"><AbEmptyState title={t('activityWorkspace.select')} /></div>}
     {selected && <>
       <button type="button" className="lead-v2-mobile-back" onClick={() => setMobileDetailOpen(false)}>← {t('account.back')}</button>
       <AbDetailHeader
+        entityIcon="activity"
         eyebrow={selected.id}
         title={selected.subject}
         subtitle={selected.targetName}
@@ -167,20 +169,20 @@ export function ActivitiesPage() {
           <div className="ab-detail-meta-item"><span>{t('activityWorkspace.type')}</span><strong>{t(`account.activityTypes.${selected.type}`)}</strong></div>
         </div>}
       />
-      <div className="lead-v2-detail-content entity-detail-stack">
+      <div className="lead-v2-detail-content entity-detail-stack activity-detail-stack">
         <AbInfoGrid columns={2} items={[
           { label: t('activityWorkspace.source'), value: selected.source === 'LEAD' ? t('activityWorkspace.lead') : t('activityWorkspace.account') },
           { label: t('activityWorkspace.target'), value: selected.targetName },
           { label: t('activityWorkspace.owner'), value: selected.ownerName },
           { label: t('activityWorkspace.occurredAt'), value: formatDateTime(selected.occurredAt, i18n.language) }
         ]} />
-        <div className="entity-section-card"><div className="entity-section-title"><strong>{t('activityWorkspace.note')}</strong></div><p>{selected.note || '-'}</p></div>
-        <div className="entity-section-card"><div className="entity-section-title"><strong>{t('activityWorkspace.timelineSection')}</strong></div><AbActivityTimeline items={rows.filter(row => row.source === selected.source && row.targetId === selected.targetId).slice(0, 10).map(row => ({ id: row.id, typeLabel: t(`account.activityTypes.${row.type}`), timeLabel: formatDateTime(row.occurredAt, i18n.language), title: row.subject, summary: row.note || undefined, owner: row.ownerName }))} /></div>
+        <div className="entity-section-card entity-note-card"><div className="entity-section-title"><strong>{t('activityWorkspace.note')}</strong></div>{selected.note ? <p>{selected.note}</p> : <AbEmptyState title={t('common.noData')} />}</div>
+        <div className="entity-section-card"><div className="entity-section-title"><strong>{t('activityWorkspace.timelineSection')}</strong><small>{t('activityWorkspace.count', { count: targetTimeline.length })}</small></div><AbActivityTimeline items={targetTimeline.map(row => ({ id: row.id, typeLabel: t(`account.activityTypes.${row.type}`), timeLabel: formatDateTime(row.occurredAt, i18n.language), title: row.subject, summary: row.note || undefined, owner: row.ownerName }))} empty={<AbEmptyState title={t('activityWorkspace.empty')} />} /></div>
       </div>
     </>}
   </article>;
 
-  return <section className={`lead-v2 ab-workspace${mobileDetailOpen ? ' mobile-detail-open' : ''}`}>
+  return <section className={`lead-v2 ab-workspace entity-workspace activity-workspace${mobileDetailOpen ? ' mobile-detail-open' : ''}`}>
     <header className="lead-v2-page-header"><div><div className="lead-v2-title-line"><span className="lead-v2-kicker">CRM · ACTIVITY</span></div><h2>{t('activityWorkspace.title')}</h2><p>{t('activityWorkspace.subtitle')}</p></div><div className="lead-v2-header-actions"><button type="button" className="lead-v2-button primary" onClick={() => setQuickOpen(true)}>+ {t('activityWorkspace.new')}</button></div></header>
     <div className="entity-toolbar-tabs">{(['ALL', 'LEAD', 'ACCOUNT'] as const).map(source => <button type="button" key={source} className={`lead-v2-button secondary${sourceFilter === source ? ' active' : ''}`} onClick={() => { setSourceFilter(source); setPage(1); }}>{source === 'ALL' ? t('activityWorkspace.all') : source === 'LEAD' ? t('activityWorkspace.lead') : t('activityWorkspace.account')}</button>)}</div>
     <AbListToolbar searchValue={search} onSearchChange={value => { setSearch(value); setPage(1); }} searchPlaceholder={t('activityWorkspace.searchPlaceholder')} onReset={reset} resetLabel={t('account.filters.reset')} resultSummary={t('activityWorkspace.count', { count: filtered.length })} filters={<><select value={typeFilter} onChange={event => { setTypeFilter(event.target.value as 'ALL' | UnifiedActivityType); setPage(1); }}><option value="ALL">{t('activityWorkspace.allTypes')}</option>{ACTIVITY_TYPES.map(type => <option key={type} value={type}>{t(`account.activityTypes.${type}`)}</option>)}</select><select value={dateFilter} onChange={event => { setDateFilter(event.target.value as DateFilter); setPage(1); }}><option value="ALL">{t('activityWorkspace.allDates')}</option><option value="TODAY">{t('activityWorkspace.today')}</option><option value="7">{t('activityWorkspace.recent7')}</option></select></>} />
