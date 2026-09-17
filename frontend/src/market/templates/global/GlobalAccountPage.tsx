@@ -18,6 +18,7 @@ import { AccountDetailHeader } from '../../../features/account/AccountDetailHead
 import { AccountActivityQuickAdd } from '../../../features/account/AccountActivityQuickAdd';
 import { AccountQuickCreatePanel } from '../../../features/account/AccountQuickCreatePanel';
 import { AccountErpWorkflowPanel } from '../../../features/account/AccountErpWorkflowPanel';
+import { AccountTabNav, type AccountTabId } from '../../../features/account/AccountTabNav';
 import {
   ACCOUNT_OWNER_NAMES,
   accountOwnerOverride,
@@ -43,7 +44,7 @@ import {
 import '../../../styles/lead-workspace.css';
 import '../../../styles/account-quick-erp.css';
 
-type AccountTab = 'summary' | 'contacts' | 'opportunities' | 'activity' | 'trade' | 'manage' | 'address' | 'erp' | 'related';
+type AccountTab = AccountTabId;
 const PAGE_STATE_KEY = 'dio-crm:account:view:global:v1';
 const LIST_STATE_KEY = 'dio-crm:account:list:global:v1';
 const QUICK_DRAFT_KEY = 'dio-crm:account:quick:global:v1';
@@ -88,7 +89,6 @@ export function GlobalAccountPage() {
   }, [localMode, localTick, query.data, scope]);
   const selected = useMemo(() => rows.find(row => row.public_id === selectedId) ?? null, [rows, selectedId]);
   const sections = visibleAccountSections(GLOBAL_ACCOUNT_FIELD_PROFILE);
-  const tabs: AccountTab[] = ['summary', 'contacts', 'opportunities', 'activity', 'trade', 'manage', 'address', 'erp', 'related'];
 
   React.useEffect(() => {
     saveAccountPageState(PAGE_STATE_KEY, { scope, selectedId, tab, mobileDetailOpen });
@@ -288,7 +288,7 @@ export function GlobalAccountPage() {
         onErpRequest={localMode ? () => requestMockErp(selected.public_id) : undefined}
         erpRequestDisabled={selected.erp_approved_yn || ['REQUESTING', 'REVIEWING'].includes(selected.integration_status)}
       />
-      <nav className="lead-v2-tabs">{tabs.map(item => <button type="button" key={item} className={tab === item ? 'active' : ''} onClick={() => setTab(item)}>{t(`account.tabs.${item}`)}</button>)}</nav>
+      <AccountTabNav activeTab={tab} onChange={setTab} />
       <div className="lead-v2-detail-content">{renderTab()}</div>
       <AbDetailFooter draftLabel={t('account.actions.saveDraft')} saveLabel={t('common.save')} onDraft={() => setMessage(t('account.toast.draftSaved'))} onSave={() => void save()} saving={saving} />
     </>}
