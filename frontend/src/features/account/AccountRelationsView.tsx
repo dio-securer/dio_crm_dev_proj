@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AbActivityTimeline, AbKpiRow, AbRelatedList, AbSectionAccordion } from '../../ui/ab-workspace';
+import { AbActivityTimeline, AbEmptyState, AbKpiRow, AbQuickCreate, AbRelatedList, AbSectionAccordion } from '../../ui/ab-workspace';
 import {
   addAccountContact,
   getAccountRelationSummary,
@@ -45,33 +45,52 @@ export function AccountRelationKpis({ accountId, tick = 0, onNavigate }: BasePro
 
 export function AccountContactsPanel({ accountId, tick = 0, onChanged }: BaseProps & { onChanged: () => void }) {
   const { t } = useTranslation();
+  const [composerOpen, setComposerOpen] = useState(false);
   const [draft, setDraft] = useState({ name: '', role: '', phone: '', email: '' });
   const contacts = useMemo(() => getAccountRelationSummary(accountId).contacts, [accountId, tick]);
+
+  const closeComposer = () => {
+    setComposerOpen(false);
+    setDraft({ name: '', role: '', phone: '', email: '' });
+  };
 
   const add = () => {
     if (!draft.name.trim()) return;
     addAccountContact(accountId, draft);
-    setDraft({ name: '', role: '', phone: '', email: '' });
+    closeComposer();
     onChanged();
   };
 
-  return <AbSectionAccordion id="contacts" title={t('account.tabs.contacts')} hint={`${contacts.length}`} open onToggle={() => undefined}>
-    <div className="lead-v2-form">
-      <label><span>{t('contact.fields.name')} *</span><input value={draft.name} onChange={event => setDraft(previous => ({ ...previous, name: event.target.value }))} /></label>
-      <label><span>{t('contact.fields.role')}</span><input value={draft.role} onChange={event => setDraft(previous => ({ ...previous, role: event.target.value }))} /></label>
-      <label><span>{t('contact.fields.phone')}</span><input value={draft.phone} onChange={event => setDraft(previous => ({ ...previous, phone: event.target.value }))} /></label>
-      <label><span>{t('contact.fields.email')}</span><input value={draft.email} onChange={event => setDraft(previous => ({ ...previous, email: event.target.value }))} /></label>
-      <button type="button" className="lead-v2-button secondary" onClick={add} disabled={!draft.name.trim()}>{t('contact.actions.add')}</button>
-    </div>
-    <div className="account-relation-contact-list">
-      {contacts.map((contact: AccountMockContact) => <div className="account-relation-contact" key={contact.id}>
-        <span className="account-relation-avatar">{contact.name.slice(0, 1)}</span>
-        <div><strong>{contact.name}</strong><small>{contact.role || '-'}</small><em>{contact.phone || contact.email || '-'}</em></div>
-        <i>{t(`account.relationSource.${contact.source}`)}</i>
-      </div>)}
-      {!contacts.length && <p className="lead-v2-empty-inline">{t('contact.empty')}</p>}
-    </div>
-  </AbSectionAccordion>;
+  const addButton = <button type="button" className="lead-v2-button secondary" onClick={() => setComposerOpen(true)}>+ {t('contact.actions.add')}</button>;
+
+  return <>
+    <AbSectionAccordion id="contacts" title={t('account.tabs.contacts')} hint={`${contacts.length}`} open onToggle={() => undefined}>
+      <div className="account-relation-section-actions">{addButton}</div>
+      <div className="account-relation-contact-list">
+        {contacts.map((contact: AccountMockContact) => <div className="account-relation-contact" key={contact.id}>
+          <span className="account-relation-avatar">{contact.name.slice(0, 1)}</span>
+          <div><strong>{contact.name}</strong><small>{contact.role || '-'}</small><em>{contact.phone || contact.email || '-'}</em></div>
+          <i>{t(`account.relationSource.${contact.source}`)}</i>
+        </div>)}
+        {!contacts.length && <AbEmptyState title={t('contact.empty')} description={t('contact.viewHint')} action={<button type="button" className="lead-v2-button primary" onClick={() => setComposerOpen(true)}>+ {t('contact.actions.add')}</button>} />}
+      </div>
+    </AbSectionAccordion>
+    <AbQuickCreate
+      open={composerOpen}
+      title={t('contact.quickAdd')}
+      help={t('contact.quickHelp')}
+      closeLabel={t('app.close')}
+      onClose={closeComposer}
+      footer={<div className="lead-v2-drawer-actions"><button type="button" className="lead-v2-button ghost" onClick={closeComposer}>{t('common.cancel')}</button><button type="button" className="lead-v2-button primary" onClick={add} disabled={!draft.name.trim()}>{t('contact.actions.save')}</button></div>}
+    >
+      <div className="lead-v2-form account-contact-composer-form">
+        <label><span>{t('contact.fields.name')} *</span><input autoFocus value={draft.name} onChange={event => setDraft(previous => ({ ...previous, name: event.target.value }))} /></label>
+        <label><span>{t('contact.fields.role')}</span><input value={draft.role} onChange={event => setDraft(previous => ({ ...previous, role: event.target.value }))} /></label>
+        <label><span>{t('contact.fields.phone')}</span><input value={draft.phone} onChange={event => setDraft(previous => ({ ...previous, phone: event.target.value }))} /></label>
+        <label><span>{t('contact.fields.email')}</span><input value={draft.email} onChange={event => setDraft(previous => ({ ...previous, email: event.target.value }))} /></label>
+      </div>
+    </AbQuickCreate>
+  </>;
 }
 
 export function AccountOpportunitiesPanel({ accountId, tick = 0 }: BaseProps) {
