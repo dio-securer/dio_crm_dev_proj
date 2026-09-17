@@ -22,7 +22,7 @@ type Props<T> = {
 };
 
 const AUTO_MOBILE_SECONDARY_KEYS = new Set([
-  'account', 'target', 'owner', 'role', 'activity', 'lastActivity', 'type',
+  'account', 'target', 'owner', 'role', 'activity', 'lastActivity', 'type', 'phone',
   'country', 'amount', 'status', 'close', 'date', 'nextAction'
 ]);
 
@@ -79,6 +79,7 @@ export function AbDataList<T>({
                   <span
                     key={column.key}
                     role="cell"
+                    data-column-key={column.key}
                     data-mobile-role={role}
                     className={`ab-data-cell${column.className ? ` ${column.className}` : ''}`}
                   >
@@ -89,7 +90,7 @@ export function AbDataList<T>({
               {mobileSecondary.length > 0 && (
                 <span className="ab-data-mobile-meta" aria-hidden="true">
                   {mobileSecondary.map(({ column, index }) => (
-                    <span className="ab-data-mobile-meta-item" key={`mobile-${column.key}`}>
+                    <span className="ab-data-mobile-meta-item" data-column-key={column.key} key={`mobile-${column.key}`}>
                       <span className="ab-data-mobile-meta-label">{mobileLabel(column)}</span>
                       <span className="ab-data-mobile-meta-value">{cells[index] ?? null}</span>
                     </span>
