@@ -12,6 +12,7 @@ import {
   countryFlag,
   type AbDataColumn
 } from '../../ui/ab-workspace';
+import { UiIcon } from '../../ui/UiIcon';
 import {
   EMPTY_ACCOUNT_LIST_FILTERS,
   accountCountry,
@@ -39,6 +40,13 @@ function formatDate(value: string | undefined, locale: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return new Intl.DateTimeFormat(locale, { year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
+}
+
+function formatMobileDate(value: string | undefined, locale: string) {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat(locale, { month: '2-digit', day: '2-digit' }).format(date);
 }
 
 function statusTone(status: string) {
@@ -166,15 +174,22 @@ export function AccountListPanel({ rows, loading = false, selectedId, scope, onS
             <span className="account-card-primary" title={`${row.account_name} · ${row.erp_customer_code || row.business_no || row.public_id}`}>
               <strong className="account-card-name">{row.account_name}</strong>
               {mobileList ? (
-                <span
-                  className="account-card-contact-line"
-                  style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, overflow: 'hidden', whiteSpace: 'nowrap' }}
-                >
-                  <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.phone || '-'}</span>
-                  <span className="account-mobile-dot">·</span>
-                  <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{row.owner_name ?? '-'}</span>
-                  <span className="account-mobile-dot">·</span>
-                  <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{formatDate(lastActivity, i18n.language)}</span>
+                <span className="account-card-mobile-details">
+                  <span className="account-card-contact-owner-row">
+                    <span className="account-card-mobile-field">
+                      <UiIcon name="phone" size={15} />
+                      <b>{row.phone || '-'}</b>
+                    </span>
+                    <span className="account-card-mobile-field account-card-mobile-owner">
+                      <UiIcon name="user" size={15} />
+                      <b>{row.owner_name ?? '-'}</b>
+                    </span>
+                  </span>
+                  <span className="account-card-recent-row">
+                    <UiIcon name="clock" size={14} />
+                    <span>{t('account.columns.lastActivity')}</span>
+                    <b>{formatMobileDate(lastActivity, i18n.language)}</b>
+                  </span>
                 </span>
               ) : (
                 <>
