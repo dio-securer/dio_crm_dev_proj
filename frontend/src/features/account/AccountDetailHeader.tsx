@@ -6,6 +6,8 @@ import { AbDetailHeader, AbEntityBadges, AbHeroInsights, AbQuickActions, country
 import { accountCountry, accountLastActivity } from './account-list-model';
 import { getAccountRelationSummary } from './account-relations-mock';
 
+export const ACCOUNT_EDIT_REQUEST_EVENT = 'dio-crm:account-edit-request';
+
 function formatDateTime(value: string | undefined, locale: string) {
   if (!value) return '-';
   const date = new Date(value);
@@ -30,6 +32,11 @@ export function AccountDetailHeader({ account, onEdit, onAddActivity, onErpReque
   const lastActivity = accountLastActivity(account);
   const email = account.tax_email || '';
   const relations = getAccountRelationSummary(account.public_id);
+
+  const beginEdit = () => {
+    onEdit();
+    window.dispatchEvent(new CustomEvent(ACCOUNT_EDIT_REQUEST_EVENT));
+  };
 
   return (
     <AbDetailHeader
@@ -59,7 +66,7 @@ export function AccountDetailHeader({ account, onEdit, onAddActivity, onErpReque
           { id: 'call', label: t('account.actions.call'), icon: '☎', href: account.phone ? `tel:${account.phone}` : undefined, disabled: !account.phone },
           { id: 'email', label: t('account.actions.email'), icon: '✉', href: email ? `mailto:${email}` : undefined, disabled: !email },
           { id: 'activity', label: t('account.actions.addActivity'), icon: '＋', onClick: onAddActivity, tone: 'primary' },
-          { id: 'edit', label: t('account.actions.edit'), icon: '✎', onClick: onEdit },
+          { id: 'edit', label: t('account.actions.edit'), icon: '✎', onClick: beginEdit },
           ...(onErpRequest ? [{ id: 'erp', label: t('account.actions.erpRequest'), icon: '⇄', onClick: onErpRequest, disabled: erpRequestDisabled }] : [])
         ]}
       />}
