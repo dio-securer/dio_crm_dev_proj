@@ -1,6 +1,6 @@
 # CRM 관리자 플랫폼 설계 및 구현 작업지시서
 
-> **현재 실행 상태:** A00~A06 구현·검증 완료. A07~A11은 [단계별 실행 대기열](execution/README.md) 및 [queue.json](execution/queue.json)에서 이어간다. 아래 설계 작성 당시 상태 문구와 실제 구현 상태를 구분한다.
+> **현재 실행 상태:** A00~A11 구현·검증 완료, 작업자 B 승인. [A11 보고서](implementation/A11-report.md), [인수 대응표](implementation/coverage.md), [사용 안내](implementation/user-guide.md), [실행 상태](execution/queue.json)를 참조한다. PR #28은 draft이며 운영 배포는 별도 범위다.
 
 작성일: 2026-10-21 (KST) · 문서 버전: 1.3 · 상태: 개발 착수용 보완 설계(구현·실행검증 전)
 기준 저장소: dio-securer/dio_crm_dev_proj

@@ -9,7 +9,7 @@
     "report": "docs/admin-platform/implementation/A06-report.md"
   },
   "executionMode": "on_chat_invocation_sequential",
-  "nextStage": "A11",
+  "nextStage": null,
   "stages": [
     {
       "id": "A07",
@@ -72,13 +72,15 @@
       "title": "전체 인수검증·사용 안내",
       "dependsOn": "A10",
       "instruction": "docs/admin-platform/execution/A11.md",
-      "status": "IN_PROGRESS",
-      "report": null,
-      "evidence": [],
-      "review": null,
-      "checkpoint": {
-        "nextAction": "Run full suites, verify 31 ADM routes and T01–T83 evidence, publish guide and B final review"
-      }
+      "status": "DONE",
+      "report": "docs/admin-platform/implementation/A11-report.md",
+      "evidence": [
+        "docs/admin-platform/implementation/evidence/a11-run-results.json",
+        "docs/admin-platform/implementation/acceptance-results.json",
+        "docs/admin-platform/implementation/coverage.md"
+      ],
+      "review": "Worker B final approval: 20 suites PASS, 31 ADM BOTH, 83 TC / 150 rows; independent reset HTTP and policy-race PASS",
+      "checkpoint": null
     }
   ]
 }

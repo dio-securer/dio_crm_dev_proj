@@ -1,0 +1,2 @@
+[i18n] translation key parity PASS (346 keys, ko-KR, en-US)
+$ node scripts/i18n/check.mjs
