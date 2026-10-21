@@ -66,7 +66,7 @@ readonly repo: MemoryAdminRepository) { this.key = process.env.CRM_MOCK_JWT_SECR
         }
         throw new AdminError(401, 'TOKEN_INVALID');
     } }
-    async authenticate(header: string | undefined) { const c = await this.claims(header); return this.engine.authenticate(c.sessionId); }
+    async authenticate(header: string | undefined, touch = true) { const c = await this.claims(header); return this.engine.authenticate(c.sessionId, touch); }
     async switchCompany(header: string, companyId: string) { const c = await this.claims(header); return this.present(await this.engine.switchCompany(c.sessionId, companyId)); }
     async refresh(token: string) { return this.present(await this.engine.refresh(token)); }
 }

@@ -30,6 +30,8 @@ export interface Envelope {
     }>;
 }
 export interface Transaction {
+    dataset(): Envelope;
+    resetDataset(expectedRevision: number, replacement: Envelope): void;
     forCompany(companyId: string): Transaction;
     read(collection: Collection, id: string): Row | undefined;
     query(collection: Collection): Row[];
@@ -64,7 +66,7 @@ export function canonical(value: unknown): string {
 export function transaction(state: Envelope, companyId: string): Transaction {
     const rows = (c: Collection) => state.collections[c] ?? {};
     const visible = (c: Collection, r: Row | undefined) => !!r && (companyId === '*' || (c === 'companies' ? r.id === companyId : c === 'users' ? (r.homeCompanyId === companyId || Object.values(state.collections.memberships || {}).some(m => m.companyId === companyId && m.userId === r.id)) : r.companyId === companyId));
-    return { forCompany: id => transaction(state, id), read: (c, id) => { const r = rows(c)[id]; return visible(c, r) ? structuredClone(r) : undefined; }, query: c => Object.values(rows(c)).filter(r => visible(c, r)).map(r => structuredClone(r)), insert(c, r) { assert(!rows(c)[r.id], 409, 'ALREADY_EXISTS'); assert(visible(c, r), 404, 'NOT_FOUND'); (state.collections[c] ??= {})[r.id] = structuredClone(r); }, compareAndSwap(c, id, rev, row) { const old = rows(c)[id]; assert(visible(c, old), 404, 'NOT_FOUND'); assert(old.revision === rev, 409, 'REVISION_CONFLICT'); assert(row.id === id && row.companyId === old.companyId, 422, 'IDENTITY_IMMUTABLE'); state.collections[c][id] = { ...structuredClone(row), revision: rev + 1 }; }, appendEvent(e) { assert(companyId === '*' || e.companyId === companyId, 404, 'NOT_FOUND'); state.events.push(structuredClone(e)); }, receipt(key, hash, response) { const k = companyId + ':' + key, old = state.receipts[k]; if (old) {
+    return { dataset: () => {assert(companyId === '*',403,'FORBIDDEN');return structuredClone(state);}, resetDataset: (expectedRevision,replacement) => {assert(companyId === '*',403,'FORBIDDEN');assert(state.revision===expectedRevision,409,'RESET_PREVIEW_STALE');assert(state.datasetId==='ADMIN_DEMO_V1'&&replacement.datasetId===state.datasetId,404,'NOT_FOUND');state.collections=structuredClone(replacement.collections);state.events=[];state.receipts={};}, forCompany: id => transaction(state, id), read: (c, id) => { const r = rows(c)[id]; return visible(c, r) ? structuredClone(r) : undefined; }, query: c => Object.values(rows(c)).filter(r => visible(c, r)).map(r => structuredClone(r)), insert(c, r) { assert(!rows(c)[r.id], 409, 'ALREADY_EXISTS'); assert(visible(c, r), 404, 'NOT_FOUND'); (state.collections[c] ??= {})[r.id] = structuredClone(r); }, compareAndSwap(c, id, rev, row) { const old = rows(c)[id]; assert(visible(c, old), 404, 'NOT_FOUND'); assert(old.revision === rev, 409, 'REVISION_CONFLICT'); assert(row.id === id && row.companyId === old.companyId, 422, 'IDENTITY_IMMUTABLE'); state.collections[c][id] = { ...structuredClone(row), revision: rev + 1 }; }, appendEvent(e) { assert(companyId === '*' || e.companyId === companyId, 404, 'NOT_FOUND'); state.events.push(structuredClone(e)); }, receipt(key, hash, response) { const k = companyId + ':' + key, old = state.receipts[k]; if (old) {
             assert(old.hash === hash, 409, 'IDEMPOTENCY_CONFLICT');
             return structuredClone(old.response);
         } if (response !== undefined)

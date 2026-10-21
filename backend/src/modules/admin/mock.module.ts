@@ -1,13 +1,17 @@
 import { Module, Controller, Post, Get, Patch, Body, Headers, Param, Req, Query } from '@nestjs/common';
 import { randomUUID, createHash } from 'node:crypto';
 import { z } from 'zod';
-import { IntegrationEngine,integrationRequest, NotificationEngine,notificationRequest, ApprovalEngine,approvalRequest, MasterDataEngine, masterDataRequest, ConfigurationEngine, configurationRequest, assert, canonical, createDraft, updateDraft, OrganizationCommands } from '@dio-crm/contracts/admin';
+import { DatasetResetEngine, IntegrationEngine,integrationRequest, NotificationEngine,notificationRequest, ApprovalEngine,approvalRequest, MasterDataEngine, masterDataRequest, ConfigurationEngine, configurationRequest, assert, canonical, createDraft, updateDraft, OrganizationCommands } from '@dio-crm/contracts/admin';
 import { MemoryAdminRepository } from './memory.repository';
 import { MockAuth, MockIdentityRepository } from './mock-auth';
 function sDrafts(tx: any, platform: boolean) { return (platform ? tx.forCompany('*') : tx).query('drafts'); }
 @Controller('api')
 class MockController {
     constructor(private readonly auth: MockAuth, private readonly repo: MemoryAdminRepository) { }
+    @Post('admin/mock-datasets/:id/reset/preview')
+    async resetPreview(@Headers('authorization') h:string,@Param('id') id:string,@Body() body:unknown){return new DatasetResetEngine(this.repo).request(await this.auth.authenticate(h,false),id,'preview',body);}
+    @Post('admin/mock-datasets/:id/reset')
+    async resetDataset(@Headers('authorization') h:string,@Param('id') id:string,@Body() body:unknown){return new DatasetResetEngine(this.repo).request(await this.auth.authenticate(h,false),id,'reset',body);}
     @Post('auth/login')
     login(
     @Body()

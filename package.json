@@ -40,7 +40,9 @@
     "test:admin:integration": "node --test tests/admin/integration-http.cjs",
     "test:admin:integration-ui": "node scripts/admin/run-integration-ui.cjs",
     "test:admin:operations": "node --test tests/admin/operations.cjs tests/admin/operations-http.cjs",
-    "test:admin:operations-ui": "node scripts/admin/run-operations-ui.cjs"
+    "test:admin:operations-ui": "node scripts/admin/run-operations-ui.cjs",
+    "test:admin:all": "node scripts/admin/run-all.cjs",
+    "test:admin:routes-ui": "node scripts/admin/run-routes-ui.cjs"
   },
   "devDependencies": {
     "playwright": "1.62.1"

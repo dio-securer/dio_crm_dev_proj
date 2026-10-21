@@ -1,4 +1,4 @@
-import { IntegrationEngine,integrationRequest, NotificationEngine,notificationRequest, ApprovalEngine,approvalRequest, MasterDataEngine, masterDataRequest, ConfigurationEngine, configurationRequest, SecurityEngine, OrganizationCommands, createDraft, updateDraft, assert, securityHash, canonical, normalizeCommandError } from '@dio-crm/contracts/admin';
+import { DatasetResetEngine, IntegrationEngine,integrationRequest, NotificationEngine,notificationRequest, ApprovalEngine,approvalRequest, MasterDataEngine, masterDataRequest, ConfigurationEngine, configurationRequest, SecurityEngine, OrganizationCommands, createDraft, updateDraft, assert, securityHash, canonical, normalizeCommandError } from '@dio-crm/contracts/admin';
 import { HttpAdminClient } from './admin-client';
 import { BrowserAdminRepository } from './browser-repository';
 export class BrowserSecurityClient extends HttpAdminClient {
@@ -23,7 +23,9 @@ export class BrowserSecurityClient extends HttpAdminClient {
             return this.engine.switchCompany(this.sessionId, body.companyId);
         if (path === '/api/auth/logout')
             return this.engine.logout(this.sessionId);
-        const a = await this.engine.authenticate(this.sessionId);
+        const resetPath=path.match(/^\/api\/admin\/mock-datasets\/([^/]+)\/reset(\/preview)?$/);
+        const a = await this.engine.authenticate(this.sessionId,!resetPath);
+        if(resetPath&&method==='POST')return new DatasetResetEngine(this.repo).request(a,resetPath[1],resetPath[2]?'preview':'reset',body);
         const integration=await integrationRequest(new IntegrationEngine(this.repo),a,url.pathname+url.search,method,body,key,revision?`"${revision}"`:undefined);if(integration!==undefined)return integration;
         const notification=await notificationRequest(new NotificationEngine(this.repo),a,url.pathname+url.search,method,body,key,revision?`"${revision}"`:undefined);if(notification!==undefined)return notification;
         const approval=await approvalRequest(new ApprovalEngine(this.repo),a,url.pathname+url.search,method,body,key,revision?`"${revision}"`:undefined);if(approval!==undefined)return approval;

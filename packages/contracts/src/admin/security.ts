@@ -24,9 +24,9 @@ export class SecurityEngine {
     else
         tx.insert('authAttempts', { id: this.id(), companyId: '*', revision: 1, userId, ...changes }); return count >= limits.maxFailedAttempts; }); assert(!locked, 429, 'AUTH_LOCKED'); }
     private checkSession(tx: Transaction, id: string, allowMfa = false) { const s = tx.read('sessions', id); assert(s && !s.revoked && Number(s.expiresAt) > this.now(), 401, 'SESSION_EXPIRED'); const { m } = this.identity(tx, String(s.userId), String(s.membershipId));const limits=this.policy(tx,m);assert(Number(s.createdAt)+limits.maxSessionMinutes*60000>this.now()&&Number(s.lastSeenAt)+limits.idleTimeoutMinutes*60000>this.now(),401,'SESSION_EXPIRED'); assert(m.permissionVersion === s.permissionVersion, 401, 'SESSION_REVOKED'); const p = this.policy(tx, m), needs = p.mode === 'REQUIRED' || (p.mode === 'OPTIONAL' && !!this.enrollment(tx, String(s.userId))); assert(allowMfa || !needs || (s.mfaVerifiedAt !== null && Number(s.mfaVerifiedAt) + 1800000 > this.now()), 403, 'MFA_REQUIRED'); this.expireDelegations(tx); assert(tx.read('memberships', m.id)?.permissionVersion === s.permissionVersion, 401, 'SESSION_REVOKED'); return { s, m, p }; }
-    async authenticate(id: string) { const result = await this.repo.transact('*', tx => { this.expireDelegations(tx); try {
+    async authenticate(id: string, touch = true) { const result = await this.repo.transact('*', tx => { this.expireDelegations(tx); try {
         const { s, p } = this.checkSession(tx, id);
-        return this.put(tx, 'sessions', s, { lastSeenAt: this.now(), securityVersion: p.version });
+        return touch ? this.put(tx, 'sessions', s, { lastSeenAt: this.now(), securityVersion: p.version }) : s;
     }
     catch (e) {
         if (e instanceof AdminError)
