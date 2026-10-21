@@ -1,7 +1,7 @@
 import { Module, Controller, Post, Get, Patch, Body, Headers, Param, Req, Query } from '@nestjs/common';
 import { randomUUID, createHash } from 'node:crypto';
 import { z } from 'zod';
-import { ApprovalEngine,approvalRequest, MasterDataEngine, masterDataRequest, ConfigurationEngine, configurationRequest, assert, canonical, createDraft, updateDraft, OrganizationCommands } from '@dio-crm/contracts/admin';
+import { NotificationEngine,notificationRequest, ApprovalEngine,approvalRequest, MasterDataEngine, masterDataRequest, ConfigurationEngine, configurationRequest, assert, canonical, createDraft, updateDraft, OrganizationCommands } from '@dio-crm/contracts/admin';
 import { MemoryAdminRepository } from './memory.repository';
 import { MockAuth, MockIdentityRepository } from './mock-auth';
 function sDrafts(tx: any, platform: boolean) { return (platform ? tx.forCompany('*') : tx).query('drafts'); }
@@ -61,7 +61,7 @@ class MockController {
     @Param('company')
     company: string,
     @Param('resource')
-    resource: string, @Query() query:any) { const s = await this.auth.authenticate(h); if(['approvals','approval-deputies','approval-metadata'].includes(resource))return new ApprovalEngine(this.repo).request(s,company,resource==='approvals'?'list':resource==='approval-deputies'?'deputies':'metadata','',query); if (resource === 'field-registry') return this.auth.engine.accountFieldRegistry(s, company); if (resource === 'releases') return new ConfigurationEngine(this.repo).read(s, 'COMPANY', company); if (['roles', 'delegations', 'sessions', 'mfa-reset-requests'].includes(resource))
+    resource: string, @Query() query:any) { const s = await this.auth.authenticate(h); if(['notifications','notification-metadata','notification-outbox'].includes(resource))return new NotificationEngine(this.repo).request(s,company,resource==='notifications'?'list':resource==='notification-metadata'?'metadata':'outbox','',query); if(['approvals','approval-deputies','approval-metadata'].includes(resource))return new ApprovalEngine(this.repo).request(s,company,resource==='approvals'?'list':resource==='approval-deputies'?'deputies':'metadata','',query); if (resource === 'field-registry') return this.auth.engine.accountFieldRegistry(s, company); if (resource === 'releases') return new ConfigurationEngine(this.repo).read(s, 'COMPANY', company); if (['roles', 'delegations', 'sessions', 'mfa-reset-requests'].includes(resource))
         return { items: await this.auth.engine.list(s, company, resource === 'mfa-reset-requests' ? 'mfaResetRequests' : resource) }; await this.auth.engine.permission(s, company, resource === 'organizations' ? 'organization.read' : resource === 'transfers' ? 'ownershipTransfer.manage' : 'user.read'); const name = z.enum(['organizations', 'users', 'memberships', 'transfers']).parse(resource); const items = await new OrganizationCommands(this.repo, randomUUID).list({ ...s, role: s.role === 'PLATFORM_ADMIN' ? 'PLATFORM_ADMIN' : 'COMPANY_ADMIN' }, company, name); return { items, total: items.length, page: 1, pageSize: 20, requestId: randomUUID() }; }
     @Post('admin/companies/:company/:resource')
     async orgCreate(
@@ -157,6 +157,8 @@ class MockController {
         return this.auth.engine.enroll(c.challengeId); if (action === 'verify')
         return this.auth.present(await this.auth.engine.verify(c.challengeId, body, key)); if (action === 'skip')
         return this.auth.present(await this.auth.engine.skip(c.challengeId, key)); assert(false, 404, 'NOT_FOUND'); }
+    @Post(['admin/companies/:company/notifications/:id','admin/companies/:company/notifications/:id/read'])
+    async notificationCommand(@Headers('authorization') h:string,@Headers('idempotency-key') key:string,@Headers('if-match') match:string,@Req() req:any,@Body() body:any){return notificationRequest(new NotificationEngine(this.repo),await this.auth.authenticate(h),req.originalUrl,'POST',body,key,match);}
     @Get(['admin/companies/:company/runtime/approval-documents','admin/companies/:company/runtime/approval-documents/:id','admin/companies/:company/approvals/:id'])
     async approvalRead(@Headers('authorization') h:string,@Req() req:any){return approvalRequest(new ApprovalEngine(this.repo),await this.auth.authenticate(h),req.originalUrl,'GET',undefined,'');}
     @Post(['admin/companies/:company/runtime/approval-documents','admin/companies/:company/runtime/approval-documents/:id/submit','admin/companies/:company/approvals/:id/:action','admin/companies/:company/approval-deputies/:id/revoke'])

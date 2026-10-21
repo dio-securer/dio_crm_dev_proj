@@ -9,7 +9,7 @@
     "report": "docs/admin-platform/implementation/A06-report.md"
   },
   "executionMode": "on_chat_invocation_sequential",
-  "nextStage": "A08",
+  "nextStage": "A09",
   "stages": [
     {
       "id": "A07",
@@ -30,10 +30,13 @@
       "title": "알림과 운영 이벤트",
       "dependsOn": "A07",
       "instruction": "docs/admin-platform/execution/A08.md",
-      "status": "PENDING",
-      "report": null,
-      "evidence": [],
-      "review": null,
+      "status": "DONE",
+      "report": "docs/admin-platform/implementation/A08-report.md",
+      "evidence": [
+        "docs/admin-platform/implementation/evidence/a08-tests-all.log",
+        "docs/admin-platform/implementation/evidence/a08-ui.log"
+      ],
+      "review": "Worker B code approved; independent HTTP6 PASS",
       "checkpoint": null
     },
     {

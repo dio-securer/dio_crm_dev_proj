@@ -1,4 +1,4 @@
-import { ApprovalEngine,approvalRequest, MasterDataEngine, masterDataRequest, ConfigurationEngine, configurationRequest, SecurityEngine, OrganizationCommands, createDraft, updateDraft, assert, securityHash, canonical, normalizeCommandError } from '@dio-crm/contracts/admin';
+import { NotificationEngine,notificationRequest, ApprovalEngine,approvalRequest, MasterDataEngine, masterDataRequest, ConfigurationEngine, configurationRequest, SecurityEngine, OrganizationCommands, createDraft, updateDraft, assert, securityHash, canonical, normalizeCommandError } from '@dio-crm/contracts/admin';
 import { HttpAdminClient } from './admin-client';
 import { BrowserAdminRepository } from './browser-repository';
 export class BrowserSecurityClient extends HttpAdminClient {
@@ -24,6 +24,7 @@ export class BrowserSecurityClient extends HttpAdminClient {
         if (path === '/api/auth/logout')
             return this.engine.logout(this.sessionId);
         const a = await this.engine.authenticate(this.sessionId);
+        const notification=await notificationRequest(new NotificationEngine(this.repo),a,url.pathname+url.search,method,body,key,revision?`"${revision}"`:undefined);if(notification!==undefined)return notification;
         const approval=await approvalRequest(new ApprovalEngine(this.repo),a,url.pathname+url.search,method,body,key,revision?`"${revision}"`:undefined);if(approval!==undefined)return approval;
         if(url.pathname.endsWith('/approval-fixtures')&&method==='POST')return new ApprovalEngine(this.repo).request(a,url.pathname.split('/')[4],'fixtures','',body,key);
         if(url.pathname.endsWith('/approval-simulations')&&method==='POST')return new ApprovalEngine(this.repo).request(a,url.pathname.split('/')[4],'simulation','',body,key);

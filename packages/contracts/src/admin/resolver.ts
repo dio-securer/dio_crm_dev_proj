@@ -7,7 +7,7 @@ const prefix = (a: Path, b: Path) => a.length <= b.length && a.every((s, i) => c
 const unsafe = new Set(['__proto__', 'prototype', 'constructor']);
 function safe(value: unknown): void { if (value && typeof value === 'object') for (const k of Object.keys(value)) { assert(!unsafe.has(k), 422, 'UNSAFE_PATH'); safe((value as any)[k]); } }
 // Registry-defined keys, never array positions. Translation identity is composite.
-function itemKey(item: any): string { if (typeof item === 'string') return item; assert(item && typeof item === 'object', 422, 'ITEM_KEY_REQUIRED'); return item.locale && item.termKey ? `${item.termKey}:${item.locale}` : String(item.id ?? item.key ?? item.code ?? item.semanticKey ?? item.eventKey ?? item.roleCode ?? ''); }
+function itemKey(item: any): string { if (typeof item === 'string') return item; assert(item && typeof item === 'object', 422, 'ITEM_KEY_REQUIRED'); return item.locale && item.key ? `${item.key}:${item.locale}` : item.locale && item.termKey ? `${item.termKey}:${item.locale}` : String(item.id ?? item.key ?? item.code ?? item.semanticKey ?? item.eventKey ?? item.roleCode ?? ''); }
 export function normalizeOverrides(previous: OverrideOp[], input: OverrideOp[]): OverrideOp[] {
     const parsed = input.map(o => overrideOpSchema.parse(o));
     // An ordinary update replaces the local patch; RESET removes a path from the previous patch.

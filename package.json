@@ -34,7 +34,9 @@
     "test:admin:master": "node --test tests/admin/master-data.cjs tests/admin/master-http.cjs",
     "test:admin:master-ui": "node scripts/admin/run-master-ui.cjs",
     "test:admin:approval": "node --test tests/admin/approval-unit.cjs tests/admin/approval-http.cjs",
-    "test:admin:approval-ui": "node scripts/admin/run-approval-ui.cjs"
+    "test:admin:approval-ui": "node scripts/admin/run-approval-ui.cjs",
+    "test:admin:notification": "node --test tests/admin/notification-http.cjs",
+    "test:admin:notification-ui": "node scripts/admin/run-notification-ui.cjs"
   },
   "devDependencies": {
     "playwright": "1.62.1"

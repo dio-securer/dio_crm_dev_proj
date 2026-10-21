@@ -1,5 +1,5 @@
 {
-  "note": "A00-A07 staged evidence; A07 B approved. T13 delivery integration remains A08. See A07-report.md.",
+  "note": "A00-A08 staged evidence. A08 code approved by worker B. A09-A11 remain.",
   "results": [
     {
       "tcId": "T01",
@@ -67,8 +67,8 @@
     },
     {
       "tcId": "T13",
-      "status": "BLOCKED",
-      "reason": "A07 UNIT PASS; notification delivery INTEGRATION remains A08."
+      "status": "PASS",
+      "reason": "A08 approval notification integration, HTTP and both-mode UI evidence; see A08-report.md."
     },
     {
       "tcId": "T14",
@@ -168,8 +168,8 @@
     },
     {
       "tcId": "T32",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A08 approval notification integration, HTTP and both-mode UI evidence; see A08-report.md."
     },
     {
       "tcId": "T33",
@@ -625,8 +625,8 @@
     },
     {
       "tcId": "T79",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A08 approval notification integration, HTTP and both-mode UI evidence; see A08-report.md."
     },
     {
       "tcId": "T80",

@@ -1,3 +1,4 @@
+import {upgradeNotificationConfig,validateNotificationConfig,enqueueNotificationEvent} from './notification-runtime';
 import {upgradeApprovalConfig,validateApprovalConfig} from './approval-config';
 import {upgradeMasterConfig,validateMasterConfig} from './master-data';
 import { accountBaseline, upgradeAccountConfig, validateAccountConfig, conditionFields, activeAccountConfig } from './account-runtime';
@@ -61,7 +62,7 @@ export class ConfigurationEngine {
     private resolve(tx: Transaction, scope: string, key: string, parents: string[], documents: any[]) {
         this.checkParents(tx, scope, key, parents);
         const inherited: Record<string, any> = parents.length ? upgradeAccountConfig(tx.read('scopeVersions', parents[parents.length - 1])!.effective as any, scope === 'COMPANY' ? String(tx.read('companies',key)!.templateCode) : key.startsWith('HQ') ? 'HQ' : 'GLOBAL') : {};
-        const effective=upgradeApprovalConfig(upgradeMasterConfig(inherited,scope==='COMPANY'?String(tx.read('companies',key)!.timezone):key.startsWith('HQ')?'Asia/Seoul':'America/New_York'));
+        const effective=upgradeNotificationConfig(upgradeApprovalConfig(upgradeMasterConfig(inherited,scope==='COMPANY'?String(tx.read('companies',key)!.timezone):key.startsWith('HQ')?'Asia/Seoul':'America/New_York')));
         if(scope==='TEMPLATE'&&key==='HQ'){const hq=accountBaseline('HQ');effective['SCREEN:account']=hq['SCREEN:account'];effective['FIELD:account']=hq['FIELD:account'];}
         if (scope === 'COMPANY') { const c = tx.read('companies', key)!; effective['COMPANY_PROFILE:profile'] = structuredClone(tx.read('configScopes', `COMPANY:${key}`)?.profileBaseline || { defaultLocale: c.defaultLocale, currency: c.currency, timezone: c.timezone, templateCode: c.templateCode }); }
         if(scope==='COMPANY'&&key===COMPANY_IDS.US_B){const f=effective['FIELD:account'].fields.find((f:any)=>f.key==='x_visitGroup');if(f)f.visible=false;}
@@ -74,7 +75,7 @@ export class ConfigurationEngine {
         }
         // Mandatory registry values stay protected even when COMMON is edited.
         const field = effective['FIELD:account']; assert(field?.fields?.some((f: any) => f.key === 'taxId' && f.visible && f.required), 422, 'LOCKED_PATH');
-        const upgraded = upgradeAccountConfig(effective, scope === 'COMPANY' ? String(tx.read('companies',key)!.templateCode) : key.startsWith('HQ') ? 'HQ' : 'GLOBAL'); validateApprovalConfig(upgraded); validateMasterConfig(upgraded,scope==='COMPANY'?tx:undefined,scope==='COMPANY'?key:undefined); validateAccountConfig(upgraded, scope === 'COMPANY' ? tx : undefined, scope === 'COMPANY' ? key : undefined); return { effective: upgraded, provenance };
+        const upgraded = upgradeAccountConfig(effective, scope === 'COMPANY' ? String(tx.read('companies',key)!.templateCode) : key.startsWith('HQ') ? 'HQ' : 'GLOBAL'); validateNotificationConfig(upgraded); validateApprovalConfig(upgraded); validateMasterConfig(upgraded,scope==='COMPANY'?tx:undefined,scope==='COMPANY'?key:undefined); validateAccountConfig(upgraded, scope === 'COMPANY' ? tx : undefined, scope === 'COMPANY' ? key : undefined); return { effective: upgraded, provenance };
     }
     private validateViews(tx: Transaction, a: SecurityActor, config: any) {
         let roles=rolesFor(tx.forCompany(a.companyId),actorMembership(tx,a));
@@ -167,6 +168,7 @@ export class ConfigurationEngine {
         tx.insert(scope === 'COMPANY' ? 'releases' : 'scopeVersions', row);
         if (scope === 'COMPANY') { const c = tx.read('companies', scopeKey)!; const profile = resolved.effective['COMPANY_PROFILE:profile']; if (profile && (profile.currency !== c.currency || profile.timezone !== c.timezone)) assert(!(['accounts','leads','opportunities','contracts','orders','sequences','approvals'] as const).some(name => tx.forCompany(scopeKey).query(name).length), 409, 'COMPANY_PROFILE_IN_USE'); tx.compareAndSwap('companies', c.id, c.revision, { ...c, ...profile, activeReleaseId: row.id }); }
         else { const p = tx.read('configScopes', `${scope}:${scopeKey}`)!; tx.compareAndSwap('configScopes', p.id, p.revision, { ...p, currentVersionId: row.id }); }
+        if(scope==='COMPANY')enqueueNotificationEvent(tx,{eventId:this.makeId(),companyId:scopeKey,eventKey:'CONFIG_PUBLISHED',title:reason,recipientMembershipIds:tx.forCompany(scopeKey).query('memberships').map(m=>m.id),at:new Date(this.now()).toISOString()},this.makeId);
         this.event(tx, a, rollbackOf ? 'CONFIG_ROLLED_BACK' : 'CONFIG_PUBLISHED', row.id, reason); return { data: row, releaseId: scope === 'COMPANY' ? row.id : undefined, versionId: row.id };
     }
 }
