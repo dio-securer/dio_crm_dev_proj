@@ -1,3 +1,4 @@
+import {useDirtyEditor} from './useDirtyEditor';
 import React,{useEffect,useState,useRef} from 'react';
 import {upgradeAccountConfig,resolveOverrides,canonical} from '@dio-crm/contracts/admin';
 import {HttpAdminClient} from './client/admin-client';
@@ -15,6 +16,7 @@ export function AccountDesigner({client,companyId}:{client:HttpAdminClient;compa
  setState(s);setConfig(c);setDirty(false);setValidation(null);}
  useEffect(()=>{void load().catch(e=>setError(e.message));return()=>{generation.current++;};},[companyId]);
  const run=async(fn:()=>Promise<void>)=>{setBusy(true);setError('');try{await fn();}catch(e){setError((e as Error).message);}finally{setBusy(false);}};
+ useDirtyEditor(dirty,()=>save(),setError);
  if(!config)return <p>{error||'설정 불러오는 중'}</p>;
  const key=`${domain}:${stable(domain)}`,doc=config[key],rows=doc[array]||[],row=rows[index];const fields=config['FIELD:account'].fields.map((f:any)=>f.key);
  const setDoc=(v:any)=>{setConfig({...config,[key]:v});setDirty(true);setValidation(null);};const setRow=(v:any)=>setDoc({...doc,[array]:rows.map((r:any,i:number)=>i===index?v:r)});

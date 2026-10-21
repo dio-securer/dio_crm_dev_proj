@@ -1,3 +1,4 @@
+import {useDirtyEditor} from './useDirtyEditor';
 import React,{useEffect,useState} from 'react';
 import {masterKeys,upgradeMasterConfig,resolveOverrides,translateTerm,termRegistry} from '@dio-crm/contracts/admin';
 import {HttpAdminClient} from './client/admin-client';
@@ -10,6 +11,7 @@ export function MasterDataPages({client,companyId}:{client:HttpAdminClient;compa
  async function load(){const s=await client.request(scope);let c=structuredClone(s.effective);const parent=upgradeMasterConfig(s.parentEffective,c['CALENDAR:business'].timezone);for(const d of s.drafts.filter((d:any)=>masterKeys.includes(d.domain+':'+d.stableKey))){c[d.domain+':'+d.stableKey]=resolveOverrides(parent[d.domain+':'+d.stableKey],d.overrides).payload;}setState(s);setConfig(c);setDirty(false);setValidation(undefined);}
  useEffect(()=>{void load().catch(e=>setError(e.message));},[companyId]);
  const run=async(fn:()=>Promise<void>)=>{setBusy(true);setError('');setNotice('');try{await fn();}catch(e){setError((e as Error).message);}finally{setBusy(false);}};
+ useDirtyEditor(dirty,()=>save(),setError);
  if(!config)return <p role="alert">{error||'설정 불러오는 중'}</p>;
  const key=masterKeys.find(k=>k.startsWith(domain+':'))!,doc=config[key];const change=(next:any)=>{setConfig({...config,[key]:next});setDirty(true);setValidation(undefined);};
  const translation=(termKey:string,lng:string,text:string)=>{const exists=doc.translations.some((t:any)=>t.termKey===termKey&&t.locale===lng);change({...doc,translations:exists?doc.translations.map((t:any)=>t.termKey===termKey&&t.locale===lng?{...t,text}:t):[...doc.translations,{termKey,locale:lng,text}]});};

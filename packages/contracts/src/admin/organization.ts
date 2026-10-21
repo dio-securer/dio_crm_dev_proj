@@ -107,11 +107,12 @@ export class OrganizationCommands {
                 data = tx.read('companies', companyId)!;
             }
             else if (operation === 'template.preview') {
+                await new ConfigurationEngine(this.repo,this.id,this.now).initialize(tx.forCompany('*'));
                 const b = z.object({ templateCode: z.enum(['HQ', 'GLOBAL']), expectedRevision: z.number().int().positive() }).strict().parse(input);
                 const company = tx.read('companies', companyId);
                 assert(company, 404, 'NOT_FOUND');
                 assert(company.revision === b.expectedRevision, 409, 'REVISION_CONFLICT');
-                data = { id: this.id(), companyId, revision: 1, actor: actor.userId, templateCode: b.templateCode, companyRevision: company.revision, releaseId: company.activeReleaseId || null, draftRevisions: tx.query('drafts').map(d => ({ id: d.id, revision: d.revision })), expiresAt: this.now() + 600000, status: 'PREVIEW', diff: { from: company.templateCode, to: b.templateCode }, conflicts: [], parentVersionIds: company.parentVersionIds || [] };
+                data = { id: this.id(), companyId, revision: 1, actor: actor.userId, templateCode: b.templateCode, companyRevision: company.revision, releaseId: company.activeReleaseId || null, draftRevisions: tx.query('drafts').map(d => ({ id: d.id, revision: d.revision })), expiresAt: this.now() + 600000, status: 'PREVIEW', diff: { from: company.templateCode, to: b.templateCode }, conflicts: [], parentVersionIds: company.parentVersionIds || [],targetCountryVersionId:tx.forCompany('*').read('configScopes',`COUNTRY:${b.templateCode}:${company.countryCode}`)?.currentVersionId };
                 data.previewId = data.id;
                 tx.insert('previews', data as Row);
             }
@@ -121,8 +122,8 @@ export class OrganizationCommands {
                 assert(p && p.actor === actor.userId, 404, 'NOT_FOUND');
                 assert(match === `"${b.revision}"`, 400, 'REVISION_MISMATCH');
                 assert(company && b.revision === company.revision && p.companyRevision === company.revision && p.releaseId === (company.activeReleaseId || null) && Number(p.expiresAt) > this.now() && canonical(p.draftRevisions) === canonical(tx.query('drafts').map(d => ({ id: d.id, revision: d.revision }))), 409, 'TEMPLATE_PREVIEW_STALE');
-                assert(tx.query('drafts').length === 0, 409, 'DRAFTS_PENDING');
-                data = { id: this.id(), companyId, revision: 1, schemaVersion: 1, scope: 'COMPANY', scopeKey: companyId, domain: 'COMPANY_PROFILE', stableKey: 'profile', parentVersionIds: [], overrides: [{ op: 'SET', path: [{ property: 'templateCode' }], value: p.templateCode }] };
+                assert(p.targetCountryVersionId===tx.forCompany('*').read('configScopes',`COUNTRY:${p.templateCode}:${company.countryCode}`)?.currentVersionId,409,'TEMPLATE_PREVIEW_STALE');assert(tx.query('drafts').length === 0, 409, 'DRAFTS_PENDING');
+                data = { id: this.id(), companyId, revision: 1, schemaVersion: 1, scope: 'COMPANY', scopeKey: companyId, domain: 'COMPANY_PROFILE', stableKey: 'profile', parentVersionIds: (company.activeReleaseId?tx.read('releases',String(company.activeReleaseId))?.parentVersionIds:tx.forCompany('*').read('configScopes',`COMPANY:${companyId}`)?.parentVersionIds)||[], overrides: [{ op: 'SET', path: [{ property: 'templateCode' }], value: p.templateCode }] };
                 tx.insert('drafts', data as Row);
                 data = { ...data, draftIds: [data.id] };
             }

@@ -1,3 +1,4 @@
+import {useDirtyEditor} from './useDirtyEditor';
 import React,{useEffect,useState} from 'react';
 import {approvalKeys,upgradeApprovalConfig,resolveOverrides,approvalTrue} from '@dio-crm/contracts/admin';
 import {HttpAdminClient} from './client/admin-client';
@@ -10,6 +11,7 @@ export function ApprovalsPage({client,companyId}:{client:HttpAdminClient;company
  useEffect(()=>{void load().catch(e=>setError(e.message));},[companyId]);
  const run=async(fn:()=>Promise<void>)=>{setBusy(true);setError('');setNotice('');try{await fn();}catch(e){setError((e as Error).message);}finally{setBusy(false);}};
  const refresh=async()=>{await load();if(detail)setDetail(await request('/approvals/'+detail.id));};
+ useDirtyEditor(dirty,()=>save(),setError);
  if(!meta)return <p role="alert">{error||'승인 불러오는 중'}</p>;
  const can=(permission:string)=>!!meta.permissions[permission];
  const change=(key:string,value:any)=>{setConfig({...config,[key]:value});setDirty(true);setValidation(undefined);};
