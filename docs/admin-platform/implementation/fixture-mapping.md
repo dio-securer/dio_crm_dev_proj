@@ -10,6 +10,6 @@
 | IF-ERP-004 | CONTRACT 기존 enqueuePending 유지 |
 | IF-ERP-007 | ORDER 기존 enqueuePending 유지 |
 | IF-ERP-011 | 수금계획 요청 기존 동작 유지; 수금 수신과 혼동 금지 |
-| GLOBAL 승인자 | 기존 미확정 유지. DEMO 사용자/승인 fixture 아직 미구현 |
+| GLOBAL 승인자 | 기존 미확정 유지. DEMO 인증 사용자 16명 추가. 승인 fixture 미구현 |
 
-현재 합성 seed는 HQ_DEMO/US_A/US_B/MX_A 회사 네 행만 있다. org/user/role/approval/account fixture는 A01 이후 미완료이며 원본 고객을 임의 이관하지 않았다.
+합성 회사 seed는 HQ_DEMO/US_A/US_B/MX_A 네 행이다. 인증 저장소에는 회사별 admin1/sales1/sales2/manager1 합계 16개 identity와 membership을 별도로 제공한다. org/업무 role/approval/account fixture 연결은 후속 단계이며 원본 고객을 임의 이관하지 않았다.

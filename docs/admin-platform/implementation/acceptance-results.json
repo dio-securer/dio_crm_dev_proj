@@ -1,420 +1,424 @@
 {
-  "note": "No acceptance case executed. Unit tests are separate evidence.",
+  "note": "A01 evidence only. T60 executed with LEGACY HTTP and SQL stub; remaining full acceptance cases not yet completed. Browser runtime is available.",
   "results": [
     {
       "tcId": "T01",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T02",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T03",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T04",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T05",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T06",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T07",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T08",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T09",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T10",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T11",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T12",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T13",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T14",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T15",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T16",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T17",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T18",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T19",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T20",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T21",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T22",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T23",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T24",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T25",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T26",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T27",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T28",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T29",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T30",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T31",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T32",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T33",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T34",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T35",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T36",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T37",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T38",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T39",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T40",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T41",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T42",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T43",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T44",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T45",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T46",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T47",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T48",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T49",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T50",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T51",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T52",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T53",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T54",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T55",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T56",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T57",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T58",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T59",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T60",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "status": "PASS",
+      "reason": "LEGACY HTTP login/refresh/logout with SQL stub; numeric claims preserved",
+      "evidence": [
+        "tests/admin/legacy-auth.cjs",
+        "evidence/resume-api.log"
+      ]
     },
     {
       "tcId": "T61",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T62",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T63",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T64",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T65",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T66",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T67",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T68",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T69",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T70",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T71",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T72",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T73",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T74",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T75",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T76",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T77",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T78",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T79",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T80",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T81",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T82",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     },
     {
       "tcId": "T83",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
     }
   ]
 }

@@ -1,0 +1,35 @@
+$ node scripts/admin/run-web-test.cjs scripts/admin/baseline.cjs
+KR D
+DIO CRM
+Sales Workspace
+영업 업무
+Lead
+Account
+활동 / GPS
+활동보고 / 승인
+직출 / 직퇴
+Opportunity
+Pipeline / Funnel
+계약 / 수금
+주문
+납품 / 매출
+US D
+DIO CRM
+Sales Workspace
+SALES WORK
+Lead
+Account
+Activities / GPS
+Activity Reports / Approval
+Opportunity
+Contract / Co
+MX D
+DIO CRM
+Sales Workspace
+SALES WORK
+Lead
+Account
+Activities / GPS
+Activity Reports / Approval
+Opportunity
+Contract / Co

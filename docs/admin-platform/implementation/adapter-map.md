@@ -1,13 +1,15 @@
-# A00 기존/신규 연결 상태
+# 기존/신규 연결 상태
 
-| 경로 | 상태/후속 |
+| 기존 경로 | 새 연결 및 상태 |
 |---|---|
-| packages/contracts/src/admin/index.ts | 신규 Company/Config 기본 Zod, Row/Envelope/Repository 계약, 결정적 company seed, 실행모드 검사 함수 |
-| backend/src/modules/admin/memory.repository.ts | 신규 메모리 copy-on-write rollback, 직렬 transaction; bootstrap 미연결 |
-| frontend/src/admin/client/browser-repository.ts | 신규 Web Locks + 단일 envelope 저장; UI 미연결/실브라우저 미검증 |
-| backend/src/app.module.ts 및 auth | 기존 그대로. mock module/SessionAuthGuard 미구현 |
-| frontend/src/App.tsx 및 api.ts | 기존 그대로. admin routes/structured error/headers 미구현 |
-| account-sandbox / field profiles / screen-registry | 원본 유지, runtime adapter 미구현 |
-| 기존 JWT 숫자 ID ↔ 신규 UUID | 신규 COMPANY_IDS 선언만. 실 데이터 변환 adapter 미구현 |
+| frontend/src/main.tsx → App.tsx | 기본 LEGACY 유지. 명시 mock 모드만 AdminMockApp 검증 화면 |
+| packages/contracts/src/admin | strict domain DTO, scope/override 계약, 회사 fixture, 공통 draft command |
+| backend/src/mock-main.ts | 독립 MockAppModule, DB bootstrap 없이 HTTP 실행, 미지원501 |
+| backend/src/modules/admin | identity/session fixture + memory repository + mock controller |
+| frontend/src/admin/client | BrowserMockAdminClient / HttpAdminClient, 공통 command / HTTP header 계약 |
+| backend 기존 auth/controller/guard | 수정 없음. tests/admin/legacy-auth.cjs SQL stub HTTP 회귀 |
+| account-sandbox / field profiles / screen-registry | 원본 보존. A05 runtime 연결 미구현 |
+| 기존 숫자 companyId ↔ 신규 UUID | LEGACY 응답 숫자 유지. 신규 합성 COMPANY_IDS UUID 별도. 실제 데이터 mapping 미구현 |
+| 기존 interface handlers | 원본 유지, A09 MOCK 연결 미구현 |
 
-신규 schema는 전체 domain 계약을 완성한 상태가 아니다. Config.payload는 현재 unknown record이므로 A01 후속 구현에서 domain별 strict schema로 확장해야 한다.
+A01 화면은 어댑터 검증용이며 관리자 전체 UI가 아니다. API actor는 인증 세션에서 도출한다. 브라우저 actor는 합성 시연 값으로 실제 보안 경계가 아니다.

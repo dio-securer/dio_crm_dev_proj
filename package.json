@@ -16,7 +16,14 @@
     "integration:check": "node scripts/integration/external-readiness.mjs",
     "audit:critical": "pnpm audit --audit-level=critical",
     "dev:api": "pnpm --filter @dio-crm/api start:dev",
-    "dev:web": "pnpm --filter @dio-crm/web dev"
+    "dev:web": "pnpm --filter @dio-crm/web dev",
+    "dev:admin:api": "CRM_EXECUTION_MODE=API_MOCK node backend/dist/src/mock-main.js",
+    "dev:admin:web": "VITE_CRM_EXECUTION_MODE=API_MOCK pnpm --filter @dio-crm/web dev",
+    "dev:admin:browser": "VITE_CRM_EXECUTION_MODE=BROWSER_MOCK pnpm --filter @dio-crm/web dev",
+    "test:admin:contracts": "pnpm --filter @dio-crm/api exec jest --runInBand src/modules/admin/memory.repository.spec.ts",
+    "test:admin:api": "node --test tests/admin/api.cjs tests/admin/legacy-auth.cjs",
+    "test:admin:browser": "VITE_CRM_EXECUTION_MODE=BROWSER_MOCK node scripts/admin/run-web-test.cjs tests/admin/browser.cjs",
+    "test:admin:baseline": "node scripts/admin/run-web-test.cjs scripts/admin/baseline.cjs"
   },
   "devDependencies": {
     "playwright": "1.62.1"

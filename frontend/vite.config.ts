@@ -7,8 +7,9 @@ export default defineConfig({
   plugins: [react()],
   server: { port: 5173 },
   resolve: {
-    alias: {
-      '@dio-crm/contracts': path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../packages/contracts/src/index.ts')
-    }
+    alias: [
+      { find: '@dio-crm/contracts/admin', replacement: path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../packages/contracts/src/admin/index.ts') },
+      { find: '@dio-crm/contracts', replacement: path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../packages/contracts/src/index.ts') }
+    ]
   }
 });
