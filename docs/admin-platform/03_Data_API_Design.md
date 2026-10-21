@@ -292,3 +292,6 @@ read/write boolean 신규 계약을 readEffect/writeEffect=UNSET|ALLOW|DENY로 �
 수정은 기본 “유지”이며 values에 masked display를 다시 넣지 않는다. 명시 “교체” 시 fieldReplacements=[{field,value}]로 새 원문을 전송하고 write ALLOW 및 타입검증을 통과해야 한다. 동일 필드를 values와 fieldReplacements 양쪽에 보내면422 DUPLICATE_FIELD_WRITE. 마스킹 필드를 values로 보내면422 MASKED_FIELD_REPLACEMENT_REQUIRED. canReplace=false는 교체 UI를 제공하지 않는다. 교체 후 응답도 마스킹, 감사 로그는 원문 미기록. 일반 필드 PATCH의 누락값 유지 규칙은 그대로다.
 
 §8.4 보충 조회: GET /companies/:company/mfa-reset-requests는 자기 법인에서 생성한 요청 중 본인 요청 또는 user.mfaReset.request 관리 범위만 반환한다. 전역 결정의 EXPIRED 요청은409 RESET_REQUEST_EXPIRED, APPROVED/REJECTED 재결정은409 RESET_REQUEST_FINALIZED다. 전역 identity 초기화 권한은 역할의 companyId 없는 platform scope로 별도 평가한다.
+
+## v1.3 회사 프로필 저장 위치
+Domain에 COMPANY_PROFILE을 추가한다. payload={defaultLocale:string,currency:string,timezone:string,templateCode:HQ|GLOBAL}; 회사 scope에서만 허용하며 기존 등록 catalog 값만 받는다. activeRelease의 COMPANY_PROFILE이 runtime 권위값이며 name/active/code/countryCode는 회사 운영 메타데이터다. 템플릿 변경 API는 이 payload와 parentVersionIds를 같은 초안 transaction으로 갱신한다. defaultLocale/currency/timezone PATCH는 이 domain 초안을 만들고 게시 전 현재값은 유지한다. 회사 생성은 초기 COMPANY_PROFILE을 포함한 baseline release를 원자 생성한다.
