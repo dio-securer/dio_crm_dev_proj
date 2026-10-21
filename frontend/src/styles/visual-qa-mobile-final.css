@@ -1,0 +1,83 @@
+/* Final mobile polish — compact Account summary + dynamic viewport / bottom safe area. */
+
+@supports (height: 100dvh) {
+  html,
+  body,
+  #root,
+  .app-shell,
+  .app-main {
+    min-height: 100dvh;
+  }
+}
+
+@media(max-width:920px),((hover:none) and (pointer:coarse) and (max-width:1400px)) {
+  :root {
+    --mobile-nav-safe-height: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom));
+  }
+
+  /* Keep route content above the fixed application navigation on mobile browsers. */
+  .app-main {
+    min-height: 100dvh;
+    padding-bottom: var(--mobile-nav-safe-height);
+  }
+
+  .mobile-bottom-nav {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    height: var(--mobile-nav-safe-height);
+    min-height: var(--mobile-nav-safe-height);
+    padding-top: 6px;
+    padding-right: max(4px, env(safe-area-inset-right));
+    padding-bottom: calc(7px + env(safe-area-inset-bottom));
+    padding-left: max(4px, env(safe-area-inset-left));
+  }
+
+  /* Detail panes have their own scroll surface, so reserve bottom-nav space there too. */
+  .ab-workspace.mobile-detail-open .lead-v2-detail-content {
+    padding-bottom: calc(24px + var(--mobile-nav-safe-height));
+    scroll-padding-bottom: calc(24px + var(--mobile-nav-safe-height));
+  }
+
+  .ab-workspace.mobile-detail-open .lead-v2-detail-pane {
+    min-height: calc(100dvh - var(--topbar-height));
+  }
+
+  /* Account Summary is a read view: keep rows compact and scan-friendly. */
+  .account-mobile-tab-shell + .lead-v2-detail-content .ab-info-grid {
+    border-radius: 11px;
+  }
+
+  .account-mobile-tab-shell + .lead-v2-detail-content .ab-info-item {
+    min-height: 58px;
+    gap: 2px;
+    padding: 9px 14px;
+  }
+
+  .account-mobile-tab-shell + .lead-v2-detail-content .ab-info-item dt {
+    font-size: 11.5px;
+    line-height: 1.25;
+  }
+
+  .account-mobile-tab-shell + .lead-v2-detail-content .ab-info-item dd {
+    font-size: 14px;
+    line-height: 1.35;
+  }
+
+  /* Avoid Android flag-font fallbacks such as "MX MX" in the Summary value. */
+  .account-mobile-tab-shell + .lead-v2-detail-content .ab-info-item .ab-list-country i {
+    display: none;
+  }
+
+  .account-mobile-tab-shell + .lead-v2-detail-content .ab-info-item .ab-list-country {
+    gap: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+  }
+}
+
+@media(max-width:430px) {
+  .account-mobile-tab-shell + .lead-v2-detail-content .ab-info-item {
+    min-height: 56px;
+    padding: 8px 12px;
+  }
+}

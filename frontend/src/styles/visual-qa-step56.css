@@ -1,0 +1,224 @@
+/* Visual QA STEP 5/6 — list information hierarchy and mobile quick actions */
+
+/* STEP 5 — desktop list rows: stronger primary/secondary hierarchy without making the grid heavy. */
+.ab-data-mobile-meta{display:none}
+.ab-data-row{
+  position:relative;
+  min-height:64px;
+  border-left:3px solid transparent;
+  transition:background .15s ease,border-color .15s ease,box-shadow .15s ease,transform .15s ease;
+}
+.ab-data-row:hover{
+  background:#f7fbff;
+  border-left-color:#b9d2ea;
+}
+.ab-data-row.selected{
+  background:linear-gradient(90deg,#eaf4fe 0%,#f8fbff 72%);
+  border-left-color:var(--dio-blue-600);
+  box-shadow:inset 0 0 0 1px rgba(39,105,167,.08);
+}
+.ab-primary-stack{gap:4px}
+.ab-primary-stack strong{font-size:14.5px;font-weight:800;color:var(--dio-navy-900);line-height:1.3}
+.ab-primary-stack small{font-size:12.5px;color:#52647a;line-height:1.35}
+.ab-primary-stack em{font-size:11.5px;color:#8995a5;line-height:1.3}
+.ab-data-cell:not(.primary-cell){font-size:12.5px;color:#46586d}
+.ab-data-header{font-size:12px;color:#617187;letter-spacing:.01em}
+.ab-data-header>span:first-child{color:#40536a}
+
+/* Keep quick action internals predictable after STEP 6 adds responsive wrappers. */
+.ab-quick-actions{position:relative}
+.ab-quick-actions-desktop-set{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap}
+.ab-quick-actions-mobile-set{display:none}
+
+@media(max-width:920px),((hover:none) and (pointer:coarse) and (max-width:1400px)){
+  /* Mobile list becomes a compact information card: identity -> status -> useful context. */
+  .ab-data-body{
+    padding:8px;
+    background:#f4f7fa;
+  }
+  .ab-data-row{
+    width:100%;
+    min-height:0;
+    margin:0 0 8px;
+    padding:13px 14px 11px;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:8px 12px;
+    border:1px solid #dde5ee;
+    border-left:1px solid #dde5ee;
+    border-radius:13px;
+    background:#fff;
+    box-shadow:0 2px 8px rgba(16,40,68,.045);
+  }
+  .ab-data-row:last-child{margin-bottom:0}
+  .ab-data-row:hover{transform:none;border-left-color:#c5d4e3}
+  .ab-data-row.selected{
+    border:1px solid #a9c9e8;
+    border-left:4px solid var(--dio-blue-600);
+    background:linear-gradient(90deg,#edf6ff 0%,#fff 78%);
+    box-shadow:0 5px 16px rgba(39,105,167,.09);
+  }
+  .ab-data-cell[data-mobile-role="primary"]{
+    display:block;
+    align-self:start;
+    min-width:0;
+  }
+  .ab-data-cell[data-mobile-role="badge"]{
+    display:block;
+    align-self:start;
+    justify-self:end;
+    overflow:visible;
+  }
+  .ab-primary-stack strong{font-size:15.5px;line-height:1.3}
+  .ab-primary-stack small{font-size:12.5px;line-height:1.35}
+  .ab-primary-stack em{font-size:11.5px}
+  .ab-data-cell[data-mobile-role="badge"] .account-list-pill,
+  .ab-data-cell[data-mobile-role="badge"] .lead-v2-pill{
+    font-size:11px;
+    padding:5px 9px;
+  }
+
+  .ab-data-mobile-meta{
+    display:flex;
+    grid-column:1/-1;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:7px 12px;
+    min-width:0;
+    margin-top:2px;
+    padding-top:9px;
+    border-top:1px dashed #e2e8ef;
+  }
+  .ab-data-mobile-meta-item{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    min-width:0;
+    max-width:100%;
+    color:#506176;
+  }
+  .ab-data-mobile-meta-label{
+    flex:0 0 auto;
+    color:#8a96a5;
+    font-size:10.5px;
+    font-weight:700;
+  }
+  .ab-data-mobile-meta-label::after{content:":"}
+  .ab-data-mobile-meta-value{
+    min-width:0;
+    color:#42546a;
+    font-size:11.5px;
+    font-weight:650;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .ab-data-mobile-meta-value>.ab-list-country,
+  .ab-data-mobile-meta-value>.ab-cell-stack,
+  .ab-data-mobile-meta-value>.ab-next-action-cell{
+    display:inline-flex;
+    flex-direction:row;
+    align-items:center;
+    gap:4px;
+  }
+  .ab-data-mobile-meta-value .account-list-pill,
+  .ab-data-mobile-meta-value .lead-v2-pill{
+    padding:3px 7px;
+    font-size:10.5px;
+  }
+  .ab-data-mobile-meta-item:nth-child(n+6){display:none}
+
+  /* STEP 6 — mobile quick actions: two frequent actions + More. */
+  .ab-detail-header{overflow:visible;z-index:5}
+  .ab-detail-actions{overflow:visible}
+  .ab-detail-header .ab-quick-actions{
+    display:block;
+    width:100%;
+    overflow:visible;
+  }
+  .ab-quick-actions.has-mobile-overflow .ab-quick-actions-desktop-set{display:none}
+  .ab-quick-actions.has-mobile-overflow .ab-quick-actions-mobile-set{
+    position:relative;
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:7px;
+    width:100%;
+  }
+  .ab-quick-actions:not(.has-mobile-overflow) .ab-quick-actions-desktop-set{
+    display:flex;
+    width:100%;
+    gap:7px;
+  }
+  .ab-quick-actions:not(.has-mobile-overflow) .ab-quick-actions-desktop-set>.ab-quick-action{
+    flex:1 1 0;
+  }
+  .ab-quick-actions-mobile-set>.ab-quick-action{
+    width:100%;
+    min-width:0;
+    min-height:58px;
+    height:58px;
+    padding:5px 6px;
+    flex-direction:column;
+    gap:4px;
+    border-radius:11px;
+  }
+  .ab-quick-actions-mobile-set>.ab-quick-action .ab-quick-action-icon{width:20px;height:20px}
+  .ab-quick-actions-mobile-set>.ab-quick-action strong{font-size:11.5px;line-height:1.15}
+  .ab-quick-action-more.active{
+    border-color:#a9c8e7;
+    background:#edf6ff;
+    color:var(--dio-blue-600);
+  }
+  .ab-quick-action-menu{
+    position:absolute;
+    top:calc(100% + 8px);
+    right:0;
+    z-index:80;
+    display:flex;
+    flex-direction:column;
+    width:min(270px,82vw);
+    padding:6px;
+    border:1px solid #d7e1eb;
+    border-radius:13px;
+    background:#fff;
+    box-shadow:0 14px 34px rgba(16,40,68,.18);
+  }
+  .ab-quick-action-menu-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    width:100%;
+    min-height:46px;
+    padding:9px 11px;
+    border:0;
+    border-radius:9px;
+    background:#fff;
+    color:var(--dio-navy-900);
+    font:inherit;
+    text-align:left;
+    text-decoration:none;
+    cursor:pointer;
+  }
+  .ab-quick-action-menu-item:hover{background:#f2f7fc}
+  .ab-quick-action-menu-item+.ab-quick-action-menu-item{margin-top:2px}
+  .ab-quick-action-menu-item .ab-quick-action-icon{
+    display:grid;
+    place-items:center;
+    width:22px;
+    height:22px;
+    flex:0 0 22px;
+    color:#52779d;
+  }
+  .ab-quick-action-menu-item strong{font-size:13px;font-weight:700}
+  .ab-quick-action-menu-item.tone-primary{color:var(--dio-blue-600)}
+  .ab-quick-action-menu-item.tone-danger{color:var(--danger)}
+  .ab-quick-action-menu-item.disabled,.ab-quick-action-menu-item:disabled{opacity:.42;cursor:not-allowed}
+}
+
+@media(max-width:430px){
+  .ab-data-body{padding:7px}
+  .ab-data-row{padding:12px 12px 10px;border-radius:12px}
+  .ab-data-mobile-meta{gap:6px 10px}
+  .ab-data-mobile-meta-item:nth-child(n+5){display:none}
+  .ab-quick-actions-mobile-set>.ab-quick-action{min-height:56px;height:56px}
+  .ab-quick-action-menu{width:min(260px,88vw)}
+}

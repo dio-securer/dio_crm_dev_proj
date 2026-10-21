@@ -29,11 +29,12 @@ describe('country profile foundation', () => {
     }
   });
 
-  it('exposes only the M7-approved GLOBAL navigation screen slots for US/MX', () => {
+  it('exposes the approved A+B GLOBAL navigation screen slots for US/MX', () => {
     const screen = getScreenProfile('GLOBAL_SCREEN_PROFILE');
     expect(screen?.screens).toEqual({
       lead: 'GLOBAL_LEAD',
       account: 'GLOBAL_ACCOUNT',
+      contact: 'GLOBAL_CONTACT',
       activity: 'GLOBAL_ACTIVITY_MAP',
       activityReport: 'GLOBAL_ACTIVITY_REPORT',
       opportunity: 'GLOBAL_OPPORTUNITY',

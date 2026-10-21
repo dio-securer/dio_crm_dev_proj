@@ -1,6 +1,7 @@
 import React from 'react';
 import { LeadsPage } from '../../../LeadsPage';
 import { AccountsPage } from '../../../AccountsPage';
+import { ContactsPage } from '../../../ContactsPage';
 import { ActivitiesPage } from '../../../ActivitiesPage';
 import { ActivityReportsPage } from '../../../ActivityReportsPage';
 import { DirectWorkPage } from '../../../DirectWorkPage';
@@ -15,12 +16,12 @@ import { AnalyticsDashboardPage } from '../../../AnalyticsDashboardPage';
 import { OpsStatusPage } from '../../../OpsStatusPage';
 
 /**
- * M6 protects the existing Korea/HQ UI behind explicit HQ template wrappers.
- * These wrappers intentionally add no behavior. The legacy pages remain the
- * regression baseline while M7 introduces separate GLOBAL implementations.
+ * HQ wrappers keep the screen-profile boundary explicit while sharing the
+ * confirmed A+B operational workspaces across markets where applicable.
  */
 export function HqLeadPage() { return <LeadsPage />; }
 export function HqAccountPage() { return <AccountsPage />; }
+export function HqContactPage() { return <ContactsPage />; }
 export function HqActivityPage() { return <ActivitiesPage />; }
 export function HqActivityReportPage() { return <ActivityReportsPage />; }
 export function HqDirectWorkPage() { return <DirectWorkPage />; }

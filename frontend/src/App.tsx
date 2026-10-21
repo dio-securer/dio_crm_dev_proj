@@ -2,7 +2,7 @@ import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useGlobalization } from './market/globalization-context';
 import { AppShell } from './ui/AppShell';
-import { APP_ROUTES } from './app/route-config';
+import { filterAppRoutes } from './app/route-config';
 import { renderScreen } from './app/screen-registry';
 import { getScreenProfile } from './app/screen-profile';
 import { resolveScreenProfileCode } from './app/screen-resolver';
@@ -20,10 +20,7 @@ export default function App() {
   const screenProfile = getScreenProfile(screenProfileCode);
   if (!screenProfile) return <div role="alert">SCREEN_PROFILE_NOT_REGISTERED</div>;
 
-  const activeRoutes = APP_ROUTES.filter(route => {
-    if (route.feature && !featureEnabled(route.feature)) return false;
-    return !!screenProfile.screens[route.slot];
-  });
+  const activeRoutes = filterAppRoutes(screenProfile.screens, featureEnabled);
 
   const links = activeRoutes.map(({ path: _path, slot: _slot, feature: _feature, ...link }) => link);
 

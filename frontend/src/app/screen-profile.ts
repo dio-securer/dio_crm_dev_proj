@@ -3,6 +3,7 @@ import type { ScreenProfileCode } from '@dio-crm/contracts';
 export type ScreenSlot =
   | 'lead'
   | 'account'
+  | 'contact'
   | 'activity'
   | 'activityReport'
   | 'directWork'
@@ -19,6 +20,7 @@ export type ScreenSlot =
 export type ScreenKey =
   | 'HQ_LEAD'
   | 'HQ_ACCOUNT'
+  | 'HQ_CONTACT'
   | 'HQ_ACTIVITY'
   | 'HQ_ACTIVITY_REPORT'
   | 'HQ_DIRECT_WORK'
@@ -33,6 +35,7 @@ export type ScreenKey =
   | 'HQ_OPS'
   | 'GLOBAL_LEAD'
   | 'GLOBAL_ACCOUNT'
+  | 'GLOBAL_CONTACT'
   | 'GLOBAL_ACTIVITY_MAP'
   | 'GLOBAL_ACTIVITY_REPORT'
   | 'GLOBAL_OPPORTUNITY'
@@ -55,6 +58,7 @@ export const HQ_SCREEN_PROFILE: ScreenProfileDefinition = {
   screens: {
     lead: 'HQ_LEAD',
     account: 'HQ_ACCOUNT',
+    contact: 'HQ_CONTACT',
     activity: 'HQ_ACTIVITY',
     activityReport: 'HQ_ACTIVITY_REPORT',
     directWork: 'HQ_DIRECT_WORK',
@@ -80,6 +84,7 @@ export const GLOBAL_SCREEN_PROFILE: ScreenProfileDefinition = {
   screens: {
     lead: 'GLOBAL_LEAD',
     account: 'GLOBAL_ACCOUNT',
+    contact: 'GLOBAL_CONTACT',
     activity: 'GLOBAL_ACTIVITY_MAP',
     activityReport: 'GLOBAL_ACTIVITY_REPORT',
     opportunity: 'GLOBAL_OPPORTUNITY',

@@ -5,6 +5,8 @@
 - 상태: DESIGN BASELINE
 - 목적: 현재 모든 UI 규칙을 선행 확정하지 않되, 향후 상용 ERP/CRM 수준의 화면 연계 기능을 추가할 때 구조 변경 없이 확장할 수 있도록 기본 원칙과 Extension Point를 정의한다.
 
+> **확정 UI Design Model:** 화면 레이아웃·등록/편집 패턴·다국어 원칙의 Source of Truth는 [`docs/ui/00_UI_Design_Confirmed_Baseline.md`](../ui/00_UI_Design_Confirmed_Baseline.md) (A+B 운영형, C 대시보드, i18n)이다. 본 문서는 Entity Drill-down / Reference Navigation / State Preservation 보조 Baseline이다.
+
 ---
 
 ## 1. 기본 원칙
