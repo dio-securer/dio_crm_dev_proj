@@ -142,3 +142,23 @@ acceptance-results.json의 각 행:
 {tcId,admIds,stage,mode,datasetId,commit,status,expected,actual,command,evidencePaths,blocker}.
 status는 실행 결과 PASS/FAIL/BLOCKED. 미실행은 BLOCKED와 NOT_RUN 사유로 기록한다. 필수 모드별 행을 분리하고 캡처만으로 API PASS를 인정하지 않는다.
 coverage.md는 31개 ADM 각각에 route/editor/client/API/DTO/repository/runtimeEffect/TC/evidence를 연결한다. 해당 영역의 필수 TC 중 하나라도 FAIL이면 FAIL, FAIL 없이 BLOCKED가 있으면 BLOCKED, 전부 통과했을 때만 PASS다. 문서의 설계 검토 통과와 실제 테스트 PASS는 별도 지표다.
+
+## 7. v1.2 — P1 보완 검증
+| TC | 모드 | 검토 ID/단계 | 입력·실행 | 기대 결과 |
+|---|---|---|---|---|
+| T56 | BOTH | B-01/A04 | COMMON 새 버전 게시 후 US_A 기존 화면 조회→회사 rebase preview/apply→게시 | 상위 게시/apply만으로 기존 화면 변화0, 회사 게시 후만 변경; US_B 유지 |
+| T57 | BOTH | B-01/A04 | SET false/0, REMOVE_ITEM/RESET; 잠긴 path 변경; 두 관리자 scope 게시/rebase | false/0 유지, RESET 상속복원, lock422, 선행 게시후409 VERSION_CONFLICT; stale preview409 |
+| T58 | API | B-02/A02·A10 | 회사 name 수정/업무 존재시 currency 수정/중지·재개/템플릿 변경 | name 즉시, currency409, 진행건 중지409, 성공 중지세션폐기; 템플릿은 게시후만 활성 |
+| T59 | BOTH | B-02/A10 | reset preview→다른 수정→reset, 만료 preview, 최신 preview로 reset | stale/만료409, 최신만 성공; 원본/다른 dataset 보존, 권한없는 회사 포함이면403 |
+| T60 | API | B-03/A01 | SQL stub으로 기존 login/refresh/logout 회귀 요청 | LEGACY 기존 응답/claim 계약 유지, 새 session claim 없다고 거부하지 않음 |
+| T61 | API | B-03/A03 | legacy/mock token 교차 사용, body mode 위조, 두 회사 같은 loginId | 교차401/모드변경불가; API_MOCK 회사없는 중복422/명시회사 정확한 identity |
+| T62 | API | B-04/A03 | US_A 관리자가 shared1 전역 MFA reset 시도→법인 요청 | 직접403·모든 세션불변, 요청 PENDING·US_B 등록/세션불변, 타법인 상세미노출 |
+| T63 | API | B-04/A03 | 전역 관리자가 요청 승인/동일키 반복/만료·identity변경 요청 승인 | 전체 identity 세션·챌린지1회회수, 감사기록, 반복 재적용0, stale409/만료거부 |
+| T64 | BOTH | B-05/A07 | 대결 등록, 겹침/연쇄/자기대결 시도, 기간 전·경계·종료시 결정 | 겹침409,연쇄/자기422; startsAt허용/endsAt거부; 원승인자·실결정자 기록 |
+| T65 | API | B-05/A07 | 원승인자/대결자 동시결정, 대결회수 경합, 원승인자중지, 대결자자기문서 | 한번결정, 회수선행403, 중지원승인자 BLOCKED, 자기승인403 |
+| T66 | BOTH | B-06/A03 | 역할 A ALLOW/B DENY, 모두 UNSET, read DENY/write ALLOW, NONE/LAST4 | DENY우선, UNSET은기본교집합, readDENY면writeDENY, LAST4우선 |
+| T67 | BOTH | B-06/A05 | 마스킹 필드 조회→다른필드만 PATCH→교체; 마스크검색/values전송/중복필드 | 원문미노출/기존원문유지, 허용교체만저장,검색403/values422/중복422 |
+
+T60은 SQL stub 기반 LEGACY 호환 검증이며 운영 DB 로그인 검증을 의미하지 않는다. T43은 A03 fixture 엔진 수준(T43-UNIT)과 A10 게시 통합 수준(T43-INTEGRATION)을 별도 증거로 기록한다.
+field permission fixture의 read=false/write=false는 readEffect=DENY/writeEffect=DENY로 변환한다. shared1은 US_A/US_B 세션을 각각 생성하여 초기화 요청 단계와 실행 단계의 영향을 비교한다. 대결 경계는 fake clock을 startsAt 바로 전/동일/endsAt에 놓아 검증한다.
+신규 TC는 구현 계획이며 아직 실행 PASS가 아니다. 이 추가 표는 P1 여섯 항목의 대응을 고정한다. 기존 31 ADM 전체와 TC 간 완전 대응표는 B-08의 별도 P2 보완 대상으로 유지한다.

@@ -184,3 +184,17 @@ API tests는 실제 ephemeral HTTP listener를 사용하고 DB credential 없이
 `docs/admin-platform/README.md와 01~06의 v1.1 보완 내용, 07의 검토 결과를 읽고 A00부터 순서대로 구현한다. 모든 31개 ADM 화면은 typed 폼·이벤트·저장·권한·오류 처리까지 연결한다. BROWSER_MOCK/API_MOCK를 구분하고 거래처 사용자 화면, 승인 샘플, ERP 모의 상태 반영을 검증한다. 단계의 필수 테스트가 실패하면 다음 단계 완료를 주장하지 않는다. 테스트 미실행을 PASS로 기록하지 않고 BLOCKED 사유 및 재개 명령을 남긴다.`
 
 실제 ERP/SSO/TOTP·운영 정책 확정·SQL migration 실행은 후속 범위다. 목업 기준으로 개발을 진행하기 위해 이 항목을 임의로 실제 정책으로 확정하지 않는다.
+
+## 7. v1.2 P1 보완 작업 배치
+| 검토 ID | 구현 단계 | 필수 작업 | 인수 증거 |
+|---|---|---|---|
+| B-01 | A01 계약/A04 엔진/A10 통합 | ScopeVersion·OverrideOp·scope publish·rebase API/UI/충돌 처리 | T56/T57 |
+| B-02 | A02 회사/A10 reset | 회사 PATCH/중지/재개/템플릿 preview·apply, reset preview·실행 | T58/T59 |
+| B-03 | A01/A03 | 모드별 controller/service/guard 바인딩, token 격리, LEGACY 호환 | T60/T61 |
+| B-04 | A03 | 회사 초기화 요청과 전역 실행 권한 분리, 전역 회수 transaction | T62/T63 |
+| B-05 | A07 | deputy 저장·조회·등록·회수 및 승인함/결정 검증 | T64/T65 |
+| B-06 | A03/A05 | tri-state 권한 결합, maskedFields/fieldReplacements, UI 분리 | T66/T67 |
+
+B-03은 이번 단계에서 LEGACY SQL 세션 모델 이행을 요구하지 않는다. 기존 auth 회귀 테스트는 SQL stub으로 검증하고 실제 DB 연결 결과와 구분한다.
+A03의 기존 T43 중 정책 강화는 repository fixture 변경으로 검증(T43-UNIT)하고, 게시 UI를 통한 강화는 A10(T43-INTEGRATION)에서 완료한다. A02의 템플릿 변경은 계약/preview 단위까지, 실제 release 활성화는 A04/A10에서 완료한다. 선행 단계가 후속 UI 완성을 기다려 완료되지 못하는 순환을 만들지 않는다.
+A11은 T01~T67과 T43 두 실행 수준을 검증하고 신규 12개 TC를 누락하지 않는다. 31 ADM 전체 coverage 보완(B-08)은 별도 P2 검토 항목으로 남아 있으므로 TC 개수만으로 전체 완료 판정하지 않는다.

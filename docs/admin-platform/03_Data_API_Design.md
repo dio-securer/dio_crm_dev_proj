@@ -173,7 +173,7 @@ ADM-05/13의 dataScopes/fieldPermissions는 role DTO의 typed 하위 구조로 �
 | LIST_VIEW | entity, views[{key,labelKey,columns:string[],filter:ConditionNode,sort:[{field,direction:ASC 또는 DESC}],pageSize,shared:boolean}] |
 | ACTION | entity, actions[{key,labelKey,featureKey,permission,condition:ConditionNode,confirmKey,enabled:boolean}] |
 | FIELD 추가 | extensionDefinitions[{key,type,labelKey,nullable,active,searchable,maxLength?,precision?,scale?,enumValues?}] |
-| role 추가 | dataScopes[{entity,actions,scope,orgIds,sharedRecordIds}], fieldPermissions[{entity,field,read,write,maskType}] |
+| role 추가 | dataScopes[{entity,actions,scope,orgIds,sharedRecordIds}], fieldPermissions[{entity,field,readEffect,writeEffect,maskType}] |
 | APPROVAL.steps | [{id,order,mode,approvers:[{type:MEMBERSHIP 또는 ROLE,key}],dueBusinessDays,alternateMembershipId?}] |
 | SECURITY.mfaPolicy | {default:OFF 또는 OPTIONAL 또는 REQUIRED,roleOverrides:[{roleCode,policy}],provider:DEMO} |
 
@@ -195,7 +195,7 @@ AdminRepository.transact의 tx에 read/query도 포함하여 비교와 갱신을
 | POST /api/auth/login | homeCompanyCode,loginId,password → AUTHENTICATED 또는 MFA_ENROLL_REQUIRED/MFA_REQUIRED | 중간 응답에 access/refresh 없음 |
 | POST /api/auth/mfa/enroll | 제한 token → enrollmentId/challengeId/expiresAt | DEMO 등록 준비만, 검증 전 등록 완료 아님 |
 | POST /api/auth/mfa/verify | 제한 token,challengeId,demoCode → 업무 token/context | 원자적 1회 소비 |
-| POST /companies/:company/users/:id/mfa-reset | reason,revision → 등록 해제 | security.mfa.reset, 모든 identity 세션/챌린지 회수 |
+| POST /identities/:id/mfa-reset | reason,revision → 등록 해제 | 플랫폼 범위 security.mfa.reset.global, 모든 identity 세션/챌린지 회수; §8.4 적용 |
 | GET /companies/:company/sessions | userId,page → 세션 요약 | session.read, token 원문 없음 |
 | GET/POST /companies/:company/runtime/accounts | 목록 조건 또는 {values,releaseId} | account.read/create, 필드·회사 검증 |
 | GET/PATCH /companies/:company/runtime/accounts/:id | 변경 시 {values,revision,releaseId} | account.read/update |
@@ -210,3 +210,85 @@ AdminRepository.transact의 tx에 read/query도 포함하여 비교와 갱신을
 기존 approval-simulations API는 합성 문서 생성+submit의 운영자용 facade다. 일반 사용자 제출과 같은 엔진을 호출한다. 일반 업무 사용자의 ERP 요청은 simulate 권한 없이 profile의 시나리오를 사용하며, 임의 scenario 지정/응답 주입은 integration.simulate만 허용한다.
 
 §7.4 보충: POST /api/auth/mfa/skip은 OPTIONAL/미등록 제한 세션만 허용하고 업무 token/context를 반환한다(04 §9.2). 인증/세션 폐기/시계 전진 같은 append-only 명령은 대상 revision이 없는 경우 If-Match를 요구하지 않으며 활성 세션·challenge 또는 expectedRevision을 원자 검증한다. approval decision은 {taskRevision,revision} 둘 다 받고 If-Match는 instance revision이다. 새 문서가 없는 approval resubmit은 명시 documentRevision을 검증한다. 위 예외를 제외한 mutable 리소스 갱신은 §7.1 규칙을 적용한다.
+
+## 8. v1.2 — 작업자 B의 P1 6개 보완 (2026-10-21)
+이 절의 확정 계약은 v1.1의 해당 개략 계약을 대체한다. 이하 경로는 /api/admin prefix다. 일반 변경 명령의 If-Match/Idempotency-Key/오류 envelope는 §7.1을 따른다.
+
+### 8.1 B-01: 상위 scope 게시·버전·rebase
+scope는 COMMON/TEMPLATE/COUNTRY/COMPANY, scopeKey는 각각 COMMON/HQ 또는 GLOBAL/templateCode:countryCode/회사 UUID다. 상속 순서는 COMMON→TEMPLATE→COUNTRY→COMPANY다. 국가 버전은 templateCode도 소유하며 COUNTRY 목록은 이를 필수 필터로 받는다. COUNTRY scopeKey는 API에서 `templateCode:countryCode`로 정규화한다(예 GLOBAL:US). 기존 ISO 국가코드 자체를 변경하지 않는다.
+
+ScopeVersion={id,scope,scopeKey,revision,documentVersionIds,parentVersionIds,contentHash,createdAt,createdBy}.
+상위 scope는 currentVersionId를 갖고 회사는 activeReleaseId를 갖는다. 상위 게시 시 scope 안의 모든 domain을 하나의 불변 ScopeVersion으로 묶고 currentVersionId를 교체한다. 회사의 기존 parentVersionIds/activeReleaseId는 자동 변경하지 않는다. 새 회사는 생성 시점의 명시적 부모 version을 고정한다.
+
+ConfigDocument.payload는 COMMON의 완전한 domain 값이고, 하위 scope는 payload 대신 overrides를 사용한다(둘 동시 입력 금지).
+OverrideOp={op:SET|REMOVE_ITEM|RESET,path:PathSegment[],value?:JsonValue}.
+PathSegment는 {property:string} 또는 {itemKey:string}; 배열 index는 금지하고 itemKey는 domain registry가 정한 id/key/code에 매핑한다.
+SET은 존재 속성 교체 또는 등록 가능한 새 배열 item 추가, REMOVE_ITEM은 배열 item에만 tombstone, RESET은 해당 path와 자손의 local op를 제거해 상속 복원이다. value는 SET에만 필수다. 예: [{property:"fields"},{itemKey:"x_priority"},{property:"required"}].
+저장 상태에는 SET/REMOVE_ITEM만 남긴다. RESET은 서버가 기존 op 목록에서 제거하는 명령으로 해석한다. 같은/조상·자손 path의 중복 op는 422 OVERRIDE_PATH_CONFLICT. 상위 lock과 필수 registry item 제거는 422 LOCKED_PATH. item 추가 SET의 value는 해당 item schema 전체를 만족해야 한다.
+
+| Method/경로 | 요청 | 응답·권한 |
+|---|---|---|
+| GET /config/scopes/:scope/:scopeKey/versions | page,templateCode(국가 scope 검증용) | ScopeVersion 목록; config.read, scope 접근 제한 |
+| GET /config/versions/:id | 없음 | 불변 snapshot/parent 정보; 동일 scope 접근 제한 |
+| POST /config/scopes/:scope/:scopeKey/validate | draftIds,revisions,expectedVersionId | validationId,hash,impact; config.validate |
+| POST /config/scopes/:scope/:scopeKey/publish | validationId,expectedVersionId,reason | ScopeVersion; config.publish.scope, 플랫폼 범위만 |
+| POST /config/rebases/preview | scope,scopeKey,draftIds,revisions,targetParentVersionIds | previewId,baseVersions,diff,conflicts,expiresAt |
+| POST /config/rebases/apply | previewId,expectedDraftRevisions,reason | 새 revision의 초안 묶음; config.manage, scope 권한 |
+
+상위 publish의 COMPANY 호출은 422 USE_COMPANY_RELEASE_API; 회사 게시에는 기존 releases API를 사용한다. preview에는 actor/scope/base hash/target versions를 바인딩하고 10분 후 만료한다. apply는 모든 초안 revision과 base를 다시 확인하고 단일 transaction으로 부모 참조만 변경한 새 초안 revision을 저장한다. 기존 override는 보존하고 새 부모와 충돌하면 409 REBASE_CONFLICT로 전체 미적용한다. 충돌은 기존 초안을 수정하거나 RESET 후 새 preview로 해결한다. apply는 게시가 아니며 기존 validation은 무효화한다. preview 만료/기준 변경은 409 REBASE_STALE이다. publish는 validation의 revision/hash/currentVersionId를 원자 비교하며 다른 관리자가 먼저 게시하면 409 VERSION_CONFLICT다. 부모 내용은 immutable이므로 새 부모가 추가돼도 명시적으로 선택한 target version의 의미는 변하지 않는다.
+
+### 8.2 B-02: 회사 변경·중지 및 reset preview
+CompanyPatch={name?,defaultLocale?,currency?,timezone?,revision}; code/countryCode는 생성 후 변경 금지다. currency/timezone은 이번 목업에서 업무 문서/sequence가 존재하면 409 COMPANY_PROFILE_IN_USE, 없으면 새 설정 초안을 만들며 게시 후 적용한다. name은 즉시 운영 메타데이터 변경, locale은 회사 기본 설정 초안이다. 응답은 {company,revision,createdDraftIds}다. template 변경은 아래 별도 명령으로 처리한다.
+
+| Method/경로 | 요청/응답 | 처리 |
+|---|---|---|
+| PATCH /companies/:company | CompanyPatch → company/revision/createdDraftIds | company.manage, 혼합 변경도 한 transaction |
+| POST /companies/:company/template-change/preview | templateCode,expectedRevision → previewId,diff,conflicts,expiresAt | company.manage; 대상 부모 version 고정 |
+| POST /companies/:company/template-change/apply | previewId,revision,reason → draftIds | 충돌 시409, 새 초안 작성만; 게시 때 templateCode와 release 원자 교체 |
+| POST /companies/:company/deactivate | revision,reason → active=false/new revision | company.manage; 진행 승인/ERP/예약 존재 시409 COMPANY_IN_USE, 성공시 membership 세션 회수 |
+| POST /companies/:company/reactivate | revision,reason → active=true/new revision | company.manage; 기존 폐기 세션 복원 없음 |
+| POST /mock-datasets/:id/reset/preview | 없음 → previewId,datasetRevision,counts,affectedCompanyIds,expiresAt | mock.dataset.reset, dataset 내 모든 회사 권한 필요 |
+| POST /mock-datasets/:id/reset | previewId,expectedRevision,reason → counts,newDatasetRevision | preview와 동일 actor/권한 재검사 후 reset |
+
+template preview는 10분 TTL이고 회사 revision/active release/초안 revision/부모 versions를 고정한다. apply는 이 값이 달라지면 409 TEMPLATE_PREVIEW_STALE, 충돌이 있으면 409 TEMPLATE_CONFLICT. 다른 미게시 회사 초안이 있으면 먼저 게시/폐기하도록 409 DRAFTS_PENDING. reset preview의 counts는 집합별 삭제/복원/세션회수 수, 원본 제외 대상을 포함하고 민감값은 반환하지 않는다. reset preview도 10분 TTL, 다른 dataset에 사용 불가. revision 변경 또는 만료는 409 RESET_PREVIEW_STALE. BROWSER_MOCK는 시연 권한으로 표시하며 다른 저장 namespace는 건드리지 않는다.
+
+### 8.3 B-03: 모드별 인증 호환
+LEGACY는 기존 AuthController/AuthService/SQL refresh-token 저장/Guard를 유지한다. 기존 토큰에 새 sessionId나 MFA claim이 없다는 이유로 폐기하지 않는다. API_MOCK는 별도 MockAuthController/AuthService + MockIdentityRepository/SessionRepository + SessionAuthGuard를 사용한다. 기존 Guard를 상속·공유하더라도 검증 모드는 bootstrap에서 고정하며 token/body/header가 모드를 선택할 수 없다.
+SessionAuthGuard는 서명/issuer/audience/tokenUse/session/membership/permissionVersion/securityVersion을 검사하고 기존 PermissionGuard의 permission 평가를 재사용한다. API_MOCK JWT는 issuer=dio-crm-api-mock, audience=dio-crm-api-mock, tokenUse=ACCESS|REFRESH|MFA_PENDING으로 구분하며 mock 전용 서명키를 사용한다. legacy 키와 같으면 mock 기동 거부. 두 모드 간 토큰 교차 사용은 401이다. LEGACY는 새 admin mock 경로를 등록하지 않는다.
+MockAuthController는 homeCompanyCode/loginId/password를 schema 검증하여 전달한다. LEGACY 로그인 계약은 이번 변경에서 유지하며 회사 미지정 중복 identity 오류(T37)는 신규 API_MOCK에 적용한다. LEGACY의 중복 로그인 개선은 SQL 인증 변경 과제로 남기고 해당 동작을 개선 완료라고 보고하지 않는다.
+BROWSER_MOCK는 DEMO 세션 객체만 생성하며 서버 JWT로 사용하지 않는다. SQL migration 없이 LEGACY에 새 세션 검증을 억지로 적용하지 않는다. 기존 controller/guard 회귀는 SQL repository stub을 통한 동일 요청/응답 테스트로 수행한다. 실제 SQL 로그인 통합검증은 별도 환경 결과로 구분한다.
+
+### 8.4 B-04: 전역 MFA 초기화 권한
+MFA enrollment는 identity 단위이므로 실제 reset 실행은 플랫폼 범위 security.mfa.reset.global만 허용한다. 회사 범위 security.mfa.reset 권한은 폐지하고 seed/화면에서 부여하지 않는다.
+POST /identities/:id/mfa-reset {revision,reason}는 전역 관리 scope를 검사하고 모든 membership의 세션/챌린지 회수 및 등록 해제를 원자 실행한다. 회사 관리자에게 해당 전역 권한을 assign/delegate할 수 없다.
+법인 관리자는 POST /companies/:company/users/:id/mfa-reset-requests {reason}로 요청만 등록한다(user.mfaReset.request). 대상은 현재 회사의 활성 membership이어야 하며 등록/세션에는 부작용이 없다.
+GET /mfa-reset-requests 및 POST /mfa-reset-requests/:id/decide {revision,decision:APPROVE|REJECT,reason}는 전역 권한만 허용한다. APPROVE는 대상 identity revision을 요청 생성 시 값과 비교하고 다르면409 RESET_REQUEST_STALE, 일치하면 reset과 요청 상태를 동일 transaction으로 처리한다. 요청 상태 PENDING→APPROVED/REJECTED, TTL 24시간 후 EXPIRED, 동일 identity에 PENDING 하나만 허용한다.
+감사에는 요청 법인/요청자/실행자/사유/대상 identity/영향 membership 수를 기록한다. 법인 요청자는 자기 요청의 상태와 사유만 조회하고 타 법인 이름/세션/등록값은 받지 않는다. reset 요청 생성/결정의 Idempotency-Key 중복은 추가 reset 없이 기존 결과만 반환한다.
+
+### 8.5 B-05: 승인 대결 계약
+ApprovalDeputy={id,companyId,principalMembershipId,deputyMembershipId,startsAt,endsAt,reason,status:ACTIVE|REVOKED,revision,createdBy,revokedAt?}.
+동일 회사 활성 membership만 허용하고 principal=deputy 금지, UTC startsAt<endsAt, 유효구간 [startsAt,endsAt). 동일 principal의 겹치는 활성 대결은409 DEPUTY_OVERLAP, 대결 연쇄/상호 순환은422 DEPUTY_CHAIN_NOT_ALLOWED. 관리자 설정권 delegation과 별도 집합이다.
+
+| Method/경로 | 요청/응답 | 권한 |
+|---|---|---|
+| GET /companies/:company/approval-deputies | principal,status,page → 목록 | approvalDeputy.read |
+| POST /companies/:company/approval-deputies | principalMembershipId,deputyMembershipId,startsAt,endsAt,reason → id/revision | approvalDeputy.manage |
+| POST /companies/:company/approval-deputies/:id/revoke | revision,reason → REVOKED | approvalDeputy.manage |
+
+기간 수정은 기존 건 revoke 후 신규 생성한다. task는 원승인자 assigneeMembershipId를 유지한다. 결정 시 서버 clock으로 활성 대결을 조회하며 대결자는 활성/approval.decide/동일 회사/자기승인 금지를 다시 검사한다. 기간 종료·회수 후 새 결정은403 DEPUTY_NOT_ACTIVE, 이미 완료된 결정은 유지한다. 원승인자는 유효 대결 기간에도 결정할 수 있지만 task CAS로 정확히 한 번만 결정된다. 원승인자가 중지되면 task는 BLOCKED, 대결도 결정할 수 없고 운영자 reassign이 필요하다.
+approval_event에는 originalAssigneeMembershipId/decidedByMembershipId/deputyId/decidedAt/reason을 기록한다. 진행 task에 대해 유효 대결자는 승인함에서 조회·결정 가능하다. task 원승인자가 신청자면 대결자로 우회하지 않고 제출 시 alternate로 해결한다. alternate는 제출 당시 대체 선택, deputy는 기간 기반 실행자, reassign은 권한자가 과제를 재배정하는 별도 기능이다.
+
+### 8.6 B-06: 필드 권한 결합 및 마스킹
+read/write boolean 신규 계약을 readEffect/writeEffect=UNSET|ALLOW|DENY로 대체한다. 미지정은 UNSET, 명시 false는 DENY, true는 ALLOW로 기존 자료를 migrate한다. field row 전체 누락도 UNSET이다.
+
+| 역할별 값 조합 | 결과 |
+|---|---|
+| 하나라도 DENY | DENY |
+| DENY 없음, 하나 이상 ALLOW | ALLOW |
+| 모두 UNSET | 해당 entity 액션 권한과 registry 기본 field 정책의 교집합 |
+
+최종 read=DENY이면 write도 DENY. readOnly/hidden/회사·데이터 scope 제한은 ALLOW보다 우선한다. read ALLOW 역할들의 mask는 LAST4가 하나라도 있으면 LAST4, 모두 NONE이면 NONE이며 UNSET 역할은 mask 결합에서 제외한다. 기본정책 mask도 적용하고 가장 제한적인 mask를 사용한다.
+응답은 마스킹 필드를 values에서 제외하고 maskedFields={fieldKey:{displayValue,canReplace}}로 반환한다. read DENY는 values/maskedFields 모두에서 제거한다. 마스킹 필드는 검색·필터·정렬·집계 조건으로 사용 불가(403 MASKED_FIELD_QUERY_DENIED)다.
+수정은 기본 “유지”이며 values에 masked display를 다시 넣지 않는다. 명시 “교체” 시 fieldReplacements=[{field,value}]로 새 원문을 전송하고 write ALLOW 및 타입검증을 통과해야 한다. 동일 필드를 values와 fieldReplacements 양쪽에 보내면422 DUPLICATE_FIELD_WRITE. 마스킹 필드를 values로 보내면422 MASKED_FIELD_REPLACEMENT_REQUIRED. canReplace=false는 교체 UI를 제공하지 않는다. 교체 후 응답도 마스킹, 감사 로그는 원문 미기록. 일반 필드 PATCH의 누락값 유지 규칙은 그대로다.
+
+§8.4 보충 조회: GET /companies/:company/mfa-reset-requests는 자기 법인에서 생성한 요청 중 본인 요청 또는 user.mfaReset.request 관리 범위만 반환한다. 전역 결정의 EXPIRED 요청은409 RESET_REQUEST_EXPIRED, APPROVED/REJECTED 재결정은409 RESET_REQUEST_FINALIZED다. 전역 identity 초기화 권한은 역할의 companyId 없는 platform scope로 별도 평가한다.

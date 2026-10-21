@@ -169,3 +169,22 @@ SEQUENTIAL은 한 step에 승인자 1명, ALL/ANY는 중복 제거된 복수 승
 requestId는 business 요청, attemptNo는 전송 시도다. timeout 이후 늦은 성공도 같은 requestId/entityRevision이면 적용할 수 있다. 성공이 먼저 확정되면 다른 attempt의 실패·성공은 업무 재적용 없이 기록만 한다. 새 업무 요청은 이전 요청을 supersededByRequestId로 표시한다. 같은 eventId/같은 hash는 무시, 다른 hash는 409 EVENT_PAYLOAD_CONFLICT다.
 수금·납품의 externalEventId는 정정 대상 identity, version은 양의 정수다. 최신값을 교체한 뒤 전체 최신 read model에서 합계를 재계산한다. 같은 version/다른 내용은 충돌, 낮은 version은 stale 이력만 기록한다.
 dataset reset은 preview의 datasetRevision과 일치할 때만 실행한다. 진행 중 DEMO 요청/승인/예약은 해당 dataset 안에서 함께 초기화한다. API 세션은 reset 이후 폐기하여 재로그인을 요구하고 다른 dataset·기존 앱 토큰 저장 키는 삭제하지 않는다.
+
+## 10. v1.2 보완 실행 순서
+### B-01/B-02: 게시·회사 변경
+상위 게시: scope 권한→draft/hash/currentVersion 비교→immutable domain versions 및 ScopeVersion 생성→scope pointer 교체→event/receipt 저장, 하나의 transaction.
+회사 rebase: 부모 diff preview→conflict 해소→apply로 draft parent refs 갱신→재검증→회사 release 게시. apply만으로 runtime은 바뀌지 않는다. scope lock 순서는 COMMON→TEMPLATE→COUNTRY→COMPANY 후 scopeKey 사전순, memory에서도 동일하다.
+템플릿 변경은 기존 회사 필드 타입·불변식·진행 인스턴스 snapshot을 재검증한다. 진행 승인/ERP는 기존 version 유지, 새 문서만 새 템플릿을 사용한다. conflict가 남으면 apply/게시 거부. 회사 metadata와 release의 templateCode가 다르게 보이는 중간 상태를 외부에 노출하지 않는다.
+reset은 preview 시 실제 상태를 읽고 모든 집합 건수와 datasetRevision을 고정한다. 실행 시 권한/TTL/revision 재검사 후 dataset lock 안에서 처리한다.
+
+### B-03/B-04: 인증
+03 §8.3은 “기존 Guard 유지”를 실행 모드별로 구체화한 기준이다. LEGACY 기존 토큰·로그인·refresh는 유지, API_MOCK는 별도 issuer/audience/키와 session 검증을 사용한다. 새 API_MOCK에 legacy token을 보내도 legacy 검증으로 fallback하지 않는다.
+전역 MFA 초기화는 identity lock→company UUID 오름차순 lock으로 등록 해제/모든 세션·challenge 폐기/감사/receipt를 원자 기록한다. 법인 초기화 요청은 전역 상태를 바꾸지 않는다. 복수 법인 사용자에 대한 요청 승인 시 해당 identity의 전체 영향 범위를 전역 관리자에게만 표시한다.
+
+### B-05: 대결 결정
+task 조회→원승인자/행위자/문서 신청자 확인→활성 원승인자 확인→행위자가 원승인자가 아니면 유효 deputy 및 기간 확인→actor 권한·자기승인 금지→task/instance CAS→집계/event/outbox/receipt 저장.
+대결 회수와 결정은 같은 company transaction lock으로 순서화한다. 회수가 먼저면 결정 거부, 결정이 먼저면 이력 유지. 유효기간 판정은 transaction 진입 시 서버 clock으로 한 번 고정한다. deputy가 자기 제출 문서를 승인하려 하면403 SELF_APPROVAL_DENIED. reassign 시 원래 task는 SUPERSEDED 처리하고 새 task를 만들어 기존 이력과 연결한다. 새 task는 새 assignee의 대결 정책을 조회한다.
+
+### B-06: 필드 출력·저장
+권한 결합→회사/행 범위 확인→field read/write/effective mask 계산→허용 검색 조건 검증→원문 조회→values/maskedFields로 분리한다. 권한 거부된 값은 provenance/오류/집계에서도 노출하지 않는다.
+변경 요청은 values와 fieldReplacements를 분리 검증하고 마스킹 문자열을 기존 값으로 되쓰지 않는다. payload에 없는 필드는 유지한다. 허용된 replacement를 포함한 전체 변경과 확장값을 하나의 transaction으로 저장한다.
