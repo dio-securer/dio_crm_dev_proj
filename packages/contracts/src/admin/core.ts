@@ -1,15 +1,17 @@
 import { z } from 'zod';
 export const uuid = z.string().uuid();
 export const domains = ['COMPANY_PROFILE', 'FEATURE', 'MENU', 'SCREEN', 'FIELD', 'RULE', 'TERM', 'CODE', 'LIST_VIEW', 'ACTION', 'WORKFLOW', 'APPROVAL', 'NOTIFICATION', 'NUMBERING', 'CALENDAR', 'INTEGRATION', 'SECURITY'] as const;
-export const companySchema = z.object({ id: uuid, code: z.string().min(1).max(40), name: z.string().min(1).max(200), countryCode: z.string().length(2), templateCode: z.enum(['HQ', 'GLOBAL']), defaultLocale: z.enum(['ko-KR', 'en-US']), currency: z.string().regex(/^[A-Z]{3}$/), timezone: z.string().refine(v => { try {
-        new Intl.DateTimeFormat('en', { timeZone: v });
-        return true;
-    }
-    catch {
-        return false;
-    } }), active: z.boolean(), revision: z.number().int().positive() }).strict();
+export const companySchema = z.object({ id: uuid, code: z.string().min(1).max(40), name: z.string().min(1).max(200), countryCode: z.string().length(2), templateCode: z.enum(['HQ', 'GLOBAL']), defaultLocale: z.enum(['ko-KR', 'en-US']), currency: z.string().regex(/^[A-Z]{3}$/), timezone: z.string().refine(v => {
+        try {
+            new Intl.DateTimeFormat('en', { timeZone: v });
+            return true;
+        }
+        catch {
+            return false;
+        }
+    }), active: z.boolean(), revision: z.number().int().positive() }).strict();
 export type Company = z.infer<typeof companySchema>;
-export type Collection = 'companies' | 'organizations' | 'users' | 'memberships' | 'roles' | 'delegations' | 'drafts' | 'releases' | 'accounts' | 'approvals' | 'tasks' | 'notifications' | 'requests' | 'sequences' | 'transfers' | 'deputies';
+export type Collection = 'companies' | 'organizations' | 'users' | 'memberships' | 'roles' | 'delegations' | 'drafts' | 'releases' | 'accounts' | 'approvals' | 'tasks' | 'notifications' | 'requests' | 'sequences' | 'transfers' | 'deputies' | 'leads' | 'opportunities' | 'contracts' | 'orders' | 'previews';
 export interface Row {
     id: string;
     companyId?: string;
@@ -28,6 +30,7 @@ export interface Envelope {
     }>;
 }
 export interface Transaction {
+    forCompany(companyId: string): Transaction;
     read(collection: Collection, id: string): Row | undefined;
     query(collection: Collection): Row[];
     insert(collection: Collection, row: Row): void;
@@ -47,22 +50,55 @@ export class AdminError extends Error {
     }[] = []) { super(code); }
     toJSON() { return { code: this.code, messageKey: `admin.${this.code}`, fieldErrors: this.fieldErrors }; }
 }
-export function assert(value: unknown, status: number, code: string): asserts value { if (!value)
-    throw new AdminError(status, code); }
-export function canonical(value: unknown): string { if (Array.isArray(value))
-    return '[' + value.map(canonical).join(',') + ']'; if (value !== null && typeof value === 'object')
-    return '{' + Object.keys(value).sort().map(k => JSON.stringify(k) + ':' + canonical((value as Record<string, unknown>)[k])).join(',') + '}'; return JSON.stringify(value); }
+export function assert(value: unknown, status: number, code: string): asserts value {
+    if (!value)
+        throw new AdminError(status, code);
+}
+export function canonical(value: unknown): string {
+    if (Array.isArray(value))
+        return '[' + value.map(canonical).join(',') + ']';
+    if (value !== null && typeof value === 'object')
+        return '{' + Object.keys(value).sort().map(k => JSON.stringify(k) + ':' + canonical((value as Record<string, unknown>)[k])).join(',') + '}';
+    return JSON.stringify(value);
+}
 export function transaction(state: Envelope, companyId: string): Transaction {
     const rows = (c: Collection) => state.collections[c] ?? {};
-    const writable = (c: Collection) => state.collections[c] ?? (state.collections[c] = {});
-    const visible = (c: Collection, r: Row | undefined) => r && (c === 'companies' ? r.id === companyId : r.companyId === companyId);
-    return { read: (c, id) => { const r = rows(c)[id]; return visible(c, r) ? structuredClone(r) : undefined; }, query: c => Object.values(rows(c)).filter(r => visible(c, r)).map(r => structuredClone(r)), insert(c, r) { assert(!rows(c)[r.id], 409, 'ALREADY_EXISTS'); assert(visible(c, r), 404, 'NOT_FOUND'); writable(c)[r.id] = structuredClone(r); }, compareAndSwap(c, id, rev, row) { const old = rows(c)[id]; assert(visible(c, old), 404, 'NOT_FOUND'); assert(old.revision === rev, 409, 'REVISION_CONFLICT'); assert(row.id === id && row.companyId === old.companyId, 422, 'IDENTITY_IMMUTABLE'); writable(c)[id] = { ...structuredClone(row), revision: rev + 1 }; }, appendEvent(e) { assert(e.companyId === companyId, 404, 'NOT_FOUND'); state.events.push(structuredClone(e)); }, receipt(key, hash, response) { const k = companyId + ':' + key, old = state.receipts[k]; if (old) {
+    const visible = (c: Collection, r: Row | undefined) => !!r && (companyId === '*' || (c === 'companies' ? r.id === companyId : c === 'users' ? (r.homeCompanyId === companyId || Object.values(state.collections.memberships || {}).some(m => m.companyId === companyId && m.userId === r.id)) : r.companyId === companyId));
+    return { forCompany: id => transaction(state, id), read: (c, id) => { const r = rows(c)[id]; return visible(c, r) ? structuredClone(r) : undefined; }, query: c => Object.values(rows(c)).filter(r => visible(c, r)).map(r => structuredClone(r)), insert(c, r) { assert(!rows(c)[r.id], 409, 'ALREADY_EXISTS'); assert(visible(c, r), 404, 'NOT_FOUND'); (state.collections[c] ??= {})[r.id] = structuredClone(r); }, compareAndSwap(c, id, rev, row) { const old = rows(c)[id]; assert(visible(c, old), 404, 'NOT_FOUND'); assert(old.revision === rev, 409, 'REVISION_CONFLICT'); assert(row.id === id && row.companyId === old.companyId, 422, 'IDENTITY_IMMUTABLE'); state.collections[c][id] = { ...structuredClone(row), revision: rev + 1 }; }, appendEvent(e) { assert(companyId === '*' || e.companyId === companyId, 404, 'NOT_FOUND'); state.events.push(structuredClone(e)); }, receipt(key, hash, response) { const k = companyId + ':' + key, old = state.receipts[k]; if (old) {
             assert(old.hash === hash, 409, 'IDEMPOTENCY_CONFLICT');
             return structuredClone(old.response);
         } if (response !== undefined)
             state.receipts[k] = { hash, response: structuredClone(response) }; return undefined; } };
 }
 export const COMPANY_IDS = { HQ_DEMO: '10000000-0000-4000-8000-000000000001', US_A: '10000000-0000-4000-8000-000000000002', US_B: '10000000-0000-4000-8000-000000000003', MX_A: '10000000-0000-4000-8000-000000000004' } as const;
-export function seed(): Envelope { const state: Envelope = { schemaVersion: 1, datasetId: 'ADMIN_DEMO_V1', revision: 1, collections: { companies: {} }, events: [], receipts: {} }; Object.entries(COMPANY_IDS).forEach(([code, id]) => { state.collections.companies[id] = companySchema.parse({ id, code, name: code, countryCode: code === 'HQ_DEMO' ? 'KR' : code === 'MX_A' ? 'MX' : 'US', templateCode: code === 'HQ_DEMO' ? 'HQ' : 'GLOBAL', defaultLocale: code === 'HQ_DEMO' ? 'ko-KR' : 'en-US', currency: code === 'HQ_DEMO' ? 'KRW' : 'USD', timezone: code === 'HQ_DEMO' ? 'Asia/Seoul' : 'America/New_York', active: true, revision: 1 }); }); return state; }
+export function seed(): Envelope {
+    const state: Envelope = { schemaVersion: 1, datasetId: 'ADMIN_DEMO_V1', revision: 1, collections: { companies: {} }, events: [], receipts: {} };
+    Object.entries(COMPANY_IDS).forEach(([code, id]) => { state.collections.companies[id] = companySchema.parse({ id, code, name: code, countryCode: code === 'HQ_DEMO' ? 'KR' : code === 'MX_A' ? 'MX' : 'US', templateCode: code === 'HQ_DEMO' ? 'HQ' : 'GLOBAL', defaultLocale: code === 'HQ_DEMO' ? 'ko-KR' : 'en-US', currency: code === 'HQ_DEMO' ? 'KRW' : 'USD', timezone: code === 'HQ_DEMO' ? 'Asia/Seoul' : 'America/New_York', active: true, revision: 1 }); });
+    state.collections.organizations = {};
+    state.collections.users = {};
+    state.collections.memberships = {};
+    state.collections.accounts = {};
+    Object.entries(COMPANY_IDS).forEach(([code, companyId], index) => {
+        const org = (n: number) => `40000000-0000-4000-8000-${String(index * 10 + n).padStart(12, '0')}`;
+        for (const n of [1, 2])
+            state.collections.organizations[org(n)] = { id: org(n), companyId, revision: 1, code: n === 1 ? 'SALES' : 'TEAM', name: n === 1 ? 'Sales' : 'Team', type: 'TEAM', parentId: n === 1 ? null : org(1), managerMembershipId: null, active: true };
+        ['admin1', 'sales1', 'sales2', 'manager1'].forEach((loginId, i) => {
+            const userId = `20000000-0000-4000-8000-${String(index * 10 + i + 1).padStart(12, '0')}`, id = `30000000-0000-4000-8000-${String(index * 10 + i + 1).padStart(12, '0')}`;
+            state.collections.users[userId] = { id: userId, revision: 1, homeCompanyId: companyId, loginId, name: code + ' ' + loginId, email: loginId + '@demo.invalid', active: true };
+            state.collections.memberships[id] = { id, companyId, userId, revision: 1, organizationId: org(i === 0 ? 1 : 2), active: true, permissionVersion: 1, role: loginId === 'admin1' ? 'COMPANY_ADMIN' : loginId === 'manager1' ? 'MANAGER' : 'SALES' };
+            if (i === 1 || i === 2) {
+                const accountId = `50000000-0000-4000-8000-${String(index * 10 + i).padStart(12, '0')}`;
+                state.collections.accounts[accountId] = { id: accountId, companyId, revision: 1, name: 'DEMO ' + code + ' Account ' + i, ownerMembershipId: id };
+            }
+        });
+    });
+    const platform = '20000000-0000-4000-8000-000000000100', shared = '20000000-0000-4000-8000-000000000101';
+    state.collections.users[platform] = { id: platform, revision: 1, homeCompanyId: COMPANY_IDS.HQ_DEMO, loginId: 'platform1', name: 'DEMO Platform Admin', email: 'platform@demo.invalid', active: true, platformAdmin: true };
+    state.collections.users[shared] = { id: shared, revision: 1, homeCompanyId: COMPANY_IDS.US_A, loginId: 'shared1', name: 'DEMO Shared Sales', email: 'shared@demo.invalid', active: true };
+    for (const [n, companyId, userId, role] of [[100, COMPANY_IDS.HQ_DEMO, platform, 'PLATFORM_ADMIN'], [101, COMPANY_IDS.US_A, shared, 'SALES'], [102, COMPANY_IDS.US_B, shared, 'SALES']] as const) {
+        const id = `30000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
+        state.collections.memberships[id] = { id, companyId, userId, revision: 1, organizationId: null, active: true, permissionVersion: 1, role };
+    }
+    return state;
+}
 export function executionMode(value: string | undefined, production: boolean) { const mode = value ?? 'LEGACY'; assert(['LEGACY', 'API_MOCK', 'BROWSER_MOCK'].includes(mode), 422, 'UNKNOWN_EXECUTION_MODE'); assert(!production || mode === 'LEGACY', 403, 'MOCK_PRODUCTION_DISABLED'); return mode; }
-

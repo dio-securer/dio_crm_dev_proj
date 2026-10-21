@@ -1,5 +1,5 @@
 {
-  "note": "A01 evidence only. T60 executed with LEGACY HTTP and SQL stub; remaining full acceptance cases not yet completed. Browser runtime is available.",
+  "note": "A00/A01/A02 scoped evidence. Full 83-case acceptance remains incomplete; partial stage checks are not full PASS.",
   "results": [
     {
       "tcId": "T01",
@@ -129,7 +129,13 @@
     {
       "tcId": "T26",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "reason": "PARTIAL: A02 checks passed; full acceptance and later-stage integration not completed. See A02-report.md.",
+      "evidence": [
+        "tests/admin/organization.cjs",
+        "scripts/admin/run-entry-tests.cjs",
+        "evidence/a02-api.log",
+        "evidence/a02-entry.log"
+      ]
     },
     {
       "tcId": "T27",
@@ -189,7 +195,13 @@
     {
       "tcId": "T38",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "reason": "PARTIAL: A02 checks passed; full acceptance and later-stage integration not completed. See A02-report.md.",
+      "evidence": [
+        "tests/admin/organization.cjs",
+        "scripts/admin/run-entry-tests.cjs",
+        "evidence/a02-api.log",
+        "evidence/a02-entry.log"
+      ]
     },
     {
       "tcId": "T39",
@@ -244,7 +256,13 @@
     {
       "tcId": "T49",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "reason": "PARTIAL: A02 checks passed; full acceptance and later-stage integration not completed. See A02-report.md.",
+      "evidence": [
+        "tests/admin/organization.cjs",
+        "scripts/admin/run-entry-tests.cjs",
+        "evidence/a02-api.log",
+        "evidence/a02-entry.log"
+      ]
     },
     {
       "tcId": "T50",
@@ -289,7 +307,13 @@
     {
       "tcId": "T58",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "reason": "PARTIAL: A02 checks passed; full acceptance and later-stage integration not completed. See A02-report.md.",
+      "evidence": [
+        "tests/admin/organization.cjs",
+        "scripts/admin/run-entry-tests.cjs",
+        "evidence/a02-api.log",
+        "evidence/a02-entry.log"
+      ]
     },
     {
       "tcId": "T59",
@@ -301,8 +325,8 @@
       "status": "PASS",
       "reason": "LEGACY HTTP login/refresh/logout with SQL stub; numeric claims preserved",
       "evidence": [
-        "tests/admin/legacy-auth.cjs",
-        "evidence/resume-api.log"
+        "tests/admin/legacy-http.cjs",
+        "evidence/a02-api.log"
       ]
     },
     {
@@ -343,7 +367,13 @@
     {
       "tcId": "T68",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "reason": "PARTIAL: A02 checks passed; full acceptance and later-stage integration not completed. See A02-report.md.",
+      "evidence": [
+        "tests/admin/organization.cjs",
+        "scripts/admin/run-entry-tests.cjs",
+        "evidence/a02-api.log",
+        "evidence/a02-entry.log"
+      ]
     },
     {
       "tcId": "T69",
@@ -413,7 +443,13 @@
     {
       "tcId": "T82",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "reason": "PARTIAL: A02 checks passed; full acceptance and later-stage integration not completed. See A02-report.md.",
+      "evidence": [
+        "tests/admin/organization.cjs",
+        "scripts/admin/run-entry-tests.cjs",
+        "evidence/a02-api.log",
+        "evidence/a02-entry.log"
+      ]
     },
     {
       "tcId": "T83",
