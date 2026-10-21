@@ -156,3 +156,48 @@ A01에서 admin contract test, A03에서 API negative test, A05에서 browser in
 ## 5. 회귀와 중단
 기존 HQ 화면 또는 API가 깨지면 다음 단계 확장 전에 복구한다. DB/ERP credentials가 없어서 API_MOCK 검증을 못 한다는 구조는 허용하지 않는다.
 변경 중 중단하면 단계, 마지막 완료 테스트, 미완료 파일, 목업 schemaVersion, 재개 명령을 보고서에 남긴다.
+
+## 6. v1.1 추가 작업과 단계별 증거
+
+01~04의 v1.1 보완 절과 README AUTH-MFA-01은 필수 구현 기준이다. 단계별 기존 요구를 삭제하거나 범위를 축소하지 않는다. 아래 명령은 현재 존재하는 명령이 아니라 해당 단계에서 추가할 고정 명령명이다.
+
+| 단계 | 추가 구현·결정 | 완료 증거 |
+|---|---|---|
+| A00 | 기존 경로·ID·field key·로그인 중복·IF code mapping 작성 | baseline.md, fixture-mapping.md, adapter-map.md에 기존/신규 변환과 미지원 경로 기록 |
+| A01 | MockAppModule, DB 없는 env/bootstrap, HTTP ApiError/headers, typed DTO/receipt/lock | test:admin:contracts와 test:admin:api에서 DB/외부 접속 0건, 같은 명령의 두 adapter 결과 일치 |
+| A02 | identity와 membership 중지 분리, 동일국가 법인 격리, 마지막 관리자 보호 | 보완 T37/T38/T49 |
+| A03 | MFA 등록/skip/verify/reset/refresh/전환 Guard, role 하위 scope/fieldPermission | T39~T43; 제한 token으로 업무 HTTP 호출 실패 로그 |
+| A04 | domain union 보완, draft-set 검증 및 dataset 원자 쓰기 | T44/T45; 두 탭 동일 revision 저장 중 정확히 하나 성공 |
+| A05 | LIST_VIEW/ACTION/extensionDefinitions 폼 및 AccountRuntimePort | T46/T47/T48; 목록·등록·상세 캡처와 실제 HTTP payload |
+| A06 | decimal/date/번호/영업일 상세 규칙 | T50/T51; 경계값 및 DST 기대값 비교 |
+| A07 | sample document CRUD/submit, 일반 승인함, 명확한 ANY/ALL | T52; 작성자→배정자 전환 end-to-end |
+| A08 | outbox 수신자 권한·중복 및 render snapshot | 기존 T32; 실제 발송 0건 |
+| A09 | business request와 attempt/version 경합 규칙 | T53/T54; account 상태와 request/attempt/event 연결 |
+| A10 | 보안 정책 강화, rollback 및 reset 경계 | T43/T55; 설정 복원과 보안/업무 상태 보존 |
+| A11 | 기존 T01~T36 + T37~T55 + 31 ADM 양방향 추적 | acceptance-results.json, coverage.md, 사용자 시연 안내 |
+
+### 고정 실행 명령 계약
+A01에서 루트 package.json에 dev:admin:api(전용 mock bootstrap), dev:admin:web(API_MOCK 프런트), dev:admin:browser(BROWSER_MOCK), test:admin:contracts, test:admin:api를 등록한다. A05에서 test:admin:ui, A11에서 test:admin:all을 추가한다. test:admin:all은 세 테스트 묶음 모두 실행하며 실패/미실행에 0을 반환하지 않는다. 현재 package.json에 이 명령이 있다고 보고하지 않는다.
+API tests는 실제 ephemeral HTTP listener를 사용하고 DB credential 없이 실행한다. UI tests는 브라우저 두 context/탭을 사용한다. mock ERP/EMAIL은 network spy로 egress=0을 검사한다. fake clock으로 예약·만료·지연을 검증하며 긴 실제 sleep을 사용하지 않는다.
+
+### 구현자에게 전달할 지시
+`docs/admin-platform/README.md와 01~06의 v1.1 보완 내용, 07의 검토 결과를 읽고 A00부터 순서대로 구현한다. 모든 31개 ADM 화면은 typed 폼·이벤트·저장·권한·오류 처리까지 연결한다. BROWSER_MOCK/API_MOCK를 구분하고 거래처 사용자 화면, 승인 샘플, ERP 모의 상태 반영을 검증한다. 단계의 필수 테스트가 실패하면 다음 단계 완료를 주장하지 않는다. 테스트 미실행을 PASS로 기록하지 않고 BLOCKED 사유 및 재개 명령을 남긴다.`
+
+실제 ERP/SSO/TOTP·운영 정책 확정·SQL migration 실행은 후속 범위다. 목업 기준으로 개발을 진행하기 위해 이 항목을 임의로 실제 정책으로 확정하지 않는다.
+
+## 7. v1.2 P1 보완 작업 배치
+| 검토 ID | 구현 단계 | 필수 작업 | 인수 증거 |
+|---|---|---|---|
+| B-01 | A01 계약/A04 엔진/A10 통합 | ScopeVersion·OverrideOp·scope publish·rebase API/UI/충돌 처리 | T56/T57 |
+| B-02 | A02 회사/A10 reset | 회사 PATCH/중지/재개/템플릿 preview·apply, reset preview·실행 | T58/T59 |
+| B-03 | A01/A03 | 모드별 controller/service/guard 바인딩, token 격리, LEGACY 호환 | T60/T61 |
+| B-04 | A03 | 회사 초기화 요청과 전역 실행 권한 분리, 전역 회수 transaction | T62/T63 |
+| B-05 | A07 | deputy 저장·조회·등록·회수 및 승인함/결정 검증 | T64/T65 |
+| B-06 | A03/A05 | tri-state 권한 결합, maskedFields/fieldReplacements, UI 분리 | T66/T67 |
+
+B-03은 이번 단계에서 LEGACY SQL 세션 모델 이행을 요구하지 않는다. 기존 auth 회귀 테스트는 SQL stub으로 검증하고 실제 DB 연결 결과와 구분한다.
+A03의 기존 T43 중 정책 강화는 repository fixture 변경으로 검증(T43-UNIT)하고, 게시 UI를 통한 강화는 A10(T43-INTEGRATION)에서 완료한다. A02의 템플릿 변경은 계약/preview 단위까지, 실제 release 활성화는 A04/A10에서 완료한다. 선행 단계가 후속 UI 완성을 기다려 완료되지 못하는 순환을 만들지 않는다.
+A11은 T01~T67과 T43 두 실행 수준을 검증하고 신규 12개 TC를 누락하지 않는다. 31 ADM 전체 coverage 보완(B-08)은 별도 P2 검토 항목으로 남아 있으므로 TC 개수만으로 전체 완료 판정하지 않는다.
+
+## v1.3 P2 조치 완료
+2026-10-21: 06 §8에 31 ADM→A단계→필수 TC 대응을 확정하고 T68~T83을 추가했다. 전체 TC는 T01~T83이며 T43/T58의 UNIT/INTEGRATION 증거를 분리한다. 기존 본문의 B-07/B-08 미완료 표시는 v1.2 당시 이력이며 현재는 문서 조치 완료다. 작업자 B의 이번 재검증 및 실제 구현 테스트 결과는 별도로 기록한다. A11은 06 §8 대응표 전체와 공통 gate를 적용한다.

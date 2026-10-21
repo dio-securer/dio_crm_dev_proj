@@ -36,11 +36,11 @@ decimal 비교는 부동소수점 대신 decimal 구현을 사용한다. 서버�
   "id": "require_followup_for_priority",
   "trigger": "SAVE",
   "condition": {"op":"eq","field":"x_priority","value":"HIGH"},
-  "effects": [{"target":"nextContactDate","required":true}],
+  "effects": [{"target":"x_nextContactDate","required":true}],
   "errorKey": "validation.nextContactRequired"
 }
 ~~~
-nextContactDate 같은 예시는 실제 등록부에 존재하도록 샘플 엔티티에 정의해야 한다. 예시를 기존 account 필드라고 가정하지 않는다.
+x_nextContactDate는 02 §9의 합성 확장 필드다. 기존 account 필드라고 가정하지 않는다.
 
 ## 2. 사용자 문맥·권한
 - 인증 → 활성 사용자/membership → 현재 법인 → 기능 → 액션 권한 → 데이터 범위 → 필드 읽기/쓰기 순으로 판단.
@@ -132,3 +132,59 @@ terminal outcome 뒤 모순되는 응답은 무시/충돌 로그 처리한다. T
 ## 8. 샘플 데이터 유지
 기존 account-sandbox 원본 seed를 덮어쓰지 않는다. migration adapter는 기존 localStorage 백업 key를 1회 만들고 schemaVersion을 기록한다. 실패하면 이전 데이터 유지 및 오류 표시.
 데모 fixture에는 회사/사용자/조직/역할/설정/문서/연계 이벤트 식별자를 고정한다. reset은 이 fixture dataset만 복원하고 브라우저 토큰이나 다른 앱 저장 데이터를 지우지 않는다.
+
+## 9. v1.1 모호성 해소 및 실행 규칙
+
+### 9.1 동시 저장와 설정 검증
+BROWSER_MOCK 쓰기는 dataset 단위 Web Locks API exclusive lock 안에서 최신 envelope를 다시 읽고 revision 비교 후 단일 envelope로 저장한다. 지원하지 않는 브라우저는 쓰기를 차단하고 API_MOCK 사용 안내를 표시한다. storage event 감지만으로 원자성을 보장한다고 하지 않는다. 공통 설정과 회사 변경이 함께 있으면 동일 dataset lock을 사용한다. API_MOCK는 memory transaction의 동일 결과를 보장한다.
+
+조건은 저장 예정 문서(기존 값+허용 PATCH), 현재 actor/context로 평가한다. null/누락/빈 문자열/빈 배열은 isEmpty=true, 0/false는 false. null의 eq/ne는 같은 타입의 명시 null 비교만 허용, 순서 비교는 false. 문자열 비교는 대소문자 구분, decimal/date는 정규화된 타입 비교다.
+임의 조건식의 중첩 가능성을 추정하지 않는다. v1에서는 같은 target+effect에 상반 값을 쓰는 두 규칙은 조건이 달라도 게시 거부한다. 동일 값은 허용한다. 다른 effect 조합 결과 hidden+required이며 서버 기본값이 없으면 게시 거부한다. 조건은 다른 규칙의 effect가 아니라 원본 필드값만 참조한다. 권한 deny/불변식은 조건 effect로 완화할 수 없다.
+
+보안 정책의 게시 및 rollback은 securityVersion을 증가시킨다. 권한·등록 상태·세션 회수는 release에서 복원하지 않는다. MFA REQUIRED가 된 현재 세션은 다음 요청부터 추가 인증을 요구한다. LOCKED 상위 필수 정책은 rollback으로 완화 불가다.
+
+### 9.2 DEMO MFA 결정표
+정책 병합은 OFF < OPTIONAL < REQUIRED의 최댓값(상위/법인/사용자의 활성 역할)이다. 실제 인증 수단을 확정하는 결정이 아니라 목업 정책이다.
+
+| 유효 정책/등록 | 1차 인증 이후 |
+|---|---|
+| OFF | 업무 세션 발급 |
+| OPTIONAL/미등록 | 제한 세션에서 등록 또는 명시 skip 후 업무 세션 발급 |
+| OPTIONAL/등록 | MFA_REQUIRED |
+| REQUIRED/미등록 | MFA_ENROLL_REQUIRED |
+| REQUIRED/등록 | MFA_REQUIRED |
+
+신규 POST /api/auth/mfa/skip은 OPTIONAL/미등록 제한 세션에서만 허용한다. 회사 전환은 membership을 확인하고 목적 회사 정책을 평가한다. MFA 부족 시 대상 전용 제한 세션만 반환하며 기존 회사 context는 유지한다. 인증 완료 후 새 회사 context로 교체한다.
+목업 고정값: 제한 세션 5분, 최대 실패 5회, 실패 한도 도달 시 해당 챌린지 폐기 및 로그인 잠금 15분. 업무 세션 idle 30분/max 8시간, MFA freshness 30분. 모두 합성 fixture 값이며 실제 운영 정책으로 확정하지 않는다.
+DEMO code 123456은 목업 화면에 DEMO임을 명시하고 테스트에만 사용한다. 등록 성공과 챌린지 소비/업무 세션 발급은 하나의 transaction이다. 만료 401 MFA_EXPIRED, 재사용 409 MFA_ALREADY_USED, 틀린 코드 401 MFA_INVALID, 한도 초과 429 AUTH_LOCKED. 제한 token은 tokenUse=MFA_PENDING이며 업무 Guard에서 403 MFA_REQUIRED로 거부한다. 일반 access token과 audience/type을 분리한다.
+refresh와 회사 전환도 활성 사용자·세션·membership·정책 버전을 검사한다. refresh가 MFA를 우회해 새 access token을 발급해서는 안 된다. 초기화는 identity 등록을 해제하고 모든 세션과 진행 챌린지를 폐기한다. 재등록은 새 1차 인증 이후 시작한다.
+
+### 9.3 승인·기한·번호
+SEQUENTIAL은 한 step에 승인자 1명, ALL/ANY는 중복 제거된 복수 승인자다. ROLE selector는 해당 회사 활성 membership으로 해석한다. 0명 또는 신청자 포함이면 지정 alternate로 대체 후 재검증하고 미해소 시 제출 거부한다.
+반려/회수/재배정은 사유 필수, 승인 comment는 선택이다. task와 instance revision을 모두 비교한다. ANY 최초 승인/반려는 서버 잠금 획득 순서로 확정하고 후속 결정은 409, 동일 key 재전송은 최초 결과를 반환한다. BLOCKED는 instance IN_PROGRESS의 blockedReason이며 별도 완료 상태가 아니다.
+캘린더 businessDays는 0 이상 정수. start를 회사 시간대로 변환한 후 시작일을 제외하고 근무일만 세어 동일 현지 시각을 반환한다(0은 start 그대로). DST gap은 다음 유효 시각, overlap은 이른 offset으로 선택한다. 샘플은 dueBusinessDays=2. 계산 시 달력/시간대 snapshot을 저장한다.
+번호는 periodKey를 회사 시간대 YYYY/YYYYMM/ALL로 정하고 nextValue부터 원자적으로 할당한다. preview는 미소모, 발급 실패 후 번호 재사용 금지, padding 초과는 409 SEQUENCE_EXHAUSTED. 초기 nextValue=1/padding=6인 DEMO fixture를 사용한다.
+
+### 9.4 ERP 경합 및 데이터 복구
+requestId는 business 요청, attemptNo는 전송 시도다. timeout 이후 늦은 성공도 같은 requestId/entityRevision이면 적용할 수 있다. 성공이 먼저 확정되면 다른 attempt의 실패·성공은 업무 재적용 없이 기록만 한다. 새 업무 요청은 이전 요청을 supersededByRequestId로 표시한다. 같은 eventId/같은 hash는 무시, 다른 hash는 409 EVENT_PAYLOAD_CONFLICT다.
+수금·납품의 externalEventId는 정정 대상 identity, version은 양의 정수다. 최신값을 교체한 뒤 전체 최신 read model에서 합계를 재계산한다. 같은 version/다른 내용은 충돌, 낮은 version은 stale 이력만 기록한다.
+dataset reset은 preview의 datasetRevision과 일치할 때만 실행한다. 진행 중 DEMO 요청/승인/예약은 해당 dataset 안에서 함께 초기화한다. API 세션은 reset 이후 폐기하여 재로그인을 요구하고 다른 dataset·기존 앱 토큰 저장 키는 삭제하지 않는다.
+
+## 10. v1.2 보완 실행 순서
+### B-01/B-02: 게시·회사 변경
+상위 게시: scope 권한→draft/hash/currentVersion 비교→immutable domain versions 및 ScopeVersion 생성→scope pointer 교체→event/receipt 저장, 하나의 transaction.
+회사 rebase: 부모 diff preview→conflict 해소→apply로 draft parent refs 갱신→재검증→회사 release 게시. apply만으로 runtime은 바뀌지 않는다. scope lock 순서는 COMMON→TEMPLATE→COUNTRY→COMPANY 후 scopeKey 사전순, memory에서도 동일하다.
+템플릿 변경은 기존 회사 필드 타입·불변식·진행 인스턴스 snapshot을 재검증한다. 진행 승인/ERP는 기존 version 유지, 새 문서만 새 템플릿을 사용한다. conflict가 남으면 apply/게시 거부. 회사 metadata와 release의 templateCode가 다르게 보이는 중간 상태를 외부에 노출하지 않는다.
+reset은 preview 시 실제 상태를 읽고 모든 집합 건수와 datasetRevision을 고정한다. 실행 시 권한/TTL/revision 재검사 후 dataset lock 안에서 처리한다.
+
+### B-03/B-04: 인증
+03 §8.3은 “기존 Guard 유지”를 실행 모드별로 구체화한 기준이다. LEGACY 기존 토큰·로그인·refresh는 유지, API_MOCK는 별도 issuer/audience/키와 session 검증을 사용한다. 새 API_MOCK에 legacy token을 보내도 legacy 검증으로 fallback하지 않는다.
+전역 MFA 초기화는 identity lock→company UUID 오름차순 lock으로 등록 해제/모든 세션·challenge 폐기/감사/receipt를 원자 기록한다. 법인 초기화 요청은 전역 상태를 바꾸지 않는다. 복수 법인 사용자에 대한 요청 승인 시 해당 identity의 전체 영향 범위를 전역 관리자에게만 표시한다.
+
+### B-05: 대결 결정
+task 조회→원승인자/행위자/문서 신청자 확인→활성 원승인자 확인→행위자가 원승인자가 아니면 유효 deputy 및 기간 확인→actor 권한·자기승인 금지→task/instance CAS→집계/event/outbox/receipt 저장.
+대결 회수와 결정은 같은 company transaction lock으로 순서화한다. 회수가 먼저면 결정 거부, 결정이 먼저면 이력 유지. 유효기간 판정은 transaction 진입 시 서버 clock으로 한 번 고정한다. deputy가 자기 제출 문서를 승인하려 하면403 SELF_APPROVAL_DENIED. reassign 시 원래 task는 SUPERSEDED 처리하고 새 task를 만들어 기존 이력과 연결한다. 새 task는 새 assignee의 대결 정책을 조회한다.
+
+### B-06: 필드 출력·저장
+권한 결합→회사/행 범위 확인→field read/write/effective mask 계산→허용 검색 조건 검증→원문 조회→values/maskedFields로 분리한다. 권한 거부된 값은 provenance/오류/집계에서도 노출하지 않는다.
+변경 요청은 values와 fieldReplacements를 분리 검증하고 마스킹 문자열을 기존 값으로 되쓰지 않는다. payload에 없는 필드는 유지한다. 허용된 replacement를 포함한 전체 변경과 확장값을 하나의 transaction으로 저장한다.
