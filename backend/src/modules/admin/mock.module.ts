@@ -61,7 +61,7 @@ class MockController {
     @Param('company')
     company: string,
     @Param('resource')
-    resource: string) { const s = await this.auth.authenticate(h); if (resource === 'releases') return new ConfigurationEngine(this.repo).read(s, 'COMPANY', company); if (['roles', 'delegations', 'sessions', 'mfa-reset-requests'].includes(resource))
+    resource: string) { const s = await this.auth.authenticate(h); if (resource === 'field-registry') return this.auth.engine.accountFieldRegistry(s, company); if (resource === 'releases') return new ConfigurationEngine(this.repo).read(s, 'COMPANY', company); if (['roles', 'delegations', 'sessions', 'mfa-reset-requests'].includes(resource))
         return { items: await this.auth.engine.list(s, company, resource === 'mfa-reset-requests' ? 'mfaResetRequests' : resource) }; await this.auth.engine.permission(s, company, resource === 'organizations' ? 'organization.read' : resource === 'transfers' ? 'ownershipTransfer.manage' : 'user.read'); const name = z.enum(['organizations', 'users', 'memberships', 'transfers']).parse(resource); const items = await new OrganizationCommands(this.repo, randomUUID).list({ ...s, role: s.role === 'PLATFORM_ADMIN' ? 'PLATFORM_ADMIN' : 'COMPANY_ADMIN' }, company, name); return { items, total: items.length, page: 1, pageSize: 20, requestId: randomUUID() }; }
     @Post('admin/companies/:company/:resource')
     async orgCreate(
@@ -157,6 +157,8 @@ class MockController {
         return this.auth.engine.enroll(c.challengeId); if (action === 'verify')
         return this.auth.present(await this.auth.engine.verify(c.challengeId, body, key)); if (action === 'skip')
         return this.auth.present(await this.auth.engine.skip(c.challengeId, key)); assert(false, 404, 'NOT_FOUND'); }
+    @Get('admin/companies/:company/runtime/account-context')
+    async accountContext(@Headers('authorization') h: string, @Param('company') company: string) { return this.auth.engine.accountContext(await this.auth.authenticate(h), company); }
     @Get('admin/companies/:company/runtime/accounts')
     async accounts(
     @Headers('authorization')

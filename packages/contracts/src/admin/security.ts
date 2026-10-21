@@ -1,3 +1,4 @@
+import { activeAccountConfig, fieldDefinitions, runtimeFieldAccess, conditionFields, evaluateCondition, effectiveFields, validateValue, projectRuntimeAccount } from './account-runtime';
 import { z } from 'zod';
 import { DemoMfaProvider, MfaProvider, MfaChallenge } from './identity';
 import { AdminRepository, Transaction, Row, assert, AdminError, canonical, domains } from './core';
@@ -219,12 +220,14 @@ export class SecurityEngine {
         });
     }
     private grantCeiling(tx: Transaction, a: SecurityActor, own: Role[], assigned: Role[], target?: Row) {
+        const definitions:Record<string,any>={...fieldDefinitions(activeAccountConfig(tx,a.companyId).config),ownerMembershipId:{type:'text'}};
+        for(const role of assigned)for(const f of role.fieldPermissions){assert(f.field in definitions,422,'FIELD_UNKNOWN');assert(f.maskType!=='LAST4'||definitions[f.field].type==='text',422,'MASK_TYPE_INVALID');}
         // Administrative assignment authority does not imply personal business-record visibility.
         if (a.role === 'PLATFORM_ADMIN' || a.role === 'COMPANY_ADMIN') {
             assert(assigned.every(r=>r.grants.every(p=>allowed(own,p)||p.startsWith('account.'))),403,'GRANT_CEILING');return;
         }
         assert(assigned.every(r => r.grants.every(p => allowed(own, p))), 403, 'GRANT_CEILING');
-        for (const field of ['name', 'phone', 'secret', 'ownerMembershipId']) {
+        for (const field of new Set([...Object.keys(definitions),...own.flatMap(r=>r.fieldPermissions.map(f=>f.field)),...assigned.flatMap(r=>r.fieldPermissions.map(f=>f.field))])) {
             const before = fieldAccess(own, field), after = fieldAccess(assigned, field);
             assert((!after.read || before.read) && (!after.write || before.write) && (!after.read || before.mask !== 'LAST4' || after.mask === 'LAST4'), 403, 'FIELD_CEILING');
         }
@@ -258,41 +261,45 @@ export class SecurityEngine {
         for (const r of tx.query(c).filter(r => r.userId === user))
             this.put(tx, c, r, c === 'sessions' ? { revoked: true } : c === 'mfaEnrollments' ? { active: false } : { revoked: true, consumedAt: this.now(), expiresAt: 0 }); }
     async globalRequests(a: SecurityActor) { return this.repo.transact('*', tx => { this.guard(tx, a, a.companyId, 'security.manage'); assert(a.role === 'PLATFORM_ADMIN', 403, 'GLOBAL_RESET_FORBIDDEN'); return tx.query('mfaResetRequests').map(r => ({ ...r, status: r.status === 'PENDING' && Number(r.expiresAt) <= this.now() ? 'EXPIRED' : r.status, affectedMemberships: tx.query('memberships').filter(m => m.userId === r.userId).map(m => ({ id: m.id, companyId: m.companyId, active: m.active })) })); }); }
-    async accounts(a: SecurityActor, company: string, id?: string, query: Record<string, string> = {}) { return this.repo.transact('*', tx => { this.guard(tx, a, company, 'account.read'); assert(company === a.companyId, 404, 'NOT_FOUND'); const local = tx.forCompany(company), m = actorMembership(tx, a), roles = rolesFor(local, m); for (const key of Object.keys(query)) {
-        assert(['field', 'value', 'sort', 'filter', 'aggregate'].includes(key), 422, 'QUERY_INVALID');
-        if (key === 'value')
-            continue;
-        const field = query[key];
-        assert(['name', 'phone', 'secret', 'ownerMembershipId'].includes(field), 422, 'FIELD_UNKNOWN');
-        const p = fieldAccess(roles, field);
-        assert(p.read && p.mask === 'NONE', 403, p.mask === 'LAST4' ? 'MASKED_FIELD_QUERY_DENIED' : 'FIELD_QUERY_DENIED');
-    } assert(!query.aggregate, 501, 'AGGREGATION_NOT_IMPLEMENTED'); let rows = local.query('accounts').filter(r => dataAllowed(local, m, roles, r, 'read')); if (id) {
-        const row = rows.find(r => r.id === id);
-        assert(row, 404, 'NOT_FOUND');
-        return projectAccount(roles, row);
-    } const filterField = query.field || query.filter; if (filterField)
-        rows = rows.filter(r => String(r[filterField] || '').includes(query.value || '')); if (query.sort)
-        rows.sort((a, b) => String(a[query.sort] || '').localeCompare(String(b[query.sort] || ''))); return { items: rows.map(r => projectAccount(roles, r)), total: rows.length }; }); }
-    async saveAccount(a: SecurityActor, company: string, id: string | undefined, body: unknown, key: string, match?: string) { const b = z.object({ revision: revision.optional(), releaseId: z.string().min(1), values: z.record(z.unknown()), fieldReplacements: z.array(z.object({ field: z.string(), value: z.unknown() }).strict()).default([]) }).strict().parse(body); assert(key, 400, 'IDEMPOTENCY_REQUIRED'); const hash = await securityHash(canonical({ id, body })); return this.repo.transact('*', tx => { this.guard(tx, a, company, id ? 'account.update' : 'account.create'); assert(company === a.companyId, 404, 'NOT_FOUND'); const receipt = 'account:' + a.userId + ':' + company + ':' + key, prior = tx.receipt(receipt, hash); if (prior)
-        return prior; assert(b.releaseId === (tx.read('companies', company)?.activeReleaseId || 'A03_BASELINE'), 409, 'CONFIG_CHANGED'); const local = tx.forCompany(company), m = actorMembership(tx, a), roles = rolesFor(local, m), old = id ? local.read('accounts', id) : undefined; if (id) {
-        assert(old && dataAllowed(local, m, roles, old, 'update'), 404, 'NOT_FOUND');
-        assert(match === `"${b.revision}"` && old.revision === b.revision, 409, 'REVISION_CONFLICT');
-    } const values = { ...b.values }; const seen = new Set(Object.keys(values)); for (const f of b.fieldReplacements) {
-        assert(!seen.has(f.field), 422, 'DUPLICATE_FIELD_WRITE');
-        seen.add(f.field);
-        values[f.field] = f.value;
-    } for (const [field, value] of Object.entries(values)) {
-        assert(['name', 'phone', 'secret'].includes(field), 422, 'FIELD_UNKNOWN');
-        const p = fieldAccess(roles, field, id ? 'update' : 'create');
-        assert(p.read && p.write, 403, 'FIELD_WRITE_DENIED');
-        if (field in b.values)
-            assert(p.mask !== 'LAST4', 422, 'MASKED_FIELD_REPLACEMENT_REQUIRED');
-        assert(typeof value === 'string' && value.length <= 1000, 422, 'FIELD_TYPE_INVALID');
-    } assert(old || typeof values.name === 'string' && values.name.length > 0, 422, 'NAME_REQUIRED'); let row; if (old)
-        row = this.put(tx, 'accounts', old, values);
-    else {
-        row = { ...values, id: this.id(), companyId: company, revision: 1, ownerMembershipId: m.id };
-        assert(dataAllowed(local, m, roles, row, 'create'), 403, 'DATA_SCOPE_DENIED');
-        tx.insert('accounts', row);
-    } const response = { data: projectAccount(roles, row) }; tx.appendEvent({ id: this.id(), companyId: company, revision: 1, action: id ? 'ACCOUNT_UPDATED' : 'ACCOUNT_CREATED', actor: a.userId, target: row.id }); tx.receipt(receipt, hash, response); return response; }); }
+    async accountFieldRegistry(a: SecurityActor, company: string) { return this.repo.transact('*',tx=>{this.guard(tx,a,company,'role.read');return {items:Object.entries({...fieldDefinitions(activeAccountConfig(tx,company).config),ownerMembershipId:{type:'text'}} as Record<string,any>).map(([key,def])=>({key,type:def.type,active:def.active!==false}))};}); }
+    async accountContext(a: SecurityActor, company: string) { return this.repo.transact('*', tx => {
+        this.guard(tx,a,company,'account.read'); assert(company===a.companyId,404,'NOT_FOUND');
+        const {config,releaseId}=activeAccountConfig(tx,company),roles=rolesFor(tx.forCompany(company),actorMembership(tx,a));
+        const fields=config['FIELD:account'].fields.filter((f:any)=>runtimeFieldAccess(roles,f.key,company).read).map((f:any)=>{const p=runtimeFieldAccess(roles,f.key,company),safe={...f,...p,createWrite:runtimeFieldAccess(roles,f.key,company,'create').write};if(p.mask!=='NONE'||!f.visible)delete safe.default;return safe;});
+        const readable=new Set(fields.map((f:any)=>f.key)),plain=new Set(fields.filter((f:any)=>f.mask==='NONE').map((f:any)=>f.key));
+        const safeCondition=(n:any)=>conditionFields(n).every(k=>plain.has(k)||['context.companyId','actor.roleCodes','document.state'].includes(k));
+        return {releaseId,companyId:company,roleCodes:roles.map(r=>r.code),screen:config['SCREEN:account'],fields,extensions:config['FIELD:account'].extensionDefinitions.filter((x:any)=>readable.has(x.key)),rules:config['RULE:account'].rules.filter((r:any)=>safeCondition(r.condition)).map((r:any)=>({...r,effects:r.effects.filter((e:any)=>readable.has(e.target)||e.target.startsWith('account.'))})),views:config['LIST_VIEW:account'].views.map((v:any)=>({key:v.key,labelKey:v.labelKey,columns:v.columns.filter((k:string)=>fields.some((f:any)=>f.key===k&&f.visible)&&config['FIELD:account'].extensionDefinitions.find((x:any)=>x.key===k)?.active!==false)})),menus:config['MENU:account'].nodes.filter((n:any)=>allowed(roles,n.permission)&&config['FEATURE:platform'].items.some((f:any)=>f.key===n.featureKey&&f.enabled)),actions:config['ACTION:account'].actions.filter((x:any)=>allowed(roles,x.permission)&&safeCondition(x.condition)),featureEnabled:config['FEATURE:platform'].items.some((f:any)=>f.key==='account'&&f.enabled)};
+    }); }
+    async accounts(a: SecurityActor, company: string, id?: string, query: Record<string, string> = {}) { return this.repo.transact('*', tx => {
+        this.guard(tx,a,company,'account.read'); assert(company===a.companyId,404,'NOT_FOUND');
+        const {config,releaseId}=activeAccountConfig(tx,company);assert(config['FEATURE:platform'].items.some((f:any)=>f.key==='account'&&f.enabled),403,'FEATURE_DISABLED');
+        const local=tx.forCompany(company),m=actorMembership(tx,a),roles=rolesFor(local,m),defs=fieldDefinitions(config);
+        const canQuery=(field:string)=>{assert(field in defs,422,'FIELD_UNKNOWN');const p=runtimeFieldAccess(roles,field,company);assert(p.read&&p.mask==='NONE'&&defs[field].visible&&defs[field].active!==false,403,p.mask==='LAST4'?'MASKED_FIELD_QUERY_DENIED':'FIELD_QUERY_DENIED');assert(defs[field].searchable!==false,422,'FIELD_NOT_SEARCHABLE');};
+        for(const key of Object.keys(query)){assert(['field','value','sort','filter','aggregate','view','page'].includes(key),422,'QUERY_INVALID');if(['field','sort','filter','aggregate'].includes(key))canQuery(query[key]);}assert(!query.aggregate,501,'AGGREGATION_NOT_IMPLEMENTED');
+        let rows=local.query('accounts').filter(r=>dataAllowed(local,m,roles,r,'read'));
+        if(id){const row=rows.find(r=>r.id===id);assert(row,404,'NOT_FOUND');return {...projectRuntimeAccount(config,roles,row),releaseId};}
+        const view=config['LIST_VIEW:account'].views.find((v:any)=>v.key===(query.view||'default'));assert(view,422,'VIEW_UNKNOWN');
+        for(const key of conditionFields(view.filter))if(!['context.companyId','actor.roleCodes','document.state'].includes(key))canQuery(key);for(const s of view.sort)canQuery(s.field);
+        rows=rows.filter(r=>evaluateCondition(view.filter,{...r,'context.companyId':company,'actor.roleCodes':roles.map(r=>r.code),'document.state':'DRAFT'},defs));const filter=query.field||query.filter;if(filter)rows=rows.filter(r=>String(r[filter]??'').includes(query.value||''));
+        const sorts=query.sort?[{field:query.sort,direction:'ASC'}]:view.sort;rows.sort((a,b)=>{for(const s of sorts){const av=a[s.field],bv=b[s.field];let c=0;if(av==null||bv==null){c=av==null&&bv==null?0:av==null?1:-1;}else{c=evaluateCondition({op:'eq',field:s.field,value:bv},{[s.field]:av},defs)?0:evaluateCondition({op:'gt',field:s.field,value:bv},{[s.field]:av},defs)?1:-1;}if(c)return c*(s.direction==='DESC'?-1:1);}return a.id.localeCompare(b.id);});
+        const page=Number(query.page||1);assert(Number.isInteger(page)&&page>0,422,'PAGE_INVALID');return {items:rows.slice((page-1)*view.pageSize,page*view.pageSize).map(r=>projectRuntimeAccount(config,roles,r)),total:rows.length,page,pageSize:view.pageSize,releaseId};
+    }); }
+    async saveAccount(a: SecurityActor, company: string, id: string | undefined, body: unknown, key: string, match?: string) {
+        const b=z.object({revision:revision.optional(),releaseId:z.string().min(1),values:z.record(z.unknown()),fieldReplacements:z.array(z.object({field:z.string(),value:z.unknown()}).strict()).default([])}).strict().parse(body);assert(key,400,'IDEMPOTENCY_REQUIRED');const hash=await securityHash(canonical({id,body}));
+        return this.repo.transact('*',tx=>{this.guard(tx,a,company,id?'account.update':'account.create');assert(company===a.companyId,404,'NOT_FOUND');const {config,releaseId}=activeAccountConfig(tx,company);assert(config['FEATURE:platform'].items.some((f:any)=>f.key==='account'&&f.enabled),403,'FEATURE_DISABLED');
+        const receipt='account:'+a.userId+':'+company+':'+key,prior=tx.receipt(receipt,hash);if(prior)return prior;assert(b.releaseId===releaseId,409,'CONFIG_CHANGED');
+        const local=tx.forCompany(company),m=actorMembership(tx,a),roles=rolesFor(local,m),old=id?local.read('accounts',id):undefined;if(id){assert(old&&dataAllowed(local,m,roles,old,'update'),404,'NOT_FOUND');assert(match===`"${b.revision}"`&&old.revision===b.revision,409,'REVISION_CONFLICT');}
+        const values={...b.values};for(const f of b.fieldReplacements){assert(!(f.field in values),422,'DUPLICATE_FIELD_WRITE');values[f.field]=f.value;}
+        const defs=fieldDefinitions(config),merged:Record<string,any>={...old};for(const f of config['FIELD:account'].fields)if(merged[f.key]===undefined&&f.default!==undefined)merged[f.key]=structuredClone(f.default);Object.assign(merged,values);
+        const context={...merged,'context.companyId':company,'actor.roleCodes':roles.map(r=>r.code),'document.state':'DRAFT'};
+        const action=config['ACTION:account'].actions.find((x:any)=>x.key===(id?'account.update':'account.create'));assert(action?.enabled&&evaluateCondition(action.condition,context,defs),403,'ACTION_DISABLED');
+        for(const r of config['RULE:account'].rules)if(r.trigger==='ACTION'&&evaluateCondition(r.condition,context,defs))assert(!r.effects.some((e:any)=>e.target===action.key&&e.actionEnabled===false),403,'ACTION_DISABLED');
+        const fields=effectiveFields(config,context);
+        for(const [field,value]of Object.entries(values)){const def=defs[field],f=fields.find((x:any)=>x.key===field);assert(def&&f&&field!=='ownerMembershipId',422,'FIELD_UNKNOWN');const p=runtimeFieldAccess(roles,field,company,id?'update':'create');assert(p.read&&p.write&&f.visible,403,'FIELD_WRITE_DENIED');assert(!f.readOnly,422,'FIELD_READ_ONLY');assert(def.active!==false,422,'EXTENSION_INACTIVE');if(field in b.values)assert(p.mask!=='LAST4',422,'MASKED_FIELD_REPLACEMENT_REQUIRED');validateValue(def,value);}
+        for(const f of fields)if(f.required&&defs[f.key].active!==false)assert(merged[f.key]!==undefined&&merged[f.key]!==null&&merged[f.key]!=='',422,f.key==='name'?'NAME_REQUIRED':'FIELD_REQUIRED');
+        assert(typeof merged.name==='string'&&merged.name.trim().length>0,422,'NAME_REQUIRED');
+        let row:Row;if(old)row=this.put(tx,'accounts',old,values);else{row={...merged,id:this.id(),companyId:company,revision:1,ownerMembershipId:m.id};assert(dataAllowed(local,m,roles,row,'create'),403,'DATA_SCOPE_DENIED');tx.insert('accounts',row);}
+        const response={data:{...projectRuntimeAccount(config,roles,row),releaseId}};tx.appendEvent({id:this.id(),companyId:company,revision:1,action:id?'ACCOUNT_UPDATED':'ACCOUNT_CREATED',actor:a.userId,target:row.id});tx.receipt(receipt,hash,response);return response;});
+    }
+
 }

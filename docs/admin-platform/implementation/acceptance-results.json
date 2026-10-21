@@ -1,5 +1,5 @@
 {
-  "note": "A00-A03 staged evidence. A03 gate approved at local 2fc8cd6. Full A04-A11 acceptance incomplete; T43 UNIT separated from INTEGRATION.",
+  "note": "A00-A05 staged evidence. A05 code and field registry addition approved by worker B. A06-A11 integration remains incomplete; see A05-report.md for exact test scope.",
   "results": [
     {
       "tcId": "T01",
@@ -312,18 +312,36 @@
     },
     {
       "tcId": "T46",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A05 shared/HTTP tests, BROWSER_MOCK boundary scenarios and both-mode Chromium interactions passed; worker B code approved.",
+      "evidence": [
+        "A05-report.md",
+        "evidence/a05-tests.log",
+        "evidence/a05-ui.log",
+        "evidence/a05-http-payloads.jsonl"
+      ]
     },
     {
       "tcId": "T47",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A05 shared/HTTP tests, BROWSER_MOCK boundary scenarios and both-mode Chromium interactions passed; worker B code approved.",
+      "evidence": [
+        "A05-report.md",
+        "evidence/a05-tests.log",
+        "evidence/a05-ui.log",
+        "evidence/a05-http-payloads.jsonl"
+      ]
     },
     {
       "tcId": "T48",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A05 shared/HTTP tests, BROWSER_MOCK boundary scenarios and both-mode Chromium interactions passed; worker B code approved.",
+      "evidence": [
+        "A05-report.md",
+        "evidence/a05-tests.log",
+        "evidence/a05-ui.log",
+        "evidence/a05-http-payloads.jsonl"
+      ]
     },
     {
       "tcId": "T49",
@@ -484,8 +502,14 @@
     },
     {
       "tcId": "T67",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A05 shared/HTTP tests, BROWSER_MOCK boundary scenarios and both-mode Chromium interactions passed; worker B code approved.",
+      "evidence": [
+        "A05-report.md",
+        "evidence/a05-tests.log",
+        "evidence/a05-ui.log",
+        "evidence/a05-http-payloads.jsonl"
+      ]
     },
     {
       "tcId": "T68",
@@ -543,13 +567,25 @@
     },
     {
       "tcId": "T71",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A05 shared/HTTP tests, BROWSER_MOCK boundary scenarios and both-mode Chromium interactions passed; worker B code approved.",
+      "evidence": [
+        "A05-report.md",
+        "evidence/a05-tests.log",
+        "evidence/a05-ui.log",
+        "evidence/a05-http-payloads.jsonl"
+      ]
     },
     {
       "tcId": "T72",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A05 shared/HTTP tests, BROWSER_MOCK boundary scenarios and both-mode Chromium interactions passed; worker B code approved.",
+      "evidence": [
+        "A05-report.md",
+        "evidence/a05-tests.log",
+        "evidence/a05-ui.log",
+        "evidence/a05-http-payloads.jsonl"
+      ]
     },
     {
       "tcId": "T73",
@@ -563,8 +599,14 @@
     },
     {
       "tcId": "T75",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A05 shared/HTTP tests, BROWSER_MOCK boundary scenarios and both-mode Chromium interactions passed; worker B code approved.",
+      "evidence": [
+        "A05-report.md",
+        "evidence/a05-tests.log",
+        "evidence/a05-ui.log",
+        "evidence/a05-http-payloads.jsonl"
+      ]
     },
     {
       "tcId": "T76",

@@ -47,6 +47,8 @@ export class BrowserSecurityClient extends HttpAdminClient {
             return this.engine.command(a, a.companyId, 'reset', company, body, key, `"${revision}"`);
         if (parts[2] === 'mfa-reset-requests')
             return this.engine.command(a, a.companyId, 'decide', company, body, key, `"${revision}"`);
+        if (resource === 'field-registry' && method === 'GET') return this.engine.accountFieldRegistry(a, company);
+        if (resource === 'runtime' && id === 'account-context') return this.engine.accountContext(a, company);
         if (resource === 'runtime' && id === 'accounts') {
             return method === 'GET' ? this.engine.accounts(a, company, action,query) : this.engine.saveAccount(a, company, action, body, key, `"${revision}"`);
         }

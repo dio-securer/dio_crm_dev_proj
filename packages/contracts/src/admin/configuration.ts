@@ -1,6 +1,7 @@
+import { accountBaseline, upgradeAccountConfig, validateAccountConfig, conditionFields, activeAccountConfig } from './account-runtime';
 import { z } from 'zod';
-import { AdminRepository, Row, Transaction, assert, canonical } from './core';
-import { SecurityActor, requirePermission } from './permissions';
+import { AdminRepository, Row, Transaction, assert, canonical, COMPANY_IDS } from './core';
+import { SecurityActor, requirePermission, rolesFor, actorMembership, fieldAccess } from './permissions';
 import { SecurityEngine, securityHash } from './security';
 import { DraftInput, draftInputSchema } from './drafts';
 import { normalizeOverrides, resolveOverrides, validateResolved, Path } from './resolver';
@@ -10,7 +11,7 @@ const refs = z.object({ draftIds: z.array(id).min(1), revisions: z.array(z.numbe
 const validateInput = refs.extend({ expectedVersionId: id.nullable().optional(), expectedReleaseId: id.nullable().optional() }).strict();
 const publishInput = z.object({ validationId: id, expectedVersionId: id.nullable().optional(), expectedReleaseId: id.nullable().optional(), reason }).strict();
 const locks: Record<string, Path[]> = { 'FIELD:account': [[{ property: 'fields' }, { itemKey: 'taxId' }]] };
-const baseline: Record<string, any> = { 'FEATURE:platform': { items: [{ key: 'account', enabled: true }, { key: 'activity', enabled: true }] }, 'FIELD:account': { entity: 'account', fields: [{ key: 'taxId', sectionId: 'main', visible: true, required: true, readOnly: false, labelKey: 'account.taxId', order: 0 }], extensionDefinitions: [] } };
+const baseline = accountBaseline();
 const documentKey = (d: any) => `${d.domain}:${d.stableKey}`;
 export class ConfigurationEngine {
     constructor(private repo: AdminRepository, private makeId: () => string = () => crypto.randomUUID(), private now = () => Date.now()) {}
@@ -19,7 +20,8 @@ export class ConfigurationEngine {
         const add = async (scope: string, scopeKey: string, parents: string[]) => {
             const existing = tx.read('configScopes', `${scope}:${scopeKey}`); if (existing) return String(existing.currentVersionId);
             if (parents.length) { const immediate = tx.read('scopeVersions', parents[parents.length - 1])!; parents = [...immediate.parentVersionIds as string[], immediate.id]; }
-            const versionId = this.makeId(); const inherited = parents.length ? tx.read('scopeVersions', parents[parents.length - 1])!.effective : baseline;
+            const versionId = this.makeId(); let inherited = parents.length ? tx.read('scopeVersions', parents[parents.length - 1])!.effective : baseline;
+            if (scope === 'TEMPLATE' && scopeKey === 'HQ') { const hq=accountBaseline('HQ'); inherited={...structuredClone(inherited as any),'SCREEN:account':hq['SCREEN:account'],'FIELD:account':hq['FIELD:account']}; }
             const documents = scope === 'COMMON' ? Object.entries(baseline).map(([key, payload]) => ({ scope, scopeKey, domain: key.split(':')[0], stableKey: key.split(':')[1], schemaVersion: 1, parentVersionIds: [], payload })) : [];
             tx.insert('scopeVersions', { id: versionId, revision: 1, scope, scopeKey, parentVersionIds: parents, documentVersionIds: [], documents, effective: inherited, provenance: {}, contentHash: await securityHash(canonical(inherited)), createdAt: new Date(this.now()).toISOString(), createdBy: '00000000-0000-4000-8000-000000000000' });
             tx.insert('configScopes', { id: `${scope}:${scopeKey}`, revision: 1, scope, scopeKey, currentVersionId: versionId }); return versionId;
@@ -56,8 +58,10 @@ export class ConfigurationEngine {
     }
     private resolve(tx: Transaction, scope: string, key: string, parents: string[], documents: any[]) {
         this.checkParents(tx, scope, key, parents);
-        const effective: Record<string, any> = parents.length ? structuredClone(tx.read('scopeVersions', parents[parents.length - 1])!.effective as any) : {};
+        const effective: Record<string, any> = parents.length ? upgradeAccountConfig(tx.read('scopeVersions', parents[parents.length - 1])!.effective as any, scope === 'COMPANY' ? String(tx.read('companies',key)!.templateCode) : key.startsWith('HQ') ? 'HQ' : 'GLOBAL') : {};
+        if(scope==='TEMPLATE'&&key==='HQ'){const hq=accountBaseline('HQ');effective['SCREEN:account']=hq['SCREEN:account'];effective['FIELD:account']=hq['FIELD:account'];}
         if (scope === 'COMPANY') { const c = tx.read('companies', key)!; effective['COMPANY_PROFILE:profile'] = structuredClone(tx.read('configScopes', `COMPANY:${key}`)?.profileBaseline || { defaultLocale: c.defaultLocale, currency: c.currency, timezone: c.timezone, templateCode: c.templateCode }); }
+        if(scope==='COMPANY'&&key===COMPANY_IDS.US_B){const f=effective['FIELD:account'].fields.find((f:any)=>f.key==='x_visitGroup');if(f)f.visible=false;}
         const provenance: Record<string, any> = parents.length ? structuredClone(tx.read('scopeVersions', parents[parents.length - 1])!.provenance as any || {}) : {};
         for (const d of documents) {
             const k = documentKey(d); assert(d.domain !== 'SECURITY', 422, 'SECURITY_PUBLISH_A10');
@@ -67,7 +71,16 @@ export class ConfigurationEngine {
         }
         // Mandatory registry values stay protected even when COMMON is edited.
         const field = effective['FIELD:account']; assert(field?.fields?.some((f: any) => f.key === 'taxId' && f.visible && f.required), 422, 'LOCKED_PATH');
-        return { effective, provenance };
+        const upgraded = upgradeAccountConfig(effective, scope === 'COMPANY' ? String(tx.read('companies',key)!.templateCode) : key.startsWith('HQ') ? 'HQ' : 'GLOBAL'); validateAccountConfig(upgraded, scope === 'COMPANY' ? tx : undefined, scope === 'COMPANY' ? key : undefined); return { effective: upgraded, provenance };
+    }
+    private validateViews(tx: Transaction, a: SecurityActor, config: any) {
+        let roles=rolesFor(tx.forCompany(a.companyId),actorMembership(tx,a));
+        // Configuration authority may author business views without receiving record access.
+        if(a.role==='PLATFORM_ADMIN'||a.role==='COMPANY_ADMIN')roles=roles.map(r=>({...r,grants:[...r.grants,'account.read']}));
+        for(const view of config['LIST_VIEW:account'].views)if(view.shared){
+            for(const key of [...view.columns,...conditionFields(view.filter),...view.sort.map((s:any)=>s.field)])assert(['context.companyId','actor.roleCodes','document.state'].includes(key)||fieldAccess(roles,key).read,422,'FIELD_NOT_READABLE');
+            for(const key of [...conditionFields(view.filter),...view.sort.map((s:any)=>s.field)])assert(fieldAccess(roles,key).mask==='NONE',422,'FIELD_NOT_READABLE');
+        }
     }
     private draftSet(tx: Transaction, scope: string, key: string, body: any) {
         assert(body.draftIds.length === body.revisions.length && new Set(body.draftIds).size === body.draftIds.length, 422, 'DRAFT_SET_INVALID');
@@ -85,10 +98,10 @@ export class ConfigurationEngine {
             await this.initialize(tx); this.access(tx, a, scope, key, runtime ? 'account.read' : 'config.read');
             const active = this.snapshot(tx, scope, key); const parents = this.parents(tx, scope, key);
             const inherited = parents.length ? tx.read('scopeVersions', parents[parents.length - 1]) : undefined;
-            if (runtime) return { releaseId: active?.id || 'A03_BASELINE', contentHash: active?.contentHash || inherited?.contentHash, effectiveConfig: active?.effective || inherited?.effective || baseline };
+            if (runtime) return { releaseId: active?.id || 'A03_BASELINE', contentHash: active?.contentHash || inherited?.contentHash, effectiveConfig: {'FEATURE:platform':(active?.effective || inherited?.effective || baseline)['FEATURE:platform']} };
             const localDrafts = tx.query('drafts').filter(d => d.scope === scope && d.scopeKey === key);
             let draftEffective: any = null; try { if (localDrafts.length) draftEffective = this.resolve(tx, scope, key, localDrafts[0].parentVersionIds as string[], localDrafts).effective; } catch {}
-            return { draftEffective, parentEffective: inherited?.effective || baseline, currentVersionId: this.current(tx, scope, key), parentVersionIds: parents, effective: active?.effective || inherited?.effective || baseline, provenance: active?.provenance || inherited?.provenance || {}, lockedPaths: locks, drafts: tx.query('drafts').filter(d => d.scope === scope && d.scopeKey === key), versions: tx.query(scope === 'COMPANY' ? 'releases' : 'scopeVersions').filter(v => v.scope === scope && v.scopeKey === key), availableParents: a.role === 'PLATFORM_ADMIN' ? tx.query('scopeVersions') : tx.query('scopeVersions').filter(v => parents.includes(v.id) || (v.scope === 'COUNTRY' && v.scopeKey === `${tx.read('companies', key)!.templateCode}:${tx.read('companies', key)!.countryCode}`)) };
+            return { draftEffective, parentEffective: inherited?.effective || baseline, currentVersionId: this.current(tx, scope, key), parentVersionIds: parents, effective: upgradeAccountConfig((scope==='COMPANY'?activeAccountConfig(tx,key).config:(active?.effective || inherited?.effective || baseline)) as any, scope === 'COMPANY' ? String(tx.read('companies',key)!.templateCode) : key.startsWith('HQ') ? 'HQ' : 'GLOBAL'), provenance: active?.provenance || inherited?.provenance || {}, lockedPaths: locks, drafts: tx.query('drafts').filter(d => d.scope === scope && d.scopeKey === key), versions: tx.query(scope === 'COMPANY' ? 'releases' : 'scopeVersions').filter(v => v.scope === scope && v.scopeKey === key), availableParents: a.role === 'PLATFORM_ADMIN' ? tx.query('scopeVersions') : tx.query('scopeVersions').filter(v => parents.includes(v.id) || (v.scope === 'COUNTRY' && v.scopeKey === `${tx.read('companies', key)!.templateCode}:${tx.read('companies', key)!.countryCode}`)) };
         });
     }
     async version(a: SecurityActor, versionId: string) {
@@ -118,18 +131,18 @@ export class ConfigurationEngine {
             let result: any;
             if (operation === 'validate') {
                 const b = validateInput.parse(body); const expected = scope === 'COMPANY' ? b.expectedReleaseId : b.expectedVersionId; assert(expected !== undefined && expected === current, 409, 'VERSION_CONFLICT');
-                const set = this.draftSet(tx, scope, scopeKey, b); checkDocuments(set.documents); const resolved = this.resolve(tx, scope, scopeKey, set.parents, set.documents);
+                const set = this.draftSet(tx, scope, scopeKey, b); checkDocuments(set.documents); const resolved = this.resolve(tx, scope, scopeKey, set.parents, set.documents); this.validateViews(tx,a,resolved.effective);
                 const row = { id: this.makeId(), revision: 1, scope, scopeKey, actorId: a.userId, current, draftIds: b.draftIds, revisions: b.revisions, draftHash: await securityHash(canonical(set.drafts)), ...set, ...resolved, contentHash: await securityHash(canonical(resolved.effective)), registryVersion: 1 };
                 tx.insert('configValidations', row); result = { validationId: row.id, errors: [], ...resolved, contentHash: row.contentHash };
             } else if (operation === 'publish') {
                 const b = publishInput.parse(body); const v: any = tx.read('configValidations', b.validationId); assert(v && v.scope === scope && v.scopeKey === scopeKey && v.actorId === a.userId, 404, 'NOT_FOUND');
                 assert((scope === 'COMPANY' ? b.expectedReleaseId : b.expectedVersionId) === current && v.current === current, 409, 'VERSION_CONFLICT');
                 const set = this.draftSet(tx, scope, scopeKey, v); assert(await securityHash(canonical(set.drafts)) === v.draftHash && v.registryVersion === 1, 409, 'VALIDATION_STALE');
-                checkDocuments(set.documents); const resolved = this.resolve(tx, scope, scopeKey, set.parents, set.documents); result = await this.publish(tx, a, scope, scopeKey, set.parents, set.documents, resolved, b.reason);
+                checkDocuments(set.documents); const resolved = this.resolve(tx, scope, scopeKey, set.parents, set.documents); this.validateViews(tx,a,resolved.effective); result = await this.publish(tx, a, scope, scopeKey, set.parents, set.documents, resolved, b.reason);
             } else if (operation === 'rollback') {
                 assert(scope === 'COMPANY', 422, 'USE_COMPANY_RELEASE_API'); const b = z.object({ targetReleaseId: id, expectedReleaseId: id, reason }).strict().parse(body); assert(current === b.expectedReleaseId, 409, 'VERSION_CONFLICT');
                 const target: any = tx.read('releases', b.targetReleaseId); assert(target?.companyId === scopeKey, 404, 'NOT_FOUND');
-                checkDocuments(target.documents); const resolved = this.resolve(tx, scope, scopeKey, target.parentVersionIds, target.documents); result = await this.publish(tx, a, scope, scopeKey, target.parentVersionIds, target.documents, resolved, b.reason, target.id);
+                checkDocuments(target.documents); const resolved = this.resolve(tx, scope, scopeKey, target.parentVersionIds, target.documents); this.validateViews(tx,a,resolved.effective); result = await this.publish(tx, a, scope, scopeKey, target.parentVersionIds, target.documents, resolved, b.reason, target.id);
             } else if (operation === 'rebase-preview') {
                 const b = refs.extend({ targetParentVersionIds: z.array(id) }).strict().parse(body); const set = this.draftSet(tx, scope, scopeKey, b); checkDocuments(set.documents); let resolved: any; let conflicts: any[] = []; try { resolved = this.resolve(tx, scope, scopeKey, b.targetParentVersionIds, set.documents); } catch (e) { conflicts = [{ code: (e as Error).message }]; resolved = { effective: null }; }
                 const row = { id: this.makeId(), revision: 1, scope, scopeKey, actorId: a.userId, current, draftIds: b.draftIds, revisions: b.revisions, baseHash: await securityHash(canonical(set.drafts)), targetParentVersionIds: b.targetParentVersionIds, expiresAt: this.now() + 600000, effective: resolved.effective, conflicts, applied: false };

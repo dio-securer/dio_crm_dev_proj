@@ -26,7 +26,7 @@ export function resolveOverrides(base: Record<string, any>, ops: OverrideOp[], l
             const last = i === op.path.length - 1;
             if ('property' in s) {
                 assert(parent && typeof parent === 'object' && !Array.isArray(parent), 422, 'PATH_INVALID');
-                assert(Object.prototype.hasOwnProperty.call(parent, s.property), 422, 'PATH_INVALID');
+                assert((last&&op.op==='SET')||Object.prototype.hasOwnProperty.call(parent, s.property), 422, 'PATH_INVALID');
                 if (last) { assert(op.op === 'SET', 422, 'ITEM_PATH_REQUIRED'); parent[s.property] = structuredClone(op.value); }
                 else parent = parent[s.property];
             } else {
