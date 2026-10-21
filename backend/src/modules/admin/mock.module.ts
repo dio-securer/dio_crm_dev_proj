@@ -1,7 +1,7 @@
 import { Module, Controller, Post, Get, Patch, Body, Headers, Param, Req, Query } from '@nestjs/common';
 import { randomUUID, createHash } from 'node:crypto';
 import { z } from 'zod';
-import { ConfigurationEngine, configurationRequest, assert, canonical, createDraft, updateDraft, OrganizationCommands } from '@dio-crm/contracts/admin';
+import { MasterDataEngine, masterDataRequest, ConfigurationEngine, configurationRequest, assert, canonical, createDraft, updateDraft, OrganizationCommands } from '@dio-crm/contracts/admin';
 import { MemoryAdminRepository } from './memory.repository';
 import { MockAuth, MockIdentityRepository } from './mock-auth';
 function sDrafts(tx: any, platform: boolean) { return (platform ? tx.forCompany('*') : tx).query('drafts'); }
@@ -157,6 +157,10 @@ class MockController {
         return this.auth.engine.enroll(c.challengeId); if (action === 'verify')
         return this.auth.present(await this.auth.engine.verify(c.challengeId, body, key)); if (action === 'skip')
         return this.auth.present(await this.auth.engine.skip(c.challengeId, key)); assert(false, 404, 'NOT_FOUND'); }
+    @Get(['admin/companies/:company/runtime/master-data','admin/companies/:company/runtime/codes'])
+    async masterRead(@Headers('authorization') h:string,@Req() req:any){return masterDataRequest(new MasterDataEngine(this.repo),await this.auth.authenticate(h),req.originalUrl,'GET',undefined,'');}
+    @Post(['admin/companies/:company/numbering/preview','admin/companies/:company/numbering/allocate','admin/companies/:company/calendars/calculate'])
+    async masterCommand(@Headers('authorization') h:string,@Headers('idempotency-key') key:string,@Req() req:any,@Body() body:any){return masterDataRequest(new MasterDataEngine(this.repo),await this.auth.authenticate(h),req.originalUrl,'POST',body,key);}
     @Get('admin/companies/:company/runtime/account-context')
     async accountContext(@Headers('authorization') h: string, @Param('company') company: string) { return this.auth.engine.accountContext(await this.auth.authenticate(h), company); }
     @Get('admin/companies/:company/runtime/accounts')

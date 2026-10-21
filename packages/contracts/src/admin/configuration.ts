@@ -1,3 +1,4 @@
+import {upgradeMasterConfig,validateMasterConfig} from './master-data';
 import { accountBaseline, upgradeAccountConfig, validateAccountConfig, conditionFields, activeAccountConfig } from './account-runtime';
 import { z } from 'zod';
 import { AdminRepository, Row, Transaction, assert, canonical, COMPANY_IDS } from './core';
@@ -58,7 +59,8 @@ export class ConfigurationEngine {
     }
     private resolve(tx: Transaction, scope: string, key: string, parents: string[], documents: any[]) {
         this.checkParents(tx, scope, key, parents);
-        const effective: Record<string, any> = parents.length ? upgradeAccountConfig(tx.read('scopeVersions', parents[parents.length - 1])!.effective as any, scope === 'COMPANY' ? String(tx.read('companies',key)!.templateCode) : key.startsWith('HQ') ? 'HQ' : 'GLOBAL') : {};
+        const inherited: Record<string, any> = parents.length ? upgradeAccountConfig(tx.read('scopeVersions', parents[parents.length - 1])!.effective as any, scope === 'COMPANY' ? String(tx.read('companies',key)!.templateCode) : key.startsWith('HQ') ? 'HQ' : 'GLOBAL') : {};
+        const effective=upgradeMasterConfig(inherited,scope==='COMPANY'?String(tx.read('companies',key)!.timezone):key.startsWith('HQ')?'Asia/Seoul':'America/New_York');
         if(scope==='TEMPLATE'&&key==='HQ'){const hq=accountBaseline('HQ');effective['SCREEN:account']=hq['SCREEN:account'];effective['FIELD:account']=hq['FIELD:account'];}
         if (scope === 'COMPANY') { const c = tx.read('companies', key)!; effective['COMPANY_PROFILE:profile'] = structuredClone(tx.read('configScopes', `COMPANY:${key}`)?.profileBaseline || { defaultLocale: c.defaultLocale, currency: c.currency, timezone: c.timezone, templateCode: c.templateCode }); }
         if(scope==='COMPANY'&&key===COMPANY_IDS.US_B){const f=effective['FIELD:account'].fields.find((f:any)=>f.key==='x_visitGroup');if(f)f.visible=false;}
@@ -71,7 +73,7 @@ export class ConfigurationEngine {
         }
         // Mandatory registry values stay protected even when COMMON is edited.
         const field = effective['FIELD:account']; assert(field?.fields?.some((f: any) => f.key === 'taxId' && f.visible && f.required), 422, 'LOCKED_PATH');
-        const upgraded = upgradeAccountConfig(effective, scope === 'COMPANY' ? String(tx.read('companies',key)!.templateCode) : key.startsWith('HQ') ? 'HQ' : 'GLOBAL'); validateAccountConfig(upgraded, scope === 'COMPANY' ? tx : undefined, scope === 'COMPANY' ? key : undefined); return { effective: upgraded, provenance };
+        const upgraded = upgradeAccountConfig(effective, scope === 'COMPANY' ? String(tx.read('companies',key)!.templateCode) : key.startsWith('HQ') ? 'HQ' : 'GLOBAL'); validateMasterConfig(upgraded,scope==='COMPANY'?tx:undefined,scope==='COMPANY'?key:undefined); validateAccountConfig(upgraded, scope === 'COMPANY' ? tx : undefined, scope === 'COMPANY' ? key : undefined); return { effective: upgraded, provenance };
     }
     private validateViews(tx: Transaction, a: SecurityActor, config: any) {
         let roles=rolesFor(tx.forCompany(a.companyId),actorMembership(tx,a));
@@ -101,7 +103,7 @@ export class ConfigurationEngine {
             if (runtime) return { releaseId: active?.id || 'A03_BASELINE', contentHash: active?.contentHash || inherited?.contentHash, effectiveConfig: {'FEATURE:platform':(active?.effective || inherited?.effective || baseline)['FEATURE:platform']} };
             const localDrafts = tx.query('drafts').filter(d => d.scope === scope && d.scopeKey === key);
             let draftEffective: any = null; try { if (localDrafts.length) draftEffective = this.resolve(tx, scope, key, localDrafts[0].parentVersionIds as string[], localDrafts).effective; } catch {}
-            return { draftEffective, parentEffective: inherited?.effective || baseline, currentVersionId: this.current(tx, scope, key), parentVersionIds: parents, effective: upgradeAccountConfig((scope==='COMPANY'?activeAccountConfig(tx,key).config:(active?.effective || inherited?.effective || baseline)) as any, scope === 'COMPANY' ? String(tx.read('companies',key)!.templateCode) : key.startsWith('HQ') ? 'HQ' : 'GLOBAL'), provenance: active?.provenance || inherited?.provenance || {}, lockedPaths: locks, drafts: tx.query('drafts').filter(d => d.scope === scope && d.scopeKey === key), versions: tx.query(scope === 'COMPANY' ? 'releases' : 'scopeVersions').filter(v => v.scope === scope && v.scopeKey === key), availableParents: a.role === 'PLATFORM_ADMIN' ? tx.query('scopeVersions') : tx.query('scopeVersions').filter(v => parents.includes(v.id) || (v.scope === 'COUNTRY' && v.scopeKey === `${tx.read('companies', key)!.templateCode}:${tx.read('companies', key)!.countryCode}`)) };
+            return { draftEffective, parentEffective: inherited?.effective || baseline, currentVersionId: this.current(tx, scope, key), parentVersionIds: parents, effective: upgradeMasterConfig(upgradeAccountConfig((scope==='COMPANY'?activeAccountConfig(tx,key).config:(active?.effective || inherited?.effective || baseline)) as any, scope === 'COMPANY' ? String(tx.read('companies',key)!.templateCode) : key.startsWith('HQ') ? 'HQ' : 'GLOBAL'),scope==='COMPANY'?String(tx.read('companies',key)!.timezone):key.startsWith('HQ')?'Asia/Seoul':'America/New_York'), provenance: active?.provenance || inherited?.provenance || {}, lockedPaths: locks, drafts: tx.query('drafts').filter(d => d.scope === scope && d.scopeKey === key), versions: tx.query(scope === 'COMPANY' ? 'releases' : 'scopeVersions').filter(v => v.scope === scope && v.scopeKey === key), availableParents: a.role === 'PLATFORM_ADMIN' ? tx.query('scopeVersions') : tx.query('scopeVersions').filter(v => parents.includes(v.id) || (v.scope === 'COUNTRY' && v.scopeKey === `${tx.read('companies', key)!.templateCode}:${tx.read('companies', key)!.countryCode}`)) };
         });
     }
     async version(a: SecurityActor, versionId: string) {

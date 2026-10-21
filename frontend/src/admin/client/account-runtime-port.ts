@@ -1,8 +1,9 @@
 import {HttpAdminClient} from './admin-client';
-export interface AccountRuntimePort { context():Promise<any>; list(view?:string):Promise<any>; get(id:string):Promise<any>; create(values:Record<string,unknown>,releaseId:string,fieldReplacements?:{field:string;value:unknown}[]):Promise<any>; update(id:string,revision:number,values:Record<string,unknown>,releaseId:string,fieldReplacements?:{field:string;value:unknown}[]):Promise<any>; requestErp(id:string,revision:number,releaseId:string):Promise<any>; }
+export interface AccountRuntimePort { context():Promise<any>; master():Promise<any>; list(view?:string):Promise<any>; get(id:string):Promise<any>; create(values:Record<string,unknown>,releaseId:string,fieldReplacements?:{field:string;value:unknown}[]):Promise<any>; update(id:string,revision:number,values:Record<string,unknown>,releaseId:string,fieldReplacements?:{field:string;value:unknown}[]):Promise<any>; requestErp(id:string,revision:number,releaseId:string):Promise<any>; }
 export class MockAccountRuntimePort implements AccountRuntimePort {
  constructor(private client:HttpAdminClient,private company:string){}
  private get base(){return `/api/admin/companies/${this.company}/runtime/accounts`;}
+ master(){return this.client.request(`/api/admin/companies/${this.company}/runtime/master-data`);}
  context(){return this.client.request(`/api/admin/companies/${this.company}/runtime/account-context`);}
  list(view='default'){return this.client.request(this.base+'?view='+encodeURIComponent(view));}
  get(id:string){return this.client.request(this.base+'/'+id);}

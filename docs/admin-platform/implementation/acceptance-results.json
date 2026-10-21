@@ -1,5 +1,5 @@
 {
-  "note": "A00-A05 staged evidence. A05 code and field registry addition approved by worker B. A06-A11 integration remains incomplete; see A05-report.md for exact test scope.",
+  "note": "A00-A06 staged evidence. A06 approved by worker B; see A06-report.md for exact scope. A07-A11 integration remains incomplete.",
   "results": [
     {
       "tcId": "T01",
@@ -14,7 +14,7 @@
     {
       "tcId": "T03",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "reason": "A06 language/calendar snapshot foundation verified; full approval-policy/dueAt integration remains A07. See A06-report.md."
     },
     {
       "tcId": "T04",
@@ -158,13 +158,13 @@
     },
     {
       "tcId": "T30",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A06 common/HTTP and both-mode UI verification; see A06-report.md for exact scope and evidence."
     },
     {
       "tcId": "T31",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "reason": "A06 language/calendar snapshot foundation verified; full approval-policy/dueAt integration remains A07. See A06-report.md."
     },
     {
       "tcId": "T32",
@@ -356,13 +356,13 @@
     },
     {
       "tcId": "T50",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A06 common/HTTP and both-mode UI verification; see A06-report.md for exact scope and evidence."
     },
     {
       "tcId": "T51",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A06 common/HTTP and both-mode UI verification; see A06-report.md for exact scope and evidence."
     },
     {
       "tcId": "T52",
@@ -589,13 +589,13 @@
     },
     {
       "tcId": "T73",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A06 common/HTTP and both-mode UI verification; see A06-report.md for exact scope and evidence."
     },
     {
       "tcId": "T74",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A06 common/HTTP and both-mode UI verification; see A06-report.md for exact scope and evidence."
     },
     {
       "tcId": "T75",

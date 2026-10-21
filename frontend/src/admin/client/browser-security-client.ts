@@ -1,4 +1,4 @@
-import { ConfigurationEngine, configurationRequest, SecurityEngine, OrganizationCommands, createDraft, updateDraft, assert, securityHash, canonical, normalizeCommandError } from '@dio-crm/contracts/admin';
+import { MasterDataEngine, masterDataRequest, ConfigurationEngine, configurationRequest, SecurityEngine, OrganizationCommands, createDraft, updateDraft, assert, securityHash, canonical, normalizeCommandError } from '@dio-crm/contracts/admin';
 import { HttpAdminClient } from './admin-client';
 import { BrowserAdminRepository } from './browser-repository';
 export class BrowserSecurityClient extends HttpAdminClient {
@@ -24,6 +24,7 @@ export class BrowserSecurityClient extends HttpAdminClient {
         if (path === '/api/auth/logout')
             return this.engine.logout(this.sessionId);
         const a = await this.engine.authenticate(this.sessionId);
+        const master=await masterDataRequest(new MasterDataEngine(this.repo),a,url.pathname+url.search,method,body,key);if(master!==undefined)return master;
         const config = await configurationRequest(new ConfigurationEngine(this.repo), a, path, method, body, key); if (config !== undefined) return config;
         const snap = await this.repo.snapshot();
         if (path === '/api/me/context')
