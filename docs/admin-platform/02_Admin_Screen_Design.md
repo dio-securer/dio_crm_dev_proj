@@ -87,3 +87,33 @@ ADM-22의 일반 승인함은 업무 사용자도 접근하며 설정 관리 권
 ## 8. 메뉴 및 폼 사용성
 관리자 왼쪽 메뉴는 위 7개 그룹으로 구성한다. 설정 상속 화면에서 각 속성은 공통/템플릿/국가/법인 출처를 보여준다. 목록에는 초안 유무, 적용 버전, 마지막 변경자·일시를 표시한다.
 오류는 저장 실패 toast만 띄우지 않고 해당 필드와 상단 요약에 함께 표시한다. 409 충돌 시 서버 최신 버전과 사용자 편집을 비교하고 자동 덮어쓰기하지 않는다. 미리보기는 읽기 전용 컨텍스트로 실행하며 실제 업무 저장/알림/연계 부작용을 발생시키지 않는다.
+
+## 9. v1.1 화면 실행 계약
+
+이 절은 위 표의 개략 필드를 구체화한다. 모든 31개 ADM 항목은 위 /admin 경로에서 독립적으로 접근할 수 있어야 한다. 도메인별 편집기 공유는 가능하지만 원시 JSON 입력만으로 구현 완료 처리하지 않는다.
+
+- 화면 상태: LOADING → EMPTY 또는 READY → EDITING → SAVING → READY. 실패 시 ERROR와 기존 입력을 유지한다. 409는 CONFLICT로 전환하여 최신값/입력값 비교와 다시 불러오기/수동 재적용을 제공한다.
+- 신규 저장은 생성 계약, 기존 저장은 If-Match와 revision을 사용한다. 중복 클릭은 진행 중 비활성화하고 같은 Idempotency-Key를 유지한다.
+- 사용자·조직·역할·필드 권한·위임·담당자 이관은 즉시 반영하는 운영 데이터다. 메뉴·필드 배치·코드·규칙·승인 정의·보안 정책은 초안→검증→게시 대상이다. 따라서 §1의 “저장은 초안”은 설정 문서에만 적용한다.
+- 법인 중지: 진행 중 승인/ERP/예약 게시 건이 있으면 409 COMPANY_IN_USE로 거부한다. 없으면 활성 세션 폐기 후 중지한다. 마지막 활성 플랫폼 관리자와 마지막 활성 법인 관리자의 소속 중지는 거부한다.
+- /users의 법인 관리자 중지는 해당 membership만 중지한다. 전역 identity 중지는 플랫폼 관리자만 수행하며 모든 소속 세션을 회수한다.
+- 일반 승인함은 /approvals, 알림함은 /notifications로 노출한다. ADM-22와 동일 service를 사용하되 admin 메뉴 권한을 요구하지 않는다.
+- ADM-20 allowAutoApprove는 이번 목업에서 false로 고정한다. ADM-21 mode는 SEQUENTIAL/ALL/ANY만 지원하며 quorum 임의 숫자는 입력 불가다.
+- 미리보기의 role 선택은 합성 fixture만 사용한다. 다른 사용자의 실제 데이터 조회/토큰 발급/권한 가장을 허용하지 않는다.
+
+### MFA UI와 영업사원 로그인
+ADM-28: 기본 policy 및 roleOverrides의 OFF/OPTIONAL/REQUIRED, DEMO provider, 잠금/만료 설정을 편집한다. ADM-03: MFA 등록 여부·마지막 인증 시각·초기화 버튼을 표시한다. 초기화는 security.mfa.reset 권한과 사유를 요구하고 비밀값/챌린지 값을 조회하지 않는다.
+로그인은 법인 코드+loginId+비밀번호 → 필요 시 DEMO 등록/챌린지 → 업무 화면 순서다. OPTIONAL이며 미등록이면 “DEMO 등록/이번 로그인 건너뛰기”를 제공하고, 등록된 사용자는 챌린지를 거친다. REQUIRED는 건너뛰기 불가. 만료/실패/사용 완료/초기화 상태를 별도 메시지로 표시한다. 회사 전환 중 MFA가 요구되면 목적 회사 화면은 인증 완료 후에만 연다.
+
+### 거래처 수직 시연 필드
+기존 account 필드 key는 A00 adapter 매핑으로 보존한다. 아래 추가 항목은 명시적으로 등록하는 합성 fixture 필드이며 기존 DB 컬럼이라고 가정하지 않는다.
+
+| key | 타입/초기값 | 시연 차이 |
+|---|---|---|
+| x_priority | enum NORMAL/HIGH, 기본 NORMAL | US_A/US_B 공통 |
+| x_nextContactDate | date, nullable | HIGH일 때 필수 |
+| x_visitGroup | text, 최대 100자 | US_A 표시, US_B 숨김 |
+| x_creditLimit | decimal, nullable | US_B read=false 역할 검증 |
+| x_optIn | boolean, 기본 false | false가 상속·저장 과정에서 보존되는지 검증 |
+
+조건 예시는 x_priority→x_nextContactDate를 사용한다. 위 필드는 FIELD.extensionDefinitions와 registry에 명시적으로 등록한 후 배치한다. taxNo 같은 기존 표의 예시는 실제 key/불변식 확인 전 사용하지 않으며 기본 업무 필수값을 해제하지 않는다.

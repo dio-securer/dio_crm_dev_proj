@@ -4,7 +4,7 @@
 식별자는 API에서는 public UUID, SQL 내부에서는 기존 bigint를 유지한다. companyId라는 API 속성은 회사 public UUID를 의미하며 내부 CompanyKey bigint와 혼용하지 않는다. 기존 API와 연결하는 adapter에서만 변환한다.
 UTC ISO timestamp, decimal은 문자열로 전송한다. 날짜만 있는 값은 YYYY-MM-DD다. 정렬은 stableKey로 보조 정렬한다.
 
-모든 관리 저장 요청에 revision/If-Match를 요구한다. 생성·게시·승인·모의 ERP 명령에는 Idempotency-Key를 요구한다. 검증 오류는 {code,messageKey,fieldErrors,requestId} 형식으로 반환한다.
+생성을 제외한 관리 갱신 요청에 revision/If-Match를 요구한다. 신규 변경 명령에는 Idempotency-Key를 요구한다. 상세 예외와 응답은 §7을 따른다. 검증 오류는 {code,messageKey,fieldErrors,requestId} 형식으로 반환한다.
 HTTP: 400 구문, 401 인증, 403 권한, 404 미존재/타 법인 레코드, 409 revision·상태 충돌, 422 의미 검증. 서버는 payload의 companyId를 신뢰하지 않고 활성 membership과 경로 회사를 검증한다.
 
 ## 2. 핵심 TypeScript 계약 (제안)
@@ -12,7 +12,7 @@ HTTP: 400 구문, 401 인증, 403 권한, 404 미존재/타 법인 레코드, 40
 type ConfigScope = 'COMMON'|'TEMPLATE'|'COUNTRY'|'COMPANY';
 type Domain = 'FEATURE'|'MENU'|'SCREEN'|'FIELD'|'RULE'|'TERM'|'CODE'
   |'WORKFLOW'|'APPROVAL'|'NOTIFICATION'|'NUMBERING'|'CALENDAR'
-  |'INTEGRATION'|'SECURITY';
+  |'INTEGRATION'|'SECURITY'|'LIST_VIEW'|'ACTION';
 interface ConfigDocument {
   id: string; scope: ConfigScope; scopeKey: string; domain: Domain;
   stableKey: string; schemaVersion: 1; revision: number;
@@ -35,7 +35,7 @@ interface AdminTransaction {
   appendEvent(event: unknown): Promise<void>;
 }
 ~~~
-collection은 코드 allowlist enum으로 구현한다. 사용자 입력 collection/table 이름을 SQL 식별자로 사용하지 않는다. Node memory adapter도 법인별 mutex와 copy-on-write rollback을 제공한다. Browser adapter는 단일 탭 쓰기 기준이며 다른 탭 revision 변경을 감지하면 편집을 막고 새로고침을 요구한다.
+collection은 코드 allowlist enum으로 구현한다. 사용자 입력 collection/table 이름을 SQL 식별자로 사용하지 않는다. Node memory adapter도 법인별 mutex와 copy-on-write rollback을 제공한다. Browser adapter는 04 §9.1의 dataset Web Lock 안에서 revision을 비교하고 단일 envelope를 저장한다.
 
 ## 3. 논리 데이터 사전
 아래는 구현 대상 논리 모델이다. SQL 적용은 이번 범위가 아니며 신규 migration은 후속 요청 시 실제 다음 번호를 확인하고 작성한다.
@@ -143,7 +143,7 @@ collection은 코드 allowlist enum으로 구현한다. 사용자 입력 collect
 | POST /companies/:company/mock-erp/requests/:id/retry | reason | 기존 idempotency identity 유지한 새 attempt |
 | POST /mock-datasets/:id/reset | expectedRevision,reason | 접근 가능한 목업 dataset 초기화 |
 
-GET /api/me/context는 기존 응답을 보존하고 companyId/membershipId/releaseId/permissionVersion을 추가한다. 법인 전환은 POST /api/me/company-context {companyId}에서 membership 확인 후 새 token/context를 발급한다.
+GET /api/me/context는 기존 응답 및 숫자 companyId를 보존하고 adminContext에 신규 UUID 기반 문맥을 추가한다. 법인 전환은 POST /api/me/company-context {companyId}에서 membership 확인 후 새 token/context를 발급한다.
 ADM-05/13의 dataScopes/fieldPermissions는 role DTO의 typed 하위 구조로 저장하고 ADM-07~24의 구성은 domain별 config API를 사용한다. 확장 필드 정의도 FIELD payload의 extensionDefinitions로 초안 관리하고 게시 시 definition read model을 생성한다.
 
 ## 6. 트랜잭션과 인덱스
@@ -153,3 +153,60 @@ ADM-05/13의 dataScopes/fieldPermissions는 role DTO의 typed 하위 구조로 �
 - API memory에서도 동일 rollback 계약을 테스트한다.
 - 주요 조회 index: company+active, company+entity+state, instance+task state, company+request status, scope+domain+stableKey.
 - 모든 쿼리·검색·확장 필드 조회는 회사 조건을 포함하며 company filter를 마지막 UI 단계에만 적용하지 않는다.
+
+## 7. v1.1 계약 보완
+
+### 7.1 식별자·저장·HTTP
+- 신규 admin API의 companyId/userId 등 id는 UUID 문자열이다. 기존 JWT.companyId와 기존 업무 API 숫자 ID는 유지하고 companyPublicId/membershipId/sessionId/tokenUse를 추가한다. /api/me/context의 기존 companyId를 UUID로 덮어쓰지 않고 adminContext.companyId에 새 계약을 둔다.
+- 신규 로그인은 homeCompanyCode+loginId로 identity를 찾는다. 기존 company 없는 로그인은 일치 identity가 정확히 하나일 때만 허용하고 복수이면 422 COMPANY_REQUIRED를 반환한다. 임의 TOP 1 선택 금지.
+- 생성은 If-Match 없이 수행, 갱신은 If-Match: "revision"과 동일 body.revision을 요구한다. 누락/헤더-body 불일치는 400 REVISION_REQUIRED/REVISION_MISMATCH, 현재 revision 불일치는 409 REVISION_CONFLICT.
+- 성공: 조회/갱신/명령 200, 리소스 생성 201, 대기 job 202. 단건 {data,meta:{revision,requestId}}, 목록 {items,page,pageSize,total,requestId}. page 기본 1, pageSize 기본 20/최대 100. sort는 허용 필드+id 보조 정렬, 검색·total 계산 전에 회사/행/필드 권한 적용.
+- 오류 {code,messageKey,fieldErrors:[{path,code,messageKey}],requestId}; 타 법인/비가시 레코드는 404, 액션 권한 위반은 403, 정책 readOnly 위반은 422 FIELD_READ_ONLY. hidden 또는 write=false 필드 전송은 403 FIELD_WRITE_DENIED.
+- PATCH의 누락 필드는 유지, null은 nullable일 때만 삭제값으로 허용. 알 수 없는 속성은 422 UNKNOWN_FIELD. 설정 payload 갱신은 부분 deep merge가 아니라 해당 domain 문서 전체 교체이며 상속 patch는 별도 overrides 구조로 표현한다.
+- 모든 신규 변경 명령에 Idempotency-Key를 사용한다. receipt 키는 (company 또는 명시 global scope, actor, operation, key). payload hash는 method/path/body를 key 순서 정규화한 JSON의 SHA-256으로 산출한다. 회사·권한·세션 검사를 먼저 수행하고 성공 receipt만 재사용한다. 같은 key/다른 hash는 409 IDEMPOTENCY_CONFLICT. 저장·event·receipt는 같은 transaction이다. 실패/rollback에는 성공 receipt를 남기지 않는다. 목업 receipt는 dataset reset까지 보존한다.
+
+### 7.2 누락 domain 구조
+기존 Domain union에 LIST_VIEW, ACTION을 추가한다. SECTION은 SCREEN.sections, EXTENSION은 FIELD.extensionDefinitions, field permission/data scope는 즉시 반영하는 role 하위 구조다.
+
+| 대상 | 확정 구조 |
+|---|---|
+| LIST_VIEW | entity, views[{key,labelKey,columns:string[],filter:ConditionNode,sort:[{field,direction:ASC 또는 DESC}],pageSize,shared:boolean}] |
+| ACTION | entity, actions[{key,labelKey,featureKey,permission,condition:ConditionNode,confirmKey,enabled:boolean}] |
+| FIELD 추가 | extensionDefinitions[{key,type,labelKey,nullable,active,searchable,maxLength?,precision?,scale?,enumValues?}] |
+| role 추가 | dataScopes[{entity,actions,scope,orgIds,sharedRecordIds}], fieldPermissions[{entity,field,read,write,maskType}] |
+| APPROVAL.steps | [{id,order,mode,approvers:[{type:MEMBERSHIP 또는 ROLE,key}],dueBusinessDays,alternateMembershipId?}] |
+| SECURITY.mfaPolicy | {default:OFF 또는 OPTIONAL 또는 REQUIRED,roleOverrides:[{roleCode,policy}],provider:DEMO} |
+
+JSON optional은 누락 허용, nullable은 명시 null 허용이다. enumValues는 중복 없는 stable code 배열. decimal은 precision 18/scale 4 문자열, 지수 표기·NaN 거부, 범위 초과/다섯째 소수 자리 입력은 422(묵시 반올림 없음). date는 실제 달력 날짜만 허용한다. text 기본 최대 1000자, boolean은 true/false만 허용한다. 활성/비활성 포함 법인·엔티티별 확장 정의 최대 50개다. maskType은 NONE/LAST4, LAST4는 text에만 허용하며 원문 대신 마스킹 값만 응답한다.
+
+ConditionNode는 {op:all|any,args:ConditionNode[]} 또는 {op:not,arg:ConditionNode} 또는 {op:eq|ne|in|isEmpty|gt|gte|lt|lte,field:string,value?:scalar|scalar[]}의 판별 union이다. all/any는 빈 배열 금지, in은 같은 타입의 비어 있지 않은 배열, isEmpty는 value 금지다. 필드 참조는 registry allowlist이며 decimal/date/문자열 타입의 암묵 변환을 금지한다.
+
+### 7.3 Repository·세션 모델
+IdentityRepository: findByHomeCompanyAndLogin, findById, listMemberships, readMembership, updateIdentity, updateMembership.
+SessionRepository: create, readActive, rotateRefresh, revoke, revokeForIdentity, revokeForMembership, consumeMfaChallenge.
+운영 값은 config JSON과 분리하여 sessions, mfaEnrollments, mfaChallenges, authAttempts 집합에 저장한다. 세션은 userId/membershipId/tokenUse/permissionVersion/securityVersion/mfaVerifiedAt/provider/expiresAt/revokedAt을 가진다. 챌린지는 userId/targetMembershipId/purpose/expiresAt/attemptCount/consumedAt/securityVersion을 가진다. 인증값은 공개 DTO와 감사 이벤트에서 제외한다.
+AdminRepository.transact의 tx에 read/query도 포함하여 비교와 갱신을 같은 잠금 내에서 수행한다. 다회사 identity 회수는 identity lock → company UUID 오름차순 lock으로 처리하며 다른 순서 잠금은 금지한다.
+
+### 7.4 추가 API (신규 구현 대상)
+아래 /api/admin prefix는 명시된 /api/auth, /api/me 외 경로에 적용한다.
+
+| Method/경로 | 입력/결과 | 권한·규칙 |
+|---|---|---|
+| POST /api/auth/login | homeCompanyCode,loginId,password → AUTHENTICATED 또는 MFA_ENROLL_REQUIRED/MFA_REQUIRED | 중간 응답에 access/refresh 없음 |
+| POST /api/auth/mfa/enroll | 제한 token → enrollmentId/challengeId/expiresAt | DEMO 등록 준비만, 검증 전 등록 완료 아님 |
+| POST /api/auth/mfa/verify | 제한 token,challengeId,demoCode → 업무 token/context | 원자적 1회 소비 |
+| POST /companies/:company/users/:id/mfa-reset | reason,revision → 등록 해제 | security.mfa.reset, 모든 identity 세션/챌린지 회수 |
+| GET /companies/:company/sessions | userId,page → 세션 요약 | session.read, token 원문 없음 |
+| GET/POST /companies/:company/runtime/accounts | 목록 조건 또는 {values,releaseId} | account.read/create, 필드·회사 검증 |
+| GET/PATCH /companies/:company/runtime/accounts/:id | 변경 시 {values,revision,releaseId} | account.read/update |
+| POST /companies/:company/runtime/accounts/:id/erp-requests | revision,releaseId,scenario | account.requestErp, 서버에서 업무 payload 구성 |
+| GET/POST /companies/:company/runtime/approval-documents | 목록 또는 합성 문서 | approvalDocument.read/create |
+| PATCH /companies/:company/runtime/approval-documents/:id | values,revision,releaseId | 작성자이며 잠기지 않은 상태 |
+| POST /companies/:company/runtime/approval-documents/:id/submit | revision,releaseId | approvalDocument.submit |
+| GET /companies/:company/approvals/:id | instance/task/event 상세 | 작성자/배정 승인자/명시 운영 조회 권한 |
+| GET /companies/:company/mock-erp/requests/:id | request/attempt/event 상세 | integration.read |
+| POST /mock-datasets/:id/clock/advance | expectedRevision,seconds | mock.clock.advance, API_MOCK 한정 |
+
+기존 approval-simulations API는 합성 문서 생성+submit의 운영자용 facade다. 일반 사용자 제출과 같은 엔진을 호출한다. 일반 업무 사용자의 ERP 요청은 simulate 권한 없이 profile의 시나리오를 사용하며, 임의 scenario 지정/응답 주입은 integration.simulate만 허용한다.
+
+§7.4 보충: POST /api/auth/mfa/skip은 OPTIONAL/미등록 제한 세션만 허용하고 업무 token/context를 반환한다(04 §9.2). 인증/세션 폐기/시계 전진 같은 append-only 명령은 대상 revision이 없는 경우 If-Match를 요구하지 않으며 활성 세션·challenge 또는 expectedRevision을 원자 검증한다. approval decision은 {taskRevision,revision} 둘 다 받고 If-Match는 instance revision이다. 새 문서가 없는 approval resubmit은 명시 documentRevision을 검증한다. 위 예외를 제외한 mutable 리소스 갱신은 §7.1 규칙을 적용한다.

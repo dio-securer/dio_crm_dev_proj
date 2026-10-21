@@ -54,7 +54,7 @@ flowchart TD
 API_MOCK에서는 DatabaseService에 의존하는 auth를 그대로 강제하지 않는다. MockIdentityRepository를 기존 auth 서비스 포트에 주입하고 해시된 합성 계정 fixture로 테스트 JWT를 발급한다. 기존 Guard는 유지한다. 운영 로그인으로 목업 사용자를 허용하지 않는다.
 기본 실행 모드는 기존 동작을 유지하며 새 모드는 명시적으로 선택한다. 배포 환경이 production이면 MOCK 구동을 거부한다.
 
-브라우저 저장 namespace: dio-crm:admin:v1:{datasetId}:{companyId}. 공통 템플릿은 별도 namespace. 데이터 export 파일은 이번 범위에 없으며 reset 전 변경 개수/범위를 보여주고 해당 dataset만 초기화한다.
+브라우저 저장 key: dio-crm:admin:v1:{datasetId}. 단일 envelope 내부 companies[companyId]와 commonTemplates로 분리하여 dataset 단위 원자 저장한다. 데이터 export 파일은 이번 범위에 없으며 reset 전 변경 개수/범위를 보여주고 해당 dataset만 초기화한다.
 
 ## 5. 관리 주체
 | 역할 | 기본 범위 |
@@ -75,3 +75,23 @@ API_MOCK에서는 DatabaseService에 의존하는 auth를 그대로 강제하지
 - 언어 변경은 레이블과 형식에만 영향을 주며 법인, 통화 원장 값, 프로세스는 변경하지 않는다.
 - 취소/반품 등 기존 미확정 업무를 관리자 설정 기능이라는 이유로 자동 구현하지 않는다.
 - 정책 변경은 신규 실행에 적용한다. 진행 중 승인/모의 ERP 요청은 생성 당시 버전을 유지한다.
+
+## 7. v1.1 구현 연결 결정 (2026-10-21)
+
+기준: main 78949684b382769bcb96547fd9ccada712ccbb60. 아래는 기존 코드의 구현 완료 설명이 아니라 이번 보완으로 확정하는 목업 구현 기준이다.
+
+| 연결 지점 | 필수 변경 | 회귀 경계 |
+|---|---|---|
+| backend/src/app.module.ts | 기존 AppModule은 유지; API_MOCK 전용 MockAppModule과 bootstrap 분기 추가 | MockAppModule은 DatabaseService 및 SQL 의존 업무 service를 등록하지 않음 |
+| backend/src/modules/auth/auth.service.ts | IdentityRepository/SessionRepository로 조회·refresh 저장 분리; SQL 구현은 기존 동작 유지 | 기존 Guard를 우회하는 mock 전용 무인증 경로 금지 |
+| backend/src/security/security.ts | sessionId, tokenUse, membership/권한 버전 및 MFA 수준 검사 | legacy 숫자 companyId의 의미를 바꾸지 않음 |
+| frontend/src/api.ts | 선택적 headers/signal 옵션, status/code/fieldErrors를 가진 ApiError 추가 | 기존 apiGet/Post/Patch 호출 서명은 계속 지원 |
+| frontend/src/app/screen-registry.tsx | HQ_ACCOUNT/GLOBAL_ACCOUNT 재사용, effective config 전달 | 기존 registry key 이름 변경 금지 |
+| frontend/src/market/field-profiles/types.ts | code↔key, readonly↔readOnly 변환 adapter | 기존 프로필 타입을 암묵적으로 바꾸지 않음 |
+| frontend/src/account-sandbox.ts | 기존 저장 adapter와 새 AdminClient 사이 AccountRuntimePort 연결 | 기존 seed 회사 소속 및 원본 백업 보존 |
+
+API_MOCK는 auth/me/admin/거래처 샘플/승인 샘플/모의 ERP만 등록한다. 나머지 기존 업무 API를 DB 없이 모두 지원한다고 표시하지 않는다. 지원하지 않는 화면은 모드 안내와 함께 비활성화하고 호출은 501 MOCK_CAPABILITY_UNAVAILABLE로 일관되게 반환한다. 기존 업무 전체의 재작성은 범위 밖이다.
+
+사용자 거래처 화면은 AccountRuntimePort.list/get/create/update/requestErp를 통해 모드별 adapter를 사용한다. API_MOCK는 /api/admin/companies/:company/runtime/accounts에 연결하고 BROWSER_MOCK는 같은 계약의 로컬 구현을 사용한다. 기존 SQL API의 DTO는 legacy adapter 밖으로 노출하지 않는다.
+
+런타임 모드 변수는 신규 CRM_EXECUTION_MODE=LEGACY|API_MOCK, 프런트는 VITE_CRM_EXECUTION_MODE=LEGACY|API_MOCK|BROWSER_MOCK로 고정한다. 미지정은 LEGACY. 알 수 없는 값/production mock은 bootstrap 전에 실패한다. API_MOCK 프런트는 /api/me/context의 실행 모드가 일치하지 않으면 중단하며 브라우저 목업으로 자동 전환하지 않는다. 서버 목업 전용 진입점은 SQL 환경값을 필수 검증하는 기존 env 모듈을 간접 import하지 않아야 한다. JWT 서명키는 로컬 개발 환경에서 주입하며 production 키/계정을 seed에 포함하지 않는다.
