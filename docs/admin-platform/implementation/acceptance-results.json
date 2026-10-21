@@ -1,0 +1,420 @@
+{
+  "note": "No acceptance case executed. Unit tests are separate evidence.",
+  "results": [
+    {
+      "tcId": "T01",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T02",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T03",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T04",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T05",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T06",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T07",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T08",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T09",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T10",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T11",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T12",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T13",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T14",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T15",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T16",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T17",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T18",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T19",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T20",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T21",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T22",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T23",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T24",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T25",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T26",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T27",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T28",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T29",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T30",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T31",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T32",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T33",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T34",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T35",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T36",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T37",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T38",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T39",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T40",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T41",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T42",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T43",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T44",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T45",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T46",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T47",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T48",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T49",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T50",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T51",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T52",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T53",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T54",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T55",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T56",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T57",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T58",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T59",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T60",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T61",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T62",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T63",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T64",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T65",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T66",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T67",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T68",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T69",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T70",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T71",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T72",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T73",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T74",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T75",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T76",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T77",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T78",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T79",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T80",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T81",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T82",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    },
+    {
+      "tcId": "T83",
+      "status": "BLOCKED",
+      "reason": "NOT_RUN: implementation incomplete; browser environment unavailable"
+    }
+  ]
+}

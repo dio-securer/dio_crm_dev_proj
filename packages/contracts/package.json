@@ -12,6 +12,10 @@
     "./globalization": {
       "types": "./dist/globalization.d.ts",
       "default": "./dist/globalization.js"
+    },
+    "./admin": {
+      "types": "./dist/admin/index.d.ts",
+      "default": "./dist/admin/index.js"
     }
   },
   "scripts": {
@@ -19,5 +23,15 @@
   },
   "devDependencies": {
     "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "zod": "^3.24.1"
+  },
+  "typesVersions": {
+    "*": {
+      "admin": [
+        "dist/admin/index.d.ts"
+      ]
+    }
   }
 }
