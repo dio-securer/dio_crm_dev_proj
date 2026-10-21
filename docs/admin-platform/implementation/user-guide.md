@@ -8,7 +8,7 @@ Node 및 pnpm 9 환경에서 저장소 의존성을 설치하고 `pnpm build`를
 
 - 브라우저 저장 방식: `pnpm dev:admin:browser`
 - API 메모리 방식: 별도 터미널에서 `pnpm dev:admin:api`, `pnpm dev:admin:web`
-- 표시되는 Vite 주소의 `/admin/configuration`으로 접속한다. API backend 기본 포트는 3000이며 Vite가 `/api`를 프록시한다.
+- 표시되는 Vite 주소의 `/admin/configuration`으로 접속한다. API backend 기본 포트는 3001이며 Vite가 `/api`를 프록시한다.
 - 전체 검증: `CHROMIUM_PATH=/path/to/chromium pnpm test:admin:all`. 기본 Playwright Chromium이 설치되어 있으면 경로 지정은 생략한다.
 
 ## 계정과 법인
