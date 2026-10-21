@@ -24,7 +24,9 @@
     "test:admin:api": "node --test tests/admin/api.cjs tests/admin/legacy-auth.cjs tests/admin/legacy-http.cjs tests/admin/organization.cjs",
     "test:admin:browser": "node scripts/admin/run-web-test.cjs tests/admin/browser.cjs",
     "test:admin:baseline": "node scripts/admin/run-web-test.cjs scripts/admin/baseline.cjs",
-    "test:admin:entry": "node scripts/admin/run-entry-tests.cjs"
+    "test:admin:entry": "node scripts/admin/run-entry-tests.cjs",
+    "test:admin:security": "node --test tests/admin/security.cjs",
+    "test:admin:security-ui": "node scripts/admin/run-security-ui.cjs"
   },
   "devDependencies": {
     "playwright": "1.62.1"

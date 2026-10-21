@@ -1,5 +1,5 @@
 {
-  "note": "A00/A01/A02 scoped evidence. Full 83-case acceptance remains incomplete; partial stage checks are not full PASS.",
+  "note": "A00-A03 staged evidence. A03 gate approved at local 2fc8cd6. Full A04-A11 acceptance incomplete; T43 UNIT separated from INTEGRATION.",
   "results": [
     {
       "tcId": "T01",
@@ -34,7 +34,11 @@
     {
       "tcId": "T07",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "reason": "A03 API and Browser account permission fixture PASS; full dynamic-field runtime verification remains A05",
+      "evidence": [
+        "evidence/a03-security.log",
+        "evidence/a03-ui.log"
+      ]
     },
     {
       "tcId": "T08",
@@ -205,28 +209,96 @@
     },
     {
       "tcId": "T39",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A03 stage evidence verified",
+      "stage": "A03",
+      "mode": "BOTH",
+      "datasetId": "ADMIN_DEMO_V1",
+      "commit": "2fc8cd6",
+      "expected": "See 06 acceptance matrix and A03 report",
+      "actual": "A03 stage checks passed; worker B approved",
+      "command": "pnpm test:admin:security; pnpm test:admin:security-ui",
+      "evidencePaths": [
+        "evidence/a03-security.log",
+        "evidence/a03-ui.log",
+        "A03-report.md"
+      ],
+      "blocker": null,
+      "admIds": [
+        "ADM-28"
+      ]
     },
     {
       "tcId": "T40",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A03 stage evidence verified",
+      "stage": "A03",
+      "mode": "BOTH",
+      "datasetId": "ADMIN_DEMO_V1",
+      "commit": "2fc8cd6",
+      "expected": "See 06 acceptance matrix and A03 report",
+      "actual": "A03 stage checks passed; worker B approved",
+      "command": "pnpm test:admin:security; pnpm test:admin:security-ui",
+      "evidencePaths": [
+        "evidence/a03-security.log",
+        "evidence/a03-ui.log",
+        "A03-report.md"
+      ],
+      "blocker": null,
+      "admIds": [
+        "ADM-28"
+      ]
     },
     {
       "tcId": "T41",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A03 stage evidence verified",
+      "stage": "A03",
+      "mode": "API",
+      "datasetId": "ADMIN_DEMO_V1",
+      "commit": "2fc8cd6",
+      "expected": "See 06 acceptance matrix and A03 report",
+      "actual": "A03 stage checks passed; worker B approved",
+      "command": "pnpm test:admin:security; pnpm test:admin:security-ui",
+      "evidencePaths": [
+        "evidence/a03-security.log",
+        "evidence/a03-ui.log",
+        "A03-report.md"
+      ],
+      "blocker": null,
+      "admIds": [
+        "ADM-28"
+      ]
     },
     {
       "tcId": "T42",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A03 stage evidence verified",
+      "stage": "A03",
+      "mode": "API",
+      "datasetId": "ADMIN_DEMO_V1",
+      "commit": "2fc8cd6",
+      "expected": "See 06 acceptance matrix and A03 report",
+      "actual": "A03 stage checks passed; worker B approved",
+      "command": "pnpm test:admin:security; pnpm test:admin:security-ui",
+      "evidencePaths": [
+        "evidence/a03-security.log",
+        "evidence/a03-ui.log",
+        "A03-report.md"
+      ],
+      "blocker": null,
+      "admIds": [
+        "ADM-28"
+      ]
     },
     {
       "tcId": "T43",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "reason": "T43-UNIT PASS; T43-INTEGRATION requires A10 release activation",
+      "evidence": [
+        "evidence/a03-security.log",
+        "A03-report.md"
+      ]
     },
     {
       "tcId": "T44",
@@ -336,13 +408,47 @@
     },
     {
       "tcId": "T62",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A03 stage evidence verified",
+      "stage": "A03",
+      "mode": "API",
+      "datasetId": "ADMIN_DEMO_V1",
+      "commit": "2fc8cd6",
+      "expected": "See 06 acceptance matrix and A03 report",
+      "actual": "A03 stage checks passed; worker B approved",
+      "command": "pnpm test:admin:security; pnpm test:admin:security-ui",
+      "evidencePaths": [
+        "evidence/a03-security.log",
+        "evidence/a03-ui.log",
+        "A03-report.md"
+      ],
+      "blocker": null,
+      "admIds": [
+        "ADM-03",
+        "ADM-28"
+      ]
     },
     {
       "tcId": "T63",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A03 stage evidence verified",
+      "stage": "A03",
+      "mode": "API",
+      "datasetId": "ADMIN_DEMO_V1",
+      "commit": "2fc8cd6",
+      "expected": "See 06 acceptance matrix and A03 report",
+      "actual": "A03 stage checks passed; worker B approved",
+      "command": "pnpm test:admin:security; pnpm test:admin:security-ui",
+      "evidencePaths": [
+        "evidence/a03-security.log",
+        "evidence/a03-ui.log",
+        "A03-report.md"
+      ],
+      "blocker": null,
+      "admIds": [
+        "ADM-03",
+        "ADM-28"
+      ]
     },
     {
       "tcId": "T64",
@@ -356,8 +462,25 @@
     },
     {
       "tcId": "T66",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A03 stage evidence verified",
+      "stage": "A03",
+      "mode": "BOTH",
+      "datasetId": "ADMIN_DEMO_V1",
+      "commit": "2fc8cd6",
+      "expected": "See 06 acceptance matrix and A03 report",
+      "actual": "A03 stage checks passed; worker B approved",
+      "command": "pnpm test:admin:security; pnpm test:admin:security-ui",
+      "evidencePaths": [
+        "evidence/a03-security.log",
+        "evidence/a03-ui.log",
+        "A03-report.md"
+      ],
+      "blocker": null,
+      "admIds": [
+        "ADM-04",
+        "ADM-13"
+      ]
     },
     {
       "tcId": "T67",
@@ -377,13 +500,46 @@
     },
     {
       "tcId": "T69",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A03 stage evidence verified",
+      "stage": "A03",
+      "mode": "BOTH",
+      "datasetId": "ADMIN_DEMO_V1",
+      "commit": "2fc8cd6",
+      "expected": "See 06 acceptance matrix and A03 report",
+      "actual": "A03 stage checks passed; worker B approved",
+      "command": "pnpm test:admin:security; pnpm test:admin:security-ui",
+      "evidencePaths": [
+        "evidence/a03-security.log",
+        "evidence/a03-ui.log",
+        "A03-report.md"
+      ],
+      "blocker": null,
+      "admIds": [
+        "ADM-05"
+      ]
     },
     {
       "tcId": "T70",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A03 stage evidence verified",
+      "stage": "A03",
+      "mode": "BOTH",
+      "datasetId": "ADMIN_DEMO_V1",
+      "commit": "2fc8cd6",
+      "expected": "See 06 acceptance matrix and A03 report",
+      "actual": "A03 stage checks passed; worker B approved",
+      "command": "pnpm test:admin:security; pnpm test:admin:security-ui",
+      "evidencePaths": [
+        "evidence/a03-security.log",
+        "evidence/a03-ui.log",
+        "A03-report.md"
+      ],
+      "blocker": null,
+      "admIds": [
+        "ADM-04",
+        "ADM-06"
+      ]
     },
     {
       "tcId": "T71",

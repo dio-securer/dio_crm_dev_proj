@@ -1,0 +1,30 @@
+$ node --test tests/admin/api.cjs tests/admin/legacy-auth.cjs tests/admin/legacy-http.cjs tests/admin/organization.cjs
+✔ HTTP requires valid typed mock authentication (107.701303ms)
+✔ duplicate login requires a company; credentials failure returns 401 (12.230359ms)
+✔ strict payload, company isolation and idempotent create over HTTP (45.323485ms)
+✔ non-admin cannot change configurations; revoked session cannot be replayed (23.938755ms)
+✔ production mock bootstrap fails before binding providers (0.899366ms)
+✔ unimplemented API fails explicitly rather than falling through to SQL (3.594921ms)
+✔ restarting API resets seed, draft data and sessions (23.220122ms)
+✔ GET and receipt replay preserve dataset revision (14.059421ms)
+✔ refresh token is consumed exactly once under concurrent requests (10.3482ms)
+✔ LEGACY login/refresh/logout retain numeric IDs using SQL stub only (22.51429ms)
+✔ T60 LEGACY HTTP login/refresh/logout preserves numeric claims with SQL stub (179.943006ms)
+✔ T68 organization tree rejects cycle and cross-company parent atomically (150.782161ms)
+✔ T38 shared membership switch rejects unassigned company and old token (23.580667ms)
+✔ identity and membership suspension invalidate existing sessions and protect last admins (25.673369ms)
+✔ T29/T82 transfer detects concurrent edits, preserves tasks, replays completed job (34.812059ms)
+✔ T58-UNIT company create prepares draft; code and template are immutable in PATCH (11.203075ms)
+✔ T49 company and user reactivation never resurrects revoked tokens (34.146343ms)
+✔ T49/T58 company profile is a draft and live work blocks deactivation (17.81134ms)
+✔ T58 template preview rejects stale revision and apply creates only a draft (14.912589ms)
+✔ a single stopped membership does not prevent login to another active company (18.983775ms)
+✔ a SALES membership cannot replace the last reachable platform administrator (12.381066ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 804.59826
