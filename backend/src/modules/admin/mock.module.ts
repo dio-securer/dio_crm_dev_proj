@@ -1,7 +1,7 @@
 import { Module, Controller, Post, Get, Patch, Body, Headers, Param, Req, Query } from '@nestjs/common';
 import { randomUUID, createHash } from 'node:crypto';
 import { z } from 'zod';
-import { NotificationEngine,notificationRequest, ApprovalEngine,approvalRequest, MasterDataEngine, masterDataRequest, ConfigurationEngine, configurationRequest, assert, canonical, createDraft, updateDraft, OrganizationCommands } from '@dio-crm/contracts/admin';
+import { IntegrationEngine,integrationRequest, NotificationEngine,notificationRequest, ApprovalEngine,approvalRequest, MasterDataEngine, masterDataRequest, ConfigurationEngine, configurationRequest, assert, canonical, createDraft, updateDraft, OrganizationCommands } from '@dio-crm/contracts/admin';
 import { MemoryAdminRepository } from './memory.repository';
 import { MockAuth, MockIdentityRepository } from './mock-auth';
 function sDrafts(tx: any, platform: boolean) { return (platform ? tx.forCompany('*') : tx).query('drafts'); }
@@ -157,6 +157,10 @@ class MockController {
         return this.auth.engine.enroll(c.challengeId); if (action === 'verify')
         return this.auth.present(await this.auth.engine.verify(c.challengeId, body, key)); if (action === 'skip')
         return this.auth.present(await this.auth.engine.skip(c.challengeId, key)); assert(false, 404, 'NOT_FOUND'); }
+    @Get(['admin/companies/:company/mock-erp/requests','admin/companies/:company/mock-erp/requests/:id','admin/companies/:company/mock-erp/metadata'])
+    async integrationRead(@Headers('authorization') h:string,@Req() req:any){return integrationRequest(new IntegrationEngine(this.repo),await this.auth.authenticate(h),req.originalUrl,'GET',undefined,'');}
+    @Post(['admin/companies/:company/mock-erp/requests','admin/companies/:company/mock-erp/requests/:id/:action','admin/companies/:company/mock-erp/preview','admin/companies/:company/mock-erp/fixtures','admin/companies/:company/mock-erp/advance','admin/companies/:company/runtime/accounts/:id/erp-requests'])
+    async integrationCommand(@Headers('authorization') h:string,@Headers('idempotency-key') key:string,@Headers('if-match') match:string,@Req() req:any,@Body() body:any){return integrationRequest(new IntegrationEngine(this.repo),await this.auth.authenticate(h),req.originalUrl,'POST',body,key,match);}
     @Post(['admin/companies/:company/notifications/:id','admin/companies/:company/notifications/:id/read'])
     async notificationCommand(@Headers('authorization') h:string,@Headers('idempotency-key') key:string,@Headers('if-match') match:string,@Req() req:any,@Body() body:any){return notificationRequest(new NotificationEngine(this.repo),await this.auth.authenticate(h),req.originalUrl,'POST',body,key,match);}
     @Get(['admin/companies/:company/runtime/approval-documents','admin/companies/:company/runtime/approval-documents/:id','admin/companies/:company/approvals/:id'])

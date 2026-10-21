@@ -9,7 +9,7 @@
     "report": "docs/admin-platform/implementation/A06-report.md"
   },
   "executionMode": "on_chat_invocation_sequential",
-  "nextStage": "A09",
+  "nextStage": "A10",
   "stages": [
     {
       "id": "A07",
@@ -44,10 +44,13 @@
       "title": "ERP 연동 가정 구현",
       "dependsOn": "A08",
       "instruction": "docs/admin-platform/execution/A09.md",
-      "status": "PENDING",
-      "report": null,
-      "evidence": [],
-      "review": null,
+      "status": "DONE",
+      "report": "docs/admin-platform/implementation/A09-report.md",
+      "evidence": [
+        "docs/admin-platform/implementation/evidence/a09-http.log",
+        "docs/admin-platform/implementation/evidence/a09-ui.log"
+      ],
+      "review": "Worker B approved; independent HTTP7 PASS",
       "checkpoint": null
     },
     {
@@ -55,11 +58,13 @@
       "title": "설정 적용 운영·미리보기 완성",
       "dependsOn": "A09",
       "instruction": "docs/admin-platform/execution/A10.md",
-      "status": "PENDING",
+      "status": "IN_PROGRESS",
       "report": null,
       "evidence": [],
       "review": null,
-      "checkpoint": null
+      "checkpoint": {
+        "nextAction": "SECURITY publication, scheduling, template activation, mobile dirty flows"
+      }
     },
     {
       "id": "A11",

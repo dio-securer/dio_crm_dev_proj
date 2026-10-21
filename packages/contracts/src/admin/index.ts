@@ -25,3 +25,6 @@ export * from './approval-engine';
 
 export * from './notification-runtime';
 export * from './notification-engine';
+
+export * from './integration-config';
+export * from './integration-engine';

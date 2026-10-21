@@ -30,3 +30,7 @@ A01~A05의 단계별 구현·검증은 각 보고서를 기준으로 한다. A06
 - SecurityEngine → active release 거래처 CRUD, 조건·타입·마스킹·검색 검사.
 - AccountDesigner → A04 초안·검증·게시; AccountRuntimePage → MockAccountRuntimePort → HttpAdminClient/BrowserSecurityClient.
 - role.read field-registry → SecurityPages의 등록/확장 필드 선택기. key/type/active만 반환.
+
+## A09 명시적 MOCK ERP adapter
+
+기존 `integration/interface.service.ts`의 enqueuePending은 변경하지 않는다. `contract/contract.service.ts`의 IF-ERP-002/004 및 `order/order.service.ts`의 IF-ERP-007 결과 의미를 IntegrationEngine sample handler에서 재현한다. SQL handler 호출이 아닌 DEMO repository 업무상태 변경이며 mode=MOCK에서만 실행된다. 수금/납품은 기존 번호를 추정하지 않고 DEMO-COLLECTION/DEMO-DELIVERY를 사용한다. 상품 snapshot/계획합계·주문 items/address·수금 date·납품 item/date를 typed DTO로 검증한다. 모든 외부 ERP/EMAIL 네트워크 전송은 0이다.
