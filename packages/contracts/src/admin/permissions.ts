@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { assert, Row, Transaction } from './core';
-export const permissionCatalog = ['account.read', 'account.create', 'account.update', 'company.read', 'company.manage', 'organization.read', 'organization.manage', 'user.read', 'user.manage', 'membership.assign', 'ownershipTransfer.manage', 'role.read', 'role.manage', 'role.assign', 'delegation.manage', 'config.read', 'config.edit', 'security.manage', 'session.read', 'session.revoke', 'user.mfaReset.request'] as const;
+export const permissionCatalog = ['account.read', 'account.create', 'account.update', 'company.read', 'company.manage', 'organization.read', 'organization.manage', 'user.read', 'user.manage', 'membership.assign', 'ownershipTransfer.manage', 'role.read', 'role.manage', 'role.assign', 'delegation.manage', 'config.read', 'config.edit', 'config.validate', 'config.publish', 'config.publish.scope', 'security.manage', 'session.read', 'session.revoke', 'user.mfaReset.request'] as const;
 const effect = z.enum(['UNSET', 'ALLOW', 'DENY']);
 export const roleSchema = z.object({ code: z.string().regex(/^[A-Z][A-Z0-9_]{1,39}$/), name: z.string().min(1).max(100), active: z.boolean(), grants: z.array(z.enum(permissionCatalog)), denies: z.array(z.enum(permissionCatalog)), dataScopes: z.array(z.object({ entity: z.literal('account'), actions: z.array(z.enum(['read', 'create', 'update'])).min(1), scope: z.enum(['SELF', 'ORG', 'SUBTREE', 'COMPANY', 'SHARED']), orgIds: z.array(z.string().uuid()).default([]), sharedRecordIds: z.array(z.string().uuid()).default([]) }).strict()), fieldPermissions: z.array(z.object({ entity: z.literal('account'), field: z.enum(['name', 'phone', 'secret', 'ownerMembershipId']), readEffect: effect, writeEffect: effect, maskType: z.enum(['NONE', 'LAST4']) }).strict()), mfaPolicy: z.enum(['OFF', 'OPTIONAL', 'REQUIRED']).default('OFF') }).strict();
 export type Role = z.infer<typeof roleSchema>;
@@ -12,7 +12,7 @@ export interface SecurityActor {
     role: string;
     permissionVersion: number;
 }
-const builtinGrants: Record<string, readonly string[]> = { PLATFORM_ADMIN: permissionCatalog.filter(x => !x.startsWith('account.')), COMPANY_ADMIN: permissionCatalog.filter(x => x !== 'delegation.manage' && !x.startsWith('account.')), MANAGER: ['account.read', 'account.create', 'account.update'], SALES: ['account.read', 'account.create', 'account.update'] };
+const builtinGrants: Record<string, readonly string[]> = { PLATFORM_ADMIN: permissionCatalog.filter(x => !x.startsWith('account.')), COMPANY_ADMIN: permissionCatalog.filter(x => x !== 'delegation.manage' && x !== 'config.publish.scope' && !x.startsWith('account.')), MANAGER: ['account.read', 'account.create', 'account.update'], SALES: ['account.read', 'account.create', 'account.update'] };
 export function rolesFor(tx: Transaction, m: Row): Role[] {
     const codes = Array.isArray(m.roleCodes) ? m.roleCodes as string[] : [String(m.role)];
     return codes.flatMap(code => {

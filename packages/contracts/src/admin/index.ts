@@ -7,3 +7,7 @@ export * from './organization';
 
 export * from './permissions';
 export * from './security';
+
+export * from './resolver';
+export * from './configuration';
+export * from './config-router';

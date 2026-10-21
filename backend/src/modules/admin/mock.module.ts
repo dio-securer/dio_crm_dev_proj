@@ -1,9 +1,10 @@
 import { Module, Controller, Post, Get, Patch, Body, Headers, Param, Req, Query } from '@nestjs/common';
 import { randomUUID, createHash } from 'node:crypto';
 import { z } from 'zod';
-import { assert, canonical, createDraft, updateDraft, OrganizationCommands } from '@dio-crm/contracts/admin';
+import { ConfigurationEngine, configurationRequest, assert, canonical, createDraft, updateDraft, OrganizationCommands } from '@dio-crm/contracts/admin';
 import { MemoryAdminRepository } from './memory.repository';
 import { MockAuth, MockIdentityRepository } from './mock-auth';
+function sDrafts(tx: any, platform: boolean) { return (platform ? tx.forCompany('*') : tx).query('drafts'); }
 @Controller('api')
 class MockController {
     constructor(private readonly auth: MockAuth, private readonly repo: MemoryAdminRepository) { }
@@ -22,7 +23,7 @@ class MockController {
     @Get('me/context')
     async context(
     @Headers('authorization')
-    header: string) { const s = await this.auth.authenticate(header); const identity = await this.auth.identities.get(s.userId); const snap = await this.repo.snapshot(); return { executionMode: 'API_MOCK', companyCode: snap.collections.companies[s.companyId].code, memberships: identity!.memberships.filter(m => m.active).map(m => ({ id: m.id, companyId: m.companyId, code: snap.collections.companies[m.companyId].code })), adminContext: { userId: s.userId, companyId: s.companyId, membershipId: s.membershipId, permissionVersion: s.permissionVersion } }; }
+    header: string) { const s = await this.auth.authenticate(header); const identity = await this.auth.identities.get(s.userId); const snap = await this.repo.snapshot(); return { executionMode: 'API_MOCK', companyCode: snap.collections.companies[s.companyId].code, memberships: identity!.memberships.filter(m => m.active).map(m => ({ id: m.id, companyId: m.companyId, code: snap.collections.companies[m.companyId].code })), adminContext: { releaseId: snap.collections.companies[s.companyId].activeReleaseId || 'A03_BASELINE', userId: s.userId, companyId: s.companyId, membershipId: s.membershipId, permissionVersion: s.permissionVersion } }; }
     @Post('me/company-context')
     switchCompany(
     @Headers('authorization')
@@ -60,7 +61,7 @@ class MockController {
     @Param('company')
     company: string,
     @Param('resource')
-    resource: string) { const s = await this.auth.authenticate(h); if (['roles', 'delegations', 'sessions', 'mfa-reset-requests'].includes(resource))
+    resource: string) { const s = await this.auth.authenticate(h); if (resource === 'releases') return new ConfigurationEngine(this.repo).read(s, 'COMPANY', company); if (['roles', 'delegations', 'sessions', 'mfa-reset-requests'].includes(resource))
         return { items: await this.auth.engine.list(s, company, resource === 'mfa-reset-requests' ? 'mfaResetRequests' : resource) }; await this.auth.engine.permission(s, company, resource === 'organizations' ? 'organization.read' : resource === 'transfers' ? 'ownershipTransfer.manage' : 'user.read'); const name = z.enum(['organizations', 'users', 'memberships', 'transfers']).parse(resource); const items = await new OrganizationCommands(this.repo, randomUUID).list({ ...s, role: s.role === 'PLATFORM_ADMIN' ? 'PLATFORM_ADMIN' : 'COMPANY_ADMIN' }, company, name); return { items, total: items.length, page: 1, pageSize: 20, requestId: randomUUID() }; }
     @Post('admin/companies/:company/:resource')
     async orgCreate(
@@ -75,7 +76,7 @@ class MockController {
     @Param('resource')
     resource: string,
     @Body()
-    body: unknown) { const s = await this.auth.authenticate(h); if (['roles', 'delegations'].includes(resource))
+    body: unknown) { const s = await this.auth.authenticate(h); if (resource === 'releases') return new ConfigurationEngine(this.repo).command(s, 'COMPANY', company, 'publish', body, key); if (['roles', 'delegations'].includes(resource))
         return this.auth.engine.command(s, company, resource === 'roles' ? 'role' : 'delegation', undefined, body, key, match); const op: Record<string, string> = { organizations: 'organization.create', users: 'user.create', memberships: 'membership.create', 'ownership-transfers': 'transfer.execute', deactivate: 'company.deactivate', reactivate: 'company.reactivate' }; assert(op[resource], 501, 'MOCK_CAPABILITY_UNAVAILABLE'); return this.orgCommand(s, company, op[resource], undefined, body, match, key); }
     @Patch('admin/companies/:company/:resource/:id')
     async orgUpdate(
@@ -122,7 +123,7 @@ class MockController {
     @Get('admin/config/drafts')
     async drafts(
     @Headers('authorization')
-    header: string) { const actor = await this.auth.authenticate(header); await this.auth.engine.permission(actor, actor.companyId, 'config.read'); const items = await this.repo.transact(actor.companyId, tx => tx.query('drafts')); return { items, total: items.length, page: 1, pageSize: 20, requestId: randomUUID() }; }
+    header: string) { const actor = await this.auth.authenticate(header); await this.auth.engine.permission(actor, actor.companyId, 'config.read'); const items = await this.repo.transact(actor.companyId, tx => sDrafts(tx, actor.role === 'PLATFORM_ADMIN')); return { items, total: items.length, page: 1, pageSize: 20, requestId: randomUUID() }; }
     @Post('admin/config/drafts')
     async create(
     @Headers('authorization')
@@ -142,7 +143,7 @@ class MockController {
     @Param('id')
     id: string,
     @Body()
-    body: unknown) { const s = await this.auth.authenticate(header); const old = (await this.repo.snapshot()).collections.drafts?.[id]; assert(old && old.companyId === s.companyId, 404, 'NOT_FOUND'); await this.auth.engine.draftAccess(s, String(old.domain), (body as any).overrides); return updateDraft(this.auth.engine.authorizedRepository(s, s.companyId, 'config.edit', String(old.domain), (body as any).overrides), this.actor(s), id, body, match, this.meta('PATCH', '/api/admin/config/drafts/' + id, body, key)); }
+    body: unknown) { const s = await this.auth.authenticate(header); const old = (await this.repo.snapshot()).collections.drafts?.[id]; assert(old && (old.companyId === s.companyId || s.role === 'PLATFORM_ADMIN'), 404, 'NOT_FOUND'); await this.auth.engine.draftAccess(s, String(old.domain), (body as any).overrides); return updateDraft(this.auth.engine.authorizedRepository(s, s.companyId, 'config.edit', String(old.domain), (body as any).overrides), this.actor(s), id, body, match, this.meta('PATCH', '/api/admin/config/drafts/' + id, body, key)); }
     @Post('auth/mfa/:action')
     async mfa(
     @Headers('authorization')
@@ -266,6 +267,24 @@ class MockController {
     id: string,
     @Body()
     body: unknown) { const s = await this.auth.authenticate(h); return this.auth.engine.command(s, s.companyId, 'decide', id, body, key, match); }
+    @Get('admin/config/versions/:id')
+    async configVersion(@Headers('authorization') h: string, @Param('id') id: string) { return new ConfigurationEngine(this.repo).version(await this.auth.authenticate(h), id); }
+    @Post('admin/config/validate')
+    async configValidate(@Headers('authorization') h: string, @Headers('idempotency-key') key: string, @Body() body: any) { const { companyId, ...b } = body; const a = await this.auth.authenticate(h); return new ConfigurationEngine(this.repo).command(a, 'COMPANY', companyId || a.companyId, 'validate', b, key); }
+    @Post('admin/config/preview')
+    async configPreview(@Headers('authorization') h: string, @Body() body: any) { return new ConfigurationEngine(this.repo).preview(await this.auth.authenticate(h), body.validationId); }
+    @Post('admin/config/rebases/:action')
+    async configRebase(@Headers('authorization') h: string, @Headers('idempotency-key') key: string, @Param('action') action: string, @Body() body: any) { const a = await this.auth.authenticate(h); const engine = new ConfigurationEngine(this.repo); if (action === 'apply') return engine.applyRebase(a, body, key); const { scope, scopeKey, ...b } = body; return engine.command(a, scope, scopeKey, 'rebase-' + action, b, key); }
+    @Get('admin/config/scopes/:scope/:scopeKey')
+    async configuration(@Headers('authorization') h: string, @Param('scope') scope: string, @Param('scopeKey') scopeKey: string) { return new ConfigurationEngine(this.repo).read(await this.auth.authenticate(h), scope, scopeKey); }
+    @Get('admin/config/scopes/:scope/:scopeKey/versions')
+    async configurationVersions(@Headers('authorization') h: string, @Param('scope') scope: string, @Param('scopeKey') scopeKey: string) { return this.configuration(h, scope, scopeKey); }
+    @Post('admin/config/scopes/:scope/:scopeKey/:operation')
+    async configurationCommand(@Headers('authorization') h: string, @Headers('idempotency-key') key: string, @Param('scope') scope: string, @Param('scopeKey') scopeKey: string, @Param('operation') operation: string, @Body() body: unknown) { assert(!(scope === 'COMPANY' && operation === 'publish'), 422, 'USE_COMPANY_RELEASE_API'); return new ConfigurationEngine(this.repo).command(await this.auth.authenticate(h), scope, scopeKey, operation, body, key); }
+    @Post('admin/companies/:company/releases/:release/rollback')
+    async rollbackConfiguration(@Headers('authorization') h: string, @Headers('idempotency-key') key: string, @Param('company') company: string, @Param('release') release: string, @Body() body: any) { assert(body.expectedReleaseId === release, 409, 'VERSION_CONFLICT'); return new ConfigurationEngine(this.repo).command(await this.auth.authenticate(h), 'COMPANY', company, 'rollback', body, key); }
+    @Get('admin/companies/:company/runtime/configuration')
+    async runtimeConfiguration(@Headers('authorization') h: string, @Param('company') company: string) { return new ConfigurationEngine(this.repo).read(await this.auth.authenticate(h), 'COMPANY', company, true); }
     private actor(s: any) { return { userId: s.userId, companyId: s.companyId, platformAdmin: s.role === 'PLATFORM_ADMIN', canConfigure: true }; }
     private meta(method: string, path: string, body: unknown, key: string) { return { key, hash: createHash('sha256').update(canonical({ method, path, body })).digest('hex'), id: randomUUID(), requestId: randomUUID() }; }
 }

@@ -1,3 +1,4 @@
+import { ConfigurationEngine } from './configuration';
 import { z } from 'zod';
 import { canonical, AdminRepository, Row, Collection, Transaction, uuid, companySchema, assert } from './core';
 import { CommandMeta } from './drafts';
@@ -51,7 +52,7 @@ export class OrganizationCommands {
     async command(actor: OrganizationActor, companyId: string, operation: string, resourceId: string | undefined, input: unknown, match: string | undefined, meta: CommandMeta): Promise<any> {
         this.authorize(actor, companyId, true);
         assert(meta.key, 400, 'IDEMPOTENCY_REQUIRED');
-        return this.repo.transact(companyId, tx => {
+        return this.repo.transact(companyId, async tx => {
             const receipt = actor.userId + ':' + operation + ':' + (resourceId || '') + ':' + meta.key;
             const previous = tx.receipt(receipt, meta.hash);
             if (previous)
@@ -64,13 +65,15 @@ export class OrganizationCommands {
                 assert(!tx.forCompany('*').query('companies').some(c => c.code === b.code), 409, 'COMPANY_CODE_EXISTS');
                 data = { ...b, id: this.id(), revision: 1 };
                 tx.forCompany('*').insert('companies', data as Row);
+                await new ConfigurationEngine(this.repo, this.id, this.now).initialize(tx.forCompany('*')); data = tx.forCompany('*').read('companies', String(data.id))!;
                 const targetTx = tx.forCompany(String(data.id));
-                targetTx.insert('drafts', { id: this.id(), companyId: String(data.id), revision: 1, schemaVersion: 1, scope: 'COMPANY', scopeKey: String(data.id), domain: 'COMPANY_PROFILE', stableKey: 'profile', parentVersionIds: [], overrides: [{ op: 'SET', path: [{ property: 'defaultLocale' }], value: b.defaultLocale }, { op: 'SET', path: [{ property: 'currency' }], value: b.currency }, { op: 'SET', path: [{ property: 'timezone' }], value: b.timezone }] });
+                targetTx.insert('drafts', { id: this.id(), companyId: String(data.id), revision: 1, schemaVersion: 1, scope: 'COMPANY', scopeKey: String(data.id), domain: 'COMPANY_PROFILE', stableKey: 'profile', parentVersionIds: (tx.forCompany('*').read('configScopes', 'COMPANY:' + String(data?.id || companyId))?.parentVersionIds || []), overrides: [{ op: 'SET', path: [{ property: 'defaultLocale' }], value: b.defaultLocale }, { op: 'SET', path: [{ property: 'currency' }], value: b.currency }, { op: 'SET', path: [{ property: 'timezone' }], value: b.timezone }] });
             }
             else if (operation === 'company.update') {
                 const b = z.object({ revision: z.number().int().positive(), name: z.string().min(1).optional(), defaultLocale: z.enum(['ko-KR', 'en-US']).optional(), currency: z.string().regex(/^[A-Z]{3}$/).optional(), timezone: z.string().optional() }).strict().parse(input);
+                await new ConfigurationEngine(this.repo, this.id, this.now).initialize(tx.forCompany('*'));
                 const old = update('companies', companyId, b);
-                companySchema.parse({ ...old, ...b });
+                const { configParentVersionIds, activeReleaseId, ...companyFields } = old; companySchema.parse({ ...companyFields, ...b });
                 const profileKeys = ['defaultLocale', 'currency', 'timezone'] as const;
                 const changed = profileKeys.filter(k => b[k] !== undefined && b[k] !== old[k]);
                 if (changed.some(k => k === 'currency' || k === 'timezone'))
@@ -79,7 +82,7 @@ export class OrganizationCommands {
                 if (changed.length) {
                     assert(!tx.query('drafts').some(d => d.domain === 'COMPANY_PROFILE'), 409, 'DRAFTS_PENDING');
                     const draftId = this.id();
-                    tx.insert('drafts', { id: draftId, companyId, revision: 1, schemaVersion: 1, scope: 'COMPANY', scopeKey: companyId, domain: 'COMPANY_PROFILE', stableKey: 'profile', parentVersionIds: [], overrides: changed.map(k => ({ op: 'SET', path: [{ property: k }], value: b[k] })) });
+                    tx.insert('drafts', { id: draftId, companyId, revision: 1, schemaVersion: 1, scope: 'COMPANY', scopeKey: companyId, domain: 'COMPANY_PROFILE', stableKey: 'profile', parentVersionIds: (old.activeReleaseId ? tx.read('releases', String(old.activeReleaseId))?.parentVersionIds : tx.forCompany('*').read('configScopes', 'COMPANY:' + companyId)?.parentVersionIds) || [], overrides: changed.map(k => ({ op: 'SET', path: [{ property: k }], value: b[k] })) });
                     createdDraftIds.push(draftId);
                 }
                 tx.compareAndSwap('companies', companyId, b.revision, { ...old, ...(b.name !== undefined ? { name: b.name } : {}) });
@@ -88,6 +91,7 @@ export class OrganizationCommands {
             }
             else if (operation === 'company.deactivate' || operation === 'company.reactivate') {
                 const b = z.object({ revision: z.number().int().positive(), reason: z.string().min(1) }).strict().parse(input);
+                await new ConfigurationEngine(this.repo, this.id, this.now).initialize(tx.forCompany('*'));
                 const old = update('companies', companyId, b);
                 const active = operation === 'company.reactivate';
                 if (!active) {

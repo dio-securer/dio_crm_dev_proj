@@ -1,4 +1,4 @@
-import { SecurityEngine, OrganizationCommands, createDraft, updateDraft, assert, securityHash, canonical, normalizeCommandError } from '@dio-crm/contracts/admin';
+import { ConfigurationEngine, configurationRequest, SecurityEngine, OrganizationCommands, createDraft, updateDraft, assert, securityHash, canonical, normalizeCommandError } from '@dio-crm/contracts/admin';
 import { HttpAdminClient } from './admin-client';
 import { BrowserAdminRepository } from './browser-repository';
 export class BrowserSecurityClient extends HttpAdminClient {
@@ -24,16 +24,17 @@ export class BrowserSecurityClient extends HttpAdminClient {
         if (path === '/api/auth/logout')
             return this.engine.logout(this.sessionId);
         const a = await this.engine.authenticate(this.sessionId);
+        const config = await configurationRequest(new ConfigurationEngine(this.repo), a, path, method, body, key); if (config !== undefined) return config;
         const snap = await this.repo.snapshot();
         if (path === '/api/me/context')
-            return { executionMode: 'BROWSER_MOCK', companyCode: snap.collections.companies[a.companyId].code, adminContext: {userId:a.userId,companyId:a.companyId,membershipId:a.membershipId,permissionVersion:a.permissionVersion}, memberships: Object.values(snap.collections.memberships).filter(m => m.userId === a.userId && m.active && snap.collections.companies[String(m.companyId)]?.active).map(m => ({ ...m, code: snap.collections.companies[String(m.companyId)].code })) };
+            return { executionMode: 'BROWSER_MOCK', companyCode: snap.collections.companies[a.companyId].code, adminContext: {releaseId:snap.collections.companies[a.companyId].activeReleaseId || 'A03_BASELINE',userId:a.userId,companyId:a.companyId,membershipId:a.membershipId,permissionVersion:a.permissionVersion}, memberships: Object.values(snap.collections.memberships).filter(m => m.userId === a.userId && m.active && snap.collections.companies[String(m.companyId)]?.active).map(m => ({ ...m, code: snap.collections.companies[String(m.companyId)].code })) };
         const meta = { id: crypto.randomUUID(), requestId: crypto.randomUUID(), key, hash: await securityHash(canonical({ path, method, body })) };
         if (path.startsWith('/api/admin/config/drafts')) {
             if (method === 'GET') {
                 await this.engine.permission(a, a.companyId, 'config.read');
             }
             if (method === 'GET')
-                return { items: Object.values(snap.collections.drafts || {}).filter(d => d.companyId === a.companyId) };
+                return { items: Object.values(snap.collections.drafts || {}).filter(d => a.role === 'PLATFORM_ADMIN' || d.companyId === a.companyId) };
             const id = path.split('/')[5], domain = id ? snap.collections.drafts[id]?.domain : body.domain;
             await this.engine.draftAccess(a, String(domain), body.overrides);
             const actor = { ...a, platformAdmin: a.role === 'PLATFORM_ADMIN', canConfigure: true };
