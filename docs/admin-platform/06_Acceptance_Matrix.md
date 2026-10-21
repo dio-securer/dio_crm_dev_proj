@@ -162,3 +162,70 @@ coverage.md는 31개 ADM 각각에 route/editor/client/API/DTO/repository/runtim
 T60은 SQL stub 기반 LEGACY 호환 검증이며 운영 DB 로그인 검증을 의미하지 않는다. T43은 A03 fixture 엔진 수준(T43-UNIT)과 A10 게시 통합 수준(T43-INTEGRATION)을 별도 증거로 기록한다.
 field permission fixture의 read=false/write=false는 readEffect=DENY/writeEffect=DENY로 변환한다. shared1은 US_A/US_B 세션을 각각 생성하여 초기화 요청 단계와 실행 단계의 영향을 비교한다. 대결 경계는 fake clock을 startsAt 바로 전/동일/endsAt에 놓아 검증한다.
 신규 TC는 구현 계획이며 아직 실행 PASS가 아니다. 이 추가 표는 P1 여섯 항목의 대응을 고정한다. 기존 31 ADM 전체와 TC 간 완전 대응표는 B-08의 별도 P2 보완 대상으로 유지한다.
+
+## 8. v1.3 — P2 완결 대응표와 누락 검증
+아래 표는 범위에 포함된 31개 ADM 전부의 필수 TC를 고정한다. 여러 TC를 공유하더라도 영역별 실제 UI·API 증거를 따로 남긴다. TC 통과 수만으로 ADM 전체 PASS를 계산하지 않는다. 표의 모든 TC 및 02 문서의 해당 화면 요구를 충족해야 해당 ADM을 PASS로 판정한다.
+
+| ADM | 단계 | 필수 TC |
+|---|---|---|
+| 01 | A02 | T58 |
+| 02 | A02 | T68 |
+| 03 | A02/A03 | T26,T37,T38,T49,T62,T63 |
+| 04 | A03 | T66,T70 |
+| 05 | A03 | T06,T69 |
+| 06 | A03 | T70 |
+| 07 | A04 | T04,T11,T56,T57 |
+| 08 | A05 | T71 |
+| 09 | A05 | T05,T72 |
+| 10 | A05 | T72 |
+| 11 | A05 | T01,T02,T72,T83 |
+| 12 | A05 | T08,T47,T48 |
+| 13 | A03/A05 | T07,T66,T67 |
+| 14 | A06 | T03,T74 |
+| 15 | A06 | T73 |
+| 16 | A05 | T46,T75 |
+| 17 | A05 | T75 |
+| 18 | A05 | T48,T50 |
+| 19 | A07 | T76 |
+| 20 | A07 | T17,T77 |
+| 21 | A07 | T14,T64,T65,T78 |
+| 22 | A07 | T12,T13,T15,T16,T52,T78 |
+| 23 | A08 | T32,T79 |
+| 24 | A09 | T80 |
+| 25 | A09 | T18,T19,T20,T21,T22,T23,T24,T53,T54 |
+| 26 | A04/A10 | T09,T10,T25,T33,T43,T56,T57,T81 |
+| 28 | A03/A10 | T36,T39,T40,T41,T42,T43,T60,T61,T62,T63 |
+| 30 | A02 | T29,T82 |
+| 33 | A06 | T30,T50 |
+| 34 | A05 | T28,T46,T50 |
+| 37 | A06 | T31,T51 |
+
+### 추가 실행 시나리오
+모든 T68~T83은 BROWSER_MOCK와 API_MOCK 각각 검증한다. API 권한·회사격리·경합 결과는 HTTP 증거 필수다. UI 항목(T72/T83)은 브라우저 화면 조작 증거를 양 모드에서 남긴다.
+
+| TC | 단계 | 입력·실행 | 기대 결과 |
+|---|---|---|---|
+| T68 | A02 | 조직 트리 SALES→TEAM; SALES를 TEAM 아래 이동, 타 회사 parent 지정 | 둘 다422, tree/revision 불변; 정상 TEAM 이동은200 |
+| T69 | A03 | SELF/ORG/SUBTREE/COMPANY 사용자로 본인·동료·하위조직·타조직·타법인 레코드 GET/PATCH | SELF 본인만, ORG 동일조직, SUBTREE 자손포함, COMPANY 동일회사만; 타법인404; 목록 total도 같은 범위 |
+| T70 | A03 | 법인 관리자에게 위임된 FIELD만 편집; SECURITY 변경·상위권한 부여·만료후 편집 | 허용 FIELD 성공, 나머지403; permissionVersion 갱신 및 이전세션 거부 |
+| T71 | A05 | 계약 선행기능 OFF 상태에서 주문기능 ON 게시; 메뉴 URL 직접 접근 | 의존위반422; feature OFF API403; 메뉴 숨김만으로 액션권한 변경 없음 |
+| T72 | A05 | 중복 route·메뉴순환·미등록 screenKey 게시; 정상 그룹·메뉴순서 변경 | 오류422; 정상 게시후 목록/상세/등록 일치, HQ 레이아웃 유지 |
+| T73 | A06 | US_A 코드 추가·참조중 삭제/비활성; US_B 같은 코드조회 | 회사격리, 참조중 삭제422, 비활성은 신규 선택 제외·과거 표시 유지 |
+| T74 | A06 | 번역 placeholder 누락·markup 입력; ko/en 전환 | 누락422, markup 텍스트 escape; 언어만 변경·회사/권한/프로세스 동일 |
+| T75 | A05 | 등록 액션 정상 POST와 미등록/권한없는 POST, 읽기불가 필드 포함 공용보기 | 등록허용만 성공; 미등록422/권한403; 보기 검증422 또는 읽기 필드 제거, 누출0 |
+| T76 | A07 | 시작상태2개·도달불가상태 workflow 게시, 합법/불법 상태 전이 | 정의422; 합법만 상태변경, 불법409; 업무 이력 원자적 |
+| T77 | A07 | 동순위 승인정책 두개 매칭, 정책없음, GLOBAL 미확정, 빈승인자, 자기승인 | 모두 제출422; 인스턴스/task/알림 생성0 |
+| T78 | A07 | ALL 두명중1승인→2승인, 반려→수정→재상신, 회수후결정 | ALL 두번째후 완료; 재상신 새revision/instance; 회수후409, 기존 이력 보존 |
+| T79 | A08 | 권한없는 수신자 포함 알림 preview, EMAIL 및 IN_APP 이벤트 두번 | 권한없는 수신자 제외, 수신자/채널별1건, EMAIL MOCK_SENT·외부호출0 |
+| T80 | A09 | LIVE profile 선택·미등록 interface·필수매핑누락; 정상 payload preview | 모두422; 정상은MOCK 표시; preview가 요청 생성하지 않음 |
+| T81 | A10 | 예약생성→취소→clock advance, 비활성회사 예약실행, rollback | 취소 적용0, 비활성 실행거부·기존release유지, rollback 새release 및 기존업무 유지 |
+| T82 | A02 | 비활성 이관대상·타회사대상·동시수정 일부 포함 이관 후 동일job재실행 | 부적격거부, 충돌항목만실패, 성공항목재적용0·합계일치 |
+| T83 | A05 | 모바일/키보드로 필드편집 중 회사전환 저장/폐기/취소 및 저장실패 | 선택별동작, 실패입력유지, 필드오류/포커스복원, 이전회사응답미표시 |
+
+T73에서 물리 삭제는 config CODE 배열 REMOVE_ITEM으로 시도한다. T75의 공용보기 편집 저장은422 FIELD_NOT_READABLE, 이미 게시된 공용보기 조회는 현재 역할에 허용된 columns만 반환하고 비허용 filter/sort 요청은403이다. 이는 선택 구현이 아니라 저장/조회별 고정 동작이다.
+T27/T34/T35/T36/T44/T45/T55/T59는 전 ADM 공통 필수 기반 gate다. T60은 LEGACY stub 회귀, T61은 모드 격리 gate다. T83은 각 ADM별 대표 편집 폼으로 반복해 31개 route 접근·저장·오류 연결을 확인한다.
+
+### 단계 게이트와 후속 의존성
+T43-UNIT(A03)은 repository fixture로 정책을 강화해 guard를 검증, T43-INTEGRATION(A10)은 실제 게시 UI와 활성화까지 검증한다. 둘 모두 통과해야 최종 T43 PASS다.
+T58-UNIT(A02)은 회사 CRUD/중지와 template preview/apply 계약을 검증하고 T58-INTEGRATION(A10)은 게시 후 template runtime 변경을 검증한다. T49의 진행건은 합성 repository fixture로 주입한다. T62/T63은 인증 repository fixture로 검증하며 전체 조직 UI를 기다리지 않는다.
+A04는 registry 최소 fixture로 게시/rebase 엔진을 먼저 검증하고 A05 실제 screen 연결과 A10 통합 게시로 회귀한다. 각 단계 보고서에는 UNIT/INTEGRATION을 따로 기록하고 미래 단계의 통합 테스트를 선행 단계 PASS로 주장하지 않는다.
