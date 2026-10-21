@@ -1,5 +1,5 @@
 {
-  "note": "A00-A06 staged evidence. A06 approved by worker B; see A06-report.md for exact scope. A07-A11 integration remains incomplete.",
+  "note": "A00-A07 staged evidence; A07 B approved. T13 delivery integration remains A08. See A07-report.md.",
   "results": [
     {
       "tcId": "T01",
@@ -62,33 +62,33 @@
     },
     {
       "tcId": "T12",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A07 common/HTTP and both-mode UI evidence; see A07-report.md."
     },
     {
       "tcId": "T13",
       "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "reason": "A07 UNIT PASS; notification delivery INTEGRATION remains A08."
     },
     {
       "tcId": "T14",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A07 common/HTTP and both-mode UI evidence; see A07-report.md."
     },
     {
       "tcId": "T15",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A07 common/HTTP and both-mode UI evidence; see A07-report.md."
     },
     {
       "tcId": "T16",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A07 common/HTTP and both-mode UI evidence; see A07-report.md."
     },
     {
       "tcId": "T17",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A07 common/HTTP and both-mode UI evidence; see A07-report.md."
     },
     {
       "tcId": "T18",
@@ -163,8 +163,8 @@
     },
     {
       "tcId": "T31",
-      "status": "BLOCKED",
-      "reason": "A06 language/calendar snapshot foundation verified; full approval-policy/dueAt integration remains A07. See A06-report.md."
+      "status": "PASS",
+      "reason": "A07 common/HTTP and both-mode UI evidence; see A07-report.md."
     },
     {
       "tcId": "T32",
@@ -366,8 +366,8 @@
     },
     {
       "tcId": "T52",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A07 common/HTTP and both-mode UI evidence; see A07-report.md."
     },
     {
       "tcId": "T53",
@@ -470,13 +470,13 @@
     },
     {
       "tcId": "T64",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A07 common/HTTP and both-mode UI evidence; see A07-report.md."
     },
     {
       "tcId": "T65",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A07 common/HTTP and both-mode UI evidence; see A07-report.md."
     },
     {
       "tcId": "T66",
@@ -610,18 +610,18 @@
     },
     {
       "tcId": "T76",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A07 common/HTTP and both-mode UI evidence; see A07-report.md."
     },
     {
       "tcId": "T77",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A07 common/HTTP and both-mode UI evidence; see A07-report.md."
     },
     {
       "tcId": "T78",
-      "status": "BLOCKED",
-      "reason": "NOT_RUN: full acceptance scenario implementation incomplete"
+      "status": "PASS",
+      "reason": "A07 common/HTTP and both-mode UI evidence; see A07-report.md."
     },
     {
       "tcId": "T79",

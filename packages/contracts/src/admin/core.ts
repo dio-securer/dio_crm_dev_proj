@@ -11,7 +11,7 @@ export const companySchema = z.object({ id: uuid, code: z.string().min(1).max(40
         }
     }), active: z.boolean(), revision: z.number().int().positive() }).strict();
 export type Company = z.infer<typeof companySchema>;
-export type Collection = 'configVersions' | 'scopeVersions' | 'configScopes' | 'configValidations' | 'companies' | 'organizations' | 'users' | 'memberships' | 'roles' | 'delegations' | 'drafts' | 'releases' | 'accounts' | 'approvals' | 'tasks' | 'notifications' | 'requests' | 'sequences' | 'transfers' | 'deputies' | 'leads' | 'opportunities' | 'contracts' | 'orders' | 'previews' | 'sessions' | 'mfaEnrollments' | 'mfaChallenges' | 'authAttempts' | 'securityPolicies' | 'mfaResetRequests';
+export type Collection = 'configVersions' | 'scopeVersions' | 'configScopes' | 'configValidations' | 'companies' | 'organizations' | 'users' | 'memberships' | 'roles' | 'delegations' | 'drafts' | 'releases' | 'accounts' | 'approvalDocuments' | 'approvals' | 'tasks' | 'notifications' | 'requests' | 'sequences' | 'transfers' | 'deputies' | 'leads' | 'opportunities' | 'contracts' | 'orders' | 'previews' | 'sessions' | 'mfaEnrollments' | 'mfaChallenges' | 'authAttempts' | 'securityPolicies' | 'mfaResetRequests';
 export interface Row {
     id: string;
     companyId?: string;

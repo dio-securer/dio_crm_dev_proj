@@ -32,7 +32,9 @@
     "test:admin:account": "node --test tests/admin/account-configuration.cjs tests/admin/account-http.cjs",
     "test:admin:ui": "node scripts/admin/run-account-ui.cjs",
     "test:admin:master": "node --test tests/admin/master-data.cjs tests/admin/master-http.cjs",
-    "test:admin:master-ui": "node scripts/admin/run-master-ui.cjs"
+    "test:admin:master-ui": "node scripts/admin/run-master-ui.cjs",
+    "test:admin:approval": "node --test tests/admin/approval-unit.cjs tests/admin/approval-http.cjs",
+    "test:admin:approval-ui": "node scripts/admin/run-approval-ui.cjs"
   },
   "devDependencies": {
     "playwright": "1.62.1"

@@ -9,17 +9,20 @@
     "report": "docs/admin-platform/implementation/A06-report.md"
   },
   "executionMode": "on_chat_invocation_sequential",
-  "nextStage": "A07",
+  "nextStage": "A08",
   "stages": [
     {
       "id": "A07",
       "title": "프로세스 정의·승인 엔진·관리 화면",
       "dependsOn": "A06",
       "instruction": "docs/admin-platform/execution/A07.md",
-      "status": "PENDING",
-      "report": null,
-      "evidence": [],
-      "review": null,
+      "status": "DONE",
+      "report": "docs/admin-platform/implementation/A07-report.md",
+      "evidence": [
+        "docs/admin-platform/implementation/evidence/a07-tests-all.log",
+        "docs/admin-platform/implementation/evidence/a07-ui.log"
+      ],
+      "review": "Worker B approved code and final deterministic fixture addition; see a07-worker-b.log",
       "checkpoint": null
     },
     {

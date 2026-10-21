@@ -19,3 +19,6 @@ export * from './account-runtime';
 
 export * from './master-data';
 export * from './master-engine';
+
+export * from './approval-config';
+export * from './approval-engine';

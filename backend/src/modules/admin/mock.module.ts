@@ -1,7 +1,7 @@
 import { Module, Controller, Post, Get, Patch, Body, Headers, Param, Req, Query } from '@nestjs/common';
 import { randomUUID, createHash } from 'node:crypto';
 import { z } from 'zod';
-import { MasterDataEngine, masterDataRequest, ConfigurationEngine, configurationRequest, assert, canonical, createDraft, updateDraft, OrganizationCommands } from '@dio-crm/contracts/admin';
+import { ApprovalEngine,approvalRequest, MasterDataEngine, masterDataRequest, ConfigurationEngine, configurationRequest, assert, canonical, createDraft, updateDraft, OrganizationCommands } from '@dio-crm/contracts/admin';
 import { MemoryAdminRepository } from './memory.repository';
 import { MockAuth, MockIdentityRepository } from './mock-auth';
 function sDrafts(tx: any, platform: boolean) { return (platform ? tx.forCompany('*') : tx).query('drafts'); }
@@ -61,7 +61,7 @@ class MockController {
     @Param('company')
     company: string,
     @Param('resource')
-    resource: string) { const s = await this.auth.authenticate(h); if (resource === 'field-registry') return this.auth.engine.accountFieldRegistry(s, company); if (resource === 'releases') return new ConfigurationEngine(this.repo).read(s, 'COMPANY', company); if (['roles', 'delegations', 'sessions', 'mfa-reset-requests'].includes(resource))
+    resource: string, @Query() query:any) { const s = await this.auth.authenticate(h); if(['approvals','approval-deputies','approval-metadata'].includes(resource))return new ApprovalEngine(this.repo).request(s,company,resource==='approvals'?'list':resource==='approval-deputies'?'deputies':'metadata','',query); if (resource === 'field-registry') return this.auth.engine.accountFieldRegistry(s, company); if (resource === 'releases') return new ConfigurationEngine(this.repo).read(s, 'COMPANY', company); if (['roles', 'delegations', 'sessions', 'mfa-reset-requests'].includes(resource))
         return { items: await this.auth.engine.list(s, company, resource === 'mfa-reset-requests' ? 'mfaResetRequests' : resource) }; await this.auth.engine.permission(s, company, resource === 'organizations' ? 'organization.read' : resource === 'transfers' ? 'ownershipTransfer.manage' : 'user.read'); const name = z.enum(['organizations', 'users', 'memberships', 'transfers']).parse(resource); const items = await new OrganizationCommands(this.repo, randomUUID).list({ ...s, role: s.role === 'PLATFORM_ADMIN' ? 'PLATFORM_ADMIN' : 'COMPANY_ADMIN' }, company, name); return { items, total: items.length, page: 1, pageSize: 20, requestId: randomUUID() }; }
     @Post('admin/companies/:company/:resource')
     async orgCreate(
@@ -76,7 +76,7 @@ class MockController {
     @Param('resource')
     resource: string,
     @Body()
-    body: unknown) { const s = await this.auth.authenticate(h); if (resource === 'releases') return new ConfigurationEngine(this.repo).command(s, 'COMPANY', company, 'publish', body, key); if (['roles', 'delegations'].includes(resource))
+    body: unknown) { const s = await this.auth.authenticate(h); if(resource==='approval-fixtures')return new ApprovalEngine(this.repo).request(s,company,'fixtures','',body,key,match); if(resource==='approval-simulations')return new ApprovalEngine(this.repo).request(s,company,'simulation','',body,key,match); if(resource==='approval-deputies')return new ApprovalEngine(this.repo).request(s,company,'deputyCreate','',body,key,match); if (resource === 'releases') return new ConfigurationEngine(this.repo).command(s, 'COMPANY', company, 'publish', body, key); if (['roles', 'delegations'].includes(resource))
         return this.auth.engine.command(s, company, resource === 'roles' ? 'role' : 'delegation', undefined, body, key, match); const op: Record<string, string> = { organizations: 'organization.create', users: 'user.create', memberships: 'membership.create', 'ownership-transfers': 'transfer.execute', deactivate: 'company.deactivate', reactivate: 'company.reactivate' }; assert(op[resource], 501, 'MOCK_CAPABILITY_UNAVAILABLE'); return this.orgCommand(s, company, op[resource], undefined, body, match, key); }
     @Patch('admin/companies/:company/:resource/:id')
     async orgUpdate(
@@ -143,7 +143,7 @@ class MockController {
     @Param('id')
     id: string,
     @Body()
-    body: unknown) { const s = await this.auth.authenticate(header); const old = (await this.repo.snapshot()).collections.drafts?.[id]; assert(old && (old.companyId === s.companyId || s.role === 'PLATFORM_ADMIN'), 404, 'NOT_FOUND'); await this.auth.engine.draftAccess(s, String(old.domain), (body as any).overrides); return updateDraft(this.auth.engine.authorizedRepository(s, s.companyId, 'config.edit', String(old.domain), (body as any).overrides), this.actor(s), id, body, match, this.meta('PATCH', '/api/admin/config/drafts/' + id, body, key)); }
+    body: unknown) { const s = await this.auth.authenticate(header); const old = (await this.repo.snapshot()).collections.drafts?.[id]; assert(old && (old.companyId === s.companyId || s.role === 'PLATFORM_ADMIN'), 404, 'NOT_FOUND'); return updateDraft(this.auth.engine.authorizedRepository(s, s.companyId, 'config.edit', String(old.domain), (body as any).overrides,id), this.actor(s), id, body, match, this.meta('PATCH', '/api/admin/config/drafts/' + id, body, key)); }
     @Post('auth/mfa/:action')
     async mfa(
     @Headers('authorization')
@@ -157,6 +157,12 @@ class MockController {
         return this.auth.engine.enroll(c.challengeId); if (action === 'verify')
         return this.auth.present(await this.auth.engine.verify(c.challengeId, body, key)); if (action === 'skip')
         return this.auth.present(await this.auth.engine.skip(c.challengeId, key)); assert(false, 404, 'NOT_FOUND'); }
+    @Get(['admin/companies/:company/runtime/approval-documents','admin/companies/:company/runtime/approval-documents/:id','admin/companies/:company/approvals/:id'])
+    async approvalRead(@Headers('authorization') h:string,@Req() req:any){return approvalRequest(new ApprovalEngine(this.repo),await this.auth.authenticate(h),req.originalUrl,'GET',undefined,'');}
+    @Post(['admin/companies/:company/runtime/approval-documents','admin/companies/:company/runtime/approval-documents/:id/submit','admin/companies/:company/approvals/:id/:action','admin/companies/:company/approval-deputies/:id/revoke'])
+    async approvalCommand(@Headers('authorization') h:string,@Headers('idempotency-key') key:string,@Headers('if-match') match:string,@Req() req:any,@Body() body:any){return approvalRequest(new ApprovalEngine(this.repo),await this.auth.authenticate(h),req.originalUrl,'POST',body,key,match);}
+    @Patch('admin/companies/:company/runtime/approval-documents/:id')
+    async approvalEdit(@Headers('authorization') h:string,@Headers('idempotency-key') key:string,@Headers('if-match') match:string,@Req() req:any,@Body() body:any){return approvalRequest(new ApprovalEngine(this.repo),await this.auth.authenticate(h),req.originalUrl,'PATCH',body,key,match);}
     @Get(['admin/companies/:company/runtime/master-data','admin/companies/:company/runtime/codes'])
     async masterRead(@Headers('authorization') h:string,@Req() req:any){return masterDataRequest(new MasterDataEngine(this.repo),await this.auth.authenticate(h),req.originalUrl,'GET',undefined,'');}
     @Post(['admin/companies/:company/numbering/preview','admin/companies/:company/numbering/allocate','admin/companies/:company/calendars/calculate'])

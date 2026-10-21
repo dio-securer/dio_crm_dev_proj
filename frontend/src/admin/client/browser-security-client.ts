@@ -1,4 +1,4 @@
-import { MasterDataEngine, masterDataRequest, ConfigurationEngine, configurationRequest, SecurityEngine, OrganizationCommands, createDraft, updateDraft, assert, securityHash, canonical, normalizeCommandError } from '@dio-crm/contracts/admin';
+import { ApprovalEngine,approvalRequest, MasterDataEngine, masterDataRequest, ConfigurationEngine, configurationRequest, SecurityEngine, OrganizationCommands, createDraft, updateDraft, assert, securityHash, canonical, normalizeCommandError } from '@dio-crm/contracts/admin';
 import { HttpAdminClient } from './admin-client';
 import { BrowserAdminRepository } from './browser-repository';
 export class BrowserSecurityClient extends HttpAdminClient {
@@ -24,6 +24,9 @@ export class BrowserSecurityClient extends HttpAdminClient {
         if (path === '/api/auth/logout')
             return this.engine.logout(this.sessionId);
         const a = await this.engine.authenticate(this.sessionId);
+        const approval=await approvalRequest(new ApprovalEngine(this.repo),a,url.pathname+url.search,method,body,key,revision?`"${revision}"`:undefined);if(approval!==undefined)return approval;
+        if(url.pathname.endsWith('/approval-fixtures')&&method==='POST')return new ApprovalEngine(this.repo).request(a,url.pathname.split('/')[4],'fixtures','',body,key);
+        if(url.pathname.endsWith('/approval-simulations')&&method==='POST')return new ApprovalEngine(this.repo).request(a,url.pathname.split('/')[4],'simulation','',body,key);
         const master=await masterDataRequest(new MasterDataEngine(this.repo),a,url.pathname+url.search,method,body,key);if(master!==undefined)return master;
         const config = await configurationRequest(new ConfigurationEngine(this.repo), a, path, method, body, key); if (config !== undefined) return config;
         const snap = await this.repo.snapshot();
@@ -37,9 +40,9 @@ export class BrowserSecurityClient extends HttpAdminClient {
             if (method === 'GET')
                 return { items: Object.values(snap.collections.drafts || {}).filter(d => a.role === 'PLATFORM_ADMIN' || d.companyId === a.companyId) };
             const id = path.split('/')[5], domain = id ? snap.collections.drafts[id]?.domain : body.domain;
-            await this.engine.draftAccess(a, String(domain), body.overrides);
+            if(!id)await this.engine.draftAccess(a, String(domain), body.overrides);
             const actor = { ...a, platformAdmin: a.role === 'PLATFORM_ADMIN', canConfigure: true };
-            return id ? updateDraft(this.engine.authorizedRepository(a, a.companyId, 'config.edit', String(domain), body.overrides), actor, id, body, `"${revision}"`, meta) : createDraft(this.engine.authorizedRepository(a, a.companyId, 'config.edit', String(domain), body.overrides), actor, body, meta);
+            return id ? updateDraft(this.engine.authorizedRepository(a, a.companyId, 'config.edit', String(domain), body.overrides,id), actor, id, body, `"${revision}"`, meta) : createDraft(this.engine.authorizedRepository(a, a.companyId, 'config.edit', String(domain), body.overrides), actor, body, meta);
         }
         if (path === '/api/admin/mfa-reset-requests')
             return { items: await this.engine.globalRequests(a) };
