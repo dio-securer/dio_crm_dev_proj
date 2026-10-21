@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "repository": "dio-securer/dio_crm_dev_proj",
+  "branch": "feat/admin-platform-a00-a11",
+  "pullRequest": 28,
+  "baseline": {
+    "stage": "A06",
+    "remoteCommit": "d8b4ac79418d3138a80f97b8cc7e8e9155b963d8",
+    "report": "docs/admin-platform/implementation/A06-report.md"
+  },
+  "executionMode": "on_chat_invocation_sequential",
+  "nextStage": "A07",
+  "stages": [
+    {
+      "id": "A07",
+      "title": "프로세스 정의·승인 엔진·관리 화면",
+      "dependsOn": "A06",
+      "instruction": "docs/admin-platform/execution/A07.md",
+      "status": "PENDING",
+      "report": null,
+      "evidence": [],
+      "review": null,
+      "checkpoint": null
+    },
+    {
+      "id": "A08",
+      "title": "알림과 운영 이벤트",
+      "dependsOn": "A07",
+      "instruction": "docs/admin-platform/execution/A08.md",
+      "status": "PENDING",
+      "report": null,
+      "evidence": [],
+      "review": null,
+      "checkpoint": null
+    },
+    {
+      "id": "A09",
+      "title": "ERP 연동 가정 구현",
+      "dependsOn": "A08",
+      "instruction": "docs/admin-platform/execution/A09.md",
+      "status": "PENDING",
+      "report": null,
+      "evidence": [],
+      "review": null,
+      "checkpoint": null
+    },
+    {
+      "id": "A10",
+      "title": "설정 적용 운영·미리보기 완성",
+      "dependsOn": "A09",
+      "instruction": "docs/admin-platform/execution/A10.md",
+      "status": "PENDING",
+      "report": null,
+      "evidence": [],
+      "review": null,
+      "checkpoint": null
+    },
+    {
+      "id": "A11",
+      "title": "전체 인수검증·사용 안내",
+      "dependsOn": "A10",
+      "instruction": "docs/admin-platform/execution/A11.md",
+      "status": "PENDING",
+      "report": null,
+      "evidence": [],
+      "review": null,
+      "checkpoint": null
+    }
+  ]
+}
