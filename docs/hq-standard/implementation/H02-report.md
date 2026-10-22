@@ -44,9 +44,9 @@ pnpm hq:start
 
 | 명령/검증 | 현재 결과 |
 |---|---|
-| `node --experimental-strip-types --test --experimental-test-isolation=none scripts/hq-standard/h02-foundation.test.mjs` | 39 PASS / 0 FAIL |
+| `node --experimental-strip-types --test --experimental-test-isolation=none scripts/hq-standard/h02-foundation.test.mjs` | 47 PASS / 0 FAIL |
 | `node --experimental-strip-types --test --experimental-test-isolation=none scripts/hq-standard/h02-frontend.test.mjs` | 26 PASS / 0 FAIL |
-| `node --experimental-strip-types --test scripts/hq-standard/h02-http.mjs` | 4 HTTP 시나리오군 PASS / 0 FAIL. 127.0.0.1 임시 포트·독립 임시 파일 사용 |
+| `node --experimental-strip-types --test scripts/hq-standard/h02-http.mjs` | 5 HTTP 시나리오군 PASS / 0 FAIL. 127.0.0.1 임시 포트·독립 임시 파일 사용 |
 | HTTP 세부 | 401/403·담당자/법인 격리·미등록 API/액션·목업 위장 차단, 생성/편집/목록/상세/버전 충돌, 파일 유지/재시작/초기화, ERP 접수/결과/중복/충돌/실패/재시도/세대 검증 |
 | 외부 송신 검사 | 별도 자식 프로세스에서 fetch/http/https/TCP/TLS 5개 시도 모두 예외 발생, 시도 계수 5 확인 |
 | 전체 빌드·기존 테스트·HQ/GLOBAL 회귀·보안 | 원격 CI 실행 예정. 결과 전까지 PASS로 판정하지 않음 |
@@ -60,3 +60,13 @@ pnpm hq:start
 기존 Nest 업무 규칙·API 형태·HQ 화면·H01 등록부를 재사용한다. PR #26의 독립 mock/localStorage·개발 인증 우회 코드는 이식하지 않는다. 관리자 A00–A11의 재사용 범위는 H07에서 현재 main과 대조한다. H02는 공통 실행 기반이며 H03–H07의 모든 업무 버튼·메뉴가 완료됐다는 뜻이 아니다.
 
 실제 ERP 서버·DB 접속 검증은 미실행이다. 여기의 ERP/HIRA·지도/GPS·메일 결과는 모두 MOCK이다.
+
+## 작업자 B 1차 지적 보완
+
+- 조직 범위 우회: 인터페이스 request/result/advance/retry 및 로그 조회에 원본 업무 엔터티의 동일 범위 검사 적용.
+- 데이터셋 결과 혼입: 결과 DTO의 datasetId 필수, 요청·현재 데이터셋·generation·업무 키 일치 검사.
+- 필수 계약 우회: 일반 연계 관리 경로도 H01 업무 액션/필수값 정책을 적용.
+- 다른 배치 역순 수신: ERP 품목·담당지역·HIRA 대상별 원천 요청 순번/결과 버전으로 최신값 보존. 비중복 대상은 정상 수신.
+- 초기 실패/지연: 별도 거래처 ID7/8과 실제 엔진이 생성한 실패/지연 로그를 시드에 포함.
+
+보완 후 foundation 47개 및 HTTP 5개 시나리오군 통과. B의 독립 재검증과 최종 CI/브라우저 결과가 완료 판정에 필요하다.

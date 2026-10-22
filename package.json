@@ -20,7 +20,11 @@
     "dev:web": "pnpm --filter @dio-crm/web dev",
     "hq:start": "node --experimental-strip-types scripts/hq-standard/server.mjs",
     "hq:dev": "pnpm build && pnpm hq:start",
-    "hq:http": "node --experimental-strip-types --test scripts/hq-standard/h0*-http.mjs"
+    "hq:http": "node --experimental-strip-types --test scripts/hq-standard/h0*-http.mjs",
+    "hq:browser": "node --experimental-strip-types scripts/hq-standard/run-browser.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
   },
   "pnpm": {
     "overrides": {

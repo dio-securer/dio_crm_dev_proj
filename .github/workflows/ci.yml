@@ -22,6 +22,8 @@ jobs:
       - run: pnpm test
       - run: pnpm hq:check
       - run: pnpm hq:http
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm hq:browser
       - run: pnpm regression:multi-market
       - run: pnpm i18n:check
       - run: pnpm i18n:hardcode

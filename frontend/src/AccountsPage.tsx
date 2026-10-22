@@ -14,6 +14,7 @@ import {
 } from './account-model';
 import { listSandboxAccounts, requestSandboxErp, saveSandboxAccount } from './account-sandbox';
 import { isHqMockMode } from './hq-mock/mode';
+import { useHqMock } from './hq-mock/HqMockProvider';
 
 function useIsMobile() {
   const [mobile, setMobile] = useState(() => typeof window !== 'undefined' && window.matchMedia(MOBILE_ACCOUNT_MQ).matches);
@@ -54,6 +55,8 @@ function ListFilterIcon() {
 export function AccountsPage() {
   const { t } = useTranslation();
   const hqMock = isHqMockMode();
+  const hq = useHqMock();
+  const ownerUserId = hqMock ? hq.session?.user.userId : undefined;
   const mobile = useIsMobile();
   const { featureEnabled } = useGlobalization();
   const [search, setSearch] = useState('');
@@ -87,9 +90,9 @@ export function AccountsPage() {
   const sandbox = !hqMock && (localMode || Boolean(query.isError));
   const apiError = hqMock && query.isError ? t('hqMock.apiError', { message: query.error instanceof Error ? query.error.message : String(query.error) }) : '';
   const rows = useMemo(() => {
-    const source = sandbox ? listSandboxAccounts(search, scope) : listVisibleAccounts(query.data ?? [], search, scope);
+    const source = sandbox ? listSandboxAccounts(search, scope) : listVisibleAccounts(query.data ?? [], search, scope, ownerUserId);
     return source;
-  }, [sandbox, search, scope, query.data, localTick]);
+  }, [sandbox, search, scope, query.data, localTick, ownerUserId]);
   const selected = rows.find(x => x.public_id === selectedId) ?? null;
   const creating = screen === 'form' && !selectedId;
 
