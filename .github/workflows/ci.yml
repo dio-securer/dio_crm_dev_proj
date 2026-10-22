@@ -16,8 +16,11 @@ jobs:
         with:
           node-version: 22
       - run: pnpm install --no-frozen-lockfile
+      - name: Record resolved dependency lockfile changes
+        run: git diff -- pnpm-lock.yaml
       - run: pnpm build
       - run: pnpm test
+      - run: pnpm hq:check
       - run: pnpm regression:multi-market
       - run: pnpm i18n:check
       - run: pnpm i18n:hardcode
