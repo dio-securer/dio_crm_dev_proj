@@ -1,10 +1,10 @@
 import { randomBytes, timingSafeEqual } from 'node:crypto';
 import type { HqCapabilities, HqContext, HqStandard } from '@dio-crm/contracts';
-import { createHqPolicy } from '@dio-crm/contracts/hq-standard';
+import { createHqPolicy } from '@dio-crm/contracts';
 import { HqRepository } from './repository.js';
 import { HQ_COLLECTION_NAMES, HqMockError, hqAssert, auditHq, newHqId, cloneHq } from './model.js';
 import type { HqActor, HqBusinessCollection, HqDataset, HqRow, HqInterfaceCode, HqInterfaceScenario, HqInterfaceResult } from './model.js';
-import { enqueueInterface, advanceInterface, applyInterfaceResult, retryInterface } from './interfaces.js';
+import { HQ_INTERFACE_REGISTRY, enqueueInterface, advanceInterface, applyInterfaceResult, retryInterface } from './interfaces.js';
 
 export type HqPersona = HqActor & { loginId: string; name: string; roles: string[] };
 export type HqRequest = { method: string; path: string; token?: string; body?: unknown; headers?: Record<string, string | undefined> };
@@ -127,7 +127,7 @@ export class HqApplication {
     const values: Record<string, unknown> = {};
     for (const field of this.standard.fields) {
       const leaf = field.fieldKey.split('.').at(-1)!;
-      const names = [field.current.apiField, field.current.dbField, leaf, snake(leaf)].filter((x): x is string => !!x);
+      const names = [field.fieldKey, field.current.apiField, field.current.dbField, leaf, snake(leaf)].filter((x): x is string => !!x);
       const inputName = names.find(name => Object.hasOwn(input, name));
       const rowName = names.find(name => Object.hasOwn(row, name));
       if (inputName !== undefined) values[field.fieldKey] = input[inputName];
@@ -198,7 +198,7 @@ export class HqApplication {
       hqAssert(route,404,'API_NOT_REGISTERED','This endpoint has no HQ mock handler');
       const match = route.regex.exec(url.pathname)!;
       const params = Object.fromEntries(route.names.map((name,i)=>[name,decodeURIComponent(match[i+1])]));
-      const result = route.handler({app:this,actor,repository,datasetId:session.datasetId,params,query:url.searchParams,body,headers,scenario:hqScenario(headers['x-hq-scenario'])});
+      const result = await route.handler({app:this,actor,repository,datasetId:session.datasetId,params,query:url.searchParams,body,headers,scenario:hqScenario(headers['x-hq-scenario'])});
       return {status:200,body:result};
     } catch (error) {
       if (error instanceof HqMockError) return {status:error.statusCode,body:{statusCode:error.statusCode,error:error.code,message:error.message,details:error.details ?? {},mode:'MOCK'}};
@@ -209,6 +209,35 @@ export class HqApplication {
     const repository = this.repository(datasetId); const admin = this.personas[0];
     const jobs = repository.read().collections.interfaceLogs.filter(log=>log.status === 'REQUESTING' && log.scenario !== 'DELAYED');
     for (const log of jobs) repository.transact(d=>advanceInterface(d,{...admin,companyId:log.company_id},log.requestId,log.scenario));
+  }
+  /** The generic monitor is another entry point to the same business rules, not an approval shortcut. */
+  guardInterface(c:HqRouteContext,d:HqDataset,code:string,entityId:string,replay=false) {
+    const config=HQ_INTERFACE_REGISTRY[code as HqInterfaceCode];
+    hqAssert(config,400,'INTERFACE_NOT_REGISTERED');
+    if(!config.collection) {hqAssert(['SYSTEM','ALL'].includes(c.actor.scope),403,'INTERFACE_SCOPE_DENIED');return;}
+    const row=hqFind(d,c.actor,config.collection,entityId);
+    if(config.direction!=='OUT' || replay)return;
+    if(code==='IF-ERP-002')this.requireAction(c.actor,'ACC.erpRequest',row);
+    if(code==='IF-ERP-004' || code==='IF-ERP-007') {
+      const contract=code==='IF-ERP-004' ? row:hqFind(d,c.actor,'contracts',String(row.contract_public_id));
+      const account=hqFind(d,c.actor,'accounts',String(contract.account_public_id));
+      this.requireAction(c.actor,code==='IF-ERP-004'?'CON.erpRequest':'ORD.submit',{
+        ...row,'contract.status':contract.status,'account.erpApprovedYn':account.erp_approved_yn,'order.status':row.status
+      });
+    }
+    if(code==='IF-ERP-011') {
+      const plans=d.collections.plans.filter(p=>p.company_id===c.actor.companyId && p.contract_public_id===row.public_id && p.is_current===true);
+      hqAssert(plans.length>0,422,'ERP_PLAN_REQUIRED');
+      for(const plan of plans)this.requireAction(c.actor,'COL.planChange',{...row,...plan,'contract.status':row.status});
+    }
+    if(code==='IF-ERP-012')hqRequire(c.actor,'DIRECT_WORK.APPROVE.DIVISION');
+  }
+  guardInterfaceLog(c:HqRouteContext,d:HqDataset,requestId:string,retry=false,idempotencyKey?:string) {
+    const log=d.collections.interfaceLogs.find(x=>x.requestId===requestId && x.company_id===c.actor.companyId);
+    hqAssert(log,404,'INTERFACE_REQUEST_NOT_FOUND');
+    const replay=retry && d.collections.interfaceLogs.some(x=>x.retryOf===requestId && x.idempotencyKey===idempotencyKey && x.company_id===c.actor.companyId);
+    this.guardInterface(c,d,log.interfaceCode,log.businessKey.entityId,!retry||replay);
+    return log;
   }
   private installFoundationRoutes() {
     this.route('GET','/api/hq/status',c=>this.status(c.repository));
@@ -253,16 +282,27 @@ export class HqApplication {
     this.route('GET','/api/users',c=>{hqRequire(c.actor,'USER.READ');return this.personas.map(x=>({user_id:x.userId,user_name:x.name,public_id:`00000000-0000-4000-8000-${String(x.userId).padStart(12,'0')}`,organization_id:x.organizationId}));});
     this.route('GET','/api/organizations',c=>{hqRequire(c.actor,'ORG.READ');return [{organization_id:10,organization_name:'본사 영업부',company_id:1},{organization_id:20,organization_name:'타 지점',company_id:1}];});
     this.route('GET','/api/common-codes/:groupCode',()=>[]);
-    this.route('GET','/api/interface-logs',c=>{hqRequire(c.actor,'INTERFACE.READ');return c.repository.read().collections.interfaceLogs.filter(x=>hqCanRead(c.actor,x));});
+    this.route('GET','/api/interface-logs',c=>{hqRequire(c.actor,'INTERFACE.READ');const d=c.repository.read();return d.collections.interfaceLogs.filter(x=>{
+      if(x.company_id!==c.actor.companyId)return false;
+      const collection=HQ_INTERFACE_REGISTRY[x.interfaceCode].collection;
+      if(!collection)return ['SYSTEM','ALL'].includes(c.actor.scope);
+      const target=d.collections[collection].find(row=>row.public_id===x.businessKey.entityId);
+      return !!target && hqCanRead(c.actor,target);
+    });});
     this.route('GET','/api/audit-logs',c=>{hqRequire(c.actor,'AUDIT.READ');return c.repository.read().collections.auditLogs.filter(x=>hqCanRead(c.actor,x));});
-    this.route('GET','/api/ops/status',c=>{hqRequire(c.actor,'OPS.READ');return {...this.status(c.repository),status:'MOCK',database:{status:'NOT_CONNECTED',mock:true},interfaces:{outboundCalls:0}};});
+    this.route('GET','/api/ops/status',c=>{hqRequire(c.actor,'OPS.READ');return {...this.status(c.repository),status:'MOCK',database:{status:'NOT_CONNECTED',mock:true},interfaces:{outboundCalls:this.options.outboundAttemptCount?.() ?? 0}};});
     this.route('POST','/api/hq/interfaces/request',c=>{
       hqRequire(c.actor,'INTERFACE.MANAGE'); hqOnlyKeys(c.body,['interfaceCode','entityType','entityPublicId','idempotencyKey','payload','scenario']);
-      return c.repository.transact(d=>enqueueInterface(d,c.actor,{interfaceCode:hqText(c.body.interfaceCode,'interfaceCode') as HqInterfaceCode,entityType:hqText(c.body.entityType,'entityType'),entityPublicId:hqText(c.body.entityPublicId,'entityPublicId'),idempotencyKey:hqText(c.body.idempotencyKey,'idempotencyKey'),payload:hqObject(c.body.payload ?? {}),scenario:hqScenario(c.body.scenario ?? c.scenario)}));
+      return c.repository.transact(d=>{
+        const code=hqText(c.body.interfaceCode,'interfaceCode'),id=hqText(c.body.entityPublicId,'entityPublicId'),key=hqText(c.body.idempotencyKey,'idempotencyKey');
+        const replay=d.collections.interfaceLogs.some(x=>x.interfaceCode===code && x.idempotencyKey===key && x.company_id===c.actor.companyId);
+        this.guardInterface(c,d,code,id,replay);
+        return enqueueInterface(d,c.actor,{interfaceCode:code as HqInterfaceCode,entityType:hqText(c.body.entityType,'entityType'),entityPublicId:id,idempotencyKey:key,payload:hqObject(c.body.payload ?? {}),scenario:hqScenario(c.body.scenario ?? c.scenario)});
+      });
     });
-    this.route('POST','/api/hq/interfaces/result',c=>{hqRequire(c.actor,'INTERFACE.MANAGE');return c.repository.transact(d=>applyInterfaceResult(d,c.actor,c.body as unknown as HqInterfaceResult));});
-    this.route('POST','/api/hq/interfaces/advance',c=>{hqRequire(c.actor,'INTERFACE.MANAGE');return c.repository.transact(d=>advanceInterface(d,c.actor,hqText(c.body.requestId,'requestId'),hqScenario(c.body.scenario ?? 'SUCCESS')));});
-    this.route('POST','/api/hq/interfaces/retry',c=>{hqRequire(c.actor,'INTERFACE.MANAGE');return c.repository.transact(d=>retryInterface(d,c.actor,hqText(c.body.requestId,'requestId'),hqText(c.body.idempotencyKey,'idempotencyKey'),hqScenario(c.body.scenario ?? c.scenario)));});
+    this.route('POST','/api/hq/interfaces/result',c=>{hqRequire(c.actor,'INTERFACE.MANAGE');return c.repository.transact(d=>{hqAssert(c.body.datasetId===d.datasetId,409,'INTERFACE_DATASET_MISMATCH');hqAssert(c.body.generation===d.generation,409,'INTERFACE_GENERATION_MISMATCH');this.guardInterfaceLog(c,d,hqText(c.body.requestId,'requestId'));return applyInterfaceResult(d,c.actor,c.body as unknown as HqInterfaceResult);});});
+    this.route('POST','/api/hq/interfaces/advance',c=>{hqRequire(c.actor,'INTERFACE.MANAGE');hqOnlyKeys(c.body,['requestId','scenario']);return c.repository.transact(d=>{this.guardInterfaceLog(c,d,hqText(c.body.requestId,'requestId'));return advanceInterface(d,c.actor,String(c.body.requestId),hqScenario(c.body.scenario ?? 'SUCCESS'));});});
+    this.route('POST','/api/hq/interfaces/retry',c=>{hqRequire(c.actor,'INTERFACE.MANAGE');hqOnlyKeys(c.body,['requestId','idempotencyKey','scenario']);return c.repository.transact(d=>{const id=hqText(c.body.requestId,'requestId'),key=hqText(c.body.idempotencyKey,'idempotencyKey');this.guardInterfaceLog(c,d,id,true,key);return retryInterface(d,c.actor,id,key,hqScenario(c.body.scenario ?? c.scenario));});});
     this.route('POST','/api/erp-accounts/:publicId/request',c=>c.repository.transact(d=>{
       const row = hqFind(d,c.actor,'accounts',c.params.publicId); this.requireAction(c.actor,'ACC.erpRequest',row);
       const log = enqueueInterface(d,c.actor,{interfaceCode:'IF-ERP-002',entityType:'ACCOUNT',entityPublicId:row.public_id,idempotencyKey:String(c.body.requestId ?? `account:${row.public_id}:${row.version}`),payload:{accountPublicId:row.public_id,accountName:row.account_name,businessNo:row.business_no},scenario:c.scenario});

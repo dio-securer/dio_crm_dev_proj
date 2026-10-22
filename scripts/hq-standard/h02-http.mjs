@@ -77,11 +77,11 @@ test('H02 HTTP request/result separation, correlated deduplication, failure retr
   const account=await admin.ok('GET',`/api/accounts/${ids.pendingAccount}`);assert.equal(account.erp_approved_yn,false);assert.equal(account.integration_status,'REQUESTING');
   assert.equal((await admin.ok('POST','/api/hq/interfaces/request',input)).requestId,pending.requestId);
   assert.equal((await admin.request('POST','/api/hq/interfaces/request',{...input,payload:{accountName:'conflicting'}})).status,409);
-  const result={requestId:pending.requestId,resultId:'http-account-result-1',generation:1,interfaceCode:'IF-ERP-003',businessKey:pending.businessKey,success:true,payload:{erpCustomerCode:'MOCK-HTTP-001',approved:true},version:1};
+  const result={datasetId:'HQ_DEMO',requestId:pending.requestId,resultId:'http-account-result-1',generation:1,interfaceCode:'IF-ERP-003',businessKey:pending.businessKey,success:true,payload:{erpCustomerCode:'MOCK-HTTP-001',approved:true},version:1};
   assert.equal((await admin.request('POST','/api/hq/interfaces/result',{...result,businessKey:{...result.businessKey,entityId:ids.approvedAccount}})).status,409);
   await admin.ok('POST','/api/hq/interfaces/result',result);await admin.ok('POST','/api/hq/interfaces/result',result);
   const approved=await admin.ok('GET',`/api/accounts/${ids.pendingAccount}`);assert.equal(approved.erp_customer_code,'MOCK-HTTP-001');assert.equal(approved.erp_approved_yn,true);
-  assert.equal((await admin.ok('GET','/api/interface-logs')).filter(x=>x.interfaceCode==='IF-ERP-002').length,1);
+  assert.equal((await admin.ok('GET','/api/interface-logs')).filter(x=>x.idempotencyKey===input.idempotencyKey).length,1);
   assert.equal((await admin.request('POST','/api/hq/interfaces/result',{...result,payload:{erpCustomerCode:'corrupted'}})).status,409);
   const failure=await admin.ok('POST','/api/hq/interfaces/request',{...input,entityPublicId:ids.noCoordinatesAccount,idempotencyKey:'http-fail',scenario:'TRANSIENT_FAILURE'});
   const failed=await admin.ok('POST','/api/hq/interfaces/advance',{requestId:failure.requestId,scenario:'TRANSIENT_FAILURE'});assert.equal(failed.status,'FAILED');
@@ -100,4 +100,28 @@ test('H02 default adapter progresses after request and external transports are b
   assert.equal(row.erp_approved_yn,true);assert.match(row.erp_customer_code,/^MOCK-/);assert.deepEqual(s.errors,[]);
   const child=spawnSync(process.execPath,['--input-type=module','-e',`import {installHqEgressFence} from './scripts/hq-standard/egress-fence.mjs';import {createRequire} from 'node:module';const r=createRequire(import.meta.url);const f=installHqEgressFence();for(const check of [()=>fetch('https://erp.invalid'),()=>r('node:http').request('http://erp.invalid'),()=>r('node:https').get('https://erp.invalid'),()=>r('node:net').connect(1433,'sql.invalid'),()=>r('node:tls').connect(443,'mail.invalid')]){try{await check();throw new Error('allowed');}catch(e){if(e.message!=='HQ_MOCK_EXTERNAL_EGRESS_BLOCKED')throw e;}}if(f.attemptCount()!==5)throw new Error('incorrect counter');console.log('EGRESS_PROBES_BLOCKED=5');`],{cwd:new URL('../..',import.meta.url),encoding:'utf8'});
   assert.equal(child.status,0,child.stderr);assert.match(child.stdout,/EGRESS_PROBES_BLOCKED=5/);
+});
+
+test('H02 B review regressions: generic interface preserves scope, required fields and dataset binding',async t=>{
+  const s=await memory(t),admin=await client(s),branch=await client(s,'hq-branch'),other=await client(s,'hq-admin','HQ_OTHER');
+  s.app.repository('HQ_DEMO').transact(d=>{d.collections.accounts.find(x=>x.public_id===ids.otherOwnerAccount).organization_id=20;});
+  assert.equal((await branch.request('GET',`/api/accounts/${ids.otherOwnerAccount}`)).status,404);
+  const request={interfaceCode:'IF-ERP-002',entityType:'ACCOUNT',entityPublicId:ids.otherOwnerAccount,idempotencyKey:'outside-org',payload:{},scenario:'DELAYED'};
+  assert.equal((await branch.request('POST','/api/hq/interfaces/request',request)).status,404);
+  const log=await admin.ok('POST','/api/hq/interfaces/request',request);
+  assert.equal((await branch.ok('GET','/api/interface-logs')).some(x=>x.requestId===log.requestId),false);
+  assert.equal((await branch.request('POST','/api/hq/interfaces/advance',{requestId:log.requestId})).status,404);
+  const result={datasetId:'HQ_DEMO',requestId:log.requestId,resultId:'b-scope',generation:1,interfaceCode:'IF-ERP-003',businessKey:log.businessKey,success:true,payload:{erpCustomerCode:'MOCK-B'},version:1};
+  assert.equal((await branch.request('POST','/api/hq/interfaces/result',result)).status,404);
+  await admin.ok('POST','/api/hq/interfaces/advance',{requestId:log.requestId,scenario:'TRANSIENT_FAILURE'});
+  assert.equal((await branch.request('POST','/api/hq/interfaces/retry',{requestId:log.requestId,idempotencyKey:'outside-retry'})).status,404);
+  const incomplete=await admin.ok('POST','/api/accounts',{accountName:'필수필드 부족',businessNo:'123-45-67890',ceoName:'원장',address:'부산'});
+  assert.equal((await admin.request('POST',`/api/erp-accounts/${incomplete.public_id}/request`,{})).status,422);
+  assert.equal((await admin.request('POST','/api/hq/interfaces/request',{...request,entityPublicId:incomplete.public_id,idempotencyKey:'missing-fields'})).status,422);
+  const same={...request,entityPublicId:ids.pendingAccount,idempotencyKey:'dataset-binding'};
+  const a=await admin.ok('POST','/api/hq/interfaces/request',same),b=await other.ok('POST','/api/hq/interfaces/request',same);
+  const mixed={...result,requestId:b.requestId,businessKey:b.businessKey,resultId:'dataset-mixed'};
+  assert.equal((await other.request('POST','/api/hq/interfaces/result',mixed)).value.error,'INTERFACE_DATASET_MISMATCH');
+  assert.equal((await other.ok('GET',`/api/accounts/${ids.pendingAccount}`)).erp_approved_yn,false);
+  assert.equal(a.datasetId,'HQ_DEMO');assert.equal(b.datasetId,'HQ_OTHER');
 });

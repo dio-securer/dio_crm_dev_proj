@@ -1,9 +1,11 @@
 import { HQ_SCHEMA_VERSION, HQ_COLLECTION_NAMES } from './model.js';
-import type { HqCollections, HqDataset, HqRow } from './model.js';
+import type { HqActor, HqCollections, HqDataset, HqRow } from './model.js';
+import { advanceInterface, enqueueInterface } from './interfaces.js';
 
 const id = (value: number) => `10000000-0000-4000-8000-${value.toString(16).padStart(12, '0')}`;
 export const seedIDs = {
   approvedAccount: id(1), pendingAccount: id(2), duplicateAccount: id(3), otherOwnerAccount: id(4), otherCompanyAccount: id(5), noCoordinatesAccount: id(6),
+  failedInterfaceAccount: id(7), delayedInterfaceAccount: id(8),
   lead: id(10), duplicateLead: id(11), otherOwnerLead: id(12), otherCompanyLead: id(13), noCoordinatesLead: id(14), contact: id(20),
   activity: id(30), pendingReport: id(31), directWork: id(32),
   approvedOpportunity: id(40), pendingOpportunity: id(41), approvedContract: id(50), pendingContract: id(51), unpaidPlan: id(60), pendingPlan: id(61),
@@ -28,7 +30,9 @@ export function createHqSeed(datasetId: string, generation = 1): HqDataset {
     account(seedIDs.approvedAccount, '본사 승인 치과', true), account(seedIDs.pendingAccount, '본사 신규 치과', false),
     account(seedIDs.duplicateAccount, '중복 후보 치과', false, { business_no: '617-81-10001' }),
     account(seedIDs.otherOwnerAccount, '다른 담당 치과', false, {}, 1, 2), account(seedIDs.otherCompanyAccount, '타법인 격리 치과', false, {}, 2, 21),
-    account(seedIDs.noCoordinatesAccount, '좌표 미등록 치과', false, { latitude: null, longitude: null })
+    account(seedIDs.noCoordinatesAccount, '좌표 미등록 치과', false, { latitude: null, longitude: null }),
+    account(seedIDs.failedInterfaceAccount, 'ERP 실패 재시도 치과', false, { fixture_note: '초기화 직후 ERP 실패·재시도 검증 사례' }),
+    account(seedIDs.delayedInterfaceAccount, 'ERP 응답 지연 치과', false, { fixture_note: '초기화 직후 ERP 응답 지연·결과 진행 검증 사례' })
   ];
   const lead = (publicId: string, name: string, extra: Record<string, unknown> = {}, company = 1, owner = 1) => row(publicId, {
     hospital_name: name, status: 'KEYMAN_MEETING', owner_name: owner === 1 ? '본사 영업담당' : '다른 영업담당', business_no: '617-81-20001',
@@ -66,5 +70,14 @@ export function createHqSeed(datasetId: string, generation = 1): HqDataset {
     row(seedIDs.pendingOrder, { contract_public_id: seedIDs.pendingContract, account_public_id: seedIDs.pendingAccount, status: 'DRAFT', integration_status: 'NOT_REQUESTED', order_amount: 100000,
       items: [{ product_public_id: seedIDs.product, quantity: 1, unit_price: 100000, amount: 100000 }], delivery_address_type: 'DIRECT', delivery_address: '', express_yn: false, note: '', erp_order_no: null, fixture_note: '승인/배송 검증용 독립 사례' })];
   collections.regions = [row(seedIDs.region, { sido: '부산광역시', sigungu: '해운대구', assigned_user_id: 1, source_system: 'ERP' })];
-  return { datasetId, schemaVersion: HQ_SCHEMA_VERSION, generation, revision: 1, sequence: 1000, clock: '2026-10-22T00:00:00.000Z', mode: 'MOCK', collections };
+  const dataset: HqDataset = { datasetId, schemaVersion: HQ_SCHEMA_VERSION, generation, revision: 1, sequence: 1000, clock: '2026-10-22T00:00:00.000Z', mode: 'MOCK', collections };
+  const seedActor: HqActor = { userId: 1, companyId: 1, organizationId: 10, permissions: ['INTERFACE.MANAGE'], scope: 'SYSTEM' };
+  for (const [entityPublicId, idempotencyKey, scenario] of [
+    [seedIDs.failedInterfaceAccount, 'seed:account:failed', 'TRANSIENT_FAILURE'],
+    [seedIDs.delayedInterfaceAccount, 'seed:account:delayed', 'DELAYED']
+  ] as const) {
+    const request = enqueueInterface(dataset, seedActor, { interfaceCode: 'IF-ERP-002', entityType: 'ACCOUNT', entityPublicId, idempotencyKey, payload: {}, scenario });
+    advanceInterface(dataset, seedActor, request.requestId);
+  }
+  return dataset;
 }

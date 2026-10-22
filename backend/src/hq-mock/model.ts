@@ -50,6 +50,7 @@ export interface HqInterfaceResult {
   requestId: string;
   resultId: string;
   interfaceCode: HqInterfaceCode;
+  datasetId: string;
   generation: number;
   businessKey: HqBusinessKey;
   success: boolean;

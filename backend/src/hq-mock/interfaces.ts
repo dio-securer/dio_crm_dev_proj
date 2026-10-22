@@ -20,6 +20,8 @@ export const HQ_INTERFACE_REGISTRY: Record<HqInterfaceCode, { entity: string; co
   'IF-ERP-014': { entity: 'ORDER', collection: 'orders', response: 'IF-ERP-014', direction: 'IN' }
 };
 const SCENARIOS: HqInterfaceScenario[] = ['SUCCESS', 'BUSINESS_REJECTED', 'TRANSIENT_FAILURE', 'TIMEOUT', 'DELAYED', 'DUPLICATE', 'OUT_OF_ORDER'];
+// Catalog batch IDs identify transport batches, not the records they contain.
+const CATALOG_STREAMS = new Set<HqInterfaceCode>(['IF-HIRA-001', 'IF-ERP-001', 'IF-ERP-006']);
 const OBJECT = (value: unknown): value is Record<string, unknown> => !!value && typeof value === 'object' && !Array.isArray(value);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 function shape(value: unknown, allowed: string[], required: string[] = []): asserts value is Record<string, unknown> {
@@ -204,7 +206,7 @@ export function enqueueInterface(d: HqDataset, actor: HqActor, input: EnqueueInt
   if (entity && config.direction === 'OUT') outboundEligible(d, actor, input.interfaceCode, entity);
   const snapshot = sourceSnapshot(d, actor, input.interfaceCode, entity, input.payload);
   validatePayload(input.interfaceCode, snapshot, false);
-  const earlier = d.collections.interfaceLogs.filter(r => r.company_id === actor.companyId && r.businessKey.entityId === input.entityPublicId && HQ_INTERFACE_REGISTRY[r.interfaceCode].response === config.response);
+  const earlier = d.collections.interfaceLogs.filter(r => r.company_id === actor.companyId && HQ_INTERFACE_REGISTRY[r.interfaceCode].response === config.response && (CATALOG_STREAMS.has(config.response) || r.businessKey.entityId === input.entityPublicId));
   const requestId = newHqId(d);
   const log: HqInterfaceLog = { public_id: requestId, requestId, company_id: actor.companyId, owner_user_id: actor.userId, version: 1,
     datasetId: d.datasetId, generation: d.generation, mode: 'MOCK', interfaceCode: input.interfaceCode,
@@ -237,6 +239,18 @@ function eventUpsert(d: HqDataset, a: HqActor, collection: 'collections' | 'sale
     d.collections[collection].push({ public_id: newHqId(d), company_id: a.companyId, ...(owner ? { owner_user_id: owner } : {}), organization_id: a.organizationId ?? 10, version: 1,
       ...cloneHq(values), [key]: externalId, source_system: 'ERP', external_version: eventVersion, external_fingerprint: fingerprint });
   }
+}
+/** Apply ordering per source record so a stale overlapping batch cannot revert newer values. */
+function acceptCatalogRevision(d: HqDataset, row: HqRow, log: HqInterfaceLog, result: HqInterfaceResult): boolean {
+  type Cursor = { requestRevision: number; resultVersion: number };
+  const cursors = (row.source_revisions ?? {}) as Partial<Record<HqInterfaceCode, Cursor>>;
+  const before = cursors[result.interfaceCode], version = result.version ?? 1;
+  if (before && (before.requestRevision > log.requestRevision || (before.requestRevision === log.requestRevision && before.resultVersion >= version))) {
+    log.events.push({ eventId: newHqId(d), at: d.clock, kind: 'STALE', resultId: result.resultId, version, message: `Source record ${row.public_id} already has a newer revision` });
+    return false;
+  }
+  row.source_revisions = { ...cursors, [result.interfaceCode]: { requestRevision: log.requestRevision, resultVersion: version } };
+  return true;
 }
 function applyBusiness(d: HqDataset, actor: HqActor, log: HqInterfaceLog, result: HqInterfaceResult): void {
   const code = result.interfaceCode, p = result.payload, config = HQ_INTERFACE_REGISTRY[log.interfaceCode];
@@ -302,6 +316,7 @@ function applyBusiness(d: HqDataset, actor: HqActor, log: HqInterfaceLog, result
     for (const region of p.regions as Record<string, unknown>[]) {
       let current = d.collections.regions.find(row => row.company_id === actor.companyId && row.sido === region.sido && row.sigungu === region.sigungu);
       if (!current) { current = { public_id: newHqId(d), company_id: actor.companyId, version: 1 }; d.collections.regions.push(current); }
+      if (!acceptCatalogRevision(d, current, log, result)) continue;
       Object.assign(current, { sido: region.sido, sigungu: region.sigungu, assigned_user_id: region.ownerUserId, source_system: 'ERP', version: current.version + 1 });
       for (const lead of d.collections.leads.filter(row => row.company_id === actor.companyId && row.sido === region.sido && row.sigungu === region.sigungu && !((row.manual_fields ?? []) as string[]).includes('owner_user_id'))) { lead.owner_user_id = Number(region.ownerUserId); lead.version += 1; }
     }
@@ -311,13 +326,16 @@ function applyBusiness(d: HqDataset, actor: HqActor, log: HqInterfaceLog, result
       let lead = d.collections.leads.find(row => row.company_id === actor.companyId && row.encrypted_provider_no === hospital.encryptedProviderNo);
       if (!lead) { lead = { public_id: newHqId(d), company_id: actor.companyId, organization_id: actor.organizationId ?? 10, version: 1, status: 'NEW', manual_fields: [], history: [], source_system: 'HIRA' }; d.collections.leads.push(lead); }
       const targets = [lead, ...d.collections.accounts.filter(row => row.company_id === actor.companyId && row.encrypted_provider_no === hospital.encryptedProviderNo)];
+      let leadApplied = false;
       for (const target of targets) {
+        if (!acceptCatalogRevision(d, target, log, result)) continue;
         const manual = (target.manual_fields ?? []) as string[];
         for (const [key, value] of Object.entries(hospital)) { const field = key === 'hospitalName' && target !== lead ? 'account_name' : mapping[key]; if (!manual.includes(field) && !manual.includes(key)) target[field] = value; }
         target.version += 1;
+        if (target === lead) leadApplied = true;
       }
-      const region = d.collections.regions.find(row => row.company_id === actor.companyId && row.sido === hospital.sido && row.sigungu === hospital.sigungu);
-      if (region && !((lead.manual_fields ?? []) as string[]).includes('owner_user_id')) lead.owner_user_id = Number(region.assigned_user_id);
+      const region = d.collections.regions.find(row => row.company_id === actor.companyId && row.sido === lead.sido && row.sigungu === lead.sigungu);
+      if (leadApplied && region && !((lead.manual_fields ?? []) as string[]).includes('owner_user_id')) lead.owner_user_id = Number(region.assigned_user_id);
     }
   } else if (code === 'IF-ERP-006') {
     for (const product of p.products as Record<string, unknown>[]) {
@@ -327,14 +345,17 @@ function applyBusiness(d: HqDataset, actor: HqActor, log: HqInterfaceLog, result
         hqAssert(byId.erp_item_code === product.erpItemCode && (!current || byId.public_id === current.public_id), 409, 'INTERFACE_PRODUCT_KEY_CONFLICT'); current = byId;
       }
       if (!current) { current = { public_id: newHqId(d), company_id: actor.companyId, version: 1 }; d.collections.products.push(current); }
+      if (!acceptCatalogRevision(d, current, log, result)) continue;
       Object.assign(current, { erp_item_code: product.erpItemCode, item_name: product.itemName, item_type: product.itemType, category: product.category ?? '', unit_price: product.unitPrice, base_price: product.unitPrice,
         stock_qty: product.stockQty, order_available_yn: product.orderAvailable, source_system: 'ERP', erp_synced_at: d.clock, version: current.version + 1 });
     }
   }
 }
 export function applyInterfaceResult(d: HqDataset, actor: HqActor, result: HqInterfaceResult): HqInterfaceLog {
-  shape(result, ['requestId', 'resultId', 'interfaceCode', 'generation', 'businessKey', 'success', 'payload', 'version', 'message'], ['requestId', 'resultId', 'interfaceCode', 'generation', 'businessKey', 'success', 'payload']);
+  shape(result, ['requestId', 'resultId', 'interfaceCode', 'datasetId', 'generation', 'businessKey', 'success', 'payload', 'version', 'message'], ['requestId', 'resultId', 'interfaceCode', 'datasetId', 'generation', 'businessKey', 'success', 'payload']);
   uuid(result.requestId, 'requestId'); text(result.resultId, 'resultId', 200);
+  text(result.datasetId, 'datasetId', 80);
+  hqAssert(result.datasetId === d.datasetId, 409, 'INTERFACE_DATASET_MISMATCH');
   hqAssert(result.generation === d.generation, 409, 'INTERFACE_GENERATION_MISMATCH');
   hqAssert(typeof result.success === 'boolean', 400, 'INTERFACE_BOOLEAN_INVALID');
   hqAssert(Number.isSafeInteger(result.version ?? 1) && Number(result.version ?? 1) > 0, 400, 'INTERFACE_VERSION_INVALID');
@@ -351,7 +372,7 @@ export function applyInterfaceResult(d: HqDataset, actor: HqActor, result: HqInt
     log.events.push({ eventId: newHqId(d), at: d.clock, kind: 'DUPLICATE', resultId: result.resultId }); return log;
   }
   const version = result.version ?? 1;
-  const stateful = ['IF-ERP-003', 'IF-ERP-005', 'IF-ERP-008', 'IF-ERP-011', 'IF-ERP-013', 'IF-HIRA-001', 'IF-ERP-001', 'IF-ERP-006'].includes(result.interfaceCode);
+  const stateful = ['IF-ERP-003', 'IF-ERP-005', 'IF-ERP-008', 'IF-ERP-011', 'IF-ERP-013'].includes(result.interfaceCode);
   const newer = stateful && d.collections.interfaceLogs.find(r => r.company_id === actor.companyId && r.businessKey.entityId === log.businessKey.entityId && HQ_INTERFACE_REGISTRY[r.interfaceCode].response === result.interfaceCode && r.requestRevision > log.requestRevision);
   if (newer || version < log.resultVersion || (version === log.resultVersion && log.result)) {
     if (version === log.resultVersion && log.result && !newer) hqAssert(canonicalHq({ ...log.result, resultId: '' }) === canonicalHq({ ...result, resultId: '' }), 409, 'INTERFACE_RESULT_VERSION_CONFLICT');
@@ -398,7 +419,7 @@ export function advanceInterface(d: HqDataset, actor: HqActor, requestId: string
   if (log.status === 'SUCCESS' || log.status === 'SUPERSEDED') return log;
   hqAssert(log.status === 'REQUESTING', 409, 'INTERFACE_RETRY_REQUIRED');
   if (selected === 'DELAYED') { log.events.push({ eventId: newHqId(d), at: d.clock, kind: 'DELAYED' }); return log; }
-  const result: HqInterfaceResult = { requestId, resultId: `${requestId}:result:${log.resultVersion + 1}`, generation: d.generation,
+  const result: HqInterfaceResult = { requestId, resultId: `${requestId}:result:${log.resultVersion + 1}`, datasetId: d.datasetId, generation: d.generation,
     interfaceCode: HQ_INTERFACE_REGISTRY[log.interfaceCode].response, businessKey: cloneHq(log.businessKey), success: !['BUSINESS_REJECTED', 'TRANSIENT_FAILURE', 'TIMEOUT'].includes(selected),
     payload: ['BUSINESS_REJECTED', 'TRANSIENT_FAILURE', 'TIMEOUT'].includes(selected) ? {} : defaultPayload(d, actor, log), version: log.resultVersion + 1 };
   if (selected === 'OUT_OF_ORDER') { result.version = 2; result.resultId = `${requestId}:result:2`; }

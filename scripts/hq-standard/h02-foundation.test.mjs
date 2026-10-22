@@ -11,7 +11,7 @@ const repository = options => new HqRepository({ datasetId: 'H02-FOUNDATION', ..
 const enqueue = (repo, code, id, key = code + ':' + id, payload = {}, scenario = 'SUCCESS') => repo.transact(d => enqueueInterface(d, actor, { interfaceCode: code, entityType: HQ_INTERFACE_REGISTRY[code].entity, entityPublicId: id, idempotencyKey: key, payload, scenario }));
 const advance = (repo, request, scenario) => repo.transact(d => advanceInterface(d, actor, request.requestId, scenario));
 const read = (repo, collection, id) => repo.read().collections[collection].find(row => row.public_id === id);
-const result = (request, changes = {}) => ({ requestId: request.requestId, resultId: request.requestId + ':custom', interfaceCode: HQ_INTERFACE_REGISTRY[request.interfaceCode].response, generation: request.generation, businessKey: request.businessKey, success: true, payload: { erpCustomerCode: 'MOCK-CUSTOM', approved: true }, version: 1, ...changes });
+const result = (request, changes = {}) => ({ requestId: request.requestId, resultId: request.requestId + ':custom', interfaceCode: HQ_INTERFACE_REGISTRY[request.interfaceCode].response, datasetId: request.datasetId, generation: request.generation, businessKey: request.businessKey, success: true, payload: { erpCustomerCode: 'MOCK-CUSTOM', approved: true }, version: 1, ...changes });
 const rejects = (work, code) => assert.throws(work, error => error.code === code, `Expected ${code}`);
 
 test('H02 seed is deterministic and all business references are valid', () => {
@@ -22,6 +22,23 @@ test('H02 seed is deterministic and all business references are valid', () => {
   assert.equal(one.collections.accounts.find(row => row.public_id === seedIDs.noCoordinatesAccount).latitude, null);
   assert.ok(one.collections.leads.some(row => row.company_id === 2));
   assert.ok(one.collections.leads.some(row => row.owner_user_id === 2));
+});
+test('H02 failed and delayed interface seed cases are immediately visible, executable and resettable', () => {
+  const repo = repository(), initial = repo.read();
+  const failed = initial.collections.interfaceLogs.find(row => row.businessKey.entityId === seedIDs.failedInterfaceAccount);
+  const delayed = initial.collections.interfaceLogs.find(row => row.businessKey.entityId === seedIDs.delayedInterfaceAccount);
+  assert.equal(failed.status, 'FAILED'); assert.equal(failed.result.datasetId, initial.datasetId);
+  assert.equal(read(repo, 'accounts', seedIDs.failedInterfaceAccount).integration_status, 'FAILED');
+  assert.equal(delayed.status, 'REQUESTING'); assert.equal(delayed.scenario, 'DELAYED');
+  assert.equal(delayed.result, undefined); assert.ok(delayed.events.some(event => event.kind === 'DELAYED'));
+  assert.equal(read(repo, 'accounts', seedIDs.delayedInterfaceAccount).erp_approved_yn, false);
+  const retried = repo.transact(d => retryInterface(d, actor, failed.requestId, 'seed-case-retry'));
+  advance(repo, retried); advance(repo, delayed, 'SUCCESS');
+  assert.equal(read(repo, 'accounts', seedIDs.failedInterfaceAccount).erp_approved_yn, true);
+  assert.equal(read(repo, 'accounts', seedIDs.delayedInterfaceAccount).erp_approved_yn, true);
+  const reset = repo.reset(); assert.equal(reset.generation, initial.generation + 1);
+  assert.equal(reset.collections.interfaceLogs.find(row => row.businessKey.entityId === seedIDs.failedInterfaceAccount).status, 'FAILED');
+  assert.equal(reset.collections.interfaceLogs.find(row => row.businessKey.entityId === seedIDs.delayedInterfaceAccount).status, 'REQUESTING');
 });
 test('H02 detached reads, atomic writes and revision increment', () => {
   const repo = repository(), one = repo.read(); one.collections.accounts[0].account_name = 'external mutation';
@@ -113,6 +130,38 @@ test('H02 product synchronization updates price, stock and order availability', 
   const request = enqueue(repo, 'IF-ERP-006', seedIDs.product, 'products', { products: [{ productPublicId: seedIDs.product, erpItemCode: 'MOCK-P001', itemName: '변경 품목', itemType: 'PRODUCT', unitPrice: 120000, stockQty: -1, orderAvailable: false }] });
   advance(repo, request); const p = read(repo, 'products', seedIDs.product); assert.equal(p.unit_price, 120000); assert.equal(p.stock_qty, -1); assert.equal(p.order_available_yn, false);
 });
+test('H02 overlapping product batches preserve newer values and still apply older nonoverlapping rows', () => {
+  const repo = repository();
+  const product = { productPublicId: seedIDs.product, erpItemCode: 'MOCK-P001', itemName: '원천 품목', itemType: 'PRODUCT', unitPrice: 100, stockQty: 1, orderAvailable: false };
+  const older = enqueue(repo, 'IF-ERP-006', seedIDs.product, 'product-old', { products: [product, { ...product, productPublicId: seedIDs.zeroStockProduct, erpItemCode: 'MOCK-P002', unitPrice: 300 }] }, 'DELAYED');
+  const newer = enqueue(repo, 'IF-ERP-006', seedIDs.zeroStockProduct, 'product-new', { products: [{ ...product, unitPrice: 200, stockQty: 20, orderAvailable: true }] }, 'DELAYED');
+  assert.ok(newer.requestRevision > older.requestRevision);
+  advance(repo, newer, 'SUCCESS'); const done = advance(repo, older, 'SUCCESS');
+  assert.equal(read(repo, 'products', seedIDs.product).unit_price, 200); assert.equal(read(repo, 'products', seedIDs.product).stock_qty, 20);
+  assert.equal(read(repo, 'products', seedIDs.product).order_available_yn, true); assert.equal(read(repo, 'products', seedIDs.zeroStockProduct).unit_price, 300);
+  assert.ok(done.events.some(event => event.kind === 'STALE'));
+  repo.transact(d => applyInterfaceResult(d, actor, result(newer, { resultId: 'product-correction', version: 2, payload: { products: [{ ...product, unitPrice: 250 }] } })));
+  assert.equal(read(repo, 'products', seedIDs.product).unit_price, 250);
+});
+test('H02 overlapping HIRA batches cannot revert lead or linked account data', () => {
+  const repo = repository(), encrypted = read(repo, 'leads', seedIDs.lead).encrypted_provider_no;
+  repo.transact(d => { d.collections.accounts.find(row => row.public_id === seedIDs.pendingAccount).encrypted_provider_no = encrypted; });
+  const hospital = { encryptedProviderNo: encrypted, hospitalName: '이전 병원', phone: '051-111-1111', sido: '부산광역시', sigungu: '해운대구' };
+  const older = enqueue(repo, 'IF-HIRA-001', seedIDs.lead, 'hira-old', { hospitals: [hospital, { ...hospital, encryptedProviderNo: 'UNIQUE-OLDER-BATCH' }] }, 'DELAYED');
+  const newer = enqueue(repo, 'IF-HIRA-001', seedIDs.duplicateLead, 'hira-new', { hospitals: [{ ...hospital, hospitalName: '최신 병원', phone: '051-222-2222' }] }, 'DELAYED');
+  assert.ok(newer.requestRevision > older.requestRevision); advance(repo, newer, 'SUCCESS'); advance(repo, older, 'SUCCESS');
+  assert.equal(read(repo, 'leads', seedIDs.lead).hospital_name, '최신 병원'); assert.equal(read(repo, 'leads', seedIDs.lead).phone, '051-222-2222');
+  assert.equal(read(repo, 'accounts', seedIDs.pendingAccount).account_name, '최신 병원');
+  assert.ok(repo.read().collections.leads.some(row => row.encrypted_provider_no === 'UNIQUE-OLDER-BATCH'));
+});
+test('H02 overlapping region batches cannot revert assignments on regions or leads', () => {
+  const repo = repository(), region = { sido: '부산광역시', sigungu: '해운대구', ownerUserId: 2 };
+  const older = enqueue(repo, 'IF-ERP-001', seedIDs.region, 'region-old', { regions: [region, { sido: '울산광역시', sigungu: '남구', ownerUserId: 2 }] }, 'DELAYED');
+  const newer = enqueue(repo, 'IF-ERP-001', seedIDs.lead, 'region-new', { regions: [{ ...region, ownerUserId: 3 }] }, 'DELAYED');
+  assert.ok(newer.requestRevision > older.requestRevision); advance(repo, newer, 'SUCCESS'); advance(repo, older, 'SUCCESS');
+  assert.equal(read(repo, 'regions', seedIDs.region).assigned_user_id, 3); assert.equal(read(repo, 'leads', seedIDs.lead).owner_user_id, 3);
+  assert.equal(repo.read().collections.regions.find(row => row.sido === '울산광역시').assigned_user_id, 2);
+});
 test('H02 direct-work requires approval and OUT; requests and results use separate codes', () => {
   const repo = repository(); rejects(() => enqueue(repo, 'IF-ERP-012', seedIDs.directWork), 'DIRECT_WORK_APPROVAL_AND_OUT_REQUIRED');
   repo.transact(d => { const dw = d.collections.directWorks[0]; dw.status = 'DIVISION_APPROVED'; d.collections.activities[0].status = 'COMPLETED'; d.collections.activities[0].out_at = d.clock; });
@@ -121,8 +170,8 @@ test('H02 direct-work requires approval and OUT; requests and results use separa
   advance(repo, enqueue(repo, 'IF-ERP-013', seedIDs.directWork, 'dw-response')); assert.ok(read(repo, 'directWorks', seedIDs.directWork).erp_reference_no);
 });
 test('H02 request idempotency is payload-sensitive and preserves one request', () => {
-  const repo = repository(), one = enqueue(repo, 'IF-ERP-002', seedIDs.pendingAccount, 'same');
-  const two = enqueue(repo, 'IF-ERP-002', seedIDs.pendingAccount, 'same'); assert.equal(two.requestId, one.requestId); assert.equal(repo.read().collections.interfaceLogs.length, 1);
+  const repo = repository(), initialCount = repo.read().collections.interfaceLogs.length, one = enqueue(repo, 'IF-ERP-002', seedIDs.pendingAccount, 'same');
+  const two = enqueue(repo, 'IF-ERP-002', seedIDs.pendingAccount, 'same'); assert.equal(two.requestId, one.requestId); assert.equal(repo.read().collections.interfaceLogs.length, initialCount + 1);
   rejects(() => enqueue(repo, 'IF-ERP-002', seedIDs.pendingAccount, 'same', { accountName: 'Changed' }), 'INTERFACE_IDEMPOTENCY_CONFLICT');
 });
 test('H02 duplicate response does not duplicate business data; conflicting ID fails', () => {
@@ -145,8 +194,10 @@ test('H02 scenarios delay, timeout, duplicate and out-of-order are deterministic
   await t.test('duplicate', () => { const repo = repository(), request = enqueue(repo, 'IF-ERP-002', seedIDs.pendingAccount); const done = advance(repo, request, 'DUPLICATE'); assert.ok(done.events.some(event => event.kind === 'DUPLICATE')); });
   await t.test('out of order', () => { const repo = repository(), request = enqueue(repo, 'IF-ERP-002', seedIDs.pendingAccount); const done = advance(repo, request, 'OUT_OF_ORDER'); assert.equal(done.resultVersion, 2); assert.ok(done.events.some(event => event.kind === 'STALE')); });
 });
-test('H02 result validates generation, company, business key, response code and exact fields', async t => {
+test('H02 result validates dataset, generation, company, business key, response code and exact fields', async t => {
   for (const [name, mutate, code] of [
+    ['missing dataset', r => { const copy = { ...r }; delete copy.datasetId; return copy; }, 'INTERFACE_FIELD_REQUIRED'],
+    ['wrong dataset', r => ({ ...r, datasetId: 'DIFFERENT-DATASET' }), 'INTERFACE_DATASET_MISMATCH'],
     ['generation', r => ({ ...r, generation: 9 }), 'INTERFACE_GENERATION_MISMATCH'],
     ['business key', r => ({ ...r, businessKey: { ...r.businessKey, entityId: seedIDs.approvedAccount } }), 'INTERFACE_BUSINESS_KEY_MISMATCH'],
     ['response code', r => ({ ...r, interfaceCode: 'IF-ERP-005' }), 'INTERFACE_RESPONSE_CODE_MISMATCH'],
@@ -155,6 +206,26 @@ test('H02 result validates generation, company, business key, response code and 
     ['invalid version', r => ({ ...r, version: -1 }), 'INTERFACE_VERSION_INVALID']
   ]) await t.test(name, () => { const repo = repository(), request = enqueue(repo, 'IF-ERP-002', seedIDs.pendingAccount); const before = repo.read(); rejects(() => repo.transact(d => applyInterfaceResult(d, actor, mutate(result(request)))), code); assert.deepEqual(repo.read(), before); });
   await t.test('company', () => { const repo = repository(), request = enqueue(repo, 'IF-ERP-002', seedIDs.pendingAccount); rejects(() => repo.transact(d => applyInterfaceResult(d, { ...actor, companyId: 2 }, result(request))), 'INTERFACE_REQUEST_NOT_FOUND'); });
+});
+test('H02 same-generation requests in two datasets cannot receive each other\'s results', () => {
+  const one = repository({ datasetId: 'DATASET-A' }), two = repository({ datasetId: 'DATASET-B' });
+  const requestOne = enqueue(one, 'IF-ERP-002', seedIDs.pendingAccount), requestTwo = enqueue(two, 'IF-ERP-002', seedIDs.pendingAccount);
+  assert.equal(requestOne.requestId, requestTwo.requestId); assert.equal(requestOne.generation, requestTwo.generation);
+  assert.deepEqual(requestOne.businessKey, requestTwo.businessKey);
+  const beforeOne = one.read(), beforeTwo = two.read();
+  rejects(() => two.transact(d => applyInterfaceResult(d, actor, result(requestOne))), 'INTERFACE_DATASET_MISMATCH');
+  rejects(() => one.transact(d => applyInterfaceResult(d, actor, result(requestTwo))), 'INTERFACE_DATASET_MISMATCH');
+  assert.deepEqual(one.read(), beforeOne); assert.deepEqual(two.read(), beforeTwo);
+  one.transact(d => applyInterfaceResult(d, actor, result(requestOne)));
+  assert.equal(read(one, 'accounts', seedIDs.pendingAccount).erp_approved_yn, true);
+  assert.equal(read(two, 'accounts', seedIDs.pendingAccount).erp_approved_yn, false);
+  const done = advance(two, requestTwo); assert.equal(done.result.datasetId, 'DATASET-B');
+  assert.equal(read(two, 'accounts', seedIDs.pendingAccount).erp_approved_yn, true);
+});
+test('H02 persisted interface results must retain the request dataset identity', () => {
+  const repo = repository(), request = enqueue(repo, 'IF-ERP-002', seedIDs.pendingAccount); advance(repo, request);
+  const corrupted = repo.read(); corrupted.collections.interfaceLogs[0].result.datasetId = 'OTHER';
+  rejects(() => repository({ load: () => corrupted }), 'DATASET_INTERFACE_RESULT_INVALID');
 });
 test('H02 reset rejects results from the previous generation', () => {
   const repo = repository(), request = enqueue(repo, 'IF-ERP-002', seedIDs.pendingAccount); repo.reset();

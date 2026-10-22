@@ -41,6 +41,12 @@ export function validateHqDataset(value: unknown, expectedDatasetId?: string): a
       hqAssert(Number.isSafeInteger(item.company_id) && item.company_id > 0, 422, 'DATASET_COMPANY_INVALID');
       hqAssert(Number.isSafeInteger(item.version) && item.version > 0, 422, 'DATASET_ROW_VERSION_INVALID');
       if (item.owner_user_id !== undefined) hqAssert(Number.isSafeInteger(item.owner_user_id) && item.owner_user_id > 0, 422, 'DATASET_OWNER_INVALID');
+      if (item.source_revisions !== undefined) {
+        hqAssert(item.source_revisions && typeof item.source_revisions === 'object' && !Array.isArray(item.source_revisions), 422, 'DATASET_SOURCE_REVISION_INVALID');
+        for (const [code, cursor] of Object.entries(item.source_revisions as Record<string, { requestRevision: number; resultVersion: number }>)) {
+          hqAssert(['IF-HIRA-001', 'IF-ERP-001', 'IF-ERP-006'].includes(code) && cursor && Number.isSafeInteger(cursor.requestRevision) && cursor.requestRevision > 0 && Number.isSafeInteger(cursor.resultVersion) && cursor.resultVersion > 0, 422, 'DATASET_SOURCE_REVISION_INVALID');
+        }
+      }
     }
   }
   const ref = (item: HqRow, key: string, target: HqBusinessCollection, required = true) => {
@@ -83,6 +89,7 @@ export function validateHqDataset(value: unknown, expectedDatasetId?: string): a
   }
   for (const log of d.collections.interfaceLogs) {
     hqAssert(log.requestId === log.public_id && log.datasetId === d.datasetId && log.generation === d.generation && log.mode === 'MOCK', 422, 'DATASET_INTERFACE_INVALID');
+    if (log.result) hqAssert(log.result.datasetId === log.datasetId && log.result.generation === log.generation && log.result.requestId === log.requestId, 422, 'DATASET_INTERFACE_RESULT_INVALID');
   }
 }
 
