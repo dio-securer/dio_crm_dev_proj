@@ -78,8 +78,11 @@ export async function apiPatch<T>(path: string, body: unknown): Promise<T> {
   }));
 }
 
-export async function apiDelete<T = { success: boolean }>(path: string): Promise<T> {
-  return parse<T>(await request(path, { method: 'DELETE', headers: headers() }));
+export async function apiDelete<T = { success: boolean }>(path: string, body?: unknown): Promise<T> {
+  return parse<T>(await request(path, {
+    method: 'DELETE', headers: headers(body !== undefined),
+    ...(body === undefined ? {} : { body: JSON.stringify(body) })
+  }));
 }
 
 export async function apiDownload(path: string) {

@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { AccountSummary } from '@dio-crm/contracts';
 import {
@@ -15,6 +16,10 @@ import {
 import { listSandboxAccounts, requestSandboxErp, saveSandboxAccount } from './account-sandbox';
 import { isHqMockMode } from './hq-mock/mode';
 import { useHqMock } from './hq-mock/HqMockProvider';
+import { HqAccountDetail } from './hq-mock/HqAccountDetail';
+import { HqAccountTools } from './hq-mock/HqAccountTools';
+import { useHqCommand, useHqCustomerPolicy } from './hq-mock/customer-shared';
+import type { CustomerRecord } from './hq-mock/customer-model';
 
 function useIsMobile() {
   const [mobile, setMobile] = useState(() => typeof window !== 'undefined' && window.matchMedia(MOBILE_ACCOUNT_MQ).matches);
@@ -56,6 +61,9 @@ export function AccountsPage() {
   const { t } = useTranslation();
   const hqMock = isHqMockMode();
   const hq = useHqMock();
+  const hqPolicy = useHqCustomerPolicy();
+  const hqCommand = useHqCommand();
+  const [params, setParams] = useSearchParams();
   const ownerUserId = hqMock ? hq.session?.user.userId : undefined;
   const mobile = useIsMobile();
   const { featureEnabled } = useGlobalization();
@@ -107,6 +115,7 @@ export function AccountsPage() {
     setSelectedId(row.public_id);
     setForm(formFromAccount(row));
     setScreen(mobile ? 'detail' : 'form');
+    if (hqMock) setParams(previous => { const next = new URLSearchParams(previous); next.set('record', row.public_id); return next; });
     setOpenSections(Object.fromEntries(FORM_SECTIONS.map(section => [section.id, true])));
   };
   const openEdit = (row?: AccountSummary) => {
@@ -120,7 +129,15 @@ export function AccountsPage() {
     setScreen('list');
     setSelectedId(null);
     setForm(emptyForm());
+    if (hqMock) setParams(previous => { const next = new URLSearchParams(previous); ['record', 'tab', 'contact'].forEach(key => next.delete(key)); return next; });
   };
+
+  React.useEffect(() => {
+    const recordId = params.get('record');
+    if (!hqMock || !recordId || selectedId === recordId) return;
+    const row = rows.find(item => item.public_id === recordId);
+    if (row) openDetail(row);
+  }, [params.get('record'), rows, hqMock]);
 
   React.useEffect(() => {
     if (screen === 'list') return;
@@ -152,7 +169,13 @@ export function AccountsPage() {
     }
     setSaving(true);
     try {
-      if (sandbox) {
+      if (hqMock) {
+        const payload = hqPolicy.writablePayload('account', toWritePayload(form) as unknown as Record<string, unknown>, selected as unknown as CustomerRecord ?? {});
+        if (selectedId) await hqCommand.run('PATCH', `/api/accounts/${selectedId}`, { ...payload, expectedVersion: (selected as unknown as CustomerRecord).version });
+        else { const created = await hqCommand.run<AccountSummary>('POST', '/api/accounts', payload); setSelectedId(created.public_id); }
+        await query.refetch();
+        setParams(previous => { const next = new URLSearchParams(previous); ['record', 'tab', 'contact'].forEach(key => next.delete(key)); return next; });
+      } else if (sandbox) {
         const saved = saveSandboxAccount(selectedId, form);
         setLocalTick(n => n + 1);
         setSelectedId(saved.public_id);
@@ -189,7 +212,7 @@ export function AccountsPage() {
         setMessage(t('account.queueCreated', { requestId: 'LOCAL-TEST' }));
         return;
       }
-      const r = await apiPost<{ requestId: string }>(`/api/erp-accounts/${publicId}/request`);
+      const r = hqMock ? await hqCommand.run<{ requestId: string }>('POST', `/api/erp-accounts/${publicId}/request`, { expectedVersion: (row as unknown as CustomerRecord)?.version }) : await apiPost<{ requestId: string }>(`/api/erp-accounts/${publicId}/request`);
       setMessage(t('account.queueCreated', { requestId: r.requestId }));
       await query.refetch();
     } catch (e) {
@@ -198,6 +221,7 @@ export function AccountsPage() {
   };
 
   const fieldInput = (field: Pick<AccountInterfaceField, 'code' | 'crmField'>, disabled = false) => {
+    if (hqMock && field.code === 'cust_nm') return <div className="readonly-value" data-hq-field="account.erp.cust_nm">{String((selected as unknown as CustomerRecord)?.erp_account_name ?? '—')}</div>;
     if (field.code === 'trade_bc_nm') {
       return <div className="readonly-value">{tradeStatusName(selected?.erp_trade_code) || '-'}</div>;
     }
@@ -217,6 +241,7 @@ export function AccountsPage() {
       if (crmField === 'erp_customer_code') return <div className="readonly-value">{String(raw || '-')}</div>;
       return <div className="readonly-value">{String(raw || '-')}</div>;
     }
+    disabled = disabled || (hqMock && (!hqPolicy.writable('account', key, selected as unknown as CustomerRecord ?? {}) || Boolean(selected && !hqPolicy.owns(selected as unknown as CustomerRecord, 'ACCOUNT.MERGE'))));
     const value = form[key];
     if (key === 'accountType') {
       return <select value={value} disabled={disabled} onChange={e => setField(key, e.target.value)}>{Object.entries(ACCOUNT_TYPE_CODES).map(([code, name]) => <option key={code} value={code}>{name}</option>)}</select>;
@@ -257,16 +282,17 @@ export function AccountsPage() {
     return text;
   };
 
+  const hqEditable = !hqMock || (hqPolicy.has('ACCOUNT.WRITE') && (!selected || hqPolicy.owns(selected as unknown as CustomerRecord, 'ACCOUNT.MERGE')));
   const formSections = (compact = false) => (
     <div className={`account-form-sections${compact ? ' compact' : ''}`}>
-      <label className="full">{t('account.name')}<input value={form.accountName} onChange={e => setField('accountName', e.target.value)} required /></label>
+      <label className="full">{t('account.name')}<input data-hq-field={hqMock ? 'account.crmName' : undefined} value={form.accountName} onChange={e => setField('accountName', e.target.value)} required disabled={!hqEditable || (hqMock && !hqPolicy.fieldWritable('account.crmName', selected as unknown as CustomerRecord ?? {}))} /></label>
       <label>{t('account.crmStatus')}
-        <select value={form.accountStatus} onChange={e => setField('accountStatus', e.target.value)}>
+        <select disabled={!hqEditable || (hqMock && !hqPolicy.writable('account', 'accountStatus', selected as unknown as CustomerRecord ?? {}))} value={form.accountStatus} onChange={e => setField('accountStatus', e.target.value)}>
           {ACCOUNT_STATUSES.map(status => <option key={status} value={status}>{t(`account.statuses.${status}`)}</option>)}
         </select>
       </label>
       <label>{t('account.grade')}
-        <select value={form.accountGrade} onChange={e => setField('accountGrade', e.target.value)}>
+        <select disabled={!hqEditable || (hqMock && !hqPolicy.writable('account', 'accountGrade', selected as unknown as CustomerRecord ?? {}))} value={form.accountGrade} onChange={e => setField('accountGrade', e.target.value)}>
           <option value="GENERAL">{t('account.grades.GENERAL')}</option>
           <option value="KEY">{t('account.grades.KEY')}</option>
         </select>
@@ -291,8 +317,8 @@ export function AccountsPage() {
     <form className={mobile ? 'mob-edit-form' : 'pc-window-form'} onSubmit={e => void save(e)}>
       {formSections(mobile)}
       <div className="account-form-actions">
-        <button type="button" onClick={() => (mobile && selectedId ? setScreen('detail') : closeScreen())}>{t('common.cancel')}</button>
-        <button type="submit" className="button-primary" disabled={saving}>{t('common.save')}</button>
+        <button type="button" onClick={() => (!hqMock && mobile && selectedId ? setScreen('detail') : closeScreen())}>{t('common.cancel')}</button>
+        <button type="submit" className="button-primary" disabled={saving || !hqEditable || (hqMock && !hqPolicy.can(selectedId ? 'ACC.save' : 'ACC.create', selected as unknown as CustomerRecord ?? {}, toWritePayload(form) as unknown as Record<string, unknown>))}>{t('common.save')}</button>
       </div>
     </form>
   );
@@ -302,7 +328,7 @@ export function AccountsPage() {
       <section className="account-mobile">
         <header className="mob-list-header">
           <h2>{t('account.shortTitle')}</h2>
-          <button type="button" className="text-link mob-new" onClick={openCreate}>{t('account.new')}</button>
+          <button type="button" className="text-link mob-new" disabled={hqMock && !hqPolicy.has('ACCOUNT.WRITE')} onClick={openCreate}>{t('account.new')}</button>
         </header>
         <label className="mob-search-wrap">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
@@ -319,6 +345,7 @@ export function AccountsPage() {
         {sandbox && <p className="notice info mob-banner">{t('account.localMode')}</p>}
         {apiError && <p className="notice warning mob-banner" role="alert">{apiError}</p>}
         {message && <p className="notice info mob-banner">{message}</p>}
+        {hqMock && <HqAccountTools rows={rows as unknown as CustomerRecord[]} onChanged={() => void query.refetch()} />}
         <div className="mob-recent-label">{t('account.recent')}</div>
         <div className="mob-account-list">
           {rows.map(row => (
@@ -337,7 +364,8 @@ export function AccountsPage() {
               <strong>{creating ? t('account.new') : selected?.account_name}</strong>
               {screen === 'detail' && selected ? <button type="button" className="text-link" onClick={() => openEdit(selected)}>{t('account.edit')}</button> : <span />}
             </header>
-            {screen === 'detail' && selected && (
+            {hqMock && selected && <HqAccountDetail key={selected.public_id} publicId={selected.public_id} basicForm={formWindow} onChanged={() => void query.refetch()} />}
+            {!hqMock && screen === 'detail' && selected && (
               <>
                 <div className="mob-actions">
                   <button type="button" disabled><ActionIcon name="plan" />{t('account.actions.plan')}</button>
@@ -385,7 +413,7 @@ export function AccountsPage() {
                 {message && <p className="notice info mob-banner">{message}</p>}
               </>
             )}
-            {screen === 'form' && formWindow}
+            {screen === 'form' && (!hqMock || !selected) && formWindow}
           </div>
         )}
       </section>
@@ -402,7 +430,7 @@ export function AccountsPage() {
         </div>
         <div className="page-actions">
           <input className="search-input" value={search} onChange={e => setSearch(e.target.value)} placeholder={t('account.search')} />
-          <button type="button" className="button-primary" onClick={openCreate}>{t('account.register')}</button>
+          <button type="button" className="button-primary" disabled={hqMock && !hqPolicy.has('ACCOUNT.WRITE')} onClick={openCreate}>{t('account.register')}</button>
         </div>
       </div>
       <div className="pc-filter-row">
@@ -410,6 +438,7 @@ export function AccountsPage() {
           <button type="button" key={id} className={`pc-chip${scope === id ? ' active' : ''}`} onClick={() => setScope(id)}>{t(key)}</button>
         ))}
       </div>
+      {hqMock && <HqAccountTools rows={rows as unknown as CustomerRecord[]} onChanged={() => void query.refetch()} />}
       {sandbox && <p className="notice info">{t('account.localMode')}</p>}
       {apiError && <p className="notice warning" role="alert">{apiError}</p>}
       {message && screen === 'list' && <p className="notice info">{message}</p>}
@@ -440,7 +469,7 @@ export function AccountsPage() {
                   <td>{row.owner_name || '-'}</td>
                   {(erpEnabled || sandbox) && (
                     <td>
-                      <button type="button" disabled={row.erp_approved_yn || row.integration_status === 'REQUESTING'} onClick={e => { e.stopPropagation(); void requestErp(row.public_id); }}>
+                      <button type="button" disabled={row.erp_approved_yn || row.integration_status === 'REQUESTING' || (hqMock && (!hqPolicy.can('ACC.erpRequest', row as unknown as CustomerRecord) || !hqPolicy.owns(row as unknown as CustomerRecord, 'ACCOUNT.MERGE')))} onClick={e => { e.stopPropagation(); void requestErp(row.public_id); }}>
                         {t('account.request')}
                       </button>
                     </td>
@@ -461,14 +490,14 @@ export function AccountsPage() {
                 <h3 id="account-form-title">{creating ? t('account.register') : selected?.account_name}</h3>
               </div>
               <div className="pc-window-actions">
-                {selected && (erpEnabled || sandbox) && (
+                {selected && (erpEnabled || sandbox) && !hqMock && (
                   <button type="button" onClick={() => void requestErp(selected.public_id)}>{t('account.actions.erp')}</button>
                 )}
                 <button type="button" className="icon-button" onClick={closeScreen} aria-label={t('app.close')}>×</button>
               </div>
             </header>
             {message && <p className="notice info">{message}</p>}
-            {formWindow}
+            {hqMock && selected ? <HqAccountDetail key={selected.public_id} publicId={selected.public_id} basicForm={formWindow} onChanged={() => void query.refetch()} /> : formWindow}
           </div>
         </div>
       )}

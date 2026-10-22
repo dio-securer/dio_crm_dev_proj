@@ -92,7 +92,7 @@ export class HqApplication {
       'CONTACT.READ','CONTACT.WRITE','ADMIN.WRITE','STANDARD.PUBLISH','STANDARD.READ'
     ])];
     const readOnly = permissions.filter(x => x.endsWith('.READ') || x === 'ACTIVITY.REPORT');
-    const sales = permissions.filter(x => !/APPROVE|MANAGE|RESET|ADMIN|PUBLISH|AUDIT|INTERFACE|USER\.|ORG\.|OPS\./.test(x));
+    const sales = permissions.filter(x => !/APPROVE|MANAGE|RESET|ADMIN|PUBLISH|AUDIT|INTERFACE|STATUS\.REVERSE|USER\.|ORG\.|OPS\./.test(x));
     this.personas = [
       { userId:99, loginId:'hq-admin', name:'본사 관리자', companyId:1, organizationId:10, roles:['HQ_ADMIN'], scope:'SYSTEM', permissions },
       { userId:1, loginId:'hq-sales', name:'본사 영업담당', companyId:1, organizationId:10, roles:['HQ_SALES'], scope:'SELF', permissions:sales },
@@ -251,7 +251,7 @@ export class HqApplication {
     this.route('GET','/api/me/context',c=>({user:{userId:c.actor.userId,publicId:`00000000-0000-4000-8000-${String(c.actor.userId).padStart(12,'0')}`,name:c.actor.name,companyId:c.actor.companyId},globalization:{locale:'ko-KR',countryCode:'KR',currencyCode:'KRW',timezone:'Asia/Seoul',marketProfileCode:'KR_SALES',marketTemplateCode:'HQ_TEMPLATE',screenProfileCode:'HQ_SCREEN_PROFILE',fieldProfileCode:'HQ_FIELD_PROFILE',featureProfileCode:'HQ_FEATURE_PROFILE',workflowProfileCode:'KR_SALES_APPROVAL',integrationProfileCode:'HQ_INTEGRATION_PROFILE',mapProfileCode:'HQ_MOCK_MAP',features:Object.fromEntries(this.capabilities.featureKeys.map(k=>[k,true]))},mode:'MOCK'}));
     const lists: Array<[string,HqBusinessCollection,string,string?]> = [
       ['/api/leads','leads','LEAD.READ','LEAD.search'], ['/api/accounts','accounts','ACCOUNT.READ','ACC.search'],
-      ['/api/contacts','contacts','CONTACT.READ'], ['/api/opportunities','opportunities','OPPORTUNITY.READ'],
+      ['/api/contacts','contacts','CONTACT.READ'], ['/api/activities','activities','ACTIVITY.READ'], ['/api/opportunities','opportunities','OPPORTUNITY.READ'],
       ['/api/contracts','contracts','CONTRACT.READ'], ['/api/orders','orders','ORDER.READ'],
       ['/api/product-packages','products','OPPORTUNITY.READ'], ['/api/order-products','products','PRODUCT_ORDER.READ'],
       ['/api/activity-reports','reports','ACTIVITY.REPORT'], ['/api/direct-work','directWorks','DIRECT_WORK.READ'],
@@ -261,7 +261,7 @@ export class HqApplication {
       this.route('GET',path,c=>{
         hqRequire(c.actor,permission); if(action) this.requireAction(c.actor,action,{},Object.fromEntries(c.query));
         const search = (c.query.get('search') ?? '').toLocaleLowerCase();
-        return c.repository.read().collections[collection].filter(row=>hqCanRead(c.actor,row) && (!search || JSON.stringify(row).toLocaleLowerCase().includes(search)) && (!c.query.get('status') || row.status === c.query.get('status')));
+        return c.repository.read().collections[collection].filter(row=>hqCanRead(c.actor,row) && (!search || JSON.stringify(row).toLocaleLowerCase().includes(search)) && (!c.query.get('status') || row.status === c.query.get('status')) && (!c.query.get('relatedType') || row.related_type === c.query.get('relatedType')) && (!c.query.get('relatedPublicId') || row.related_public_id === c.query.get('relatedPublicId')));
       });
       this.route('GET',`${path}/:publicId`,c=>{hqRequire(c.actor,permission);return hqFind(c.repository.read(),c.actor,collection,c.params.publicId);});
     }

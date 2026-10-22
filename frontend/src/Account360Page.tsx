@@ -2,12 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Account360, AccountSummary } from '@dio-crm/contracts';
 import { apiGet } from './api';
+import { useHqMock } from './hq-mock/HqMockProvider';
+import { HqAccount360Page } from './hq-mock/HqAccountDetail';
 import { useGlobalization } from './market/globalization-context';
 import { formatCurrency } from './formatting/currency';
 
 function Box({title,children}:{title:string;children:React.ReactNode}) { return <div style={{border:'1px solid #dfe4ea',borderRadius:10,padding:14,background:'#fff'}}><h3>{title}</h3>{children}</div>; }
 
 export function Account360Page() {
+  const { enabled } = useHqMock();
+  return enabled ? <HqAccount360Page /> : <LegacyAccount360Page />;
+}
+function LegacyAccount360Page() {
   const { t } = useTranslation();
   const { globalization } = useGlobalization();
   const money=(value:number)=>formatCurrency(Number(value||0),globalization.locale,globalization.currencyCode);

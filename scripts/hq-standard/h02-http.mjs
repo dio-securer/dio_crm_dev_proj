@@ -34,7 +34,8 @@ test('H02 HTTP authentication, real policy, ownership and fail-closed routes',as
   assert.equal((await admin.request('POST','/api/real-database/connect',{})).status,404);
   assert.equal((await admin.request('GET','/api/accounts',undefined,{'x-hq-dataset':'HQ_OTHER'})).status,409);
   assert.equal((await admin.request('GET','/api/accounts',undefined,{'x-hq-schema-version':'99'})).status,409);
-  assert.equal((await admin.request('POST','/api/accounts',{accountName:'blocked',erpApprovedYn:true})).status,400);
+  const sourceWrite=await admin.request('POST','/api/accounts',{accountName:'blocked',erpApprovedYn:true});
+  assert.equal(sourceWrite.status,403);assert.equal(sourceWrite.value.error,'SOURCE_FIELD_READ_ONLY');
   const externalOrigin=await fetch(s.url+'/api/hq/bootstrap',{headers:{origin:'https://outside.invalid'}});assert.equal(externalOrigin.status,403);
   const status=await admin.ok('GET','/api/hq/status');assert.equal(status.mode,'MOCK');assert.equal(status.outboundCalls,0);
 });

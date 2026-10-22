@@ -47,7 +47,7 @@ const get = (d: HqDataset, company: number, collection: HqBusinessCollection, id
 const idFields: Partial<Record<HqInterfaceCode, string>> = { 'IF-ERP-002': 'accountPublicId', 'IF-ERP-003': 'accountPublicId', 'IF-ERP-004': 'contractPublicId', 'IF-ERP-005': 'contractPublicId', 'IF-ERP-007': 'orderPublicId', 'IF-ERP-008': 'orderPublicId', 'IF-ERP-009': 'contractPublicId', 'IF-ERP-010': 'accountPublicId', 'IF-ERP-011': 'contractPublicId', 'IF-ERP-012': 'directWorkPublicId', 'IF-ERP-013': 'directWorkPublicId', 'IF-ERP-014': 'orderPublicId' };
 const fieldLists: Record<HqInterfaceCode, string[]> = {
   'IF-HIRA-001': ['hospitals'], 'IF-ERP-001': ['regions'],
-  'IF-ERP-002': ['accountPublicId', 'accountName', 'businessNo', 'businessName', 'ceoName', 'phone', 'address', 'zipCode', 'taxEmail', 'providerNo', 'accountType', 'ownerUserId', 'companyCode'],
+  'IF-ERP-002': ['accountPublicId', 'accountName', 'businessNo', 'businessName', 'ceoName', 'phone', 'address', 'addressLine1', 'addressLine2', 'hospitalAddress', 'zipCode', 'taxEmail', 'providerNo', 'encryptedProviderNo', 'openDate', 'accountType', 'ownerUserId', 'companyCode'],
   'IF-ERP-003': ['accountPublicId', 'erpCustomerCode', 'approved', 'message'],
   'IF-ERP-004': ['contractPublicId', 'contractName', 'amount', 'productAmount', 'goodsAmount', 'products', 'collectionPlans'],
   'IF-ERP-005': ['contractPublicId', 'erpContractNo', 'approved', 'message'],
@@ -67,7 +67,7 @@ function validatePayload(code: HqInterfaceCode, payload: Record<string, unknown>
   const id = idFields[code]; if (id && payload[id] !== undefined) uuid(payload[id], id);
   for (const key of ['approved', 'accepted', 'expressYn']) if (payload[key] !== undefined) hqAssert(typeof payload[key] === 'boolean', 400, 'INTERFACE_BOOLEAN_INVALID', key);
   for (const key of ['amount', 'productAmount', 'goodsAmount', 'planVersion', 'ownerUserId']) if (payload[key] !== undefined) finite(payload[key], key);
-  for (const key of ['accountName', 'businessNo', 'businessName', 'ceoName', 'phone', 'address', 'zipCode', 'taxEmail', 'providerNo', 'accountType', 'companyCode', 'contractName', 'deliveryAddress', 'erpCustomerCode', 'erpContractNo', 'erpOrderNo', 'erpReferenceNo', 'reason', 'workType', 'outAt', 'message', 'note']) {
+  for (const key of ['accountName', 'businessNo', 'businessName', 'ceoName', 'phone', 'address', 'addressLine1', 'addressLine2', 'hospitalAddress', 'zipCode', 'taxEmail', 'providerNo', 'encryptedProviderNo', 'openDate', 'accountType', 'companyCode', 'contractName', 'deliveryAddress', 'erpCustomerCode', 'erpContractNo', 'erpOrderNo', 'erpReferenceNo', 'reason', 'workType', 'outAt', 'message', 'note']) {
     if (payload[key] !== undefined && payload[key] !== null) hqAssert(typeof payload[key] === 'string' && String(payload[key]).length <= 4000, 400, 'INTERFACE_TEXT_INVALID', key);
   }
   if (code === 'IF-HIRA-001' && payload.hospitals !== undefined) for (const row of rows(payload.hospitals, 'hospitals')) {
@@ -149,7 +149,7 @@ export interface EnqueueInterfaceInput {
 function sourceSnapshot(d: HqDataset, actor: HqActor, code: HqInterfaceCode, entity: HqRow | undefined, input: Record<string, unknown>): Record<string, unknown> {
   if (!entity || HQ_INTERFACE_REGISTRY[code].direction === 'IN') return cloneHq(input);
   if (code === 'IF-ERP-002') {
-    const values = { accountPublicId: entity.public_id, accountName: entity.account_name, businessNo: entity.business_no, businessName: entity.business_name, ceoName: entity.ceo_name, phone: entity.phone, address: entity.address, zipCode: entity.zip_code, taxEmail: entity.tax_email, providerNo: entity.provider_no, accountType: entity.account_type, ownerUserId: entity.owner_user_id, companyCode: entity.company_code };
+    const values = { accountPublicId: entity.public_id, accountName: entity.account_name, businessNo: entity.business_no, businessName: entity.business_name, ceoName: entity.ceo_name, phone: entity.phone, address: entity.address, addressLine1: entity.address_line1, addressLine2: entity.address_line2, hospitalAddress: entity.hospital_address, zipCode: entity.zip_code, taxEmail: entity.tax_email, providerNo: entity.provider_no, encryptedProviderNo: entity.encrypted_provider_no, openDate: entity.open_date, accountType: entity.account_type, ownerUserId: entity.owner_user_id, companyCode: entity.company_code };
     for (const key of ['accountName', 'businessNo', 'ceoName', 'address']) text(values[key as keyof typeof values], key);
     return Object.fromEntries(Object.entries(values).filter(([, value]) => value !== undefined));
   }
@@ -268,7 +268,7 @@ function applyBusiness(d: HqDataset, actor: HqActor, log: HqInterfaceLog, result
   }
   if (code === 'IF-ERP-003') {
     hqAssert(p.approved !== false, 422, 'INTERFACE_APPROVAL_SUCCESS_MISMATCH');
-    Object.assign(entity!, { erp_customer_code: p.erpCustomerCode, erp_approved_yn: true, integration_status: 'SUCCESS', erp_approval_code: 'CM840500', erp_trade_code: 'BC5110', account_status: 'ACTIVE', updated_at: d.clock, version: entity!.version + 1 });
+    Object.assign(entity!, { erp_customer_code: p.erpCustomerCode, erp_account_name: typeof log.payload.accountName === 'string' ? log.payload.accountName : entity!.erp_account_name ?? null, erp_approved_yn: true, integration_status: 'SUCCESS', erp_approval_code: 'CM840500', erp_trade_code: 'BC5110', account_status: 'ACTIVE', updated_at: d.clock, version: entity!.version + 1 });
   } else if (code === 'IF-ERP-005') {
     hqAssert(p.approved !== false, 422, 'INTERFACE_APPROVAL_SUCCESS_MISMATCH');
     hqAssert(get(d, actor.companyId, 'accounts', entity!.account_public_id).erp_approved_yn === true, 409, 'ERP_ACCOUNT_APPROVAL_REQUIRED');
@@ -328,6 +328,7 @@ function applyBusiness(d: HqDataset, actor: HqActor, log: HqInterfaceLog, result
       const targets = [lead, ...d.collections.accounts.filter(row => row.company_id === actor.companyId && row.encrypted_provider_no === hospital.encryptedProviderNo)];
       let leadApplied = false;
       for (const target of targets) {
+        if (target.hira_sync_exclude_yn === true) continue;
         if (!acceptCatalogRevision(d, target, log, result)) continue;
         const manual = (target.manual_fields ?? []) as string[];
         for (const [key, value] of Object.entries(hospital)) { const field = key === 'hospitalName' && target !== lead ? 'account_name' : mapping[key]; if (!manual.includes(field) && !manual.includes(key)) target[field] = value; }
