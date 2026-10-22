@@ -21,9 +21,19 @@ jobs:
       - run: pnpm build
       - run: pnpm test
       - run: pnpm hq:check
+      - run: pnpm hq:http
       - run: pnpm regression:multi-market
       - run: pnpm i18n:check
       - run: pnpm i18n:hardcode
       - run: pnpm pwa:check
       - run: pnpm env:check
       - run: pnpm audit:critical
+      - name: Upload HQ browser build and validation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hq-validation-${{ github.sha }}
+          path: |
+            frontend/dist/
+            docs/hq-standard/implementation/evidence/
+          retention-days: 7

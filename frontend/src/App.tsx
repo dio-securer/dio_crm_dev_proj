@@ -6,6 +6,7 @@ import { APP_ROUTES } from './app/route-config';
 import { renderScreen } from './app/screen-registry';
 import { getScreenProfile } from './app/screen-profile';
 import { resolveScreenProfileCode } from './app/screen-resolver';
+import { HqMockControls } from './hq-mock/HqMockControls';
 
 export default function App() {
   const { globalization, featureEnabled } = useGlobalization();
@@ -29,6 +30,7 @@ export default function App() {
 
   return (
     <AppShell links={links}>
+      <HqMockControls />
       <Routes>
         {activeRoutes.map(route => {
           const screenKey = screenProfile.screens[route.slot];

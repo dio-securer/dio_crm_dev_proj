@@ -13,6 +13,7 @@ import {
   formFromAccount, listVisibleAccounts, toWritePayload, type AccountFormInput, type AccountScope
 } from './account-model';
 import { listSandboxAccounts, requestSandboxErp, saveSandboxAccount } from './account-sandbox';
+import { isHqMockMode } from './hq-mock/mode';
 
 function useIsMobile() {
   const [mobile, setMobile] = useState(() => typeof window !== 'undefined' && window.matchMedia(MOBILE_ACCOUNT_MQ).matches);
@@ -52,6 +53,7 @@ function ListFilterIcon() {
 
 export function AccountsPage() {
   const { t } = useTranslation();
+  const hqMock = isHqMockMode();
   const mobile = useIsMobile();
   const { featureEnabled } = useGlobalization();
   const [search, setSearch] = useState('');
@@ -76,13 +78,14 @@ export function AccountsPage() {
   });
 
   React.useEffect(() => {
-    if (query.isError && !localMode) {
+    if (!hqMock && query.isError && !localMode) {
       setLocalMode(true);
       setMessage('');
     }
-  }, [query.isError, localMode]);
+  }, [query.isError, localMode, hqMock]);
 
-  const sandbox = localMode || Boolean(query.isError);
+  const sandbox = !hqMock && (localMode || Boolean(query.isError));
+  const apiError = hqMock && query.isError ? t('hqMock.apiError', { message: query.error instanceof Error ? query.error.message : String(query.error) }) : '';
   const rows = useMemo(() => {
     const source = sandbox ? listSandboxAccounts(search, scope) : listVisibleAccounts(query.data ?? [], search, scope);
     return source;
@@ -244,6 +247,7 @@ export function AccountsPage() {
     const raw = row[field.crmField];
     if (raw == null || raw === '') return '-';
     const text = String(raw);
+    if (hqMock && ['tel', 'email', 'homepage'].includes(field.code)) return text;
     if (field.code === 'tel') return <a href={`tel:${text}`}>{text}</a>;
     if (field.code === 'email') return <a href={`mailto:${text}`}>{text}</a>;
     if (field.code === 'homepage') return <a href={/^https?:\/\//i.test(text) ? text : `https://${text}`} target="_blank" rel="noreferrer">{text}</a>;
@@ -310,6 +314,7 @@ export function AccountsPage() {
           ))}
         </div>
         {sandbox && <p className="notice info mob-banner">{t('account.localMode')}</p>}
+        {apiError && <p className="notice warning mob-banner" role="alert">{apiError}</p>}
         {message && <p className="notice info mob-banner">{message}</p>}
         <div className="mob-recent-label">{t('account.recent')}</div>
         <div className="mob-account-list">
@@ -403,6 +408,7 @@ export function AccountsPage() {
         ))}
       </div>
       {sandbox && <p className="notice info">{t('account.localMode')}</p>}
+      {apiError && <p className="notice warning" role="alert">{apiError}</p>}
       {message && screen === 'list' && <p className="notice info">{message}</p>}
       <div className="data-card pc-table-card">
         <div className="data-card-header"><div><strong>{t('account.title')}</strong><small>{rows.length} · {t('account.selectRow')}</small></div></div>
