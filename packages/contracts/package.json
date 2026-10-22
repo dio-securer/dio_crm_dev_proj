@@ -12,6 +12,10 @@
     "./globalization": {
       "types": "./dist/globalization.d.ts",
       "default": "./dist/globalization.js"
+    },
+    "./hq-standard": {
+      "types": "./dist/hq-standard.d.ts",
+      "default": "./dist/hq-standard.js"
     }
   },
   "scripts": {

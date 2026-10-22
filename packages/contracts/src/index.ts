@@ -214,3 +214,4 @@ export type AnalyticsDashboard = {
 };
 
 export * from './globalization';
+export * from './hq-standard';
