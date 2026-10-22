@@ -85,6 +85,7 @@ export function AccountsPage() {
   const query = useQuery({
     queryKey: ['accounts', search, scope],
     enabled: !localMode,
+    refetchInterval: hqMock ? current => current.state.data?.some(row => row.integration_status === 'REQUESTING') ? 750 : false : false,
     queryFn: () => apiGet<AccountSummary[]>(`/api/accounts?scope=${scope}${search ? `&search=${encodeURIComponent(search)}` : ''}`),
     retry: false
   });

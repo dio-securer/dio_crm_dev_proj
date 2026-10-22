@@ -33,7 +33,7 @@ test('H03 selected stages do not persist; forward/reverse transitions and conver
   const app=createHqApplication(),sales=await client(app,'hq-sales'),admin=await client(app);
   const lead=await sales.ok('POST','/api/leads',{hospitalName:'단계검증',idempotencyKey:'stage-create'}),selected='FIRST_VISIT';
   assert.equal((await sales.ok('GET',`/api/leads/${lead.public_id}`)).status,'NEW');
-  const first=await sales.ok('POST',`/api/leads/${lead.public_id}/status`,{toStatus:selected,expectedVersion:1,idempotencyKey:'first'});
+  const first=await sales.ok('POST',`/api/leads/${lead.public_id}/status`,{toStatus:selected,reason:'',expectedVersion:1,idempotencyKey:'first'});
   assert.equal(first.status,'FIRST_VISIT');const second=await sales.ok('POST',`/api/leads/${lead.public_id}/status`,{toStatus:'KEYMAN_MEETING',expectedVersion:2,idempotencyKey:'second'});
   await sales.fails('POST',`/api/leads/${lead.public_id}/status`,{toStatus:'NEW',reason:'되돌림',expectedVersion:second.version,idempotencyKey:'reverse-sales'},409,'LEAD_TRANSITION_DENIED');
   await admin.fails('POST',`/api/leads/${lead.public_id}/status`,{toStatus:'NEW',expectedVersion:second.version,idempotencyKey:'reverse-missing'},409,'LEAD_TRANSITION_DENIED');

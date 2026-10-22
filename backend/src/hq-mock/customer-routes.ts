@@ -183,7 +183,8 @@ export function installCustomerRoutes(app:HqApplication):void {
     const response=mutation(c,'LEAD.changeStage',c.params.publicId,true,d=>{requireLeadWrite(c,d);},d=>{
       const row=requireLeadWrite(c,d);expected(row,c.body);const to=c.body.toStatus as LeadStatus;
       hqAssert(STATUS.includes(to)&&to!=='CONVERTED',400,'CONVERSION_ACTION_REQUIRED','CONVERTED can only be reached through the atomic conversion action');
-      const reason=c.body.reason===undefined?'':hqText(c.body.reason,'reason',1000);
+      hqAssert(c.body.reason===undefined||(typeof c.body.reason==='string'&&c.body.reason.length<=1000),400,'ValidationError','reason must be a string of at most 1000 characters');
+      const reason=typeof c.body.reason==='string'?c.body.reason.trim():'';
       const decision=canTransitionLead(row.status as LeadStatus,to,c.actor.permissions,reason);
       hqAssert(decision.allowed,409,'LEAD_TRANSITION_DENIED',decision.error??'Transition is not allowed');
       if(decision.reverse){app.requireAction(c.actor,'LEAD.reverse',row,c.body);app.requireTransition(c.actor,`LEAD.reverseTo.${to}`,row,c.body);}
@@ -337,7 +338,7 @@ export function installCustomerRoutes(app:HqApplication):void {
     const total=(rows:HqRow[],key:string):number|null=>rows.every(row=>typeof row[key]==='number'&&Number.isFinite(row[key]))?rows.reduce((sum,row)=>sum+Number(row[key]),0):null;
     const contractAmount=total(contracts,'contract_amount'),collectionAmount=total(collections,'amount');
     const analytics={contactCount:contacts.length,opportunityCount:opportunities.length,contractCount:contracts.length,orderCount:orders.length,activityCount:activities.length,salesAmount:total(sales,'amount'),collectionAmount,outstandingAmount:contractAmount===null||collectionAmount===null?null:contractAmount-collectionAmount,orderAmount:total(orders.filter(row=>row.status!=='FAILED'),'order_amount'),erpApproved:account.erp_approved_yn===true,orderAllowed:orderAllowed(account)};
-    const visibleAccount=accountDto(c,d,account);
+    const visibleAccount:HqRow=accountDto(c,d,account);
     const timeline=[...(Array.isArray(visibleAccount.history)?visibleAccount.history:[]),...activities.map(row=>({public_id:row.public_id,action:'ACTIVITY',at:row.start_at??d.clock,subject:row.subject,status:row.status})),...interfaces.map(row=>({public_id:row.requestId,action:'ERP',at:row.requestedAt,status:row.status,interfaceCode:row.interfaceCode}))].sort((a,b)=>String(b.at).localeCompare(String(a.at)));
     return {account:visibleAccount,contacts,opportunities,contracts,orders,sales,collections,services,activities,timeline,analytics,hospital:Object.fromEntries(HOSPITAL_FIELDS.filter(key=>Object.hasOwn(visibleAccount,ACCOUNT_FIELDS[key])).map(key=>[ACCOUNT_FIELDS[key],visibleAccount[ACCOUNT_FIELDS[key]]??null])),interfaces,permissions:c.actor.permissions,mode:'MOCK'};
   };
