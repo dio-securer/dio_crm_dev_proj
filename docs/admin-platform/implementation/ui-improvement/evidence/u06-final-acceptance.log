@@ -1,0 +1,80 @@
+$ node scripts/admin/run-designer-ui.cjs
+PASS BROWSER_MOCK UI01: Ten distinct unlocked rows edited; stable keys retained after group roundtrip.
+PASS U02 BROWSER_MOCK: 10 stable-key row edits, group roundtrip, detail, 390px save access
+PASS BROWSER_MOCK UI02: Filtered selection reset, ten-row keep/true bulk, invariant rollback, one-step undo/redo, extension definition/placement create and deactivate.
+PASS BROWSER_MOCK UI03: Filtered selection reset, ten-row keep/true bulk, invariant rollback, one-step undo/redo, extension definition/placement create and deactivate.
+PASS BROWSER_MOCK UI04: Filtered selection reset, ten-row keep/true bulk, invariant rollback, one-step undo/redo, extension definition/placement create and deactivate.
+PASS BROWSER_MOCK UI06: Filtered selection reset, ten-row keep/true bulk, invariant rollback, one-step undo/redo, extension definition/placement create and deactivate.
+PASS BROWSER_MOCK UI08: Filtered selection reset, ten-row keep/true bulk, invariant rollback, one-step undo/redo, extension definition/placement create and deactivate.
+PASS U03 BROWSER_MOCK: filtered selection reset, ten-row atomic bulk/undo/redo, invariant rollback, extension create/deactivate
+PASS BROWSER_MOCK UI11: SCREEN success, FIELD failure and same-key failed-only retry; reason-required validation/publish succeeded.
+PASS BROWSER_MOCK UI12: SCREEN success, FIELD failure and same-key failed-only retry; reason-required validation/publish succeeded.
+PASS BROWSER_MOCK UI17: SCREEN success, FIELD failure and same-key failed-only retry; reason-required validation/publish succeeded.
+PASS U04 BROWSER_MOCK: SCREEN success/FIELD failure, preserved inputs, failed-only same-key retry, validation, reason-required one-release publish
+PASS BROWSER_MOCK UI22: Working/published snapshot distinction; invalid state removes preview and displays error.
+PASS BROWSER_MOCK UI24: Working/published snapshot distinction; invalid state removes preview and displays error.
+PASS U05 BROWSER_MOCK: live/published snapshots, conditional required, role-hidden fields, invalid state removed, mobile preview
+PASS BROWSER_MOCK UI26: Keyboard Escape/Enter, modal focus return, missing key warning, Korean/English, 390/1024/1440 no overflow.
+PASS BROWSER_MOCK UI27: Keyboard Escape/Enter, modal focus return, missing key warning, Korean/English, 390/1024/1440 no overflow.
+PASS U06 BROWSER_MOCK: Escape/Enter, modal focus return, missing translation, ko/en, 390/1024/1440 widths
+PASS BROWSER_MOCK UI05: Native drag and keyboard button yield identical key order; filtered drag disabled.
+PASS BROWSER_MOCK UI07: Persisted false, decimal string 0, empty text, then removed default and reloaded.
+PASS BROWSER_MOCK UI09: Nonempty removal rejected without destination; atomic move to extensions and removal persisted.
+PASS BROWSER_MOCK UI10: Active effective FIELD snapshot unchanged after changed draft persisted.
+PASS BROWSER_MOCK UI13: Lost successful response replayed same key; revision increased exactly once.
+PASS BROWSER_MOCK UI14: Two real tabs conflicted; input 601 retained, three-way choice reapplied and saved.
+PASS BROWSER_MOCK UI15: Injected 422 hidden row path; error action clears filters and focuses exact maxLength cell.
+PASS BROWSER_MOCK UI16: Editing invalidates validation; 10min expiry and changed parent snapshot block publish before mutation.
+PASS BROWSER_MOCK UI20: Delayed real scope response discarded after disposal; separate current workspace loads only its scope.
+PASS BROWSER_MOCK UI18: External related ACTION draft detected as stale; explicit refresh shows it in validation target list.
+PASS BROWSER_MOCK UI23: Shared role/mask evaluator emits only mask token; conditional sample interaction issues zero account mutations.
+BLOCKED BROWSER_MOCK UI29: 76 supported rows, 5 warmups/30 paints, p95 133.3ms. 100 valid rows cannot be constructed under existing registry and max 50 extensions.
+PASS BROWSER_MOCK UI25: Published supported-capacity fixture: actual SALES form visibility, required, readonly and key order equal shared preview projection.
+PASS BROWSER_MOCK UI21: Actual SALES session: config read and direct draft write denied by unchanged permission engine. Frontend denied-save freeze separately unit-tested.
+PASS BROWSER_MOCK UI20: Platform loads real B scope while A response is delayed; disposed A response cannot alter B fields or company.
+PASS BROWSER_MOCK UI21: Actual SALES config read/write denied; injected expired-session save preserves 803 and disables editing.
+PASS BROWSER_MOCK UI19: Company cancel/discard/save behave correctly; failed expired-session save blocks switch and preserves 803.
+PASS BROWSER_MOCK UI30: Page reload/relogin retains draft value 802 in same browser storage / running API process.
+PASS BROWSER_MOCK UI21: Real SALES config denial; expired-session preserves input; real deny role disables editor/publish and direct validate/release return 403.
+PASS additional designer boundaries BROWSER_MOCK
+PASS API_MOCK UI01: Ten distinct unlocked rows edited; stable keys retained after group roundtrip.
+PASS U02 API_MOCK: 10 stable-key row edits, group roundtrip, detail, 390px save access
+PASS API_MOCK UI02: Filtered selection reset, ten-row keep/true bulk, invariant rollback, one-step undo/redo, extension definition/placement create and deactivate.
+PASS API_MOCK UI03: Filtered selection reset, ten-row keep/true bulk, invariant rollback, one-step undo/redo, extension definition/placement create and deactivate.
+PASS API_MOCK UI04: Filtered selection reset, ten-row keep/true bulk, invariant rollback, one-step undo/redo, extension definition/placement create and deactivate.
+PASS API_MOCK UI06: Filtered selection reset, ten-row keep/true bulk, invariant rollback, one-step undo/redo, extension definition/placement create and deactivate.
+PASS API_MOCK UI08: Filtered selection reset, ten-row keep/true bulk, invariant rollback, one-step undo/redo, extension definition/placement create and deactivate.
+PASS U03 API_MOCK: filtered selection reset, ten-row atomic bulk/undo/redo, invariant rollback, extension create/deactivate
+PASS API_MOCK UI11: SCREEN success, FIELD failure and same-key failed-only retry; reason-required validation/publish succeeded.
+PASS API_MOCK UI12: SCREEN success, FIELD failure and same-key failed-only retry; reason-required validation/publish succeeded.
+PASS API_MOCK UI17: SCREEN success, FIELD failure and same-key failed-only retry; reason-required validation/publish succeeded.
+PASS U04 API_MOCK: SCREEN success/FIELD failure, preserved inputs, failed-only same-key retry, validation, reason-required one-release publish
+PASS API_MOCK UI22: Working/published snapshot distinction; invalid state removes preview and displays error.
+PASS API_MOCK UI24: Working/published snapshot distinction; invalid state removes preview and displays error.
+PASS U05 API_MOCK: live/published snapshots, conditional required, role-hidden fields, invalid state removed, mobile preview
+PASS API_MOCK UI26: Keyboard Escape/Enter, modal focus return, missing key warning, Korean/English, 390/1024/1440 no overflow.
+PASS API_MOCK UI27: Keyboard Escape/Enter, modal focus return, missing key warning, Korean/English, 390/1024/1440 no overflow.
+PASS U06 API_MOCK: Escape/Enter, modal focus return, missing translation, ko/en, 390/1024/1440 widths
+PASS API_MOCK UI05: Native drag and keyboard button yield identical key order; filtered drag disabled.
+PASS API_MOCK UI07: Persisted false, decimal string 0, empty text, then removed default and reloaded.
+PASS API_MOCK UI09: Nonempty removal rejected without destination; atomic move to extensions and removal persisted.
+PASS API_MOCK UI10: Active effective FIELD snapshot unchanged after changed draft persisted.
+PASS API_MOCK UI13: Lost successful response replayed same key; revision increased exactly once.
+PASS API_MOCK UI14: Two real tabs conflicted; input 601 retained, three-way choice reapplied and saved.
+PASS API_MOCK UI15: Injected 422 hidden row path; error action clears filters and focuses exact maxLength cell.
+PASS API_MOCK UI16: Editing invalidates validation; 10min expiry and changed parent snapshot block publish before mutation.
+PASS API_MOCK UI20: Delayed real scope response discarded after disposal; separate current workspace loads only its scope.
+PASS API_MOCK UI18: External related ACTION draft detected as stale; explicit refresh shows it in validation target list.
+PASS API_MOCK UI23: Shared role/mask evaluator emits only mask token; conditional sample interaction issues zero account mutations.
+BLOCKED API_MOCK UI29: 76 supported rows, 5 warmups/30 paints, p95 133.3ms. 100 valid rows cannot be constructed under existing registry and max 50 extensions.
+PASS API_MOCK UI25: Published supported-capacity fixture: actual SALES form visibility, required, readonly and key order equal shared preview projection.
+PASS API_MOCK UI21: Actual SALES session: config read and direct draft write denied by unchanged permission engine. Frontend denied-save freeze separately unit-tested.
+PASS API_MOCK UI20: Platform loads real B scope while A response is delayed; disposed A response cannot alter B fields or company.
+PASS API_MOCK UI21: Actual SALES config read/write denied; injected expired-session save preserves 803 and disables editing.
+PASS API_MOCK UI19: Company cancel/discard/save behave correctly; failed expired-session save blocks switch and preserves 803.
+PASS API_MOCK UI30: Page reload/relogin retains draft value 802 in same browser storage / running API process.
+PASS API_MOCK UI21: Real SALES config denial; expired-session preserves input; real deny role disables editor/publish and direct validate/release return 403.
+PASS additional designer boundaries API_MOCK
+PASS BROWSER_MOCK UI28: Existing account/configuration/operations regression commands passed; browser runtime compatibility also checked by UI25.
+PASS API_MOCK UI28: Existing account/configuration/operations regression commands passed; browser runtime compatibility also checked by UI25.
+PASS API_MOCK UI30: Saved draft 802 survived page reload while API ran; fresh API process restored original seed with no drafts/releases.

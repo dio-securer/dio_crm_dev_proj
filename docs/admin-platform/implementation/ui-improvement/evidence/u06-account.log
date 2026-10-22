@@ -1,0 +1,30 @@
+$ node --test tests/admin/account-configuration.cjs tests/admin/account-http.cjs
+✔ T71 feature dependencies and registry are validated (21.654646ms)
+✔ T72 registered screens, duplicate routes, cycles and section references (7.089225ms)
+✔ T48 opposing effects and cross-rule hidden required rejected regardless of condition (3.662601ms)
+✔ base readOnly cannot be weakened by DISPLAY/SAVE rules (3.954212ms)
+✔ condition AST has strict null, empty arrays, decimal and context semantics (0.689109ms)
+✔ extension five types reject precision/date/code/null/type/length errors (1.023573ms)
+✔ action allowlist rejects arbitrary operation (3.043186ms)
+✔ HQ TEMPLATE no-op validation and publish retain exact profile layout (128.475998ms)
+✔ business name invariant cannot be removed or weakened by a rule (3.69547ms)
+✔ T46 drafts isolated; published field/list/action affects only US_A; stale release409 (658.570463ms)
+✔ T47 create/update five extension types, required rule, nullable and omitted PATCH preservation (63.963503ms)
+✔ T71 feature OFF blocks direct API; menu hiding does not grant or revoke permission (448.354686ms)
+✔ T75 shared view unreadable field rejected during validation (91.774801ms)
+✔ T75 published view columns filtered and unreadable sort denied; metadata excludes secrets (35.786296ms)
+✔ T67 duplicate masked write422; readOnly mask cannot be replaced; raw value retained (23.218416ms)
+✔ extension type change with existing data blocked; inactive keeps stored value and rejects writes (234.064539ms)
+✔ registered text-only mask and extension privilege ceiling (26.99051ms)
+✔ LIST_VIEW context filter validates and executes against current company and role (169.661531ms)
+✔ create-only roles expose createWrite separately; blank name cannot create (47.229153ms)
+✔ registry, dependency and rule failures return HTTP422 before publication (498.313647ms)
+✔ field registry exposes only registered metadata to role readers and isolates companies (30.329864ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2659.882148
