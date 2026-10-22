@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { ACCOUNT_INTERFACE_FIELDS, createHqPolicy, validateHqStandard, type HqContext } from '@dio-crm/contracts';
 import { HQ_STANDARD, HQ_CAPABILITIES } from './hq-standard';
 import { HQ_CATALOG_IDS } from './hq-standard-registry';
@@ -6,6 +6,21 @@ import { APP_ROUTES } from './route-config';
 import { GLOBAL_SCREEN_PROFILE, HQ_SCREEN_PROFILE, type ScreenKey } from './screen-profile';
 import { getRegisteredScreen } from './screen-registry';
 import { HQ_SCREEN_KEYS } from '../market/templates/hq/hq-screen-manifest';
+
+// This suite verifies real registry/component references, not DOM rendering or HTTP.
+// Vitest hoists this boundary mock before page imports: production api.ts reads
+// window at module load. Keep all renderers real and forbid network/download calls.
+vi.mock('../api', () => {
+  const forbidden = () => { throw new Error('H01_REGISTRY_TEST_FORBIDS_NETWORK_OR_DOWNLOAD'); };
+  return {
+    apiGet: forbidden,
+    apiPost: forbidden,
+    apiPatch: forbidden,
+    apiDownload: forbidden,
+    apiPostDownload: forbidden,
+    saveBlob: forbidden
+  };
+});
 
 describe('H01 actual frontend registration glue', () => {
   it('validates the actual exported HQ metadata through the package public API', () => {
