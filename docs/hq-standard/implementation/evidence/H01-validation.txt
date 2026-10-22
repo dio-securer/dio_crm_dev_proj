@@ -1,10 +1,11 @@
-H01 local validation evidence
+H01 local and remote validation evidence
 Date: 2026-10-22 (user timezone Asia/Seoul)
 Baseline: e111138dbf50c46aca41c7097e156840fcd59069
+Reviewed functional source: af4ec78fcfec723a6c8deeb66a4313f846bcd606
 Branch: feat/hq-standard-h01-contracts
-Runtime: Node.js v24.19.0
-Scope: actual pure TypeScript execution; not tsc/Vitest/browser/HTTP/ERP verification.
-Revision: Worker B P1-01 and P2-01 through P2-04 remediation snapshot.
+PR: https://github.com/dio-securer/dio_crm_dev_proj/pull/30
+Local runtime: Node.js v24.19.0
+Local scope: pure TypeScript execution; not a replacement for type checking or browser/HTTP/ERP verification.
 Command: node --experimental-strip-types --test --test-reporter=spec scripts/hq-standard/hq-standard.test.mjs
 Exit: 0
 
@@ -15,163 +16,163 @@ To eliminate this warning, add "type": "module" to /tmp/crm-h00-review.W1iDYY/re
 (node:11) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///tmp/crm-h00-review.W1iDYY/repo/frontend/src/app/route-config.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
 To eliminate this warning, add "type": "module" to /tmp/crm-h00-review.W1iDYY/repo/frontend/package.json.
-✔ 01 actual catalog, additional OPS, existing 14 routes and explicit planned coverage (28.799142ms)
-✔ 02 factory is isolated and does not change original HQ/GLOBAL assets (5.328072ms)
+✔ 01 actual catalog, additional OPS, existing 14 routes and explicit planned coverage (31.098769ms)
+✔ 02 factory is isolated and does not change original HQ/GLOBAL assets (6.899913ms)
 ▶ 03 duplicates are rejected for every stable entity ID
-  ✔ processes (15.043998ms)
-  ✔ screens (12.512367ms)
-  ✔ menus (12.429896ms)
-  ✔ tabs (17.568838ms)
-  ✔ sections (6.826216ms)
-  ✔ fields (7.354696ms)
-  ✔ actions (5.241675ms)
-  ✔ transitions (6.541385ms)
-  ✔ evidence (8.35188ms)
-  ✔ coverage (5.555448ms)
-✔ 03 duplicates are rejected for every stable entity ID (99.604308ms)
+  ✔ processes (19.783539ms)
+  ✔ screens (15.628286ms)
+  ✔ menus (17.572488ms)
+  ✔ tabs (6.35995ms)
+  ✔ sections (6.896818ms)
+  ✔ fields (7.234452ms)
+  ✔ actions (7.735597ms)
+  ✔ transitions (6.701208ms)
+  ✔ evidence (6.588633ms)
+  ✔ coverage (7.388744ms)
+✔ 03 duplicates are rejected for every stable entity ID (104.557918ms)
 ▶ 04 renderer and route mismatches
-  ✔ unknown renderer (6.899634ms)
-  ✔ GLOBAL renderer (7.306455ms)
-  ✔ duplicate route (5.806779ms)
-  ✔ wrong route key (5.749565ms)
-  ✔ wrong path (4.96112ms)
-✔ 04 renderer and route mismatches (31.394647ms)
+  ✔ unknown renderer (8.287673ms)
+  ✔ GLOBAL renderer (9.975646ms)
+  ✔ duplicate route (7.589462ms)
+  ✔ wrong route key (7.364098ms)
+  ✔ wrong path (5.790914ms)
+✔ 04 renderer and route mismatches (39.954861ms)
 ▶ 05 dangling references across metadata graph
-  ✔ menu screen (5.007809ms)
-  ✔ process screen (4.774284ms)
-  ✔ process dependency (4.903786ms)
-  ✔ screen tab (4.870136ms)
-  ✔ screen section (4.901372ms)
-  ✔ section field (5.078133ms)
-  ✔ screen action (4.749507ms)
-  ✔ action input (5.02165ms)
-  ✔ required action input (5.725629ms)
-  ✔ action process (4.907832ms)
-  ✔ transition state (5.127716ms)
-  ✔ transition input (6.295652ms)
-  ✔ evidence (5.039116ms)
-  ✔ condition field (4.701327ms)
-✔ 05 dangling references across metadata graph (72.523555ms)
+  ✔ menu screen (7.205494ms)
+  ✔ process screen (5.543809ms)
+  ✔ process dependency (6.4444ms)
+  ✔ screen tab (6.591748ms)
+  ✔ screen section (5.836201ms)
+  ✔ section field (5.251188ms)
+  ✔ screen action (8.254913ms)
+  ✔ action input (6.804572ms)
+  ✔ required action input (5.917932ms)
+  ✔ action process (6.564588ms)
+  ✔ transition state (5.843151ms)
+  ✔ transition input (6.255381ms)
+  ✔ evidence (8.061188ms)
+  ✔ condition field (5.981806ms)
+✔ 05 dangling references across metadata graph (93.266324ms)
 ▶ 06 parent references, menu cycles and cross-screen section ownership
-  ✔ missing parent (6.302052ms)
-  ✔ self parent (5.961759ms)
-  ✔ cycle (5.8413ms)
-  ✔ foreign section (5.948149ms)
-✔ 06 parent references, menu cycles and cross-screen section ownership (24.585947ms)
-✔ 07 shared screen activation uses any owning active process (8.496223ms)
-✔ 08 screen/menu permissions, feature and device conditions require all gates (11.989395ms)
-✔ 09 shared-screen access does not grant an inactive owning process action (12.346443ms)
-✔ 10 condition evaluation preserves zero/false and rejects malformed rules (0.329777ms)
-✔ 11 observation versus executable requirement and current support versus target policy (1.48936ms)
+  ✔ missing parent (7.964896ms)
+  ✔ self parent (7.939538ms)
+  ✔ cycle (9.922638ms)
+  ✔ foreign section (7.44705ms)
+✔ 06 parent references, menu cycles and cross-screen section ownership (34.262563ms)
+✔ 07 shared screen activation uses any owning active process (11.354693ms)
+✔ 08 screen/menu permissions, feature and device conditions require all gates (14.58173ms)
+✔ 09 shared-screen access does not grant an inactive owning process action (14.016075ms)
+✔ 10 condition evaluation preserves zero/false and rejects malformed rules (0.442363ms)
+✔ 11 observation versus executable requirement and current support versus target policy (1.697748ms)
 ▶ 12 hiding required field or its owner section is rejected
-  ✔ field (5.48181ms)
-  ✔ section (5.632792ms)
-✔ 12 hiding required field or its owner section is rejected (11.4242ms)
-✔ 13 transition-required fields cannot be hidden or removed (10.523799ms)
-✔ 14 hidden defaults must satisfy type/range; zero is not absence (16.197382ms)
-✔ 15 missing fallback references and cycles do not satisfy required inputs (8.666996ms)
-✔ 16 read/write permissions, masking and conditional state locks are separate (11.380746ms)
-✔ 17 actual field constraints validate numeric/string boundary values (1.370474ms)
+  ✔ field (6.198186ms)
+  ✔ section (4.983992ms)
+✔ 12 hiding required field or its owner section is rejected (11.537583ms)
+✔ 13 transition-required fields cannot be hidden or removed (9.56542ms)
+✔ 14 hidden defaults must satisfy type/range; zero is not absence (16.398534ms)
+✔ 15 missing fallback references and cycles do not satisfy required inputs (9.67381ms)
+✔ 16 read/write permissions, masking and conditional state locks are separate (12.307851ms)
+✔ 17 actual field constraints validate numeric/string boundary values (1.465865ms)
 ▶ 18 override identity, schema, target, duplicate and parent-version checks
-  ✔ wrong parent (9.470674ms)
-  ✔ stale version (11.139579ms)
-  ✔ unknown target (9.410494ms)
-  ✔ unknown ID (10.465173ms)
-  ✔ unknown property (9.142318ms)
-  ✔ ID change (7.281919ms)
-  ✔ route change (8.40559ms)
-  ✔ duplicate patch (7.808567ms)
-✔ 18 override identity, schema, target, duplicate and parent-version checks (75.541685ms)
+  ✔ wrong parent (9.221172ms)
+  ✔ stale version (10.843158ms)
+  ✔ unknown target (8.999214ms)
+  ✔ unknown ID (9.208763ms)
+  ✔ unknown property (11.228702ms)
+  ✔ ID change (8.111893ms)
+  ✔ route change (9.617317ms)
+  ✔ duplicate patch (10.695881ms)
+✔ 18 override identity, schema, target, duplicate and parent-version checks (80.472921ms)
 ▶ 19 protected fields reject policy relaxation
-  ✔ lock (6.435719ms)
-  ✔ policy (5.271619ms)
-  ✔ read-only (6.21262ms)
-  ✔ required (5.552083ms)
-  ✔ mask (6.172ms)
-  ✔ source (5.08986ms)
-✔ 19 protected fields reject policy relaxation (36.950324ms)
-✔ 20 presentation override pins parent and isolates snapshot from future HQ edits (19.212527ms)
-✔ 21 overrides revalidate mandatory-field graph (16.305902ms)
+  ✔ lock (7.407222ms)
+  ✔ policy (5.994816ms)
+  ✔ read-only (4.845818ms)
+  ✔ required (4.830946ms)
+  ✔ mask (6.405733ms)
+  ✔ source (5.085933ms)
+✔ 19 protected fields reject policy relaxation (38.885481ms)
+✔ 20 presentation override pins parent and isolates snapshot from future HQ edits (20.378292ms)
+✔ 21 overrides revalidate mandatory-field graph (15.904865ms)
 ▶ 22 malformed untrusted input fails closed without traversal exceptions
-  ✔ shape 0 (0.444777ms)
-  ✔ shape 1 (0.069764ms)
-  ✔ shape 2 (0.057124ms)
-  ✔ shape 3 (0.046859ms)
-  ✔ shape 4 (0.078717ms)
-  ✔ shape 5 (0.49433ms)
-  ✔ shape 6 (0.109652ms)
-  ✔ collection (3.372773ms)
-  ✔ null row (6.186911ms)
-  ✔ wrong boolean (4.504105ms)
-  ✔ blank ID (5.205671ms)
-  ✔ condition (5.477103ms)
-  ✔ range (5.933607ms)
-  ✔ feature (4.885158ms)
-  ✔ missing catalog coverage (6.371684ms)
-✔ 22 malformed untrusted input fails closed without traversal exceptions (44.814435ms)
-✔ 23 transition permission is separate from screen access and requires valid state and values (12.707456ms)
+  ✔ shape 0 (0.316637ms)
+  ✔ shape 1 (0.06102ms)
+  ✔ shape 2 (0.049112ms)
+  ✔ shape 3 (0.043935ms)
+  ✔ shape 4 (0.053089ms)
+  ✔ shape 5 (0.155429ms)
+  ✔ shape 6 (0.089062ms)
+  ✔ collection (3.856107ms)
+  ✔ null row (4.944384ms)
+  ✔ wrong boolean (5.722964ms)
+  ✔ blank ID (4.956482ms)
+  ✔ condition (5.385115ms)
+  ✔ range (5.719319ms)
+  ✔ feature (5.34767ms)
+  ✔ missing catalog coverage (5.021097ms)
+✔ 22 malformed untrusted input fails closed without traversal exceptions (43.240235ms)
+✔ 23 transition permission is separate from screen access and requires valid state and values (12.696696ms)
 ▶ 24 missing additional current-screen coverage and process dependency cycles are rejected
-  ✔ additional OPS (4.863336ms)
-  ✔ process self-cycle (6.840987ms)
-✔ 24 missing additional current-screen coverage and process dependency cycles are rejected (12.190482ms)
-✔ 25 malformed exported conditions cannot succeed on missing operands or extra properties (7.459983ms)
+  ✔ additional OPS (5.585321ms)
+  ✔ process self-cycle (4.811067ms)
+✔ 24 missing additional current-screen coverage and process dependency cycles are rejected (10.841725ms)
+✔ 25 malformed exported conditions cannot succeed on missing operands or extra properties (5.024271ms)
 ▶ 26 malformed non-JSON override input is rejected without stringify exceptions
-  ✔ cyclic value (8.311882ms)
-  ✔ undefined value (5.721954ms)
-  ✔ null patch (10.291185ms)
-  ✔ wrong changes (12.736999ms)
-✔ 26 malformed non-JSON override input is rejected without stringify exceptions (38.93664ms)
-✔ 27 ancestor menu gates and immutable policy snapshots are enforced (28.18904ms)
-✔ 28 ERP account request has thirteen action-specific mandatory inputs (13.98289ms)
-✔ 29 stable references survive array reordering and display-label changes (11.314533ms)
+  ✔ cyclic value (5.578511ms)
+  ✔ undefined value (7.610853ms)
+  ✔ null patch (7.912659ms)
+  ✔ wrong changes (11.403555ms)
+✔ 26 malformed non-JSON override input is rejected without stringify exceptions (34.195344ms)
+✔ 27 ancestor menu gates and immutable policy snapshots are enforced (31.790892ms)
+✔ 28 ERP account request has thirteen action-specific mandatory inputs (15.700222ms)
+✔ 29 stable references survive array reordering and display-label changes (10.922976ms)
 ▶ 30 B-H01 transition state declarations reject unregistered values and unrelated fields
-  ✔ unregistered destination (4.862094ms)
-  ✔ unregistered origin (4.577443ms)
-  ✔ non-state phone field (5.10957ms)
-  ✔ foreign-process state field (5.680372ms)
-  ✔ state not readable (5.275915ms)
-  ✔ state not read-only (4.934071ms)
-  ✔ state has no registered values (4.7984ms)
-  ✔ target reference missing (5.300322ms)
-  ✔ target is not required input (4.813382ms)
-✔ 30 B-H01 transition state declarations reject unregistered values and unrelated fields (47.393946ms)
-✔ 31 B-H01 transition binds requested target to destination even when both are valid enum members (10.350443ms)
-✔ 32 B-H01 direct-work input permissions follow the eligible approval action and current step (12.8997ms)
+  ✔ unregistered destination (4.683368ms)
+  ✔ unregistered origin (4.324368ms)
+  ✔ non-state phone field (4.463534ms)
+  ✔ foreign-process state field (5.152521ms)
+  ✔ state not readable (6.205587ms)
+  ✔ state not read-only (4.696738ms)
+  ✔ state has no registered values (4.570791ms)
+  ✔ target reference missing (4.585334ms)
+  ✔ target is not required input (5.594824ms)
+✔ 30 B-H01 transition state declarations reject unregistered values and unrelated fields (45.373035ms)
+✔ 31 B-H01 transition binds requested target to destination even when both are valid enum members (9.968305ms)
+✔ 32 B-H01 direct-work input permissions follow the eligible approval action and current step (11.351669ms)
 ▶ 33 B-H01 field write-action references must be present and own that input
-  ✔ unknown write action (5.23164ms)
-  ✔ unrelated write action (5.162187ms)
-✔ 33 B-H01 field write-action references must be present and own that input (10.793969ms)
+  ✔ unknown write action (4.551764ms)
+  ✔ unrelated write action (5.62519ms)
+✔ 33 B-H01 field write-action references must be present and own that input (10.548893ms)
 ▶ 34 B-H01 numeric fallback domain must be a subset including integer constraints
-  ✔ valid numeric subset (6.206871ms)
-  ✔ zero-only original reproduction (5.312149ms)
-  ✔ lower bound expansion (4.691032ms)
-  ✔ upper bound expansion (4.802075ms)
-  ✔ integer condition missing (5.743116ms)
-  ✔ lower bound unbounded (4.83936ms)
-✔ 34 B-H01 numeric fallback domain must be a subset including integer constraints (32.297851ms)
+  ✔ valid numeric subset (4.802213ms)
+  ✔ zero-only original reproduction (5.759237ms)
+  ✔ lower bound expansion (4.54254ms)
+  ✔ upper bound expansion (5.092002ms)
+  ✔ integer condition missing (4.486156ms)
+  ✔ lower bound unbounded (5.300559ms)
+✔ 34 B-H01 numeric fallback domain must be a subset including integer constraints (30.836251ms)
 ▶ 35 B-H01 string fallback lengths and enumeration values must satisfy both fields
-  ✔ valid length subset (4.525968ms)
-  ✔ expanded string bound (4.773122ms)
-  ✔ missing string bound (5.164311ms)
-  ✔ valid enum subset (6.014346ms)
-  ✔ enum outside target domain (4.490265ms)
-  ✔ enum violates own source constraint (4.693245ms)
-  ✔ numeric options subset (4.633957ms)
-  ✔ numeric options violate target (5.208726ms)
-✔ 35 B-H01 string fallback lengths and enumeration values must satisfy both fields (40.397168ms)
-✔ 36 B-H01 merge inputs require primary UUID reference and one or two duplicate references (6.556347ms)
+  ✔ valid length subset (4.487139ms)
+  ✔ expanded string bound (4.406439ms)
+  ✔ missing string bound (4.646444ms)
+  ✔ valid enum subset (4.972765ms)
+  ✔ enum outside target domain (5.266701ms)
+  ✔ enum violates own source constraint (4.647445ms)
+  ✔ numeric options subset (4.540417ms)
+  ✔ numeric options violate target (4.389153ms)
+✔ 35 B-H01 string fallback lengths and enumeration values must satisfy both fields (38.39731ms)
+✔ 36 B-H01 merge inputs require primary UUID reference and one or two duplicate references (7.251952ms)
 ▶ 37 B-H01 calendar/map queries cannot omit currently required date or coordinate inputs
-  ✔ ACT.calendar (0.266373ms)
-  ✔ ACT.map (0.117844ms)
-✔ 37 B-H01 calendar/map queries cannot omit currently required date or coordinate inputs (7.526581ms)
-✔ 38 B-H01 direct delivery requires an address, while account delivery may use account address (6.97102ms)
-✔ 39 B-H01 ERP account request blocks requesting and successfully approved duplicates (8.307083ms)
+  ✔ ACT.calendar (0.269017ms)
+  ✔ ACT.map (0.08157ms)
+✔ 37 B-H01 calendar/map queries cannot omit currently required date or coordinate inputs (7.479599ms)
+✔ 38 B-H01 direct delivery requires an address, while account delivery may use account address (6.509016ms)
+✔ 39 B-H01 ERP account request blocks requesting and successfully approved duplicates (7.083063ms)
 ▶ 40 B-H01 evidence maps approval list/detail and training rules to the right screens
-  ✔ S21 is approval target list, not report creation (0.14147ms)
-  ✔ S22 is approval detail (0.079597ms)
-  ✔ S525 is collection training (0.073548ms)
-  ✔ S527 is order training, not fabricated completion evidence (0.087329ms)
-✔ 40 B-H01 evidence maps approval list/detail and training rules to the right screens (1.839187ms)
+  ✔ S21 is approval target list, not report creation (0.147248ms)
+  ✔ S22 is approval detail (0.075752ms)
+  ✔ S525 is collection training (0.106948ms)
+  ✔ S527 is order training, not fabricated completion evidence (0.08784ms)
+✔ 40 B-H01 evidence maps approval list/detail and training rules to the right screens (1.744317ms)
 ℹ tests 141
 ℹ suites 0
 ℹ pass 141
@@ -179,7 +180,7 @@ To eliminate this warning, add "type": "module" to /tmp/crm-h00-review.W1iDYY/re
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 1044.14254
+ℹ duration_ms 1124.691657
 
 Command: node scripts/regression/multi-market-ui-check.mjs
 Exit: 0
@@ -205,6 +206,85 @@ Exit: 0
 
 NOT RUN locally: pnpm build; pnpm test; new Vitest glue tests (11).
 Reason: dependency installation blocked by network policy for registry.npmjs.org.
-Historical H00 PASS results have not been relabeled as current execution.
-Remote PR CI results will be recorded separately with the commit/run identifiers.
+These checks were instead actually executed by the standard PR CI below, not assumed from historical results.
+
+REMOTE CI HISTORY:
+c099f759 / run 39760732132: frontend build failed with TS2322 at registry lines 154 and 249; tests and audit skipped.
+bfcea5ef / run 39761004071: build passed; new H01 Vitest suite failed collection (window is not defined); later gates skipped.
+af4ec78f / run 39761348395: all functional gates passed; security audit failed with 5 critical findings.
+Latest verified run: https://github.com/dio-securer/dio_crm_dev_proj/actions/runs/39761348395
+Job log: https://github.com/dio-securer/dio_crm_dev_proj/actions/runs/39761348395/job/119766018990
+Overall conclusion: FAILURE. This is not an all-green CI run.
+CI boundary: the 11 new Vitest tests use real renderer/registry imports and throw-on-call API/download mocks; they do not execute DOM or HTTP.
+CI environment checks: migration plan only and external runtime checks skipped due to missing endpoints.
+
+VERBATIM CI EXCERPTS (ANSI color escapes removed; timestamps preserved):
+2026-10-22T10:12:35.1489397Z HEAD is now at b87d1ff Merge af4ec78fcfec723a6c8deeb66a4313f846bcd606 into e111138dbf50c46aca41c7097e156840fcd59069
+2026-10-22T10:12:37.0547464Z node: v22.23.3
+2026-10-22T10:12:41.7730265Z ##[group]Run pnpm build
+2026-10-22T10:12:43.8408074Z packages/contracts build: Done
+2026-10-22T10:12:49.9292509Z backend build: Done
+2026-10-22T10:12:53.0448304Z frontend build: Done
+2026-10-22T10:12:53.0712488Z ##[group]Run pnpm test
+2026-10-22T10:12:57.1165643Z frontend test:  ✓ src/app/hq-standard.spec.ts (11 tests) 296ms
+2026-10-22T10:12:58.1825394Z frontend test:  Test Files  15 passed (15)
+2026-10-22T10:12:58.1855020Z frontend test:       Tests  70 passed (70)
+2026-10-22T10:13:00.4053917Z backend test: Test Suites: 15 passed, 15 total
+2026-10-22T10:13:00.4067030Z backend test: Tests:       59 passed, 59 total
+2026-10-22T10:13:00.5399541Z ##[group]Run pnpm hq:check
+2026-10-22T10:13:02.4305501Z # tests 141
+2026-10-22T10:13:02.4306463Z # pass 141
+2026-10-22T10:13:02.4307013Z # fail 0
+2026-10-22T10:13:02.4308295Z # skipped 0
+2026-10-22T10:13:02.4555352Z ##[group]Run pnpm regression:multi-market
+2026-10-22T10:13:02.9149483Z [regression:multi-market] PASS — 85 source-level architecture/responsive checks passed.
+2026-10-22T10:13:02.9342139Z ##[group]Run pnpm i18n:check
+2026-10-22T10:13:03.3948857Z [i18n] translation key parity PASS (346 keys, ko-KR, en-US)
+2026-10-22T10:13:03.4158866Z ##[group]Run pnpm i18n:hardcode
+2026-10-22T10:13:03.8917441Z [i18n] hard-coded Korean TSX text check PASS
+2026-10-22T10:13:03.9120205Z ##[group]Run pnpm pwa:check
+2026-10-22T10:13:04.3600132Z [pwa:check] PASS — manifest, installability baseline and API cache safety checks passed.
+2026-10-22T10:13:04.3791836Z ##[group]Run pnpm env:check
+2026-10-22T10:13:04.8420721Z PLAN ONLY No SQL was executed. Add --execute only after backup/snapshot and environment approval.
+2026-10-22T10:13:04.8743180Z INFO Runtime checks skipped. Use --strict with a deployed DEV/UAT HTTPS URL for Pilot Gate.
+2026-10-22T10:13:04.9047704Z SKIP  Map provider config - CRM_MAP_PROVIDER not configured
+2026-10-22T10:13:04.9048851Z SKIP  ERP test endpoint - CRM_ERP_BASE_URL and CRM_ERP_HEALTH_PATH are required
+2026-10-22T10:13:04.9246182Z ##[group]Run pnpm audit:critical
+2026-10-22T10:13:07.5552409Z │ Package             │ proxy-addr                                             │
+2026-10-22T10:13:07.5555219Z │ Vulnerable versions │ >=1.1.0 <2.0.8                                         │
+2026-10-22T10:13:07.5557486Z │ Patched versions    │ >=2.0.8                                                │
+2026-10-22T10:13:07.5561868Z │                     │ proxy-addr@2.0.7                                       │
+2026-10-22T10:13:07.5565192Z │                     │ express@5.2.1 > proxy-addr@2.0.7                       │
+2026-10-22T10:13:07.5569223Z │                     │ proxy-addr@2.0.7                                       │
+2026-10-22T10:13:07.5574692Z │ More info           │ https://github.com/advisories/GHSA-jqcg-44mw-7w3h      │
+2026-10-22T10:13:07.5581784Z │ Package             │ tinypool                                               │
+2026-10-22T10:13:07.5584681Z │ Vulnerable versions │ <=2.1.0                                                │
+2026-10-22T10:13:07.5586995Z │ Patched versions    │ >=2.1.1                                                │
+2026-10-22T10:13:07.5589202Z │ Paths               │ frontend > vitest@3.2.7 > tinypool@1.1.1               │
+2026-10-22T10:13:07.5591471Z │ More info           │ https://github.com/advisories/GHSA-5gmw-xhrv-c9v3      │
+2026-10-22T10:13:07.5598527Z │ Package             │ tinypool                                               │
+2026-10-22T10:13:07.5600704Z │ Vulnerable versions │ <2.1.2                                                 │
+2026-10-22T10:13:07.5602951Z │ Patched versions    │ >=2.1.2                                                │
+2026-10-22T10:13:07.5605966Z │ Paths               │ frontend > vitest@3.2.7 > tinypool@1.1.1               │
+2026-10-22T10:13:07.5608298Z │ More info           │ https://github.com/advisories/GHSA-85c8-ppgw-ccpr      │
+2026-10-22T10:13:07.5615357Z │ Package             │ handlebars                                             │
+2026-10-22T10:13:07.5617636Z │ Vulnerable versions │ >=4.0.0 <=4.7.9                                        │
+2026-10-22T10:13:07.5619843Z │ Patched versions    │ >=4.7.10                                               │
+2026-10-22T10:13:07.5622016Z │ Paths               │ backend > ts-jest@29.4.12 > handlebars@4.7.9           │
+2026-10-22T10:13:07.5624474Z │ More info           │ https://github.com/advisories/GHSA-8r5x-fm3f-whwj      │
+2026-10-22T10:13:07.5631658Z │ Package             │ handlebars                                             │
+2026-10-22T10:13:07.5634188Z │ Vulnerable versions │ >=3.0.0 <=4.7.9                                        │
+2026-10-22T10:13:07.5636454Z │ Patched versions    │ >=4.7.10                                               │
+2026-10-22T10:13:07.5638781Z │ Paths               │ backend > ts-jest@29.4.12 > handlebars@4.7.9           │
+2026-10-22T10:13:07.5641020Z │ More info           │ https://github.com/advisories/GHSA-p8wg-vrv2-v86f      │
+2026-10-22T10:13:07.5642808Z 25 vulnerabilities found
+2026-10-22T10:13:07.5643624Z Severity: 2 low | 12 moderate | 6 high | 5 critical
+2026-10-22T10:13:07.6095320Z ##[error]Process completed with exit code 1.
+
+WORKER B DECISION:
+H01 code/contracts/build/test scope PASS after P1 1 and P2 4 remediation; main merge/security gate withheld.
+B separately reran 141 native tests, ran 12 core probes and inspected 52 delegated API/field-policy assertions.
+The evidence sets overlap and must not be added together as unique test counts.
+Baseline main run 39731453601 also failed the same security audit (5 critical: proxy-addr 1, tinypool 2, handlebars 2).
+No audit bypass, main merge, H02 work, real SQL/ERP call, or user-local env.ts/salesforce upload was performed.
 

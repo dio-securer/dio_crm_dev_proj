@@ -2,7 +2,7 @@
 
 작성일: 2026-10-22 · 기준 코드: `e111138dbf50c46aca41c7097e156840fcd59069` · 작업 브랜치: `feat/hq-standard-h01-contracts`
 
-현재 상태: **H01 코드 구현 및 B 지적사항 보완 완료 / 작업자 B 코드·계약 범위 PASS / 전체 빌드·Vitest 확인 대기**. H02는 시작하지 않았다. 이 문서의 등록 수량은 업무 화면 구현 완료 수량이 아니다.
+현재 상태: **H01 구현·빌드·테스트 및 작업자 B 기능 검증 PASS / 기존 Critical 보안 취약점 5건으로 전체 CI·병합 게이트 보류**. [검토 PR #30](https://github.com/dio-securer/dio_crm_dev_proj/pull/30)은 Draft·미병합이며 H02는 시작하지 않았다. 이 문서의 등록 수량은 업무 화면 구현 완료 수량이 아니다.
 
 ## 1. 선행 승인과 변경 경계
 
@@ -85,10 +85,36 @@
 | `node scripts/i18n/hardcode-check.mjs` | PASS, exit 0 | 기존 TSX 하드코딩 검사 |
 | `node scripts/pwa/check.mjs` | PASS, exit 0 | manifest/installability/API cache 소스 검사 |
 | `git diff --check` | PASS | 공백/패치 검사 |
-| `pnpm build`, `pnpm test`, 신규 Vitest 11개 | **로컬 미실행** | 의존성 설치가 registry.npmjs.org 네트워크 정책으로 차단됨. 과거 H00 PASS를 이번 결과로 재사용하지 않음 |
+| `pnpm build`, `pnpm test`, 신규 Vitest 11개 | **로컬 미실행 / 아래 신규 CI에서 PASS** | 로컬 의존성 설치는 네트워크 정책으로 차단됨. 이번 PR CI의 실제 실행으로 별도 검증했으며 과거 결과를 재사용하지 않음 |
 | 브라우저/HTTP/실기기/운영 DB/실 ERP | 미실행 | H01 등록부 계약 범위와 구분. H02 이후 관련 시나리오에서 검증 |
 
-Node native TypeScript 실행은 정적 타입검사가 아니다. 모듈 형식 미지정 경고는 출력에 보존했으며 이를 없애기 위해 기존 CommonJS 패키지 설정을 변경하지 않았다. 정식 CI는 기존 Node 22 환경에서 전체 빌드·Vitest 및 새 `hq:check`를 실행하도록 연결했다. 실제 CI가 성공하기 전 전체 회귀 PASS로 표시하지 않는다.
+Node native TypeScript 실행은 정적 타입검사가 아니다. 모듈 형식 미지정 경고는 출력에 보존했으며 이를 없애기 위해 기존 CommonJS 패키지 설정을 변경하지 않았다. 정식 CI는 기존 Node 22 환경에서 전체 빌드·Vitest 및 새 `hq:check`를 실행하도록 연결했다. 아래와 같이 기능 게이트는 통과했지만 보안 검사 실패로 **전체 CI 결론은 failure**다.
+
+### 신규 CI의 기능 검증 결과
+
+검증 소스: `af4ec78fcfec723a6c8deeb66a4313f846bcd606` · 기준 main: `e111138` · [CI run 39761348395 / job 119766018990](https://github.com/dio-securer/dio_crm_dev_proj/actions/runs/39761348395/job/119766018990). PR 합성 merge `b87d1ff`로 실행됐으며 Node v22.23.3, pnpm 9.15.0 환경이다. 이후 보고서·증거 정리 커밋은 위 검증 소스를 변경하지 않는다.
+
+| 검사 | 실제 결과 | 제한 |
+|---|---|---|
+| `pnpm build` | contracts/backend/frontend 모두 PASS | TypeScript 타입검사 및 프런트 빌드 포함 |
+| `pnpm test` — Frontend | 15개 파일, 70개 PASS | 신규 H01 11개 포함. 기존 59개 유지 |
+| `pnpm test` — Backend | 15개 suite, 59개 PASS | 기존 전체 단위 테스트 |
+| `pnpm hq:check` | 141개 PASS, 실패·생략 0 | 기존 순수 TS 자산과 신규 코어/등록부 실제 실행 |
+| 회귀·다국어·하드코딩·PWA | 85개 소스 회귀, 346개 번역키 및 각 명령 PASS | 실기기·DOM 동작 인수 아님 |
+| `pnpm env:check` | 명령 exit 0 | migration PLAN ONLY, URL 미설정으로 runtime/Map/ERP SKIP. 실제 SQL·ERP 접속 PASS가 아님 |
+| `pnpm audit:critical` | **FAIL — Critical 5건** | proxy-addr 1건, tinypool 2건, handlebars 2건. 기준 main에도 같은 패키지·버전·건수 존재 |
+
+프런트 신규 검증은 실제 renderer·등록부를 가져오되 브라우저 API 모듈만 테스트에서 격리한다. API/다운로드 6개 함수가 호출되면 즉시 예외로 실패하며, 운영 API 파일을 변경하거나 테스트를 생략하지 않았다. 이는 등록·참조·정책 검증이며 DOM 렌더링/실제 HTTP 요청 검증은 아니다.
+
+### 신규 CI에서 발견한 통합 보완 이력
+
+| 검증 커밋 / CI | 실제 결과 | 조치 |
+|---|---|---|
+| `c099f759` / [39760732132](https://github.com/dio-securer/dio_crm_dev_proj/actions/runs/39760732132) | contracts/backend 빌드 성공, frontend TS2322 2건. 이후 테스트·audit skipped | `read`/`writable` helper가 실제로 완전한 객체를 반환하므로 반환 타입을 `HqField['current']`로 정정. 런타임/검사 정책 변경 없음 |
+| `bfcea5ef` / [39761004071](https://github.com/dio-securer/dio_crm_dev_proj/actions/runs/39761004071) | 전체 빌드 성공. 기존 프런트 59개 통과, 신규 검증은 `window is not defined`로 수집 실패. 이후 HQ 검사·audit skipped | Node 검증 파일에서 브라우저 API 모듈만 격리. 운영 소스 변경 없이 실제 renderer·등록부 참조는 유지 |
+| `af4ec78f` / [39761348395](https://github.com/dio-securer/dio_crm_dev_proj/actions/runs/39761348395) | 전체 빌드·프런트 70개·백엔드 59개·HQ 141개 및 정적 회귀 PASS. audit Critical 5건 FAIL | H01 기능 검증 승인. 보안 게이트 유지, main 미병합·H02 미착수 |
+
+위 실패를 기존 보안 감사 실패와 혼동하지 않는다. 통합 테스트가 실제로 실행되기 전에는 신규 Vitest를 PASS로 계산하지 않는다.
 
 ## 5. 작업자 B 및 다음 단계 통제
 
@@ -102,7 +128,7 @@ Node native TypeScript 실행은 정적 타입검사가 아니다. 모듈 형식
 | H01-P2-03 | 값 범위가 맞지 않는 필드 fallback 허용 | 대체 필드 허용 영역의 포함 관계 검사 | B 해소 확인 |
 | H01-P2-04 | 승인 목록 근거 오연결 및 S525/S527 누락 | H00 관찰/교육 구분과 정확한 근거 연결 | B 해소 확인 |
 
-작업자 B는 보완된 동결본에서 141개 테스트를 직접 재실행하고, 별도 코어 프로브 12개 및 API/필드권한 분담 프로브 52개와 소스 대조를 확인해 **H01 코드·표준 계약 범위 PASS**로 판정했다. 각 검증은 일부 중복되므로 합산하여 고유 테스트 수로 표시하지 않는다. 전체 단계 인수는 신규 CI의 빌드·Vitest 결과 확인까지 유보했고, 기존 보안 감사 게이트는 별도로 유지한다.
+작업자 B는 보완된 동결본에서 141개 테스트를 직접 재실행하고, 별도 코어 프로브 12개 및 API/필드권한 분담 프로브 52개와 소스 대조를 확인했다. 이후 타입 선언·테스트 경계의 최소 보완 및 `af4ec78f`의 실제 CI도 독립 조회하여 **H01 코드·표준 계약·빌드·테스트 범위 PASS**로 최종 판정했다. 각 검증은 일부 중복되므로 합산하여 고유 테스트 수로 표시하지 않는다. 기존 보안 감사 문제는 직접 기준 main 로그와 대조했으며, 보안 게이트를 포함한 전체 승인·main 병합은 계속 보류한다.
 
 B가 확인한 SHA-256 지문:
 
@@ -110,12 +136,14 @@ B가 확인한 SHA-256 지문:
 packages/contracts/src/hq-standard.ts
 f3916cc2d792adea66ff51e715b7980085b2cb92916af6a10a3600a18a3371cc
 frontend/src/app/hq-standard-registry.ts
-90ac0c6c18489707eb058260a0a2015ec3bf9f1428e3964c12ccba8dd0a72121
+a6d850880f6319218878a5eb5f5d71e4c82fb7d44bbd742526c45d773ffbae08
 scripts/hq-standard/hq-standard.test.mjs
 547345615dea6c352f866367c061762e89e211aefb21f77f1b47460ac3de239e
+frontend/src/app/hq-standard.spec.ts
+ac5906f87c96f8750a58af638d6ad7be6b68cb30320acceca252e85eca009146
 ```
 
-기존 main `e111138`의 [CI 실행 39731453601](https://github.com/dio-securer/dio_crm_dev_proj/actions/runs/39731453601)은 빌드·테스트·소스 회귀를 통과했으나 `pnpm audit:critical`에서 Critical 5건으로 실패했다. 해당 로그에는 proxy-addr, tinypool, handlebars가 표시된다. 이는 이번 H01 변경 이전의 기준 상태이며 H01의 새 CI 결과와 구분한다. 기존 보안 검사를 제거하거나 의존성을 임의로 대규모 변경하지 않는다. 실제 H01 CI 결과와 B 최종 판정이 확인되기 전 전체 PASS로 표시하지 않는다.
+기존 main `e111138`의 [CI 실행 39731453601](https://github.com/dio-securer/dio_crm_dev_proj/actions/runs/39731453601)은 빌드·테스트·소스 회귀를 통과했으나 `pnpm audit:critical`에서 Critical 5건으로 실패했다. 새 H01 CI에서도 같은 패키지·버전·건수가 확인됐다. 의존성/lockfile은 이번 범위에서 변경하지 않았으며, 기존 문제라는 이유로 보안 검사를 제거하거나 성공으로 처리하지 않는다. 별도 의존성 보완과 CI 재검증 후 병합 게이트를 다시 판정해야 한다.
 
 H02는 아직 시작하지 않았다. 목업 저장소·시드·ERP 어댑터, 기존 UI/서버의 실시간 정책 적용, 관리자/법인 편집기 및 34개 실제 업무 화면 완성은 해당 후속 단계의 범위다. 새로운 설정 데이터가 등록됐다는 이유로 실제 ERP 요청→결과 수신 또는 화면 동작이 구현됐다고 간주하지 않는다.
 
