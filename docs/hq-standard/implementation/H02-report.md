@@ -1,6 +1,6 @@
 # H02 — 격리된 HQ 목업 실행 기반
 
-작성일: 2026-10-22 · 상태: 구현 완료, 실행·독립 검증 진행 중
+작성일: 2026-10-22 · 상태: 완료 · 작업자 B 승인 · H03 착수 가능
 
 ## 기준과 범위
 
@@ -49,9 +49,9 @@ pnpm hq:start
 | `node --experimental-strip-types --test scripts/hq-standard/h02-http.mjs` | 5 HTTP 시나리오군 PASS / 0 FAIL. 127.0.0.1 임시 포트·독립 임시 파일 사용 |
 | HTTP 세부 | 401/403·담당자/법인 격리·미등록 API/액션·목업 위장 차단, 생성/편집/목록/상세/버전 충돌, 파일 유지/재시작/초기화, ERP 접수/결과/중복/충돌/실패/재시도/세대 검증 |
 | 외부 송신 검사 | 별도 자식 프로세스에서 fetch/http/https/TCP/TLS 5개 시도 모두 예외 발생, 시도 계수 5 확인 |
-| 전체 빌드·기존 테스트·HQ/GLOBAL 회귀·보안 | 원격 CI 실행 예정. 결과 전까지 PASS로 판정하지 않음 |
-| 실제 브라우저 | 빌드 산출물 확보 후 실행 예정 |
-| 작업자 B | 독립 검토 진행 중. 최종 승인 전 |
+| 전체 빌드·기존 테스트·HQ/GLOBAL 회귀·보안 | 250474d6 / CI 39789050459: build·FE70·BE59·HQ214·HTTP5·회귀85·다국어·PWA·audit PASS (Critical 0) |
+| 실제 브라우저 | 실제 Chromium 151.0.7922.34: 18/18 PASS, 실패·미실행 0, pageErrors·externalRequests 0. PC 1440px / 모바일 390px 캡처 8장 |
+| 작업자 B | 최종 승인. P1 4건·P2 1건 보완 독립 재검증, 원격 CI·회수 JSON·PC/모바일 캡처 일치 확인. 추가 차단 결함 없음 |
 
 `pnpm hq:check`는 계약·기반·전송 경계 테스트를, `pnpm hq:http`는 실제 localhost HTTP 인수를 실행한다. CI는 두 명령과 기존 회귀 게이트를 실행하고 프런트 빌드/증거를 artifact로 보관한다.
 
@@ -69,4 +69,16 @@ pnpm hq:start
 - 다른 배치 역순 수신: ERP 품목·담당지역·HIRA 대상별 원천 요청 순번/결과 버전으로 최신값 보존. 비중복 대상은 정상 수신.
 - 초기 실패/지연: 별도 거래처 ID7/8과 실제 엔진이 생성한 실패/지연 로그를 시드에 포함.
 
-보완 후 foundation 47개 및 HTTP 5개 시나리오군 통과. B의 독립 재검증과 최종 CI/브라우저 결과가 완료 판정에 필요하다.
+보완 후 foundation 47개 및 HTTP 5개 시나리오군 통과. 작업자 B가 원격 CI와 실제 브라우저 증거까지 대조하고 최종 승인했다.
+
+## 최종 실행 근거
+
+- 구현 head: `250474d66f31603d8ba1731c68bfcad555f2c17f`
+- CI checkout merge: `22cbf9c977aafb1aa8488bbaa9240b4856b82a49` (base `e111138`)
+- [GitHub Actions 실행](https://github.com/dio-securer/dio_crm_dev_proj/actions/runs/39789050459), job `119859846719`, 결론 `success`.
+- artifact `12430211870`에서 회수한 [결과 JSON](evidence/h02-browser-results.json)과 `h02-*.png` 8장.
+- `pnpm-lock.yaml`은 이 실행에서 실제 pnpm이 생성한 76줄 diff를 적용해 playwright 1.62.1 해석 결과와 일치시켰다.
+- 브라우저 확인: 거래처 수정/저장/새로고침, 테스트 사용자별 범위/초기화 권한, 초기화 미리보기/취소/확정, API 오류, MOCK 응답, GLOBAL 및 기존 저장값 보존.
+- 실제 ERP·SQL·심평원·메일·지도 서비스 접속은 미실행이며, 이번 승인은 H02 목업 실행 기반에 대한 것이다.
+
+다음 단계는 지시서 §6 H03이며, 이전 단계 승인 후 리드·거래처·전환 구현으로 진행한다.
