@@ -17,11 +17,11 @@ export function updateField(c:Config,key:string,patch:Config){const n=structured
 export function bulkFields(c:Config,keys:string[],patch:Config){let n=structuredClone(c);for(const key of keys)n=updateField(n,key,patch);validateAccountConfig(n);return n;}
 export function reorder(c:Config,group:string,from:string,to:string){const n=structuredClone(c),rows=n['FIELD:account'].fields.filter((f:any)=>f.sectionId===group).sort((a:any,b:any)=>a.order-b.order||a.key.localeCompare(b.key));const i=rows.findIndex((f:any)=>f.key===from),j=rows.findIndex((f:any)=>f.key===to);if(i<0||j<0)throw Error('FIELD_NOT_REGISTERED');rows.splice(j,0,rows.splice(i,1)[0]);rows.forEach((f:any,i:number)=>f.order=(i+1)*10);return n;}
 export function removeGroup(c:Config,id:string,target:string){const n=structuredClone(c),s=n['SCREEN:account'];if(target===id||target&&!s.sections.some((r:any)=>r.id===target))throw Error('GROUP_TARGET_REQUIRED');const rows=n['FIELD:account'].fields.filter((f:any)=>f.sectionId===id);if(rows.length&&!target)throw Error('GROUP_TARGET_REQUIRED');rows.forEach((f:any)=>f.sectionId=target);s.sections=s.sections.filter((g:any)=>g.id!==id);validateAccountConfig(n);return n;}
-export interface Client{request:(path:string,method?:string,body?:any,key?:string)=>Promise<any>;createDraft:(input:any,key?:string)=>Promise<any>;updateDraft:(id:string,input:any,key?:string)=>Promise<any>}
+export interface Client{request:(path:string,method?:string,body?:any,key?:ReturnType<typeof crypto.randomUUID>)=>Promise<any>;createDraft:(input:any,key?:ReturnType<typeof crypto.randomUUID>)=>Promise<any>;updateDraft:(id:string,input:any,key?:ReturnType<typeof crypto.randomUUID>)=>Promise<any>}
 export class DesignerWorkspace {
  state:any; working:Config={}; loaded:Config={}; published:Config={}; validation:any; validationFingerprint=''; validationAt=0;
  busy=false; blocked=false; error=''; statuses:Record<string,string>={}; history:Config[]=[]; future:Config[]=[]; conflict:any;
- private pending=new Map<string,{signature:string,key:string}>();private generation=0;private version=0;private listeners=new Set<()=>void>();
+ private pending=new Map<string,{signature:string,key:ReturnType<typeof crypto.randomUUID>}>();private generation=0;private version=0;private listeners=new Set<()=>void>();
  constructor(public client:Client,public companyId:string){}
  subscribe=(f:()=>void)=>{this.listeners.add(f);return()=>{this.listeners.delete(f);}};
  snapshot=()=>this.version;
