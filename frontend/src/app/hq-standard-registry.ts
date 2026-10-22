@@ -144,8 +144,8 @@ export function createHqStandardRegistry(deps: HqRegistryDependencies): HqStanda
     return field;
   };
   const customer = ['H00.FIELDS','CODE.CUSTOMER'];
-  const writable = (apiField:string, dbField = apiField): Partial<HqField['current']> => ({read:true,write:true,apiField,dbField,note:'현재 API 수용 및 서비스 매핑 확인. 세부 업무/소유자 검사는 기존 서비스에 유지.'});
-  const read = (dbField:string): Partial<HqField['current']> => ({read:true,write:false,dbField,note:'현재 조회/원천 결과. 일반 사용자 쓰기 API로 취급하지 않음.'});
+  const writable = (apiField:string, dbField = apiField): HqField['current'] => ({read:true,write:true,apiField,dbField,note:'현재 API 수용 및 서비스 매핑 확인. 세부 업무/소유자 검사는 기존 서비스에 유지.'});
+  const read = (dbField:string): HqField['current'] => ({read:true,write:false,dbField,note:'현재 조회/원천 결과. 일반 사용자 쓰기 API로 취급하지 않음.'});
   const candidate = (stage:string, note:string): FieldOptions => ({visible:false,readOnly:true,current:{read:false,write:false,note},notes:`현재 미지원 요구 후보; ${stage} 구현·검증 대상. ${note}`, evidenceKeys:['H00.FIELDS','UNKNOWN.POLICY']});
 
   addField('lead.search','검색','lead.list',{current:{read:false,write:true,apiField:'search',note:'목록 GET 검색조건이며 업무 레코드 저장 필드 아님.'},writePermissions:['LEAD.READ']});
