@@ -1,0 +1,91 @@
+$ pnpm -r --if-present test
+Scope: 3 of 4 workspace projects
+backend test$ jest --runInBand
+frontend test$ vitest run
+frontend test:  RUN  v3.2.7 /workspace/scratch/ccd48e109c9e/crm/frontend
+frontend test:  ✓ src/app/screen-resolver.spec.ts (6 tests) 4ms
+frontend test:  ✓ src/market/templates/global/global-screen-manifest.spec.ts (4 tests) 5ms
+frontend test:  ✓ src/formatting/formatting.spec.ts (6 tests) 27ms
+frontend test:  ✓ src/market/country-profile.spec.ts (5 tests) 8ms
+frontend test:  ✓ src/account-model.spec.ts (10 tests) 8ms
+frontend test:  ✓ src/i18n/i18n.spec.ts (2 tests) 10ms
+frontend test:  ✓ src/market/market-profile.spec.ts (2 tests) 3ms
+frontend test:  ✓ src/app/multi-market-regression.spec.ts (4 tests) 7ms
+frontend test:  ✓ src/i18n/locale-resolver.spec.ts (4 tests) 4ms
+frontend test:  ✓ src/market/globalization-contract.spec.ts (3 tests) 3ms
+frontend test:  ✓ src/market/templates/hq/hq-screen-manifest.spec.ts (3 tests) 5ms
+frontend test:  ✓ src/market/feature-visibility.spec.ts (1 test) 6ms
+frontend test:  ✓ src/market/field-profiles/field-profile-resolver.spec.ts (7 tests) 10ms
+frontend test:  Test Files  13 passed (13)
+frontend test:       Tests  57 passed (57)
+frontend test:    Start at  16:47:31
+frontend test:    Duration  992ms (transform 1.09s, setup 0ms, collect 1.96s, tests 102ms, environment 3ms, prepare 1.18s)
+frontend test: Done
+backend test: PASS src/globalization/globalization.service.spec.ts
+backend test: ts-jest[ts-compiler] (WARN) Got a `.js` file to compile while `allowJs` option is not set to `true` (file: /workspace/scratch/ccd48e109c9e/crm/packages/contracts/dist/admin/index.js). To fix this:
+backend test:   - if you want TypeScript to process JS files, set `allowJs` to `true` in your TypeScript config (usually tsconfig.json)
+backend test:   - if you do not want TypeScript to process your `.js` files, in your Jest config change the `transform` key which value is `ts-jest` so that it does not match `.js` files anymore
+backend test: ts-jest[ts-compiler] (WARN) Got a `.js` file to compile while `allowJs` option is not set to `true` (file: /workspace/scratch/ccd48e109c9e/crm/packages/contracts/dist/admin/drafts.js). To fix this:
+backend test:   - if you want TypeScript to process JS files, set `allowJs` to `true` in your TypeScript config (usually tsconfig.json)
+backend test:   - if you do not want TypeScript to process your `.js` files, in your Jest config change the `transform` key which value is `ts-jest` so that it does not match `.js` files anymore
+backend test: ts-jest[ts-compiler] (WARN) Got a `.js` file to compile while `allowJs` option is not set to `true` (file: /workspace/scratch/ccd48e109c9e/crm/packages/contracts/dist/admin/resolver.js). To fix this:
+backend test:   - if you want TypeScript to process JS files, set `allowJs` to `true` in your TypeScript config (usually tsconfig.json)
+backend test:   - if you do not want TypeScript to process your `.js` files, in your Jest config change the `transform` key which value is `ts-jest` so that it does not match `.js` files anymore
+backend test: ts-jest[ts-compiler] (WARN) Got a `.js` file to compile while `allowJs` option is not set to `true` (file: /workspace/scratch/ccd48e109c9e/crm/packages/contracts/dist/admin/versions.js). To fix this:
+backend test:   - if you want TypeScript to process JS files, set `allowJs` to `true` in your TypeScript config (usually tsconfig.json)
+backend test:   - if you do not want TypeScript to process your `.js` files, in your Jest config change the `transform` key which value is `ts-jest` so that it does not match `.js` files anymore
+backend test: ts-jest[ts-compiler] (WARN) Got a `.js` file to compile while `allowJs` option is not set to `true` (file: /workspace/scratch/ccd48e109c9e/crm/packages/contracts/dist/admin/identity.js). To fix this:
+backend test:   - if you want TypeScript to process JS files, set `allowJs` to `true` in your TypeScript config (usually tsconfig.json)
+backend test:   - if you do not want TypeScript to process your `.js` files, in your Jest config change the `transform` key which value is `ts-jest` so that it does not match `.js` files anymore
+backend test: ts-jest[ts-compiler] (WARN) Got a `.js` file to compile while `allowJs` option is not set to `true` (file: /workspace/scratch/ccd48e109c9e/crm/packages/contracts/dist/admin/organization.js). To fix this:
+backend test:   - if you want TypeScript to process JS files, set `allowJs` to `true` in your TypeScript config (usually tsconfig.json)
+backend test:   - if you do not want TypeScript to process your `.js` files, in your Jest config change the `transform` key which value is `ts-jest` so that it does not match `.js` files anymore
+backend test: ts-jest[ts-compiler] (WARN) Got a `.js` file to compile while `allowJs` option is not set to `true` (file: /workspace/scratch/ccd48e109c9e/crm/packages/contracts/dist/admin/configuration.js). To fix this:
+backend test:   - if you want TypeScript to process JS files, set `allowJs` to `true` in your TypeScript config (usually tsconfig.json)
+backend test:   - if you do not want TypeScript to process your `.js` files, in your Jest config change the `transform` key which value is `ts-jest` so that it does not match `.js` files anymore
+backend test: ts-jest[ts-compiler] (WARN) Got a `.js` file to compile while `allowJs` option is not set to `true` (file: /workspace/scratch/ccd48e109c9e/crm/packages/contracts/dist/admin/account-runtime.js). To fix this:
+backend test:   - if you want TypeScript to process JS files, set `allowJs` to `true` in your TypeScript config (usually tsconfig.json)
+backend test:   - if you do not want TypeScript to process your `.js` files, in your Jest config change the `transform` key which value is `ts-jest` so that it does not match `.js` files anymore
+backend test: ts-jest[ts-compiler] (WARN) Got a `.js` file to compile while `allowJs` option is not set to `true` (file: /workspace/scratch/ccd48e109c9e/crm/packages/contracts/dist/admin/account-profile-HQ_ACCOUNT.js). To fix this:
+backend test:   - if you want TypeScript to process JS files, set `allowJs` to `true` in your TypeScript config (usually tsconfig.json)
+backend test:   - if you do not want TypeScript to process your `.js` files, in your Jest config change the `transform` key which value is `ts-jest` so that it does not match `.js` files anymore
+backend test: ts-jest[ts-compiler] (WARN) Got a `.js` file to compile while `allowJs` option is not set to `true` (file: /workspace/scratch/ccd48e109c9e/crm/packages/contracts/dist/admin/account-profile-GLOBAL_ACCOUNT.js). To fix this:
+backend test:   - if you want TypeScript to process JS files, set `allowJs` to `true` in your TypeScript config (usually tsconfig.json)
+backend test:   - if you do not want TypeScript to process your `.js` files, in your Jest config change the `transform` key which value is `ts-jest` so that it does not match `.js` files anymore
+backend test: ts-jest[ts-compiler] (WARN) Got a `.js` file to compile while `allowJs` option is not set to `true` (file: /workspace/scratch/ccd48e109c9e/crm/packages/contracts/dist/admin/permissions.js). To fix this:
+backend test:   - if you want TypeScript to process JS files, set `allowJs` to `true` in your TypeScript config (usually tsconfig.json)
+backend test:   - if you do not want TypeScript to process your `.js` files, in your Jest config change the `transform` key which value is `ts-jest` so that it does not match `.js` files anymore
+backend test: ts-jest[ts-compiler] (WARN) Got a `.js` file to compile while `allowJs` option is not set to `true` (file: /workspace/scratch/ccd48e109c9e/crm/packages/contracts/dist/admin/security.js). To fix this:
+backend test:   - if you want TypeScript to process JS files, set `allowJs` to `true` in your TypeScript config (usually tsconfig.json)
+backend test:   - if you do not want TypeScript to process your `.js` files, in your Jest config change the `transform` key which value is `ts-jest` so that it does not match `.js` files anymore
+backend test: ts-jest[ts-compiler] (WARN) Got a `.js` file to compile while `allowJs` option is not set to `true` (file: /workspace/scratch/ccd48e109c9e/crm/packages/contracts/dist/admin/config-router.js). To fix this:
+backend test:   - if you want TypeScript to process JS files, set `allowJs` to `true` in your TypeScript config (usually tsconfig.json)
+backend test:   - if you do not want TypeScript to process your `.js` files, in your Jest config change the `transform` key which value is `ts-jest` so that it does not match `.js` files anymore
+backend test: ts-jest[ts-compiler] (WARN) Got a `.js` file to compile while `allowJs` option is not set to `true` (file: /workspace/scratch/ccd48e109c9e/crm/packages/contracts/dist/admin/account-profile-types.js). To fix this:
+backend test:   - if you want TypeScript to process JS files, set `allowJs` to `true` in your TypeScript config (usually tsconfig.json)
+backend test:   - if you do not want TypeScript to process your `.js` files, in your Jest config change the `transform` key which value is `ts-jest` so that it does not match `.js` files anymore
+backend test: PASS src/modules/admin/memory.repository.spec.ts
+backend test: PASS src/globalization/feature.guard.spec.ts
+backend test: PASS src/modules/admin/contracts.spec.ts
+backend test: ts-jest[ts-compiler] (WARN) Got a `.js` file to compile while `allowJs` option is not set to `true` (file: /workspace/scratch/ccd48e109c9e/crm/packages/contracts/dist/index.js). To fix this:
+backend test:   - if you want TypeScript to process JS files, set `allowJs` to `true` in your TypeScript config (usually tsconfig.json)
+backend test:   - if you do not want TypeScript to process your `.js` files, in your Jest config change the `transform` key which value is `ts-jest` so that it does not match `.js` files anymore
+backend test: PASS src/modules/customer/account-interface.spec.ts
+backend test: PASS src/globalization/market-profile.spec.ts
+backend test: PASS src/modules/analytics/analytics.rules.spec.ts
+backend test: PASS src/modules/order/order.rules.spec.ts
+backend test: PASS src/modules/opportunity/opportunity.rules.spec.ts
+backend test: PASS src/ops/hardening.rules.spec.ts
+backend test: PASS src/integration/circuit-breaker.spec.ts
+backend test: PASS src/modules/contract/contract.rules.spec.ts
+backend test: PASS src/modules/activity/activity.rules.spec.ts
+backend test: PASS src/globalization/profile-resolver.spec.ts
+backend test: PASS src/globalization/integration-profile.spec.ts
+backend test: PASS src/modules/customer/customer.rules.spec.ts
+backend test: PASS test/health.spec.ts
+backend test: Test Suites: 17 passed, 17 total
+backend test: Tests:       74 passed, 74 total
+backend test: Snapshots:   0 total
+backend test: Time:        2.934 s, estimated 3 s
+backend test: Ran all test suites.
+backend test: Done

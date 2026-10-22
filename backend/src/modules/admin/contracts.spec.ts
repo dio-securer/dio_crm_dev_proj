@@ -1,0 +1,12 @@
+import { configDocumentSchema, draftInputSchema, overrideOpSchema, scopeVersionSchema, parsePayload, executionMode } from '@dio-crm/contracts/admin';
+const company = '10000000-0000-4000-8000-000000000002';
+const draft = { scope: 'COMPANY', scopeKey: company, schemaVersion: 1, domain: 'FEATURE', stableKey: 'features', parentVersionIds: [], overrides: [{ op: 'SET', path: [{ property: 'items' }, { itemKey: 'account' }, { property: 'enabled' }], value: false }] };
+describe('A01 typed contracts', () => {
+    it('rejects company profile in parent scopes', () => { expect(draftInputSchema.safeParse({ ...draft, domain: 'COMPANY_PROFILE', scope: 'TEMPLATE', scopeKey: 'GLOBAL' }).success).toBe(false); });
+    it('round trips the published config document contract', () => { expect(configDocumentSchema.parse({ ...draft, id: company, revision: 1 }).schemaVersion).toBe(1); });
+    it('requires common payload and company overrides exclusively', () => { expect(draftInputSchema.parse(draft).scope).toBe('COMPANY'); expect(() => draftInputSchema.parse({ ...draft, payload: { items: [] } })).toThrow(); expect(() => draftInputSchema.parse({ ...draft, scope: 'COMMON', scopeKey: 'COMMON' })).toThrow(); expect(draftInputSchema.parse({ ...draft, scope: 'COMMON', scopeKey: 'COMMON', overrides: undefined, payload: { items: [{ key: 'account', enabled: false }] } }).scope).toBe('COMMON'); });
+    it('rejects unsafe/indexed/overlapping override paths', () => { expect(() => overrideOpSchema.parse({ op: 'SET', path: [{ property: '__proto__' }], value: true })).toThrow(); expect(() => overrideOpSchema.parse({ op: 'SET', path: [{ index: 0 }], value: true })).toThrow(); expect(() => draftInputSchema.parse({ ...draft, overrides: [...draft.overrides, { op: 'SET', path: [{ property: 'items' }], value: [] }] })).toThrow(); });
+    it('validates domain schema and keeps explicit false/zero', () => { expect(parsePayload('FEATURE', { items: [{ key: 'x', enabled: false }] })).toEqual({ items: [{ key: 'x', enabled: false }] }); expect(() => parsePayload('FEATURE', { items: [], unknown: true })).toThrow(); expect(() => parsePayload('INTEGRATION', { mode: 'LIVE' })).toThrow(); });
+    it('rejects all mock modes in production and unknown modes', () => { for (const mode of ['API_MOCK', 'BROWSER_MOCK'])
+        expect(() => executionMode(mode, true)).toThrow('MOCK_PRODUCTION_DISABLED'); expect(() => executionMode('Typo', false)).toThrow(); });
+});

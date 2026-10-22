@@ -1,0 +1,2 @@
+$ node scripts/admin/run-web-test.cjs tests/admin/browser.cjs
+PASS browser reload, false preservation, cross-tab CAS, shared DTO commands and idempotency

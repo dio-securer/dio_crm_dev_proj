@@ -1,0 +1,24 @@
+✔ A07 T12/T13 submit snapshot, exactly once decision, locked document and cross-company isolation (582.697334ms)
+✔ A07 T14/T52 ANY simultaneous approve/reject has one winner and cancels siblings (351.45932ms)
+✔ A07 T78 ALL waits for both; reject/edit/resubmit preserves old history (414.537783ms)
+✔ A07 T77 missing policy/self/empty/conflict submission is atomic (416.849552ms)
+✔ A07 T15 inactive assignee blocked; reassign preserves superseded task (368.627983ms)
+✔ A07 T64/T65 deputy overlap/chain/self, principal-deputy race and revoke (457.888333ms)
+✔ A07 T76 invalid workflow definition rejected; policy/domain permission enforced (339.213167ms)
+✔ A07 T31 frozen calendar/route after publish, withdraw cancels and stale decision rejected (522.66259ms)
+✔ A07 split policy authority cannot delete route override; preserve route and edit policy succeeds (277.79016ms)
+✔ A07 numeric policy, ALL completion and status/assignee/deputy paging filters (553.813144ms)
+✔ A07 explicit deterministic demo fixture prepares DRAFT and IN_PROGRESS atomically without replacing existing data (268.21972ms)
+✔ A07 config rejects terminal restart, mistyped conditions and duplicate steps (14.47358ms)
+✔ A07 deputy boundary start inclusive/end exclusive and self-document denial (100.545682ms)
+✔ A07 inactive principal blocks deputy and permission denied writes leave business data unchanged (27.048649ms)
+✔ A07 SLA includes holiday and calendar remains fixed after release changes (26.133755ms)
+✔ A07 simulation facade atomic on feature/policy failure and successful normal engine submit (26.544256ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4900.63798

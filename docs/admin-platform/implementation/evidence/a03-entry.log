@@ -1,0 +1,6 @@
+PASS BROWSER_MOCK: organization create, cycle rejection, input preserved
+PASS BROWSER_MOCK T82 partial transfer, replay, inactive target
+PASS BROWSER_MOCK: login/entry, create, update, reload, egress=0
+PASS API_MOCK: organization create, cycle rejection, input preserved
+PASS API_MOCK T26 late response discarded after company management switch
+PASS API_MOCK: login/entry, create, update, reload, egress=0

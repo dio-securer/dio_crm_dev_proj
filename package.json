@@ -5,7 +5,7 @@
   "packageManager": "pnpm@9.15.0",
   "scripts": {
     "build": "pnpm -r build",
-    "test": "pnpm -r test --if-present",
+    "test": "pnpm -r --if-present test",
     "regression:multi-market": "node scripts/regression/multi-market-ui-check.mjs",
     "i18n:check": "node scripts/i18n/check.mjs",
     "i18n:hardcode": "node scripts/i18n/hardcode-check.mjs",
@@ -16,6 +16,35 @@
     "integration:check": "node scripts/integration/external-readiness.mjs",
     "audit:critical": "pnpm audit --audit-level=critical",
     "dev:api": "pnpm --filter @dio-crm/api start:dev",
-    "dev:web": "pnpm --filter @dio-crm/web dev"
+    "dev:web": "pnpm --filter @dio-crm/web dev",
+    "dev:admin:api": "node scripts/admin/dev.cjs api",
+    "dev:admin:web": "node scripts/admin/dev.cjs web",
+    "dev:admin:browser": "node scripts/admin/dev.cjs browser",
+    "test:admin:contracts": "pnpm --filter @dio-crm/api exec jest --runInBand src/modules/admin/memory.repository.spec.ts src/modules/admin/contracts.spec.ts",
+    "test:admin:api": "node --test tests/admin/api.cjs tests/admin/legacy-auth.cjs tests/admin/legacy-http.cjs tests/admin/organization.cjs",
+    "test:admin:browser": "node scripts/admin/run-web-test.cjs tests/admin/browser.cjs",
+    "test:admin:baseline": "node scripts/admin/run-web-test.cjs scripts/admin/baseline.cjs",
+    "test:admin:entry": "node scripts/admin/run-entry-tests.cjs",
+    "test:admin:security": "node --test tests/admin/security.cjs",
+    "test:admin:security-ui": "node scripts/admin/run-security-ui.cjs",
+    "test:admin:configuration": "node --test tests/admin/configuration.cjs tests/admin/configuration-http.cjs",
+    "test:admin:configuration-ui": "node scripts/admin/run-configuration-ui.cjs",
+    "test:admin:account": "node --test tests/admin/account-configuration.cjs tests/admin/account-http.cjs",
+    "test:admin:ui": "node scripts/admin/run-account-ui.cjs",
+    "test:admin:master": "node --test tests/admin/master-data.cjs tests/admin/master-http.cjs",
+    "test:admin:master-ui": "node scripts/admin/run-master-ui.cjs",
+    "test:admin:approval": "node --test tests/admin/approval-unit.cjs tests/admin/approval-http.cjs",
+    "test:admin:approval-ui": "node scripts/admin/run-approval-ui.cjs",
+    "test:admin:notification": "node --test tests/admin/notification-http.cjs",
+    "test:admin:notification-ui": "node scripts/admin/run-notification-ui.cjs",
+    "test:admin:integration": "node --test tests/admin/integration-http.cjs",
+    "test:admin:integration-ui": "node scripts/admin/run-integration-ui.cjs",
+    "test:admin:operations": "node --test tests/admin/operations.cjs tests/admin/operations-http.cjs",
+    "test:admin:operations-ui": "node scripts/admin/run-operations-ui.cjs",
+    "test:admin:all": "node scripts/admin/run-all.cjs",
+    "test:admin:routes-ui": "node scripts/admin/run-routes-ui.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
   }
 }
