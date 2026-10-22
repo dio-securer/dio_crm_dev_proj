@@ -133,6 +133,14 @@
     }
   },
   "hqCustomer": {
+  "changedElsewhere": "The record changed in another operation. Your input is preserved; saving against the older version will be rejected.",
+  "reloadLatest": "Reload latest values",
+  "discardReload": "Discard the current input and reload the latest saved values?",
+
+  "recent": "Recently created / updated",
+  "today": "Created today",
+  "recentRule": "Recent: latest create/update first. Today: created on {{date}}, using the mock server clock in Asia/Seoul. Records without dates appear last.",
+
   "leadIntro": "Register hospitals and manage ownership, stages and conversion history.",
   "newLead": "New hospital",
   "scope": "Scope",

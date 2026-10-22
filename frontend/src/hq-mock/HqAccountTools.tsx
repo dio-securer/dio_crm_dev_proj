@@ -24,7 +24,7 @@ function AccountLedger({ rows, onClose, onChanged }: { rows: CustomerRecord[]; o
   const [drafts, setDrafts] = useState<DraftRow[]>(() => rows.filter(row => policy.owns(row, 'ACCOUNT.MERGE')).map(row => ({ row, form: formFromRecord(LEDGER_FIELDS, row), selected: false })));
   const [notice, setNotice] = useState('');
   const selected = drafts.filter(row => row.selected);
-  const payload = { rows: selected.map(({ row, form }) => ({ rowKey: row.public_id, publicId: row.public_id, expectedVersion: row.version, values: formPayload(LEDGER_FIELDS, form) })) };
+  const payload = { rows: selected.map(({ row, form }) => ({ rowKey: row.public_id, publicId: row.public_id, expectedVersion: row.version, values: policy.writablePayload('account', formPayload(LEDGER_FIELDS, form), row) })) };
   const save = async (event: React.FormEvent) => { event.preventDefault(); try {
     const result = await command.run<BulkResult>('POST', '/api/accounts/bulk-update', payload);
     setDrafts(current => current.map(draft => { const item = result.results.find(value => value.rowKey === draft.row.public_id); if (!item) return draft; return { ...draft, row: item.saved ?? draft.row, selected: item.status === 'ERROR', status: item.status, result: item.status === 'SUCCESS' ? t('hqCustomer.saved') : `${item.error?.code}: ${item.error?.message}` }; }));

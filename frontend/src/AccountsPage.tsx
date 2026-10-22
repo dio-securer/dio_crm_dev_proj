@@ -75,6 +75,7 @@ export function AccountsPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [screen, setScreen] = useState<'list' | 'detail' | 'form'>('list');
   const [form, setForm] = useState<AccountFormInput>(emptyForm);
+  const [hqFormBaseline, setHqFormBaseline] = useState<CustomerRecord | null>(null);
   const [saving, setSaving] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(FORM_SECTIONS.map(section => [section.id, true]))
@@ -109,11 +110,13 @@ export function AccountsPage() {
   const openCreate = () => {
     setSelectedId(null);
     setForm(emptyForm());
+    setHqFormBaseline(null);
     setScreen('form');
   };
   const openDetail = (row: AccountSummary) => {
     setSelectedId(row.public_id);
     setForm(formFromAccount(row));
+    if (hqMock) setHqFormBaseline(row as unknown as CustomerRecord);
     setScreen(mobile ? 'detail' : 'form');
     if (hqMock) setParams(previous => { const next = new URLSearchParams(previous); next.set('record', row.public_id); return next; });
     setOpenSections(Object.fromEntries(FORM_SECTIONS.map(section => [section.id, true])));
@@ -123,6 +126,7 @@ export function AccountsPage() {
     if (!target) return openCreate();
     setSelectedId(target.public_id);
     setForm(formFromAccount(target));
+    if (hqMock) setHqFormBaseline(target as unknown as CustomerRecord);
     setScreen('form');
   };
   const closeScreen = () => {
@@ -170,8 +174,8 @@ export function AccountsPage() {
     setSaving(true);
     try {
       if (hqMock) {
-        const payload = hqPolicy.writablePayload('account', toWritePayload(form) as unknown as Record<string, unknown>, selected as unknown as CustomerRecord ?? {});
-        if (selectedId) await hqCommand.run('PATCH', `/api/accounts/${selectedId}`, { ...payload, expectedVersion: (selected as unknown as CustomerRecord).version });
+        const payload = hqPolicy.writablePayload('account', toWritePayload(form) as unknown as Record<string, unknown>, hqFormBaseline ?? {});
+        if (selectedId) await hqCommand.run('PATCH', `/api/accounts/${selectedId}`, { ...payload, expectedVersion: hqFormBaseline?.version });
         else { const created = await hqCommand.run<AccountSummary>('POST', '/api/accounts', payload); setSelectedId(created.public_id); }
         await query.refetch();
         setParams(previous => { const next = new URLSearchParams(previous); ['record', 'tab', 'contact'].forEach(key => next.delete(key)); return next; });
@@ -244,19 +248,19 @@ export function AccountsPage() {
     disabled = disabled || (hqMock && (!hqPolicy.writable('account', key, selected as unknown as CustomerRecord ?? {}) || Boolean(selected && !hqPolicy.owns(selected as unknown as CustomerRecord, 'ACCOUNT.MERGE'))));
     const value = form[key];
     if (key === 'accountType') {
-      return <select value={value} disabled={disabled} onChange={e => setField(key, e.target.value)}>{Object.entries(ACCOUNT_TYPE_CODES).map(([code, name]) => <option key={code} value={code}>{name}</option>)}</select>;
+      return <select data-hq-api-field={hqMock ? key : undefined} value={value} disabled={disabled} onChange={e => setField(key, e.target.value)}>{Object.entries(ACCOUNT_TYPE_CODES).map(([code, name]) => <option key={code} value={code}>{name}</option>)}</select>;
     }
     if (key === 'useYn') {
-      return <select value={value} disabled={disabled} onChange={e => setField(key, e.target.value)}><option value="1">{t('account.yes')}</option><option value="0">{t('account.no')}</option></select>;
+      return <select data-hq-api-field={hqMock ? key : undefined} value={value} disabled={disabled} onChange={e => setField(key, e.target.value)}><option value="1">{t('account.yes')}</option><option value="0">{t('account.no')}</option></select>;
     }
     if (key === 'churnRiskYn') {
-      return <select value={value} disabled={disabled} onChange={e => setField(key, e.target.value)}><option value="1">{t('account.churnYes')}</option><option value="0">{t('account.churnNo')}</option></select>;
+      return <select data-hq-api-field={hqMock ? key : undefined} value={value} disabled={disabled} onChange={e => setField(key, e.target.value)}><option value="1">{t('account.churnYes')}</option><option value="0">{t('account.churnNo')}</option></select>;
     }
     if (key === 'accountStatCode') {
-      return <select value={value} disabled={disabled} onChange={e => setField(key, e.target.value)}>{Object.entries(ACCOUNT_STAT_CODES).map(([code, name]) => <option key={code} value={code}>{name}</option>)}</select>;
+      return <select data-hq-api-field={hqMock ? key : undefined} value={value} disabled={disabled} onChange={e => setField(key, e.target.value)}>{Object.entries(ACCOUNT_STAT_CODES).map(([code, name]) => <option key={code} value={code}>{name}</option>)}</select>;
     }
-    if (key === 'openDate') return <input type="date" value={value} disabled={disabled} onChange={e => setField(key, e.target.value)} />;
-    return <input value={value} disabled={disabled} onChange={e => setField(key, e.target.value)} />;
+    if (key === 'openDate') return <input data-hq-api-field={hqMock ? key : undefined} type="date" value={value} disabled={disabled} onChange={e => setField(key, e.target.value)} />;
+    return <input data-hq-api-field={hqMock ? key : undefined} value={value} disabled={disabled} onChange={e => setField(key, e.target.value)} />;
   };
 
   const interfaceDisplay = (row: AccountSummary, field: AccountInterfaceField) => {
@@ -315,6 +319,7 @@ export function AccountsPage() {
 
   const formWindow = (
     <form className={mobile ? 'mob-edit-form' : 'pc-window-form'} onSubmit={e => void save(e)}>
+      {hqMock && selected && hqFormBaseline && hqFormBaseline.version !== (selected as unknown as CustomerRecord).version && <p className="notice warning">{t('hqCustomer.changedElsewhere')} <button type="button" onClick={() => { if (window.confirm(t('hqCustomer.discardReload'))) { setForm(formFromAccount(selected)); setHqFormBaseline(selected as unknown as CustomerRecord); } }}>{t('hqCustomer.reloadLatest')}</button></p>}
       {formSections(mobile)}
       <div className="account-form-actions">
         <button type="button" onClick={() => (!hqMock && mobile && selectedId ? setScreen('detail') : closeScreen())}>{t('common.cancel')}</button>

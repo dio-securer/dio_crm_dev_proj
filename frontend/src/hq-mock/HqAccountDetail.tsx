@@ -26,7 +26,7 @@ export function HqAccountDetail({ publicId, basicForm, onChanged }: { publicId: 
     {!data && query.isLoading && <p>{t('common.loading')}</p>}
     {active === 'basic' && (basicForm ?? (data && <div className="hq-customer-panel"><HqRecordSummary row={data.account} fields={[
       { key: 'account_name', label: t('account.name') }, { key: 'business_no', label: t('lead.businessNo') }, { key: 'phone', label: t('account.phone') }, { key: 'hospital_address', label: t('hqCustomer.fields.address') }, { key: 'owner_name', label: t('account.owner') }
-    ]} /><Link to={`/accounts?record=${publicId}`}>{t('account.edit')}</Link></div>)))}
+    ]} /><Link to={`/accounts?record=${publicId}`}>{t('account.edit')}</Link></div>))}
     {data && active === 'erp' && <AccountErp data={data} onChanged={refresh} />}
     {data && active === 'hospital' && <AccountHospital key={publicId} row={data.account} onChanged={refresh} />}
     {data && active === 'contacts' && <AccountContacts key={publicId} account={data.account} contacts={data.contacts} contactId={params.get('contact')} onChanged={refresh} />}
@@ -47,10 +47,11 @@ function AccountHospital({ row, onChanged }: { row: CustomerRecord; onChanged: (
   const policy = useHqCustomerPolicy();
   const command = useHqCommand();
   const [form, setForm] = useState<CustomerForm>(() => formFromRecord(HOSPITAL_FIELDS, row));
+  const [baseline, setBaseline] = useState(row);
   const [notice, setNotice] = useState('');
   const editable = policy.has('ACCOUNT.WRITE') && policy.owns(row, 'ACCOUNT.MERGE');
-  const save = async (event: React.FormEvent) => { event.preventDefault(); try { await command.run('PATCH', `/api/accounts/${row.public_id}/hospital`, { ...formPayload(HOSPITAL_FIELDS, form), expectedVersion: row.version }); await onChanged(); setNotice(t('hqCustomer.saved')); } catch { /* Keep the hospital draft. */ } };
-  return <form className="hq-customer-panel" onSubmit={event => void save(event)}><HqFields fields={HOSPITAL_FIELDS} form={form} onChange={setForm} disabled={!editable || command.busy} />
+  const save = async (event: React.FormEvent) => { event.preventDefault(); try { const saved = await command.run<CustomerRecord>('PATCH', `/api/accounts/${row.public_id}/hospital`, { ...policy.writablePayload('account', formPayload(HOSPITAL_FIELDS, form), baseline), expectedVersion: baseline.version }); setBaseline(saved); setForm(formFromRecord(HOSPITAL_FIELDS, saved)); await onChanged(); setNotice(t('hqCustomer.saved')); } catch { /* Keep the hospital draft. */ } };
+  return <form className="hq-customer-panel" onSubmit={event => void save(event)}>{baseline.version !== row.version && <p className="notice warning">{t('hqCustomer.changedElsewhere')} <button type="button" onClick={() => { if (window.confirm(t('hqCustomer.discardReload'))) { setBaseline(row); setForm(formFromRecord(HOSPITAL_FIELDS, row)); } }}>{t('hqCustomer.reloadLatest')}</button></p>}<HqFields entity="account" row={row} fields={HOSPITAL_FIELDS} form={form} onChange={setForm} disabled={!editable || command.busy} />
     <HqError error={command.error} />{notice && <p className="hq-customer-success" role="status">{notice}</p>}
     {editable && <footer><button type="submit" className="button-primary" disabled={command.busy || !policy.can('ACC.hospitalSave', row, formPayload(HOSPITAL_FIELDS, form))}>{t('common.save')}</button></footer>}
   </form>;
@@ -78,10 +79,10 @@ function ContactEditor({ account, row, onClose, onChanged }: { account: Customer
   const [form, setForm] = useState<CustomerForm>(() => formFromRecord(CONTACT_FIELDS, row ?? { contact_type: 'DOCTOR' }));
   const editable = policy.has('CONTACT.WRITE') && policy.owns(row ?? account, 'ACCOUNT.MERGE');
   const input = { ...formPayload(CONTACT_FIELDS, form), accountPublicId: account.public_id };
-  const save = async (event: React.FormEvent) => { event.preventDefault(); try { if (row) await command.run('PATCH', `/api/contacts/${row.public_id}`, { ...formPayload(CONTACT_FIELDS, form), expectedVersion: row.version }); else await command.run('POST', `/api/accounts/${account.public_id}/contacts`, formPayload(CONTACT_FIELDS, form)); await onChanged(); onClose(); } catch { /* Preserve contact inputs. */ } };
+  const save = async (event: React.FormEvent) => { event.preventDefault(); try { if (row) await command.run('PATCH', `/api/contacts/${row.public_id}`, { ...policy.writablePayload('contact', formPayload(CONTACT_FIELDS, form), row), expectedVersion: row.version }); else await command.run('POST', `/api/accounts/${account.public_id}/contacts`, policy.writablePayload('contact', formPayload(CONTACT_FIELDS, form))); await onChanged(); onClose(); } catch { /* Preserve contact inputs. */ } };
   const remove = async () => { if (!row || !window.confirm(t('hqCustomer.deleteConfirm'))) return; try { await command.run('DELETE', `/api/contacts/${row.public_id}`, { expectedVersion: row.version }); await onChanged(); onClose(); } catch { /* Server remains authoritative. */ } };
   return <HqModal title={t(row ? 'hqCustomer.editContact' : 'hqCustomer.newContact')} onClose={onClose} busy={command.busy}><form onSubmit={event => void save(event)}>
-    {row && <p className="hq-record-id">{row.public_id}</p>}<HqFields fields={CONTACT_FIELDS} form={form} onChange={setForm} disabled={!editable || command.busy} />
+    {row && <p className="hq-record-id">{row.public_id}</p>}<HqFields entity="contact" row={row ?? {}} fields={CONTACT_FIELDS} form={form} onChange={setForm} disabled={!editable || command.busy} />
     <HqError error={command.error} /><footer>{row && editable && policy.can('CONTACT.delete', row) && <button type="button" onClick={() => void remove()} disabled={command.busy}>{t('hqCustomer.delete')}</button>}<button type="button" onClick={onClose} disabled={command.busy}>{t('app.close')}</button>
       {editable && <button type="submit" className="button-primary" disabled={command.busy || !policy.can(row ? 'CONTACT.save' : 'CONTACT.create', row ?? account, input)}>{t('common.save')}</button>}
     </footer></form></HqModal>;

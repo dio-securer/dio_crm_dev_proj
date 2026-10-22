@@ -25,15 +25,18 @@ export function HqTabs({ tabs, active, onChange }: { tabs: { key: string; label:
   return <div className="hq-customer-tabs" role="tablist">{tabs.map(tab => <button key={tab.key} type="button" role="tab"
     aria-selected={active === tab.key} data-tab-key={tab.key} onClick={() => onChange(tab.key)}>{tab.label}</button>)}</div>;
 }
-export function HqFields({ fields, form, onChange, disabled = false, prefix = '' }: { fields: CustomerField[]; form: CustomerForm; onChange: (form: CustomerForm) => void; disabled?: boolean; prefix?: string }) {
+export function HqFields({ fields, form, onChange, disabled = false, prefix = '', entity, row = {} }: { fields: CustomerField[]; form: CustomerForm; onChange: (form: CustomerForm) => void; disabled?: boolean; prefix?: string; entity?: 'lead' | 'account' | 'contact'; row?: Record<string, unknown> }) {
   const { t } = useTranslation();
-  return <div className="hq-customer-fields">{fields.map(field => <label key={field.key} className={field.type === 'textarea' ? 'full' : ''}>
+  const policy = useHqCustomerPolicy();
+  const visible = entity ? fields.filter(field => policy.visible(entity, field.key, row)) : fields;
+  const readOnly = (field: CustomerField) => disabled || Boolean(entity && !policy.writable(entity, field.key, row));
+  return <div className="hq-customer-fields">{visible.map(field => <label key={field.key} className={field.type === 'textarea' ? 'full' : ''}>
     <span>{t(`hqCustomer.fields.${field.key}`)}{field.required ? ' *' : ''}</span>
-    {field.type === 'textarea' ? <textarea data-field-key={`${prefix}${field.key}`} value={String(form[field.key] ?? '')} disabled={disabled}
+    {field.type === 'textarea' ? <textarea data-field-key={`${prefix}${field.key}`} value={String(form[field.key] ?? '')} disabled={readOnly(field)}
       onChange={event => onChange({ ...form, [field.key]: event.target.value })} rows={3} />
-      : field.type === 'checkbox' ? <input type="checkbox" data-field-key={`${prefix}${field.key}`} checked={Boolean(form[field.key])} disabled={disabled}
+      : field.type === 'checkbox' ? <input type="checkbox" data-field-key={`${prefix}${field.key}`} checked={Boolean(form[field.key])} disabled={readOnly(field)}
         onChange={event => onChange({ ...form, [field.key]: event.target.checked })} />
-      : <input type={field.type ?? 'text'} data-field-key={`${prefix}${field.key}`} value={String(form[field.key] ?? '')} disabled={disabled} required={field.required}
+      : <input type={field.type ?? 'text'} data-field-key={`${prefix}${field.key}`} value={String(form[field.key] ?? '')} disabled={readOnly(field)} required={field.required}
         min={field.type === 'number' ? 0 : undefined} step={field.type === 'number' ? field.integer ? 1 : 'any' : undefined}
         onChange={event => onChange({ ...form, [field.key]: event.target.value })} />}
   </label>)}</div>;
@@ -50,7 +53,7 @@ export function HqRows({ rows, columns }: { rows: CustomerRecord[]; columns: { k
 export function useHqCommand() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
-  const last = useRef<{ fingerprint: string; key: string }>();
+  const last = useRef<{ fingerprint: string; key: string } | undefined>(undefined);
   const run = async <T,>(method: 'POST' | 'PATCH' | 'DELETE', path: string, body: Record<string, unknown> = {}): Promise<T> => {
     const fingerprint = JSON.stringify([method, path, body]);
     if (last.current?.fingerprint !== fingerprint) last.current = { fingerprint, key: crypto.randomUUID() };
@@ -96,15 +99,23 @@ export function useHqCustomerPolicy() {
     fieldWritable: (field: string, row?: Record<string, unknown>) => {
       const current = context(row); return Boolean(policy && current && policy.fieldWritable(field, current));
     },
+    visible: (entity: string, apiField: string, row?: Record<string, unknown>) => {
+      const field = query.data?.standard.fields.find(item => item.entity === entity && item.current.apiField === apiField);
+      const current = context(row); return Boolean(field && policy && current && policy.fieldVisible(field.fieldKey, current));
+    },
     writable: (entity: string, apiField: string, row?: Record<string, unknown>) => {
       const field = query.data?.standard.fields.find(item => item.entity === entity && item.current.apiField === apiField);
       const current = context(row); return Boolean(field && policy && current && policy.fieldWritable(field.fieldKey, current));
     },
     writablePayload: (entity: string, input: Record<string, unknown>, row?: Record<string, unknown>) => {
       const current = context(row, input);
-      return Object.fromEntries(Object.entries(input).filter(([key]) => {
+      return Object.fromEntries(Object.entries(input).filter(([key, value]) => {
         const field = query.data?.standard.fields.find(item => item.entity === entity && item.current.apiField === key);
-        return Boolean(field && current && policy && policy.fieldWritable(field.fieldKey, current));
+        if (!field || !current || !policy || !policy.fieldWritable(field.fieldKey, current)) return false;
+        const db = field.current.dbField;
+        // An unchanged projected/masked value must never replace the stored original.
+        if (row && db && Object.hasOwn(row, db) && String(row[db] ?? '') === String(value ?? '')) return false;
+        return true;
       }));
     },
     has: (permission: string) => Boolean(session?.user.permissions.includes(permission)),

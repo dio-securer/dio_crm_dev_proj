@@ -12,7 +12,7 @@ export function HqLeadsPage() {
   const { session } = useHqMock();
   const [params, setParams] = useSearchParams();
   const [search, setSearch] = useState('');
-  const [scope, setScope] = useState('managed');
+  const [scope, setScope] = useState('recent');
   const [stage, setStage] = useState('');
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState<CustomerForm>(() => formFromRecord(LEAD_FIELDS));
@@ -21,14 +21,18 @@ export function HqLeadsPage() {
   const cache = useQueryClient();
   const query = useQuery({ queryKey: ['hq-leads', search, scope, stage], retry: false,
     queryFn: () => apiGet<CustomerRecord[]>(`/api/leads?search=${encodeURIComponent(search)}&scope=${scope}${stage ? `&status=${stage}` : ''}`) });
-  const rows = (query.data ?? []).filter(row => (scope !== 'mine' || row.owner_user_id === session?.user.userId) && (!stage || row.status === stage));
+  const clock = useQuery({ queryKey: ['hq-clock'], queryFn: () => apiGet<{ now: string }>('/api/hq/status'), retry: false });
+  const dateInSeoul = (value: unknown) => { const date = new Date(String(value ?? '')); return Number.isFinite(date.valueOf()) ? new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Seoul' }).format(date) : ''; };
+  const today = dateInSeoul(clock.data?.now);
+  const recentTime = (row: CustomerRecord) => String(row.updated_at ?? row.created_at ?? row.source_updated_at ?? '');
+  const rows = (query.data ?? []).filter(row => (scope !== 'mine' || row.owner_user_id === session?.user.userId) && (scope !== 'today' || Boolean(today && dateInSeoul(row.created_at) === today)) && (!stage || row.status === stage)).sort((a, b) => recentTime(b).localeCompare(recentTime(a)) || a.public_id.localeCompare(b.public_id));
   const selectedId = params.get('lead');
   const open = (id: string) => setParams(previous => { const next = new URLSearchParams(previous); next.set('lead', id); return next; });
   const close = () => setParams(previous => { const next = new URLSearchParams(previous); next.delete('lead'); return next; });
   const create = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
-      const result = await command.run<CustomerRecord>('POST', '/api/leads', formPayload(LEAD_FIELDS, form));
+      const result = await command.run<CustomerRecord>('POST', '/api/leads', policy.writablePayload('lead', formPayload(LEAD_FIELDS, form)));
       await cache.invalidateQueries({ queryKey: ['hq-leads'] }); setCreating(false); open(result.public_id);
     } catch { /* Input remains available for correction and retry. */ }
   };
@@ -37,10 +41,11 @@ export function HqLeadsPage() {
     <div className="page-header"><div><span className="page-kicker">CRM · LEAD</span><h2>{t('lead.title')}</h2><p>{t('hqCustomer.leadIntro')}</p></div>
       <button type="button" className="button-primary" disabled={!policy.has('LEAD.WRITE') || !policy.ready} onClick={() => { setForm(formFromRecord(LEAD_FIELDS)); command.clearError(); setCreating(true); }}>{t('hqCustomer.newLead')}</button></div>
     <div className="hq-customer-toolbar"><input aria-label={t('lead.search')} placeholder={t('lead.search')} value={search} onChange={event => setSearch(event.target.value)} />
-      <select aria-label={t('hqCustomer.scope')} value={scope} onChange={event => setScope(event.target.value)}><option value="managed">{t('hqCustomer.managed')}</option><option value="mine">{t('hqCustomer.mine')}</option></select>
+      <select aria-label={t('hqCustomer.scope')} value={scope} onChange={event => setScope(event.target.value)}><option value="recent">{t('hqCustomer.recent')}</option><option value="today">{t('hqCustomer.today')}</option><option value="managed">{t('hqCustomer.managed')}</option><option value="mine">{t('hqCustomer.mine')}</option></select>
       <select aria-label={t('common.status')} value={stage} onChange={event => setStage(event.target.value)}><option value="">{t('hqCustomer.allStages')}</option>{LEAD_STAGES.map(value => <option key={value} value={value}>{t(`status.${value}`)}</option>)}</select>
     </div>
-    <HqError error={query.error ?? policy.error} />
+    <p className="hq-customer-filter-note">{t('hqCustomer.recentRule', { date: today || '—' })}</p>
+    <HqError error={query.error ?? policy.error ?? clock.error} />
     <HqRows rows={rows} columns={[
       { key: 'hospital_name', label: t('lead.hospital'), render: row => <button className="hq-record-link" type="button" data-lead-id={row.public_id} onClick={() => open(row.public_id)}>{recordLabel(row)}</button> },
       { key: 'status', label: t('common.status'), render: row => t(`status.${row.status}`) },
@@ -48,7 +53,7 @@ export function HqLeadsPage() {
       { key: 'phone', label: t('lead.phone') }, { key: 'business_no', label: t('lead.businessNo') }
     ]} />
     {creating && <HqModal title={t('hqCustomer.newLead')} onClose={() => setCreating(false)} busy={command.busy} wide><form onSubmit={event => void create(event)}>
-      {['basic', 'keyman', 'hospital', 'exclusions'].map(group => <fieldset key={group}><legend>{t(`hqCustomer.tabs.${group}`)}</legend><HqFields fields={LEAD_FIELDS.filter(field => field.group === group)} form={form} onChange={setForm} disabled={command.busy} /></fieldset>)}
+      {['basic', 'keyman', 'hospital', 'exclusions'].map(group => <fieldset key={group}><legend>{t(`hqCustomer.tabs.${group}`)}</legend><HqFields entity="lead" fields={LEAD_FIELDS.filter(field => field.group === group)} form={form} onChange={setForm} disabled={command.busy} /></fieldset>)}
       <HqError error={command.error} /><footer><button type="button" onClick={() => setCreating(false)} disabled={command.busy}>{t('common.cancel')}</button><button type="submit" className="button-primary" disabled={command.busy || !policy.can('LEAD.create', {}, formPayload(LEAD_FIELDS, form))}>{t('common.create')}</button></footer>
     </form></HqModal>}
   </section>;
@@ -61,6 +66,7 @@ function HqLeadDetail({ publicId, onBack }: { publicId: string; onBack: () => vo
   const command = useHqCommand();
   const [active, setActive] = useState('basic');
   const [form, setForm] = useState<CustomerForm | null>(null);
+  const [baseline, setBaseline] = useState<CustomerRecord | null>(null);
   const [selectedStage, setSelectedStage] = useState('');
   const [reason, setReason] = useState('');
   const [notice, setNotice] = useState('');
@@ -71,19 +77,19 @@ function HqLeadDetail({ publicId, onBack }: { publicId: string; onBack: () => vo
   const history = useQuery({ queryKey: ['hq-lead-history', publicId], queryFn: () => apiGet<CustomerRecord[]>(`/api/leads/${publicId}/history`), retry: false });
   const options = useQuery({ queryKey: ['hq-lead-options'], queryFn: () => apiGet<{ owners: CustomerOwner[]; statuses: string[] }>('/api/leads/options'), retry: false });
   const row = query.data;
-  useEffect(() => { if (row && form === null) { setForm(formFromRecord(LEAD_FIELDS, row)); setSelectedStage(String(row.status)); setOwnerUserId(String(row.owner_user_id)); } }, [row, form]);
+  useEffect(() => { if (row && form === null) { setForm(formFromRecord(LEAD_FIELDS, row)); setBaseline(row); setSelectedStage(String(row.status)); setOwnerUserId(String(row.owner_user_id)); } }, [row, form]);
   const refresh = async () => { await Promise.all([query.refetch(), history.refetch(), cache.invalidateQueries({ queryKey: ['hq-leads'] })]); };
   const save = async (event: React.FormEvent) => {
-    event.preventDefault(); if (!row || !form) return;
-    try { const saved = await command.run<CustomerRecord>('PATCH', `/api/leads/${publicId}`, { ...formPayload(LEAD_FIELDS, form), expectedVersion: row.version }); setForm(formFromRecord(LEAD_FIELDS, saved)); await refresh(); setNotice(t('hqCustomer.saved')); } catch { /* Preserve edited fields. */ }
+    event.preventDefault(); if (!row || !form || !baseline) return;
+    try { const saved = await command.run<CustomerRecord>('PATCH', `/api/leads/${publicId}`, { ...policy.writablePayload('lead', formPayload(LEAD_FIELDS, form), baseline), expectedVersion: baseline.version }); setForm(formFromRecord(LEAD_FIELDS, saved)); setBaseline(saved); await refresh(); setNotice(t('hqCustomer.saved')); } catch { /* Preserve edited fields. */ }
   };
   const saveStage = async () => {
     if (!row) return;
-    try { const saved = await command.run<CustomerRecord>('POST', `/api/leads/${publicId}/status`, { toStatus: selectedStage, reason, expectedVersion: row.version }); setSelectedStage(String(saved.status)); setReason(''); await refresh(); setNotice(t('hqCustomer.stageSaved')); } catch { /* A selected stage is not the persisted stage. */ }
+    try { const saved = await command.run<CustomerRecord>('POST', `/api/leads/${publicId}/status`, { toStatus: selectedStage, reason, expectedVersion: row.version }); setSelectedStage(String(saved.status)); setReason(''); setBaseline(current => current?.version === row.version ? { ...current, version: saved.version, status: saved.status } : current); await refresh(); setNotice(t('hqCustomer.stageSaved')); } catch { /* A selected stage is not the persisted stage. */ }
   };
   const assign = async (event: React.FormEvent) => {
     event.preventDefault(); if (!row) return;
-    try { await command.run('POST', `/api/leads/${publicId}/assign-owner`, { ownerUserId: Number(ownerUserId), expectedVersion: row.version }); await refresh(); setOwnerOpen(false); setNotice(t('hqCustomer.saved')); } catch { /* Keep selection on failure. */ }
+    try { const saved = await command.run<CustomerRecord>('POST', `/api/leads/${publicId}/assign-owner`, { ownerUserId: Number(ownerUserId), expectedVersion: row.version }); setBaseline(current => current?.version === row.version ? { ...current, version: saved.version, owner_user_id: saved.owner_user_id } : current); await refresh(); setOwnerOpen(false); setNotice(t('hqCustomer.saved')); } catch { /* Keep selection on failure. */ }
   };
   const remove = async () => { if (!row || !window.confirm(t('hqCustomer.deleteConfirm'))) return; try { await command.run('DELETE', `/api/leads/${publicId}`, { expectedVersion: row.version }); await cache.invalidateQueries({ queryKey: ['hq-leads'] }); onBack(); } catch { /* Show API refusal. */ } };
   if (!row || !form) return <section className="hq-customer-page"><button onClick={onBack}>{t('account.back')}</button><HqError error={query.error} />{query.isLoading && <p>{t('common.loading')}</p>}</section>;
@@ -106,10 +112,11 @@ function HqLeadDetail({ publicId, onBack }: { publicId: string; onBack: () => vo
         <small>{t('hqCustomer.selectedStage', { stage: t(`status.${selectedStage}`) })}</small></div>}
     </section>
     {conversion && <ConversionLinks result={conversion} />}
+    {baseline && baseline.version !== row.version && <p className="notice warning">{t('hqCustomer.changedElsewhere')} <button type="button" onClick={() => { if (window.confirm(t('hqCustomer.discardReload'))) { setForm(formFromRecord(LEAD_FIELDS, row)); setBaseline(row); command.clearError(); } }}>{t('hqCustomer.reloadLatest')}</button></p>}
     {notice && <p className="hq-customer-success" role="status">{notice}</p>}<HqError error={command.error ?? policy.error} />
     <HqTabs active={active} onChange={setActive} tabs={['basic', 'keyman', 'hospital', 'exclusions', 'hira', 'marketing', 'history', 'activities'].map(key => ({ key, label: t(`hqCustomer.tabs.${key}`) }))} />
     {['basic', 'keyman', 'hospital', 'exclusions'].includes(active) && <form onSubmit={event => void save(event)} className="hq-customer-panel">
-      <HqFields fields={LEAD_FIELDS.filter(field => field.group === active)} form={form} onChange={setForm} disabled={!editable || command.busy} />
+      <HqFields entity="lead" row={row} fields={LEAD_FIELDS.filter(field => field.group === active)} form={form} onChange={setForm} disabled={!editable || command.busy} />
       {editable && <footer><button type="submit" className="button-primary" disabled={command.busy || !policy.can('LEAD.save', row, formPayload(LEAD_FIELDS, form))}>{t('common.save')}</button></footer>}
     </form>}
     {active === 'hira' && <div className="hq-customer-panel"><p>{t('hqCustomer.sourceReadOnly')}</p><HqRecordSummary row={row} fields={[
