@@ -18,5 +18,12 @@
     "audit:critical": "pnpm audit --audit-level=critical",
     "dev:api": "pnpm --filter @dio-crm/api start:dev",
     "dev:web": "pnpm --filter @dio-crm/web dev"
+  },
+  "pnpm": {
+    "overrides": {
+      "proxy-addr@<2.0.8": "2.0.8",
+      "tinypool@<2.1.2": "2.1.2",
+      "handlebars@<4.7.10": "4.7.10"
+    }
   }
 }
