@@ -1,0 +1,1846 @@
+﻿2026-10-22T13:37:50.3361691Z Current runner version: '2.338.0'
+2026-10-22T13:37:50.3385761Z ##[group]Runner Image Provisioner
+2026-10-22T13:37:50.3386611Z Hosted Compute Agent
+2026-10-22T13:37:50.3387210Z Version: 20261012.601
+2026-10-22T13:37:50.3387835Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+2026-10-22T13:37:50.3388501Z Build Date: 2026-10-12T17:48:21Z
+2026-10-22T13:37:50.3389177Z Worker ID: {114e9ed5-2133-4350-be67-8c32cc63f4c9}
+2026-10-22T13:37:50.3389829Z Region: westus3
+2026-10-22T13:37:50.3390353Z Cloud: Azure
+2026-10-22T13:37:50.3390876Z ##[endgroup]
+2026-10-22T13:37:50.3392803Z ##[group]Operating System
+2026-10-22T13:37:50.3393484Z Ubuntu
+2026-10-22T13:37:50.3393972Z 24.04.5
+2026-10-22T13:37:50.3394454Z LTS
+2026-10-22T13:37:50.3394958Z ##[endgroup]
+2026-10-22T13:37:50.3395473Z ##[group]Runner Image
+2026-10-22T13:37:50.3396056Z Image: ubuntu-24.04
+2026-10-22T13:37:50.3396607Z Version: 20261012.334.1
+2026-10-22T13:37:50.3397836Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-22T13:37:50.3399232Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+2026-10-22T13:37:50.3400128Z ##[endgroup]
+2026-10-22T13:37:50.3401239Z ##[group]GITHUB_TOKEN Permissions
+2026-10-22T13:37:50.3403555Z Contents: read
+2026-10-22T13:37:50.3404144Z Metadata: read
+2026-10-22T13:37:50.3404650Z Packages: read
+2026-10-22T13:37:50.3405277Z ##[endgroup]
+2026-10-22T13:37:50.3407331Z Secret source: Actions
+2026-10-22T13:37:50.3408313Z Cache mode: write
+2026-10-22T13:37:50.3408974Z Prepare workflow directory
+2026-10-22T13:37:50.3783651Z Prepare all required actions
+2026-10-22T13:37:50.3833893Z Getting action download info
+2026-10-22T13:37:50.7114825Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-22T13:37:50.8267168Z Download action repository 'pnpm/action-setup@v4' (SHA:b906affcce14559ad1aafd4ab0e942779e9f58b1)
+2026-10-22T13:37:51.6737375Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-10-22T13:37:51.7434342Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-22T13:37:51.9345729Z Complete job name: build-test
+2026-10-22T13:37:52.0359243Z ##[group]Run actions/checkout@v4
+2026-10-22T13:37:52.0360191Z with:
+2026-10-22T13:37:52.0360755Z   repository: dio-securer/dio_crm_dev_proj
+2026-10-22T13:37:52.0365434Z   token: ***
+2026-10-22T13:37:52.0365963Z   ssh-strict: true
+2026-10-22T13:37:52.0366497Z   ssh-user: git
+2026-10-22T13:37:52.0367044Z   persist-credentials: true
+2026-10-22T13:37:52.0367647Z   clean: true
+2026-10-22T13:37:52.0368192Z   sparse-checkout-cone-mode: true
+2026-10-22T13:37:52.0368828Z   fetch-depth: 1
+2026-10-22T13:37:52.0369359Z   fetch-tags: false
+2026-10-22T13:37:52.0369904Z   show-progress: true
+2026-10-22T13:37:52.0370456Z   lfs: false
+2026-10-22T13:37:52.0370951Z   submodules: false
+2026-10-22T13:37:52.0371487Z   set-safe-directory: true
+2026-10-22T13:37:52.0372224Z   allow-unsafe-pr-checkout: false
+2026-10-22T13:37:52.0373140Z ##[endgroup]
+2026-10-22T13:37:52.1376981Z Syncing repository: dio-securer/dio_crm_dev_proj
+2026-10-22T13:37:52.1380450Z ##[group]Getting Git version info
+2026-10-22T13:37:52.1382602Z Working directory is '/home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj'
+2026-10-22T13:37:52.1385341Z [command]/usr/bin/git version
+2026-10-22T13:37:52.1392982Z git version 2.55.0
+2026-10-22T13:37:52.1410879Z ##[endgroup]
+2026-10-22T13:37:52.1424156Z Temporarily overriding HOME='/home/runner/work/_temp/88608e93-2358-40c5-b0c2-1f07f9f78462' before making global git config changes
+2026-10-22T13:37:52.1427656Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-22T13:37:52.1430991Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj
+2026-10-22T13:37:52.1470937Z Deleting the contents of '/home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj'
+2026-10-22T13:37:52.1477950Z ##[group]Initializing the repository
+2026-10-22T13:37:52.1483000Z [command]/usr/bin/git init /home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj
+2026-10-22T13:37:52.1578667Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-22T13:37:52.1581066Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-22T13:37:52.1583536Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-22T13:37:52.1585147Z hint: call:
+2026-10-22T13:37:52.1586084Z hint:
+2026-10-22T13:37:52.1587255Z hint: 	git config --global init.defaultBranch <name>
+2026-10-22T13:37:52.1588658Z hint:
+2026-10-22T13:37:52.1589966Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-22T13:37:52.1592313Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-22T13:37:52.1594130Z hint:
+2026-10-22T13:37:52.1595093Z hint: 	git branch -m <name>
+2026-10-22T13:37:52.1596205Z hint:
+2026-10-22T13:37:52.1597652Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-22T13:37:52.1604320Z Initialized empty Git repository in /home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj/.git/
+2026-10-22T13:37:52.1626908Z [command]/usr/bin/git remote add origin https://github.com/dio-securer/dio_crm_dev_proj
+2026-10-22T13:37:52.1659970Z ##[endgroup]
+2026-10-22T13:37:52.1660925Z ##[group]Disabling automatic garbage collection
+2026-10-22T13:37:52.1664435Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-22T13:37:52.1692478Z ##[endgroup]
+2026-10-22T13:37:52.1694428Z ##[group]Setting up auth
+2026-10-22T13:37:52.1700746Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-22T13:37:52.1732829Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-22T13:37:52.2049778Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-22T13:37:52.2082265Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-22T13:37:52.2286226Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-22T13:37:52.2318917Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-22T13:37:52.2493832Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-22T13:37:52.2526776Z ##[endgroup]
+2026-10-22T13:37:52.2527837Z ##[group]Fetching the repository
+2026-10-22T13:37:52.2535980Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +93a7c0372f7ce873a3c5c93975761e297394bce9:refs/remotes/pull/31/merge
+2026-10-22T13:37:53.0614577Z From https://github.com/dio-securer/dio_crm_dev_proj
+2026-10-22T13:37:53.0617237Z  * [new ref]         93a7c0372f7ce873a3c5c93975761e297394bce9 -> pull/31/merge
+2026-10-22T13:37:53.0621342Z ##[endgroup]
+2026-10-22T13:37:53.0622955Z ##[group]Determining the checkout info
+2026-10-22T13:37:53.0624576Z ##[endgroup]
+2026-10-22T13:37:53.0627325Z [command]/usr/bin/git sparse-checkout disable
+2026-10-22T13:37:53.0674236Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-22T13:37:53.0706954Z ##[group]Checking out the ref
+2026-10-22T13:37:53.0710382Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/31/merge
+2026-10-22T13:37:53.0907125Z Note: switching to 'refs/remotes/pull/31/merge'.
+2026-10-22T13:37:53.0908236Z 
+2026-10-22T13:37:53.0909030Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-22T13:37:53.0911391Z changes and commit them, and you can discard any commits you make in this
+2026-10-22T13:37:53.0914443Z state without impacting any branches by switching back to a branch.
+2026-10-22T13:37:53.0916639Z 
+2026-10-22T13:37:53.0917838Z If you want to create a new branch to retain commits you create, you may
+2026-10-22T13:37:53.0920492Z do so (now or later) by using -c with the switch command. Example:
+2026-10-22T13:37:53.0922209Z 
+2026-10-22T13:37:53.0922853Z   git switch -c <new-branch-name>
+2026-10-22T13:37:53.0923911Z 
+2026-10-22T13:37:53.0924541Z Or undo this operation with:
+2026-10-22T13:37:53.0925547Z 
+2026-10-22T13:37:53.0926162Z   git switch -
+2026-10-22T13:37:53.0927003Z 
+2026-10-22T13:37:53.0928506Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-22T13:37:53.0930592Z 
+2026-10-22T13:37:53.0932281Z HEAD is now at 93a7c03 Merge 452cf4465408e233c3ef7b410e8c8b897cc0882d into e111138dbf50c46aca41c7097e156840fcd59069
+2026-10-22T13:37:53.0937707Z ##[endgroup]
+2026-10-22T13:37:53.0961022Z [command]/usr/bin/git log -1 --format=%H
+2026-10-22T13:37:53.0983123Z 93a7c0372f7ce873a3c5c93975761e297394bce9
+2026-10-22T13:37:53.1305870Z ##[group]Run pnpm/action-setup@v4
+2026-10-22T13:37:53.1306943Z with:
+2026-10-22T13:37:53.1307712Z   version: 9.15.0
+2026-10-22T13:37:53.1308551Z   dest: ~/setup-pnpm
+2026-10-22T13:37:53.1309407Z   run_install: null
+2026-10-22T13:37:53.1310228Z   cache: false
+2026-10-22T13:37:53.1311084Z   cache_dependency_path: pnpm-lock.yaml
+2026-10-22T13:37:53.1312358Z   package_json_file: package.json
+2026-10-22T13:37:53.1313404Z   standalone: false
+2026-10-22T13:37:53.1314227Z ##[endgroup]
+2026-10-22T13:37:53.2709998Z ##[group]Running self-installer...
+2026-10-22T13:37:53.6493161Z (node:2320) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-22T13:37:53.6497978Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-22T13:37:53.8574979Z Progress: resolved 1, reused 0, downloaded 0, added 0
+2026-10-22T13:37:53.8658002Z Packages: +1
+2026-10-22T13:37:53.8659625Z +
+2026-10-22T13:37:54.2333390Z Progress: resolved 1, reused 0, downloaded 1, added 1, done
+2026-10-22T13:37:54.2778217Z 
+2026-10-22T13:37:54.2778538Z dependencies:
+2026-10-22T13:37:54.2778838Z + pnpm 9.15.0 (12.15.0 is available)
+2026-10-22T13:37:54.2779034Z 
+2026-10-22T13:37:54.2803896Z Done in 841ms
+2026-10-22T13:37:54.2929780Z ##[endgroup]
+2026-10-22T13:37:54.2930119Z Installation Completed!
+2026-10-22T13:37:54.3093547Z ##[group]Run actions/setup-node@v4
+2026-10-22T13:37:54.3093873Z with:
+2026-10-22T13:37:54.3094095Z   node-version: 22
+2026-10-22T13:37:54.3094327Z   always-auth: false
+2026-10-22T13:37:54.3094552Z   check-latest: false
+2026-10-22T13:37:54.3097072Z   token: ***
+2026-10-22T13:37:54.3097273Z env:
+2026-10-22T13:37:54.3097530Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-22T13:37:54.3097841Z ##[endgroup]
+2026-10-22T13:37:54.4583829Z Found in cache @ /opt/hostedtoolcache/node/22.23.3/x64
+2026-10-22T13:37:54.4586951Z (node:2335) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-22T13:37:54.4587752Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-22T13:37:54.4589933Z ##[group]Environment details
+2026-10-22T13:37:57.4189610Z node: v22.23.3
+2026-10-22T13:37:57.4190050Z npm: 10.9.9
+2026-10-22T13:37:57.4190353Z yarn: 1.22.22
+2026-10-22T13:37:57.4191395Z ##[endgroup]
+2026-10-22T13:37:57.4302034Z ##[group]Run pnpm install --no-frozen-lockfile
+2026-10-22T13:37:57.4302715Z [36;1mpnpm install --no-frozen-lockfile[0m
+2026-10-22T13:37:57.4508478Z shell: /usr/bin/bash -e {0}
+2026-10-22T13:37:57.4508843Z env:
+2026-10-22T13:37:57.4509281Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-22T13:37:57.4509676Z ##[endgroup]
+2026-10-22T13:37:57.9891197Z Scope: all 4 workspace projects
+2026-10-22T13:37:58.0547608Z Lockfile is up to date, resolution step is skipped
+2026-10-22T13:37:58.1018136Z Progress: resolved 1, reused 0, downloaded 0, added 0
+2026-10-22T13:37:58.2177454Z Packages: +797
+2026-10-22T13:37:58.2178288Z ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+2026-10-22T13:37:59.1033829Z Progress: resolved 797, reused 0, downloaded 194, added 193
+2026-10-22T13:38:00.1034632Z Progress: resolved 797, reused 0, downloaded 405, added 405
+2026-10-22T13:38:01.1043276Z Progress: resolved 797, reused 0, downloaded 648, added 641
+2026-10-22T13:38:02.0589257Z Progress: resolved 797, reused 0, downloaded 796, added 797, done
+2026-10-22T13:38:02.2699525Z .../esbuild@0.25.12/node_modules/esbuild postinstall$ node install.js
+2026-10-22T13:38:02.3209900Z .../esbuild@0.25.12/node_modules/esbuild postinstall: Done
+2026-10-22T13:38:02.5283217Z 
+2026-10-22T13:38:02.5432494Z Done in 5s
+2026-10-22T13:38:02.5719930Z ##[group]Run git diff -- pnpm-lock.yaml
+2026-10-22T13:38:02.5720369Z [36;1mgit diff -- pnpm-lock.yaml[0m
+2026-10-22T13:38:02.5757503Z shell: /usr/bin/bash -e {0}
+2026-10-22T13:38:02.5757935Z env:
+2026-10-22T13:38:02.5758262Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-22T13:38:02.5758663Z ##[endgroup]
+2026-10-22T13:38:02.5959084Z ##[group]Run pnpm build
+2026-10-22T13:38:02.5959343Z [36;1mpnpm build[0m
+2026-10-22T13:38:02.5994921Z shell: /usr/bin/bash -e {0}
+2026-10-22T13:38:02.5995171Z env:
+2026-10-22T13:38:02.5995420Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-22T13:38:02.5995716Z ##[endgroup]
+2026-10-22T13:38:02.9780199Z 
+2026-10-22T13:38:02.9781216Z > dio-crm@0.1.0 build /home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj
+2026-10-22T13:38:02.9782143Z > pnpm -r build
+2026-10-22T13:38:02.9782381Z 
+2026-10-22T13:38:03.3719997Z Scope: 3 of 4 workspace projects
+2026-10-22T13:38:03.3742938Z packages/contracts build$ tsc -p tsconfig.json
+2026-10-22T13:38:04.4522126Z packages/contracts build: Done
+2026-10-22T13:38:04.4529307Z backend build$ nest build
+2026-10-22T13:38:04.4533769Z frontend build$ tsc --noEmit && vite build
+2026-10-22T13:38:11.0776230Z backend build: Done
+2026-10-22T13:38:11.7113380Z frontend build: [36mvite v6.4.3 [32mbuilding for production...[36m[39m
+2026-10-22T13:38:11.7723260Z frontend build: transforming...
+2026-10-22T13:38:13.3524041Z frontend build: [32m✓[39m 164 modules transformed.
+2026-10-22T13:38:13.5978306Z frontend build: rendering chunks...
+2026-10-22T13:38:13.6062746Z frontend build: computing gzip size...
+2026-10-22T13:38:13.6216255Z frontend build: [2mdist/[22m[32mindex.html                 [39m[1m[2m  0.86 kB[22m[1m[22m[2m │ gzip:   0.42 kB[22m
+2026-10-22T13:38:13.6219780Z frontend build: [2mdist/[22m[2massets/[22m[35mindex-BUMD7gfJ.css  [39m[1m[2m 36.54 kB[22m[1m[22m[2m │ gzip:   7.74 kB[22m
+2026-10-22T13:38:13.6223268Z frontend build: [2mdist/[22m[2massets/[22m[36mindex-Brv-IjsI.js   [39m[1m[33m550.23 kB[39m[22m[2m │ gzip: 160.54 kB[22m
+2026-10-22T13:38:13.6226202Z frontend build: [33m
+2026-10-22T13:38:13.6228550Z frontend build: (!) Some chunks are larger than 500 kB after minification. Consider:
+2026-10-22T13:38:13.6229879Z frontend build: - Using dynamic import() to code-split the application
+2026-10-22T13:38:13.6232173Z frontend build: - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2026-10-22T13:38:13.6234240Z frontend build: - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+2026-10-22T13:38:13.6236139Z frontend build: [32m✓ built in 1.89s[39m
+2026-10-22T13:38:13.6447202Z frontend build: Done
+2026-10-22T13:38:13.6620991Z ##[group]Run pnpm test
+2026-10-22T13:38:13.6621396Z [36;1mpnpm test[0m
+2026-10-22T13:38:13.6664336Z shell: /usr/bin/bash -e {0}
+2026-10-22T13:38:13.6664601Z env:
+2026-10-22T13:38:13.6664861Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-22T13:38:13.6665163Z ##[endgroup]
+2026-10-22T13:38:14.0296492Z 
+2026-10-22T13:38:14.0297319Z > dio-crm@0.1.0 test /home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj
+2026-10-22T13:38:14.0297835Z > pnpm -r test --if-present
+2026-10-22T13:38:14.0298363Z 
+2026-10-22T13:38:14.4152992Z Scope: 3 of 4 workspace projects
+2026-10-22T13:38:14.4176935Z backend test$ jest --runInBand
+2026-10-22T13:38:14.4182661Z frontend test$ vitest run
+2026-10-22T13:38:14.7363871Z frontend test: [1m[46m RUN [49m[22m [36mv3.2.7 [39m[90m/home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj/frontend[39m
+2026-10-22T13:38:15.5037131Z frontend test:  [32m✓[39m src/account-model.spec.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+2026-10-22T13:38:15.5307730Z frontend test:  [32m✓[39m src/market/field-profiles/field-profile-resolver.spec.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+2026-10-22T13:38:16.0121648Z frontend test:  [32m✓[39m src/app/multi-market-regression.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+2026-10-22T13:38:16.1263879Z frontend test:  [32m✓[39m src/market/country-profile.spec.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+2026-10-22T13:38:16.4843024Z frontend test:  [32m✓[39m src/app/screen-resolver.spec.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+2026-10-22T13:38:16.6553216Z frontend test:  [32m✓[39m src/market/globalization-contract.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-22T13:38:16.9141773Z frontend test:  [32m✓[39m src/market/templates/global/global-screen-manifest.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+2026-10-22T13:38:17.2618921Z frontend test:  [32m✓[39m src/formatting/formatting.spec.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 80[2mms[22m[39m
+2026-10-22T13:38:17.3410056Z frontend test:  [32m✓[39m src/market/market-profile.spec.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+2026-10-22T13:38:17.4939465Z frontend test:  [32m✓[39m src/app/hq-standard.spec.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 329[2mms[22m[39m
+2026-10-22T13:38:17.6313798Z frontend test:  [32m✓[39m src/market/feature-visibility.spec.ts [2m([22m[2m1 test[22m[2m)[22m[32m 3[2mms[22m[39m
+2026-10-22T13:38:17.6922324Z frontend test:  [32m✓[39m src/market/templates/hq/hq-screen-manifest.spec.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+2026-10-22T13:38:18.0132711Z frontend test:  [32m✓[39m src/demo/demo-account-repository.spec.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+2026-10-22T13:38:18.1703545Z frontend test:  [32m✓[39m src/i18n/i18n.spec.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+2026-10-22T13:38:18.2135993Z frontend test:  [32m✓[39m src/i18n/locale-resolver.spec.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+2026-10-22T13:38:18.2474612Z frontend test: [2m Test Files [22m [1m[32m15 passed[39m[22m[90m (15)[39m
+2026-10-22T13:38:18.2503292Z frontend test: [2m      Tests [22m [1m[32m70 passed[39m[22m[90m (70)[39m
+2026-10-22T13:38:18.2531213Z frontend test: [2m   Start at [22m 13:38:14
+2026-10-22T13:38:18.2594174Z frontend test: [2m   Duration [22m 3.51s[2m (transform 1.77s, setup 0ms, collect 3.44s, tests 550ms, environment 4ms, prepare 2.41s)[22m
+2026-10-22T13:38:18.4483759Z frontend test: Done
+2026-10-22T13:38:19.3386893Z backend test: PASS src/globalization/globalization.service.spec.ts
+2026-10-22T13:38:19.4075578Z backend test: PASS src/globalization/market-profile.spec.ts
+2026-10-22T13:38:19.4776958Z backend test: PASS src/globalization/profile-resolver.spec.ts
+2026-10-22T13:38:19.6225854Z backend test: PASS src/globalization/feature.guard.spec.ts
+2026-10-22T13:38:19.6717094Z backend test: PASS src/modules/activity/activity.rules.spec.ts
+2026-10-22T13:38:19.7149131Z backend test: PASS src/globalization/integration-profile.spec.ts
+2026-10-22T13:38:19.7554939Z backend test: ts-jest[ts-compiler] (WARN) Got a `.js` file to compile while `allowJs` option is not set to `true` (file: /home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj/packages/contracts/dist/index.js). To fix this:
+2026-10-22T13:38:19.7557332Z backend test:   - if you want TypeScript to process JS files, set `allowJs` to `true` in your TypeScript config (usually tsconfig.json)
+2026-10-22T13:38:19.7560025Z backend test:   - if you do not want TypeScript to process your `.js` files, in your Jest config change the `transform` key which value is `ts-jest` so that it does not match `.js` files anymore
+2026-10-22T13:38:19.7573256Z backend test: ts-jest[ts-compiler] (WARN) Got a `.js` file to compile while `allowJs` option is not set to `true` (file: /home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj/packages/contracts/dist/account-interface.js). To fix this:
+2026-10-22T13:38:19.7597027Z backend test:   - if you want TypeScript to process JS files, set `allowJs` to `true` in your TypeScript config (usually tsconfig.json)
+2026-10-22T13:38:19.7599462Z backend test:   - if you do not want TypeScript to process your `.js` files, in your Jest config change the `transform` key which value is `ts-jest` so that it does not match `.js` files anymore
+2026-10-22T13:38:19.7774033Z backend test: ts-jest[ts-compiler] (WARN) Got a `.js` file to compile while `allowJs` option is not set to `true` (file: /home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj/packages/contracts/dist/globalization.js). To fix this:
+2026-10-22T13:38:19.7776807Z backend test:   - if you want TypeScript to process JS files, set `allowJs` to `true` in your TypeScript config (usually tsconfig.json)
+2026-10-22T13:38:19.7806290Z backend test:   - if you do not want TypeScript to process your `.js` files, in your Jest config change the `transform` key which value is `ts-jest` so that it does not match `.js` files anymore
+2026-10-22T13:38:19.7817157Z backend test: ts-jest[ts-compiler] (WARN) Got a `.js` file to compile while `allowJs` option is not set to `true` (file: /home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj/packages/contracts/dist/hq-standard.js). To fix this:
+2026-10-22T13:38:19.7853932Z backend test:   - if you want TypeScript to process JS files, set `allowJs` to `true` in your TypeScript config (usually tsconfig.json)
+2026-10-22T13:38:19.7856180Z backend test:   - if you do not want TypeScript to process your `.js` files, in your Jest config change the `transform` key which value is `ts-jest` so that it does not match `.js` files anymore
+2026-10-22T13:38:19.7858069Z backend test: PASS src/modules/customer/account-interface.spec.ts
+2026-10-22T13:38:19.8165540Z backend test: PASS src/modules/opportunity/opportunity.rules.spec.ts
+2026-10-22T13:38:19.8643046Z backend test: PASS src/modules/analytics/analytics.rules.spec.ts
+2026-10-22T13:38:19.9115362Z backend test: PASS src/modules/order/order.rules.spec.ts
+2026-10-22T13:38:19.9652910Z backend test: PASS src/modules/contract/contract.rules.spec.ts
+2026-10-22T13:38:20.0343094Z backend test: PASS src/modules/customer/customer.rules.spec.ts
+2026-10-22T13:38:20.0800459Z backend test: PASS src/ops/hardening.rules.spec.ts
+2026-10-22T13:38:20.1246069Z backend test: PASS src/integration/circuit-breaker.spec.ts
+2026-10-22T13:38:20.1466130Z backend test: PASS test/health.spec.ts
+2026-10-22T13:38:20.1479313Z backend test: Test Suites: 15 passed, 15 total
+2026-10-22T13:38:20.1480157Z backend test: Tests:       59 passed, 59 total
+2026-10-22T13:38:20.1480856Z backend test: Snapshots:   0 total
+2026-10-22T13:38:20.1481652Z backend test: Time:        5.382 s
+2026-10-22T13:38:20.1502663Z backend test: Ran all test suites.
+2026-10-22T13:38:20.2768750Z backend test: Done
+2026-10-22T13:38:20.2950019Z ##[group]Run pnpm hq:check
+2026-10-22T13:38:20.2950474Z [36;1mpnpm hq:check[0m
+2026-10-22T13:38:20.3007738Z shell: /usr/bin/bash -e {0}
+2026-10-22T13:38:20.3008128Z env:
+2026-10-22T13:38:20.3008544Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-22T13:38:20.3009058Z ##[endgroup]
+2026-10-22T13:38:20.6740802Z 
+2026-10-22T13:38:20.6743174Z > dio-crm@0.1.0 hq:check /home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj
+2026-10-22T13:38:20.6743793Z > node --experimental-strip-types --test scripts/hq-standard/*.test.mjs
+2026-10-22T13:38:20.6744086Z 
+2026-10-22T13:38:20.7220105Z TAP version 13
+2026-10-22T13:38:21.2604511Z # (node:2764) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj/backend/src/hq-mock/repository.ts is not specified and it doesn't parse as CommonJS.
+2026-10-22T13:38:21.2607455Z # Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+2026-10-22T13:38:21.2609593Z # To eliminate this warning, add "type": "module" to /home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj/backend/package.json.
+2026-10-22T13:38:21.2611150Z # (Use `node --trace-warnings ...` to show where the warning was created)
+2026-10-22T13:38:21.2725132Z # Subtest: H02 seed is deterministic and all business references are valid
+2026-10-22T13:38:21.2752937Z ok 1 - H02 seed is deterministic and all business references are valid
+2026-10-22T13:38:21.2762344Z   ---
+2026-10-22T13:38:21.2773096Z   duration_ms: 47.900228
+2026-10-22T13:38:21.2773514Z   type: 'test'
+2026-10-22T13:38:21.2773843Z   ...
+2026-10-22T13:38:21.2774823Z # Subtest: H02 failed and delayed interface seed cases are immediately visible, executable and resettable
+2026-10-22T13:38:21.2776227Z ok 2 - H02 failed and delayed interface seed cases are immediately visible, executable and resettable
+2026-10-22T13:38:21.2777033Z   ---
+2026-10-22T13:38:21.2777363Z   duration_ms: 16.822866
+2026-10-22T13:38:21.2777766Z   type: 'test'
+2026-10-22T13:38:21.2778093Z   ...
+2026-10-22T13:38:21.2778697Z # Subtest: H02 detached reads, atomic writes and revision increment
+2026-10-22T13:38:21.2779595Z ok 3 - H02 detached reads, atomic writes and revision increment
+2026-10-22T13:38:21.2780175Z   ---
+2026-10-22T13:38:21.2780502Z   duration_ms: 6.522823
+2026-10-22T13:38:21.2780892Z   type: 'test'
+2026-10-22T13:38:21.2781220Z   ...
+2026-10-22T13:38:21.2782024Z # Subtest: H02 persistence failure cannot expose a partial commit
+2026-10-22T13:38:21.2782629Z ok 4 - H02 persistence failure cannot expose a partial commit
+2026-10-22T13:38:21.2782996Z   ---
+2026-10-22T13:38:21.2783199Z   duration_ms: 5.441866
+2026-10-22T13:38:21.2783452Z   type: 'test'
+2026-10-22T13:38:21.2783666Z   ...
+2026-10-22T13:38:21.2784081Z # Subtest: H02 corrupt persisted data is rejected rather than silently reset
+2026-10-22T13:38:21.2784695Z ok 5 - H02 corrupt persisted data is rejected rather than silently reset
+2026-10-22T13:38:21.2785171Z   ---
+2026-10-22T13:38:21.2785510Z   duration_ms: 1.009094
+2026-10-22T13:38:21.2785886Z   type: 'test'
+2026-10-22T13:38:21.2786183Z   ...
+2026-10-22T13:38:21.2792667Z # Subtest: H02 invalid relationship, financial amount and company mutation roll back
+2026-10-22T13:38:21.2793579Z     # Subtest: cross-company contract
+2026-10-22T13:38:21.2794853Z     ok 1 - cross-company contract
+2026-10-22T13:38:21.2795397Z       ---
+2026-10-22T13:38:21.2795988Z       duration_ms: 3.14024
+2026-10-22T13:38:21.2796529Z       type: 'test'
+2026-10-22T13:38:21.2796984Z       ...
+2026-10-22T13:38:21.2797466Z     # Subtest: missing account
+2026-10-22T13:38:21.2798209Z     ok 2 - missing account
+2026-10-22T13:38:21.2798720Z       ---
+2026-10-22T13:38:21.2799189Z       duration_ms: 2.404443
+2026-10-22T13:38:21.2799695Z       type: 'test'
+2026-10-22T13:38:21.2800109Z       ...
+2026-10-22T13:38:21.2800730Z     # Subtest: negative amount
+2026-10-22T13:38:21.2801830Z     ok 3 - negative amount
+2026-10-22T13:38:21.2802374Z       ---
+2026-10-22T13:38:21.2802836Z       duration_ms: 3.278911
+2026-10-22T13:38:21.2803827Z       type: 'test'
+2026-10-22T13:38:21.2804327Z       ...
+2026-10-22T13:38:21.2807497Z     # Subtest: nonfinite amount
+2026-10-22T13:38:21.2808721Z     ok 4 - nonfinite amount
+2026-10-22T13:38:21.2809328Z       ---
+2026-10-22T13:38:21.2809861Z       duration_ms: 3.826807
+2026-10-22T13:38:21.2810392Z       type: 'test'
+2026-10-22T13:38:21.2810871Z       ...
+2026-10-22T13:38:21.2811383Z     # Subtest: rekey dataset
+2026-10-22T13:38:21.2812138Z     ok 5 - rekey dataset
+2026-10-22T13:38:21.2812677Z       ---
+2026-10-22T13:38:21.2813150Z       duration_ms: 2.926807
+2026-10-22T13:38:21.2813687Z       type: 'test'
+2026-10-22T13:38:21.2814463Z       ...
+2026-10-22T13:38:21.2815153Z     # Subtest: duplicate ID
+2026-10-22T13:38:21.2815746Z     ok 6 - duplicate ID
+2026-10-22T13:38:21.2816270Z       ---
+2026-10-22T13:38:21.2816776Z       duration_ms: 6.342262
+2026-10-22T13:38:21.2817314Z       type: 'test'
+2026-10-22T13:38:21.2817802Z       ...
+2026-10-22T13:38:21.2818290Z     # Subtest: async work
+2026-10-22T13:38:21.2818835Z     ok 7 - async work
+2026-10-22T13:38:21.2819348Z       ---
+2026-10-22T13:38:21.2819808Z       duration_ms: 3.727415
+2026-10-22T13:38:21.2820327Z       type: 'test'
+2026-10-22T13:38:21.2820806Z       ...
+2026-10-22T13:38:21.2821277Z     1..7
+2026-10-22T13:38:21.2822239Z ok 6 - H02 invalid relationship, financial amount and company mutation roll back
+2026-10-22T13:38:21.2823164Z   ---
+2026-10-22T13:38:21.2823675Z   duration_ms: 27.025176
+2026-10-22T13:38:21.2824209Z   type: 'test'
+2026-10-22T13:38:21.2824681Z   ...
+2026-10-22T13:38:21.2825625Z # Subtest: H02 reset restores seed, increments generation, isolates another repository
+2026-10-22T13:38:21.2826943Z ok 7 - H02 reset restores seed, increments generation, isolates another repository
+2026-10-22T13:38:21.2827797Z   ---
+2026-10-22T13:38:21.2828266Z   duration_ms: 12.515597
+2026-10-22T13:38:21.2828784Z   type: 'test'
+2026-10-22T13:38:21.2829262Z   ...
+2026-10-22T13:38:21.2830011Z # Subtest: H02 catalog has exactly all 15 registered interfaces
+2026-10-22T13:38:21.2830980Z ok 8 - H02 catalog has exactly all 15 registered interfaces
+2026-10-22T13:38:21.2831810Z   ---
+2026-10-22T13:38:21.2832271Z   duration_ms: 0.19011
+2026-10-22T13:38:21.2832782Z   type: 'test'
+2026-10-22T13:38:21.2833236Z   ...
+2026-10-22T13:38:21.2834561Z # Subtest: H02 normal ERP account → contract → order request/result flow updates shared entities
+2026-10-22T13:38:21.2836070Z ok 9 - H02 normal ERP account → contract → order request/result flow updates shared entities
+2026-10-22T13:38:21.2836973Z   ---
+2026-10-22T13:38:21.2837468Z   duration_ms: 19.470542
+2026-10-22T13:38:21.2838034Z   type: 'test'
+2026-10-22T13:38:21.2838515Z   ...
+2026-10-22T13:38:21.2839586Z # Subtest: H02 inbound account and contract results, fulfillment, collections, sales, plans and returns
+2026-10-22T13:38:21.2841123Z ok 10 - H02 inbound account and contract results, fulfillment, collections, sales, plans and returns
+2026-10-22T13:38:21.2842227Z   ---
+2026-10-22T13:38:21.2842714Z   duration_ms: 27.82582
+2026-10-22T13:38:21.2843234Z   type: 'test'
+2026-10-22T13:38:21.2843688Z   ...
+2026-10-22T13:38:21.2844607Z # Subtest: H02 HIRA manual fields are preserved and ERP region assignment reaches leads
+2026-10-22T13:38:21.2845882Z ok 11 - H02 HIRA manual fields are preserved and ERP region assignment reaches leads
+2026-10-22T13:38:21.2846695Z   ---
+2026-10-22T13:38:21.2847168Z   duration_ms: 9.022604
+2026-10-22T13:38:21.2847673Z   type: 'test'
+2026-10-22T13:38:21.2848186Z   ...
+2026-10-22T13:38:21.2849122Z # Subtest: H02 product synchronization updates price, stock and order availability
+2026-10-22T13:38:21.2850413Z ok 12 - H02 product synchronization updates price, stock and order availability
+2026-10-22T13:38:21.2851165Z   ---
+2026-10-22T13:38:21.2851729Z   duration_ms: 3.66922
+2026-10-22T13:38:21.2852199Z   type: 'test'
+2026-10-22T13:38:21.2852609Z   ...
+2026-10-22T13:38:21.2882860Z # Subtest: H02 overlapping product batches preserve newer values and still apply older nonoverlapping rows
+2026-10-22T13:38:21.2889254Z ok 13 - H02 overlapping product batches preserve newer values and still apply older nonoverlapping rows
+2026-10-22T13:38:21.2890408Z   ---
+2026-10-22T13:38:21.2890897Z   duration_ms: 9.356953
+2026-10-22T13:38:21.2891455Z   type: 'test'
+2026-10-22T13:38:21.2892117Z   ...
+2026-10-22T13:38:21.2892998Z # Subtest: H02 overlapping HIRA batches cannot revert lead or linked account data
+2026-10-22T13:38:21.2894213Z ok 14 - H02 overlapping HIRA batches cannot revert lead or linked account data
+2026-10-22T13:38:21.2895002Z   ---
+2026-10-22T13:38:21.2895477Z   duration_ms: 8.913134
+2026-10-22T13:38:21.2895990Z   type: 'test'
+2026-10-22T13:38:21.2896667Z   ...
+2026-10-22T13:38:21.2897589Z # Subtest: H02 overlapping region batches cannot revert assignments on regions or leads
+2026-10-22T13:38:21.2898901Z ok 15 - H02 overlapping region batches cannot revert assignments on regions or leads
+2026-10-22T13:38:21.2899742Z   ---
+2026-10-22T13:38:21.2900211Z   duration_ms: 6.636518
+2026-10-22T13:38:21.2900733Z   type: 'test'
+2026-10-22T13:38:21.2901206Z   ...
+2026-10-22T13:38:21.2902368Z # Subtest: H02 direct-work requires approval and OUT; requests and results use separate codes
+2026-10-22T13:38:21.2903778Z ok 16 - H02 direct-work requires approval and OUT; requests and results use separate codes
+2026-10-22T13:38:21.2904676Z   ---
+2026-10-22T13:38:21.2905158Z   duration_ms: 7.478466
+2026-10-22T13:38:21.2905689Z   type: 'test'
+2026-10-22T13:38:21.2906156Z   ...
+2026-10-22T13:38:21.2907026Z # Subtest: H02 request idempotency is payload-sensitive and preserves one request
+2026-10-22T13:38:21.2908251Z ok 17 - H02 request idempotency is payload-sensitive and preserves one request
+2026-10-22T13:38:21.2909063Z   ---
+2026-10-22T13:38:21.2909497Z   duration_ms: 4.373398
+2026-10-22T13:38:21.2910002Z   type: 'test'
+2026-10-22T13:38:21.2910484Z   ...
+2026-10-22T13:38:21.2911351Z # Subtest: H02 duplicate response does not duplicate business data; conflicting ID fails
+2026-10-22T13:38:21.2912725Z ok 18 - H02 duplicate response does not duplicate business data; conflicting ID fails
+2026-10-22T13:38:21.2913580Z   ---
+2026-10-22T13:38:21.2914045Z   duration_ms: 5.35665
+2026-10-22T13:38:21.2914577Z   type: 'test'
+2026-10-22T13:38:21.2915030Z   ...
+2026-10-22T13:38:21.2915860Z # Subtest: H02 failed request can retry; old late response cannot overwrite retry
+2026-10-22T13:38:21.2917005Z ok 19 - H02 failed request can retry; old late response cannot overwrite retry
+2026-10-22T13:38:21.2917819Z   ---
+2026-10-22T13:38:21.2918291Z   duration_ms: 7.850581
+2026-10-22T13:38:21.2918805Z   type: 'test'
+2026-10-22T13:38:21.2919255Z   ...
+2026-10-22T13:38:21.2920135Z # Subtest: H02 scenarios delay, timeout, duplicate and out-of-order are deterministic
+2026-10-22T13:38:21.2921025Z     # Subtest: delay
+2026-10-22T13:38:21.2921685Z     ok 1 - delay
+2026-10-22T13:38:21.2922173Z       ---
+2026-10-22T13:38:21.2922650Z       duration_ms: 4.182202
+2026-10-22T13:38:21.2923188Z       type: 'test'
+2026-10-22T13:38:21.2923664Z       ...
+2026-10-22T13:38:21.2924147Z     # Subtest: timeout
+2026-10-22T13:38:21.2924639Z     ok 2 - timeout
+2026-10-22T13:38:21.2925099Z       ---
+2026-10-22T13:38:21.2925561Z       duration_ms: 3.422814
+2026-10-22T13:38:21.2926105Z       type: 'test'
+2026-10-22T13:38:21.2926591Z       ...
+2026-10-22T13:38:21.3016479Z     # Subtest: duplicate
+2026-10-22T13:38:21.3039296Z     ok 3 - duplicate
+2026-10-22T13:38:21.3039704Z       ---
+2026-10-22T13:38:21.3040147Z       duration_ms: 3.502987
+2026-10-22T13:38:21.3040683Z       type: 'test'
+2026-10-22T13:38:21.3041043Z       ...
+2026-10-22T13:38:21.3041373Z     # Subtest: out of order
+2026-10-22T13:38:21.3042869Z     ok 4 - out of order
+2026-10-22T13:38:21.3043323Z       ---
+2026-10-22T13:38:21.3043749Z       duration_ms: 3.213356
+2026-10-22T13:38:21.3044143Z       type: 'test'
+2026-10-22T13:38:21.3044474Z       ...
+2026-10-22T13:38:21.3044777Z     1..4
+2026-10-22T13:38:21.3045496Z ok 20 - H02 scenarios delay, timeout, duplicate and out-of-order are deterministic
+2026-10-22T13:38:21.3046585Z   ---
+2026-10-22T13:38:21.3046918Z   duration_ms: 14.965714
+2026-10-22T13:38:21.3047296Z   type: 'test'
+2026-10-22T13:38:21.3047596Z   ...
+2026-10-22T13:38:21.3048480Z # Subtest: H02 result validates dataset, generation, company, business key, response code and exact fields
+2026-10-22T13:38:21.3050128Z     # Subtest: missing dataset
+2026-10-22T13:38:21.3050574Z     ok 1 - missing dataset
+2026-10-22T13:38:21.3051234Z       ---
+2026-10-22T13:38:21.3051804Z       duration_ms: 3.363349
+2026-10-22T13:38:21.3052213Z       type: 'test'
+2026-10-22T13:38:21.3052561Z       ...
+2026-10-22T13:38:21.3064897Z     # Subtest: wrong dataset
+2026-10-22T13:38:21.3082751Z     ok 2 - wrong dataset
+2026-10-22T13:38:21.3083361Z       ---
+2026-10-22T13:38:21.3083909Z       duration_ms: 3.068857
+2026-10-22T13:38:21.3084493Z       type: 'test'
+2026-10-22T13:38:21.3084979Z       ...
+2026-10-22T13:38:21.3085448Z     # Subtest: generation
+2026-10-22T13:38:21.3086136Z     ok 3 - generation
+2026-10-22T13:38:21.3087458Z       ---
+2026-10-22T13:38:21.3097383Z       duration_ms: 3.646345
+2026-10-22T13:38:21.3097938Z       type: 'test'
+2026-10-22T13:38:21.3098395Z       ...
+2026-10-22T13:38:21.3098867Z     # Subtest: business key
+2026-10-22T13:38:21.3099433Z     ok 4 - business key
+2026-10-22T13:38:21.3099961Z       ---
+2026-10-22T13:38:21.3100449Z       duration_ms: 3.160503
+2026-10-22T13:38:21.3101024Z       type: 'test'
+2026-10-22T13:38:21.3101685Z       ...
+2026-10-22T13:38:21.3102235Z     # Subtest: response code
+2026-10-22T13:38:21.3102845Z     ok 5 - response code
+2026-10-22T13:38:21.3103402Z       ---
+2026-10-22T13:38:21.3103868Z       duration_ms: 3.796117
+2026-10-22T13:38:21.3104464Z       type: 'test'
+2026-10-22T13:38:21.3104954Z       ...
+2026-10-22T13:38:21.3105511Z     # Subtest: unknown payload field
+2026-10-22T13:38:21.3106221Z     ok 6 - unknown payload field
+2026-10-22T13:38:21.3106818Z       ---
+2026-10-22T13:38:21.3107305Z       duration_ms: 3.087825
+2026-10-22T13:38:21.3107876Z       type: 'test'
+2026-10-22T13:38:21.3108405Z       ...
+2026-10-22T13:38:21.3108901Z     # Subtest: wrong identity
+2026-10-22T13:38:21.3109496Z     ok 7 - wrong identity
+2026-10-22T13:38:21.3110013Z       ---
+2026-10-22T13:38:21.3110478Z       duration_ms: 3.834305
+2026-10-22T13:38:21.3110946Z       type: 'test'
+2026-10-22T13:38:21.3111406Z       ...
+2026-10-22T13:38:21.3112113Z     # Subtest: invalid version
+2026-10-22T13:38:21.3112710Z     ok 8 - invalid version
+2026-10-22T13:38:21.3113244Z       ---
+2026-10-22T13:38:21.3113707Z       duration_ms: 3.105252
+2026-10-22T13:38:21.3114334Z       type: 'test'
+2026-10-22T13:38:21.3114813Z       ...
+2026-10-22T13:38:21.3115277Z     # Subtest: company
+2026-10-22T13:38:21.3115839Z     ok 9 - company
+2026-10-22T13:38:21.3116382Z       ---
+2026-10-22T13:38:21.3116862Z       duration_ms: 2.40856
+2026-10-22T13:38:21.3117415Z       type: 'test'
+2026-10-22T13:38:21.3117877Z       ...
+2026-10-22T13:38:21.3118329Z     1..9
+2026-10-22T13:38:21.3119422Z ok 21 - H02 result validates dataset, generation, company, business key, response code and exact fields
+2026-10-22T13:38:21.3120504Z   ---
+2026-10-22T13:38:21.3120984Z   duration_ms: 30.557532
+2026-10-22T13:38:21.3121465Z   type: 'test'
+2026-10-22T13:38:21.3121964Z   ...
+2026-10-22T13:38:21.3122720Z # Subtest: H02 same-generation requests in two datasets cannot receive each other's results
+2026-10-22T13:38:21.3123879Z ok 22 - H02 same-generation requests in two datasets cannot receive each other's results
+2026-10-22T13:38:21.3124709Z   ---
+2026-10-22T13:38:21.3125110Z   duration_ms: 12.072982
+2026-10-22T13:38:21.3125532Z   type: 'test'
+2026-10-22T13:38:21.3125918Z   ...
+2026-10-22T13:38:21.3126766Z # Subtest: H02 persisted interface results must retain the request dataset identity
+2026-10-22T13:38:21.3128007Z ok 23 - H02 persisted interface results must retain the request dataset identity
+2026-10-22T13:38:21.3128823Z   ---
+2026-10-22T13:38:21.3129277Z   duration_ms: 3.639757
+2026-10-22T13:38:21.3129826Z   type: 'test'
+2026-10-22T13:38:21.3130287Z   ...
+2026-10-22T13:38:21.3131370Z # Subtest: H02 reset rejects results from the previous generation
+2026-10-22T13:38:21.3132578Z ok 24 - H02 reset rejects results from the previous generation
+2026-10-22T13:38:21.3133305Z   ---
+2026-10-22T13:38:21.3133763Z   duration_ms: 3.029648
+2026-10-22T13:38:21.3134262Z   type: 'test'
+2026-10-22T13:38:21.3134715Z   ...
+2026-10-22T13:38:21.3135687Z # Subtest: H02 collection external keys deduplicate and versioned corrections update a single row
+2026-10-22T13:38:21.3137162Z ok 25 - H02 collection external keys deduplicate and versioned corrections update a single row
+2026-10-22T13:38:21.3138079Z   ---
+2026-10-22T13:38:21.3138756Z   duration_ms: 11.541009
+2026-10-22T13:38:21.3139279Z   type: 'test'
+2026-10-22T13:38:21.3139667Z   ...
+2026-10-22T13:38:21.3140396Z # Subtest: H02 rejected multi-row result rolls back preceding valid rows
+2026-10-22T13:38:21.3141435Z ok 26 - H02 rejected multi-row result rolls back preceding valid rows
+2026-10-22T13:38:21.3142297Z   ---
+2026-10-22T13:38:21.3142741Z   duration_ms: 6.186076
+2026-10-22T13:38:21.3143239Z   type: 'test'
+2026-10-22T13:38:21.3143686Z   ...
+2026-10-22T13:38:21.3144651Z # Subtest: H02 input isolation forbids cross-company entities, unknown interfaces and bad amounts
+2026-10-22T13:38:21.3146056Z ok 27 - H02 input isolation forbids cross-company entities, unknown interfaces and bad amounts
+2026-10-22T13:38:21.3146948Z   ---
+2026-10-22T13:38:21.3147383Z   duration_ms: 2.212352
+2026-10-22T13:38:21.3147889Z   type: 'test'
+2026-10-22T13:38:21.3148328Z   ...
+2026-10-22T13:38:21.3264236Z # (node:2765) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj/frontend/src/hq-mock/mode.ts is not specified and it doesn't parse as CommonJS.
+2026-10-22T13:38:21.3266397Z # Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+2026-10-22T13:38:21.3268059Z # To eliminate this warning, add "type": "module" to /home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj/frontend/package.json.
+2026-10-22T13:38:21.3269432Z # (Use `node --trace-warnings ...` to show where the warning was created)
+2026-10-22T13:38:21.3270400Z # Subtest: H02 frontend explicit mode and transport isolation
+2026-10-22T13:38:21.3271260Z     # Subtest: 01 explicit HQ overrides a stored GLOBAL preference
+2026-10-22T13:38:21.3272577Z     ok 1 - 01 explicit HQ overrides a stored GLOBAL preference
+2026-10-22T13:38:21.3273193Z       ---
+2026-10-22T13:38:21.3273563Z       duration_ms: 3.553009
+2026-10-22T13:38:21.3273997Z       type: 'test'
+2026-10-22T13:38:21.3274365Z       ...
+2026-10-22T13:38:21.3275052Z     # Subtest: 02 HQ requests stay on the same-origin API and ignore normal API_BASE
+2026-10-22T13:38:21.3276120Z     ok 2 - 02 HQ requests stay on the same-origin API and ignore normal API_BASE
+2026-10-22T13:38:21.3276825Z       ---
+2026-10-22T13:38:21.3277189Z       duration_ms: 58.863433
+2026-10-22T13:38:21.3277602Z       type: 'test'
+2026-10-22T13:38:21.3277952Z       ...
+2026-10-22T13:38:21.3278413Z     # Subtest: 03 HQ requests never send cookies
+2026-10-22T13:38:21.3279037Z     ok 3 - 03 HQ requests never send cookies
+2026-10-22T13:38:21.3279535Z       ---
+2026-10-22T13:38:21.3279892Z       duration_ms: 4.181921
+2026-10-22T13:38:21.3280315Z       type: 'test'
+2026-10-22T13:38:21.3280671Z       ...
+2026-10-22T13:38:21.3281110Z     # Subtest: 04 HQ requests reject redirects
+2026-10-22T13:38:21.3281867Z     ok 4 - 04 HQ requests reject redirects
+2026-10-22T13:38:21.3282342Z       ---
+2026-10-22T13:38:21.3282692Z       duration_ms: 1.111181
+2026-10-22T13:38:21.3283110Z       type: 'test'
+2026-10-22T13:38:21.3283466Z       ...
+2026-10-22T13:38:21.3283999Z     # Subtest: 05 HQ does not borrow a real-server access token
+2026-10-22T13:38:21.3284750Z     ok 5 - 05 HQ does not borrow a real-server access token
+2026-10-22T13:38:21.3285305Z       ---
+2026-10-22T13:38:21.3285659Z       duration_ms: 1.047232
+2026-10-22T13:38:21.3286078Z       type: 'test'
+2026-10-22T13:38:21.3286425Z       ...
+2026-10-22T13:38:21.3287212Z     # Subtest: 06 HQ sends only its own access token
+2026-10-22T13:38:21.3287889Z     ok 6 - 06 HQ sends only its own access token
+2026-10-22T13:38:21.3292456Z       ---
+2026-10-22T13:38:21.3322497Z       duration_ms: 1.072017
+2026-10-22T13:38:21.3322967Z       type: 'test'
+2026-10-22T13:38:21.3323388Z       ...
+2026-10-22T13:38:21.3323971Z     # Subtest: 07 ERP scenario selection reaches the request header
+2026-10-22T13:38:21.3324784Z     ok 7 - 07 ERP scenario selection reaches the request header
+2026-10-22T13:38:21.3325394Z       ---
+2026-10-22T13:38:21.3325765Z       duration_ms: 0.761954
+2026-10-22T13:38:21.3326202Z       type: 'test'
+2026-10-22T13:38:21.3326871Z       ...
+2026-10-22T13:38:21.3327390Z     # Subtest: 08 POST preserves the JSON request body
+2026-10-22T13:38:21.3328095Z     ok 8 - 08 POST preserves the JSON request body
+2026-10-22T13:38:21.3328621Z       ---
+2026-10-22T13:38:21.3328976Z       duration_ms: 0.683933
+2026-10-22T13:38:21.3329377Z       type: 'test'
+2026-10-22T13:38:21.3329711Z       ...
+2026-10-22T13:38:21.3330218Z     # Subtest: 09 absolute external URL is rejected before fetch
+2026-10-22T13:38:21.3330871Z     ok 9 - 09 absolute external URL is rejected before fetch
+2026-10-22T13:38:21.3331411Z       ---
+2026-10-22T13:38:21.3352294Z       duration_ms: 0.923325
+2026-10-22T13:38:21.3352755Z       type: 'test'
+2026-10-22T13:38:21.3353118Z       ...
+2026-10-22T13:38:21.3353763Z     # Subtest: 10 protocol-relative external URL is rejected before fetch
+2026-10-22T13:38:21.3354634Z     ok 10 - 10 protocol-relative external URL is rejected before fetch
+2026-10-22T13:38:21.3355235Z       ---
+2026-10-22T13:38:21.3355599Z       duration_ms: 0.438079
+2026-10-22T13:38:21.3356009Z       type: 'test'
+2026-10-22T13:38:21.3356371Z       ...
+2026-10-22T13:38:21.3356926Z     # Subtest: 11 path traversal outside API is rejected before fetch
+2026-10-22T13:38:21.3357768Z     ok 11 - 11 path traversal outside API is rejected before fetch
+2026-10-22T13:38:21.3358323Z       ---
+2026-10-22T13:38:21.3358707Z       duration_ms: 0.278335
+2026-10-22T13:38:21.3359124Z       type: 'test'
+2026-10-22T13:38:21.3359469Z       ...
+2026-10-22T13:38:21.3360084Z     # Subtest: 12 encoded path traversal outside API is rejected before fetch
+2026-10-22T13:38:21.3360994Z     ok 12 - 12 encoded path traversal outside API is rejected before fetch
+2026-10-22T13:38:21.3361756Z       ---
+2026-10-22T13:38:21.3362101Z       duration_ms: 0.27078
+2026-10-22T13:38:21.3362519Z       type: 'test'
+2026-10-22T13:38:21.3362857Z       ...
+2026-10-22T13:38:21.3363385Z     # Subtest: 13 backslash URL ambiguity is rejected before fetch
+2026-10-22T13:38:21.3364110Z     ok 13 - 13 backslash URL ambiguity is rejected before fetch
+2026-10-22T13:38:21.3364679Z       ---
+2026-10-22T13:38:21.3365024Z       duration_ms: 0.30769
+2026-10-22T13:38:21.3365439Z       type: 'test'
+2026-10-22T13:38:21.3365787Z       ...
+2026-10-22T13:38:21.3366488Z     # Subtest: 14 missing MOCK marker fails once without retry or another-server fallback
+2026-10-22T13:38:21.3367549Z     ok 14 - 14 missing MOCK marker fails once without retry or another-server fallback
+2026-10-22T13:38:21.3368223Z       ---
+2026-10-22T13:38:21.3368559Z       duration_ms: 2.37907
+2026-10-22T13:38:21.3368961Z       type: 'test'
+2026-10-22T13:38:21.3369298Z       ...
+2026-10-22T13:38:21.3369892Z     # Subtest: 15 JSON permission errors preserve status, message and details
+2026-10-22T13:38:21.3370861Z     ok 15 - 15 JSON permission errors preserve status, message and details
+2026-10-22T13:38:21.3371475Z       ---
+2026-10-22T13:38:21.3387784Z       duration_ms: 2.586455
+2026-10-22T13:38:21.3388303Z       type: 'test'
+2026-10-22T13:38:21.3388733Z       ...
+2026-10-22T13:38:21.3389436Z     # Subtest: 16 unsupported scenario cannot replace the active scenario
+2026-10-22T13:38:21.3390485Z     ok 16 - 16 unsupported scenario cannot replace the active scenario
+2026-10-22T13:38:21.3391207Z       ---
+2026-10-22T13:38:21.3391773Z       duration_ms: 0.335153
+2026-10-22T13:38:21.3392233Z       type: 'test'
+2026-10-22T13:38:21.3392871Z       ...
+2026-10-22T13:38:21.3393416Z     # Subtest: 17 DELETE handles an empty 204 response
+2026-10-22T13:38:21.3394171Z     ok 17 - 17 DELETE handles an empty 204 response
+2026-10-22T13:38:21.3394766Z       ---
+2026-10-22T13:38:21.3395140Z       duration_ms: 0.487423
+2026-10-22T13:38:21.3395603Z       type: 'test'
+2026-10-22T13:38:21.3395995Z       ...
+2026-10-22T13:38:21.3396599Z     # Subtest: 18 DELETE uses the intended method and target
+2026-10-22T13:38:21.3397451Z     ok 18 - 18 DELETE uses the intended method and target
+2026-10-22T13:38:21.3398074Z       ---
+2026-10-22T13:38:21.3398449Z       duration_ms: 2.07827
+2026-10-22T13:38:21.3399052Z       type: 'test'
+2026-10-22T13:38:21.3399439Z       ...
+2026-10-22T13:38:21.3399984Z     # Subtest: 19 explicit GLOBAL selection disables HQ
+2026-10-22T13:38:21.3400752Z     ok 19 - 19 explicit GLOBAL selection disables HQ
+2026-10-22T13:38:21.3401352Z       ---
+2026-10-22T13:38:21.3401839Z       duration_ms: 0.292021
+2026-10-22T13:38:21.3402300Z       type: 'test'
+2026-10-22T13:38:21.3402659Z       ...
+2026-10-22T13:38:21.3403217Z     # Subtest: 20 normal mode still uses its configured API_BASE
+2026-10-22T13:38:21.3404013Z     ok 20 - 20 normal mode still uses its configured API_BASE
+2026-10-22T13:38:21.3404594Z       ---
+2026-10-22T13:38:21.3404945Z       duration_ms: 2.945246
+2026-10-22T13:38:21.3405374Z       type: 'test'
+2026-10-22T13:38:21.3405735Z       ...
+2026-10-22T13:38:21.3406259Z     # Subtest: 21 normal mode still uses its own legacy token
+2026-10-22T13:38:21.3407007Z     ok 21 - 21 normal mode still uses its own legacy token
+2026-10-22T13:38:21.3407567Z       ---
+2026-10-22T13:38:21.3407922Z       duration_ms: 0.499876
+2026-10-22T13:38:21.3408351Z       type: 'test'
+2026-10-22T13:38:21.3408717Z       ...
+2026-10-22T13:38:21.3409382Z     # Subtest: 22 normal mode receives no HQ headers or credential policy changes
+2026-10-22T13:38:21.3410393Z     ok 22 - 22 normal mode receives no HQ headers or credential policy changes
+2026-10-22T13:38:21.3411107Z       ---
+2026-10-22T13:38:21.3411459Z       duration_ms: 2.591664
+2026-10-22T13:38:21.3412005Z       type: 'test'
+2026-10-22T13:38:21.3412364Z       ...
+2026-10-22T13:38:21.3412930Z     # Subtest: 23 switching to GLOBAL preserves all legacy storage
+2026-10-22T13:38:21.3413756Z     ok 23 - 23 switching to GLOBAL preserves all legacy storage
+2026-10-22T13:38:21.3414349Z       ---
+2026-10-22T13:38:21.3414702Z       duration_ms: 0.265781
+2026-10-22T13:38:21.3415121Z       type: 'test'
+2026-10-22T13:38:21.3415484Z       ...
+2026-10-22T13:38:21.3415955Z     # Subtest: 24 explicit HQ off disables HQ mode
+2026-10-22T13:38:21.3416613Z     ok 24 - 24 explicit HQ off disables HQ mode
+2026-10-22T13:38:21.3417135Z       ---
+2026-10-22T13:38:21.3417477Z       duration_ms: 0.169071
+2026-10-22T13:38:21.3417903Z       type: 'test'
+2026-10-22T13:38:21.3418259Z       ...
+2026-10-22T13:38:21.3418737Z     # Subtest: 25 exiting HQ clears only the HQ access token
+2026-10-22T13:38:21.3419453Z     ok 25 - 25 exiting HQ clears only the HQ access token
+2026-10-22T13:38:21.3420002Z       ---
+2026-10-22T13:38:21.3420353Z       duration_ms: 0.184388
+2026-10-22T13:38:21.3420769Z       type: 'test'
+2026-10-22T13:38:21.3421127Z       ...
+2026-10-22T13:38:21.3421905Z     # Subtest: 26 exiting HQ preserves the real-server token and GLOBAL data
+2026-10-22T13:38:21.3422843Z     ok 26 - 26 exiting HQ preserves the real-server token and GLOBAL data
+2026-10-22T13:38:21.3423494Z       ---
+2026-10-22T13:38:21.3423850Z       duration_ms: 0.336131
+2026-10-22T13:38:21.3424267Z       type: 'test'
+2026-10-22T13:38:21.3424630Z       ...
+2026-10-22T13:38:21.3424955Z     1..26
+2026-10-22T13:38:21.3425536Z ok 28 - H02 frontend explicit mode and transport isolation
+2026-10-22T13:38:21.3426104Z   ---
+2026-10-22T13:38:21.3426456Z   duration_ms: 93.791275
+2026-10-22T13:38:21.3426862Z   type: 'suite'
+2026-10-22T13:38:21.3427211Z   ...
+2026-10-22T13:38:22.2295373Z # (node:2771) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj/packages/contracts/src/hq-standard.ts is not specified and it doesn't parse as CommonJS.
+2026-10-22T13:38:22.2297500Z # Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+2026-10-22T13:38:22.2299043Z # To eliminate this warning, add "type": "module" to /home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj/packages/contracts/package.json.
+2026-10-22T13:38:22.2300363Z # (Use `node --trace-warnings ...` to show where the warning was created)
+2026-10-22T13:38:22.2302513Z # (node:2771) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj/frontend/src/app/route-config.ts is not specified and it doesn't parse as CommonJS.
+2026-10-22T13:38:22.2304662Z # Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+2026-10-22T13:38:22.2313494Z # To eliminate this warning, add "type": "module" to /home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj/frontend/package.json.
+2026-10-22T13:38:22.2325875Z # Subtest: 01 actual catalog, additional OPS, existing 14 routes and explicit planned coverage
+2026-10-22T13:38:22.2327196Z ok 29 - 01 actual catalog, additional OPS, existing 14 routes and explicit planned coverage
+2026-10-22T13:38:22.2327941Z   ---
+2026-10-22T13:38:22.2328290Z   duration_ms: 63.233924
+2026-10-22T13:38:22.2328697Z   type: 'test'
+2026-10-22T13:38:22.2329033Z   ...
+2026-10-22T13:38:22.2329734Z # Subtest: 02 factory is isolated and does not change original HQ/GLOBAL assets
+2026-10-22T13:38:22.2330744Z ok 30 - 02 factory is isolated and does not change original HQ/GLOBAL assets
+2026-10-22T13:38:22.2331396Z   ---
+2026-10-22T13:38:22.2332004Z   duration_ms: 9.432159
+2026-10-22T13:38:22.2332403Z   type: 'test'
+2026-10-22T13:38:22.2332730Z   ...
+2026-10-22T13:38:22.2333336Z # Subtest: 03 duplicates are rejected for every stable entity ID
+2026-10-22T13:38:22.2333941Z     # Subtest: processes
+2026-10-22T13:38:22.2334337Z     ok 1 - processes
+2026-10-22T13:38:22.2334720Z       ---
+2026-10-22T13:38:22.2335069Z       duration_ms: 36.704824
+2026-10-22T13:38:22.2335481Z       type: 'test'
+2026-10-22T13:38:22.2335823Z       ...
+2026-10-22T13:38:22.2336155Z     # Subtest: screens
+2026-10-22T13:38:22.2336526Z     ok 2 - screens
+2026-10-22T13:38:22.2336868Z       ---
+2026-10-22T13:38:22.2337204Z       duration_ms: 12.129472
+2026-10-22T13:38:22.2337613Z       type: 'test'
+2026-10-22T13:38:22.2337948Z       ...
+2026-10-22T13:38:22.2338275Z     # Subtest: menus
+2026-10-22T13:38:22.2338641Z     ok 3 - menus
+2026-10-22T13:38:22.2338985Z       ---
+2026-10-22T13:38:22.2339319Z       duration_ms: 12.78524
+2026-10-22T13:38:22.2339741Z       type: 'test'
+2026-10-22T13:38:22.2340096Z       ...
+2026-10-22T13:38:22.2340411Z     # Subtest: tabs
+2026-10-22T13:38:22.2340771Z     ok 4 - tabs
+2026-10-22T13:38:22.2341098Z       ---
+2026-10-22T13:38:22.2341435Z       duration_ms: 12.871537
+2026-10-22T13:38:22.2348011Z       type: 'test'
+2026-10-22T13:38:22.2348374Z       ...
+2026-10-22T13:38:22.2348728Z     # Subtest: sections
+2026-10-22T13:38:22.2349111Z     ok 5 - sections
+2026-10-22T13:38:22.2349454Z       ---
+2026-10-22T13:38:22.2349785Z       duration_ms: 12.771632
+2026-10-22T13:38:22.2350182Z       type: 'test'
+2026-10-22T13:38:22.2350514Z       ...
+2026-10-22T13:38:22.2350843Z     # Subtest: fields
+2026-10-22T13:38:22.2351204Z     ok 6 - fields
+2026-10-22T13:38:22.2351718Z       ---
+2026-10-22T13:38:22.2352063Z       duration_ms: 16.318566
+2026-10-22T13:38:22.2352477Z       type: 'test'
+2026-10-22T13:38:22.2352820Z       ...
+2026-10-22T13:38:22.2353149Z     # Subtest: actions
+2026-10-22T13:38:22.2353516Z     ok 7 - actions
+2026-10-22T13:38:22.2353863Z       ---
+2026-10-22T13:38:22.2354199Z       duration_ms: 17.352628
+2026-10-22T13:38:22.2354598Z       type: 'test'
+2026-10-22T13:38:22.2354938Z       ...
+2026-10-22T13:38:22.2355286Z     # Subtest: transitions
+2026-10-22T13:38:22.2355688Z     ok 8 - transitions
+2026-10-22T13:38:22.2356049Z       ---
+2026-10-22T13:38:22.2356638Z       duration_ms: 11.936267
+2026-10-22T13:38:22.2357056Z       type: 'test'
+2026-10-22T13:38:22.2357372Z       ...
+2026-10-22T13:38:22.2357674Z     # Subtest: evidence
+2026-10-22T13:38:22.2358044Z     ok 9 - evidence
+2026-10-22T13:38:22.2358382Z       ---
+2026-10-22T13:38:22.2358714Z       duration_ms: 11.53363
+2026-10-22T13:38:22.2359114Z       type: 'test'
+2026-10-22T13:38:22.2359452Z       ...
+2026-10-22T13:38:22.2359774Z     # Subtest: coverage
+2026-10-22T13:38:22.2360171Z     ok 10 - coverage
+2026-10-22T13:38:22.2360523Z       ---
+2026-10-22T13:38:22.2360858Z       duration_ms: 11.604641
+2026-10-22T13:38:22.2361262Z       type: 'test'
+2026-10-22T13:38:22.2361970Z       ...
+2026-10-22T13:38:22.2362242Z     1..10
+2026-10-22T13:38:22.2362789Z ok 31 - 03 duplicates are rejected for every stable entity ID
+2026-10-22T13:38:22.2363290Z   ---
+2026-10-22T13:38:22.2363598Z   duration_ms: 158.18022
+2026-10-22T13:38:22.2363949Z   type: 'test'
+2026-10-22T13:38:22.2364252Z   ...
+2026-10-22T13:38:22.2364690Z # Subtest: 04 renderer and route mismatches
+2026-10-22T13:38:22.2365206Z     # Subtest: unknown renderer
+2026-10-22T13:38:22.2365570Z     ok 1 - unknown renderer
+2026-10-22T13:38:22.2365918Z       ---
+2026-10-22T13:38:22.2366238Z       duration_ms: 19.470912
+2026-10-22T13:38:22.2366624Z       type: 'test'
+2026-10-22T13:38:22.2366962Z       ...
+2026-10-22T13:38:22.2367346Z     # Subtest: GLOBAL renderer
+2026-10-22T13:38:22.2367777Z     ok 2 - GLOBAL renderer
+2026-10-22T13:38:22.2368151Z       ---
+2026-10-22T13:38:22.2368488Z       duration_ms: 14.552118
+2026-10-22T13:38:22.2368889Z       type: 'test'
+2026-10-22T13:38:22.2369229Z       ...
+2026-10-22T13:38:22.2369616Z     # Subtest: duplicate route
+2026-10-22T13:38:22.2370061Z     ok 3 - duplicate route
+2026-10-22T13:38:22.2370441Z       ---
+2026-10-22T13:38:22.2370736Z       duration_ms: 14.869934
+2026-10-22T13:38:22.2371091Z       type: 'test'
+2026-10-22T13:38:22.2381802Z       ...
+2026-10-22T13:38:22.2382384Z     # Subtest: wrong route key
+2026-10-22T13:38:22.2382872Z     ok 4 - wrong route key
+2026-10-22T13:38:22.2383271Z       ---
+2026-10-22T13:38:22.2383627Z       duration_ms: 10.456374
+2026-10-22T13:38:22.2384046Z       type: 'test'
+2026-10-22T13:38:22.2384388Z       ...
+2026-10-22T13:38:22.2384724Z     # Subtest: wrong path
+2026-10-22T13:38:22.2385131Z     ok 5 - wrong path
+2026-10-22T13:38:22.2385498Z       ---
+2026-10-22T13:38:22.2385830Z       duration_ms: 12.50169
+2026-10-22T13:38:22.2386233Z       type: 'test'
+2026-10-22T13:38:22.2386575Z       ...
+2026-10-22T13:38:22.2420264Z     1..5
+2026-10-22T13:38:22.2420851Z ok 32 - 04 renderer and route mismatches
+2026-10-22T13:38:22.2421363Z   ---
+2026-10-22T13:38:22.2422008Z   duration_ms: 72.803813
+2026-10-22T13:38:22.2422422Z   type: 'test'
+2026-10-22T13:38:22.2422750Z   ...
+2026-10-22T13:38:22.2423304Z # Subtest: 05 dangling references across metadata graph
+2026-10-22T13:38:22.2423859Z     # Subtest: menu screen
+2026-10-22T13:38:22.2424241Z     ok 1 - menu screen
+2026-10-22T13:38:22.2424595Z       ---
+2026-10-22T13:38:22.2424954Z       duration_ms: 13.876258
+2026-10-22T13:38:22.2425364Z       type: 'test'
+2026-10-22T13:38:22.2425712Z       ...
+2026-10-22T13:38:22.2426061Z     # Subtest: process screen
+2026-10-22T13:38:22.2426498Z     ok 2 - process screen
+2026-10-22T13:38:22.2426887Z       ---
+2026-10-22T13:38:22.2427222Z       duration_ms: 10.58447
+2026-10-22T13:38:22.2427623Z       type: 'test'
+2026-10-22T13:38:22.2427975Z       ...
+2026-10-22T13:38:22.2428421Z     # Subtest: process dependency
+2026-10-22T13:38:22.2428879Z     ok 3 - process dependency
+2026-10-22T13:38:22.2429294Z       ---
+2026-10-22T13:38:22.2429629Z       duration_ms: 13.443105
+2026-10-22T13:38:22.2430048Z       type: 'test'
+2026-10-22T13:38:22.2430394Z       ...
+2026-10-22T13:38:22.2430725Z     # Subtest: screen tab
+2026-10-22T13:38:22.2431116Z     ok 4 - screen tab
+2026-10-22T13:38:22.2431484Z       ---
+2026-10-22T13:38:22.2431984Z       duration_ms: 6.468037
+2026-10-22T13:38:22.2432417Z       type: 'test'
+2026-10-22T13:38:22.2432766Z       ...
+2026-10-22T13:38:22.2433352Z     # Subtest: screen section
+2026-10-22T13:38:22.2433796Z     ok 5 - screen section
+2026-10-22T13:38:22.2434182Z       ---
+2026-10-22T13:38:22.2434511Z       duration_ms: 6.395847
+2026-10-22T13:38:22.2434906Z       type: 'test'
+2026-10-22T13:38:22.2435246Z       ...
+2026-10-22T13:38:22.2435584Z     # Subtest: section field
+2026-10-22T13:38:22.2435999Z     ok 6 - section field
+2026-10-22T13:38:22.2436373Z       ---
+2026-10-22T13:38:22.2436708Z       duration_ms: 6.884029
+2026-10-22T13:38:22.2437099Z       type: 'test'
+2026-10-22T13:38:22.2437435Z       ...
+2026-10-22T13:38:22.2437781Z     # Subtest: screen action
+2026-10-22T13:38:22.2438363Z     ok 7 - screen action
+2026-10-22T13:38:22.2438735Z       ---
+2026-10-22T13:38:22.2439065Z       duration_ms: 6.396467
+2026-10-22T13:38:22.2439463Z       type: 'test'
+2026-10-22T13:38:22.2439794Z       ...
+2026-10-22T13:38:22.2440133Z     # Subtest: action input
+2026-10-22T13:38:22.2440541Z     ok 8 - action input
+2026-10-22T13:38:22.2440910Z       ---
+2026-10-22T13:38:22.2441259Z       duration_ms: 6.216009
+2026-10-22T13:38:22.2441908Z       type: 'test'
+2026-10-22T13:38:22.2442258Z       ...
+2026-10-22T13:38:22.2442655Z     # Subtest: required action input
+2026-10-22T13:38:22.2443170Z     ok 9 - required action input
+2026-10-22T13:38:22.2443587Z       ---
+2026-10-22T13:38:22.2443922Z       duration_ms: 6.392607
+2026-10-22T13:38:22.2444320Z       type: 'test'
+2026-10-22T13:38:22.2444714Z       ...
+2026-10-22T13:38:22.2445053Z     # Subtest: action process
+2026-10-22T13:38:22.2445492Z     ok 10 - action process
+2026-10-22T13:38:22.2445875Z       ---
+2026-10-22T13:38:22.2446218Z       duration_ms: 7.107628
+2026-10-22T13:38:22.2446605Z       type: 'test'
+2026-10-22T13:38:22.2446934Z       ...
+2026-10-22T13:38:22.2447314Z     # Subtest: transition state
+2026-10-22T13:38:22.2447770Z     ok 11 - transition state
+2026-10-22T13:38:22.2448160Z       ---
+2026-10-22T13:38:22.2448494Z       duration_ms: 11.524083
+2026-10-22T13:38:22.2448901Z       type: 'test'
+2026-10-22T13:38:22.2449246Z       ...
+2026-10-22T13:38:22.2449627Z     # Subtest: transition input
+2026-10-22T13:38:22.2450071Z     ok 12 - transition input
+2026-10-22T13:38:22.2450467Z       ---
+2026-10-22T13:38:22.2450792Z       duration_ms: 7.172197
+2026-10-22T13:38:22.2451178Z       type: 'test'
+2026-10-22T13:38:22.2451665Z       ...
+2026-10-22T13:38:22.2452021Z     # Subtest: evidence
+2026-10-22T13:38:22.2452404Z     ok 13 - evidence
+2026-10-22T13:38:22.2452765Z       ---
+2026-10-22T13:38:22.2453091Z       duration_ms: 6.420475
+2026-10-22T13:38:22.2453480Z       type: 'test'
+2026-10-22T13:38:22.2453823Z       ...
+2026-10-22T13:38:22.2454204Z     # Subtest: condition field
+2026-10-22T13:38:22.2454632Z     ok 14 - condition field
+2026-10-22T13:38:22.2455017Z       ---
+2026-10-22T13:38:22.2455355Z       duration_ms: 6.393597
+2026-10-22T13:38:22.2455749Z       type: 'test'
+2026-10-22T13:38:22.2456078Z       ...
+2026-10-22T13:38:22.2456376Z     1..14
+2026-10-22T13:38:22.2456883Z ok 33 - 05 dangling references across metadata graph
+2026-10-22T13:38:22.2457409Z   ---
+2026-10-22T13:38:22.2457736Z   duration_ms: 117.048755
+2026-10-22T13:38:22.2458125Z   type: 'test'
+2026-10-22T13:38:22.2458454Z   ...
+2026-10-22T13:38:22.2459149Z # Subtest: 06 parent references, menu cycles and cross-screen section ownership
+2026-10-22T13:38:22.2459865Z     # Subtest: missing parent
+2026-10-22T13:38:22.2460312Z     ok 1 - missing parent
+2026-10-22T13:38:22.2460694Z       ---
+2026-10-22T13:38:22.2461029Z       duration_ms: 9.206804
+2026-10-22T13:38:22.2461630Z       type: 'test'
+2026-10-22T13:38:22.2461979Z       ...
+2026-10-22T13:38:22.2462307Z     # Subtest: self parent
+2026-10-22T13:38:22.2462723Z     ok 2 - self parent
+2026-10-22T13:38:22.2463095Z       ---
+2026-10-22T13:38:22.2463427Z       duration_ms: 7.868284
+2026-10-22T13:38:22.2463828Z       type: 'test'
+2026-10-22T13:38:22.2464169Z       ...
+2026-10-22T13:38:22.2464491Z     # Subtest: cycle
+2026-10-22T13:38:22.2464843Z     ok 3 - cycle
+2026-10-22T13:38:22.2465179Z       ---
+2026-10-22T13:38:22.2465729Z       duration_ms: 6.3897
+2026-10-22T13:38:22.2466134Z       type: 'test'
+2026-10-22T13:38:22.2466470Z       ...
+2026-10-22T13:38:22.2466836Z     # Subtest: foreign section
+2026-10-22T13:38:22.2467266Z     ok 4 - foreign section
+2026-10-22T13:38:22.2467651Z       ---
+2026-10-22T13:38:22.2467984Z       duration_ms: 6.315381
+2026-10-22T13:38:22.2468374Z       type: 'test'
+2026-10-22T13:38:22.2468706Z       ...
+2026-10-22T13:38:22.2469055Z     1..4
+2026-10-22T13:38:22.2469788Z ok 34 - 06 parent references, menu cycles and cross-screen section ownership
+2026-10-22T13:38:22.2470431Z   ---
+2026-10-22T13:38:22.2470912Z   duration_ms: 30.249986
+2026-10-22T13:38:22.2471292Z   type: 'test'
+2026-10-22T13:38:22.2471839Z   ...
+2026-10-22T13:38:22.2472483Z # Subtest: 07 shared screen activation uses any owning active process
+2026-10-22T13:38:22.2473368Z ok 35 - 07 shared screen activation uses any owning active process
+2026-10-22T13:38:22.2473944Z   ---
+2026-10-22T13:38:22.2474283Z   duration_ms: 10.932089
+2026-10-22T13:38:22.2474670Z   type: 'test'
+2026-10-22T13:38:22.2475004Z   ...
+2026-10-22T13:38:22.2475754Z # Subtest: 08 screen/menu permissions, feature and device conditions require all gates
+2026-10-22T13:38:22.2476906Z ok 36 - 08 screen/menu permissions, feature and device conditions require all gates
+2026-10-22T13:38:22.2477587Z   ---
+2026-10-22T13:38:22.2477908Z   duration_ms: 19.966424
+2026-10-22T13:38:22.2478309Z   type: 'test'
+2026-10-22T13:38:22.2478633Z   ...
+2026-10-22T13:38:22.2479357Z # Subtest: 09 shared-screen access does not grant an inactive owning process action
+2026-10-22T13:38:22.2480438Z ok 37 - 09 shared-screen access does not grant an inactive owning process action
+2026-10-22T13:38:22.2481103Z   ---
+2026-10-22T13:38:22.2481430Z   duration_ms: 19.647582
+2026-10-22T13:38:22.2481985Z   type: 'test'
+2026-10-22T13:38:22.2482317Z   ...
+2026-10-22T13:38:22.2482986Z # Subtest: 10 condition evaluation preserves zero/false and rejects malformed rules
+2026-10-22T13:38:22.2484049Z ok 38 - 10 condition evaluation preserves zero/false and rejects malformed rules
+2026-10-22T13:38:22.2484711Z   ---
+2026-10-22T13:38:22.2485042Z   duration_ms: 0.402976
+2026-10-22T13:38:22.2485428Z   type: 'test'
+2026-10-22T13:38:22.2485748Z   ...
+2026-10-22T13:38:22.2486587Z # Subtest: 11 observation versus executable requirement and current support versus target policy
+2026-10-22T13:38:22.2487805Z ok 39 - 11 observation versus executable requirement and current support versus target policy
+2026-10-22T13:38:22.2488550Z   ---
+2026-10-22T13:38:22.2488869Z   duration_ms: 1.607755
+2026-10-22T13:38:22.2489245Z   type: 'test'
+2026-10-22T13:38:22.2489630Z   ...
+2026-10-22T13:38:22.2490236Z # Subtest: 12 hiding required field or its owner section is rejected
+2026-10-22T13:38:22.2490857Z     # Subtest: field
+2026-10-22T13:38:22.2491224Z     ok 1 - field
+2026-10-22T13:38:22.2521916Z       ---
+2026-10-22T13:38:22.2522396Z       duration_ms: 7.572502
+2026-10-22T13:38:22.2522806Z       type: 'test'
+2026-10-22T13:38:22.2523160Z       ...
+2026-10-22T13:38:22.2523505Z     # Subtest: section
+2026-10-22T13:38:22.2523896Z     ok 2 - section
+2026-10-22T13:38:22.2524226Z       ---
+2026-10-22T13:38:22.2524566Z       duration_ms: 8.839486
+2026-10-22T13:38:22.2524969Z       type: 'test'
+2026-10-22T13:38:22.2525302Z       ...
+2026-10-22T13:38:22.2525659Z     1..2
+2026-10-22T13:38:22.2526276Z ok 40 - 12 hiding required field or its owner section is rejected
+2026-10-22T13:38:22.2526939Z   ---
+2026-10-22T13:38:22.2527346Z   duration_ms: 16.70116
+2026-10-22T13:38:22.2527788Z   type: 'test'
+2026-10-22T13:38:22.2528106Z   ...
+2026-10-22T13:38:22.2528711Z # Subtest: 13 transition-required fields cannot be hidden or removed
+2026-10-22T13:38:22.2529663Z ok 41 - 13 transition-required fields cannot be hidden or removed
+2026-10-22T13:38:22.2530252Z   ---
+2026-10-22T13:38:22.2530583Z   duration_ms: 18.332019
+2026-10-22T13:38:22.2530983Z   type: 'test'
+2026-10-22T13:38:22.2531320Z   ...
+2026-10-22T13:38:22.2532371Z # Subtest: 14 hidden defaults must satisfy type/range; zero is not absence
+2026-10-22T13:38:22.2533349Z ok 42 - 14 hidden defaults must satisfy type/range; zero is not absence
+2026-10-22T13:38:22.2533961Z   ---
+2026-10-22T13:38:22.2534298Z   duration_ms: 30.863144
+2026-10-22T13:38:22.2534682Z   type: 'test'
+2026-10-22T13:38:22.2535014Z   ...
+2026-10-22T13:38:22.2535745Z # Subtest: 15 missing fallback references and cycles do not satisfy required inputs
+2026-10-22T13:38:22.2536837Z ok 43 - 15 missing fallback references and cycles do not satisfy required inputs
+2026-10-22T13:38:22.2537516Z   ---
+2026-10-22T13:38:22.2537846Z   duration_ms: 10.714663
+2026-10-22T13:38:22.2538390Z   type: 'test'
+2026-10-22T13:38:22.2538715Z   ...
+2026-10-22T13:38:22.2539469Z # Subtest: 16 read/write permissions, masking and conditional state locks are separate
+2026-10-22T13:38:22.2540607Z ok 44 - 16 read/write permissions, masking and conditional state locks are separate
+2026-10-22T13:38:22.2541282Z   ---
+2026-10-22T13:38:22.2541774Z   duration_ms: 15.772927
+2026-10-22T13:38:22.2542238Z   type: 'test'
+2026-10-22T13:38:22.2542521Z   ...
+2026-10-22T13:38:22.2543187Z # Subtest: 17 actual field constraints validate numeric/string boundary values
+2026-10-22T13:38:22.2544160Z ok 45 - 17 actual field constraints validate numeric/string boundary values
+2026-10-22T13:38:22.2544797Z   ---
+2026-10-22T13:38:22.2545119Z   duration_ms: 1.54112
+2026-10-22T13:38:22.2545499Z   type: 'test'
+2026-10-22T13:38:22.2545821Z   ...
+2026-10-22T13:38:22.2546566Z # Subtest: 18 override identity, schema, target, duplicate and parent-version checks
+2026-10-22T13:38:22.2547326Z     # Subtest: wrong parent
+2026-10-22T13:38:22.2547759Z     ok 1 - wrong parent
+2026-10-22T13:38:22.2548141Z       ---
+2026-10-22T13:38:22.2548484Z       duration_ms: 11.665379
+2026-10-22T13:38:22.2548892Z       type: 'test'
+2026-10-22T13:38:22.2549232Z       ...
+2026-10-22T13:38:22.2549616Z     # Subtest: stale version
+2026-10-22T13:38:22.2550046Z     ok 2 - stale version
+2026-10-22T13:38:22.2550425Z       ---
+2026-10-22T13:38:22.2550774Z       duration_ms: 14.100535
+2026-10-22T13:38:22.2551186Z       type: 'test'
+2026-10-22T13:38:22.2554466Z       ...
+2026-10-22T13:38:22.2554887Z     # Subtest: unknown target
+2026-10-22T13:38:22.2555326Z     ok 3 - unknown target
+2026-10-22T13:38:22.2555710Z       ---
+2026-10-22T13:38:22.2556056Z       duration_ms: 10.830242
+2026-10-22T13:38:22.2556464Z       type: 'test'
+2026-10-22T13:38:22.2556809Z       ...
+2026-10-22T13:38:22.2557153Z     # Subtest: unknown ID
+2026-10-22T13:38:22.2557575Z     ok 4 - unknown ID
+2026-10-22T13:38:22.2557939Z       ---
+2026-10-22T13:38:22.2558286Z       duration_ms: 13.150245
+2026-10-22T13:38:22.2558714Z       type: 'test'
+2026-10-22T13:38:22.2559058Z       ...
+2026-10-22T13:38:22.2559448Z     # Subtest: unknown property
+2026-10-22T13:38:22.2559904Z     ok 5 - unknown property
+2026-10-22T13:38:22.2560304Z       ---
+2026-10-22T13:38:22.2560635Z       duration_ms: 10.656585
+2026-10-22T13:38:22.2561048Z       type: 'test'
+2026-10-22T13:38:22.2561387Z       ...
+2026-10-22T13:38:22.2561935Z     # Subtest: ID change
+2026-10-22T13:38:22.2562349Z     ok 6 - ID change
+2026-10-22T13:38:22.2562700Z       ---
+2026-10-22T13:38:22.2563043Z       duration_ms: 9.518889
+2026-10-22T13:38:22.2563445Z       type: 'test'
+2026-10-22T13:38:22.2563778Z       ...
+2026-10-22T13:38:22.2564107Z     # Subtest: route change
+2026-10-22T13:38:22.2564497Z     ok 7 - route change
+2026-10-22T13:38:22.2564868Z       ---
+2026-10-22T13:38:22.2565209Z       duration_ms: 10.12614
+2026-10-22T13:38:22.2565598Z       type: 'test'
+2026-10-22T13:38:22.2565933Z       ...
+2026-10-22T13:38:22.2566316Z     # Subtest: duplicate patch
+2026-10-22T13:38:22.2566771Z     ok 8 - duplicate patch
+2026-10-22T13:38:22.2567175Z       ---
+2026-10-22T13:38:22.2567508Z       duration_ms: 9.107734
+2026-10-22T13:38:22.2567913Z       type: 'test'
+2026-10-22T13:38:22.2568252Z       ...
+2026-10-22T13:38:22.2568565Z     1..8
+2026-10-22T13:38:22.2569290Z ok 46 - 18 override identity, schema, target, duplicate and parent-version checks
+2026-10-22T13:38:22.2570271Z   ---
+2026-10-22T13:38:22.2570627Z   duration_ms: 92.197297
+2026-10-22T13:38:22.2571029Z   type: 'test'
+2026-10-22T13:38:22.2571359Z   ...
+2026-10-22T13:38:22.2599707Z # Subtest: 19 protected fields reject policy relaxation
+2026-10-22T13:38:22.2642204Z     # Subtest: lock
+2026-10-22T13:38:22.2672244Z     ok 1 - lock
+2026-10-22T13:38:22.2672660Z       ---
+2026-10-22T13:38:22.2673148Z       duration_ms: 7.206471
+2026-10-22T13:38:22.2673846Z       type: 'test'
+2026-10-22T13:38:22.2674159Z       ...
+2026-10-22T13:38:22.2674428Z     # Subtest: policy
+2026-10-22T13:38:22.2674741Z     ok 2 - policy
+2026-10-22T13:38:22.2675243Z       ---
+2026-10-22T13:38:22.2675453Z       duration_ms: 6.395918
+2026-10-22T13:38:22.2675702Z       type: 'test'
+2026-10-22T13:38:22.2675911Z       ...
+2026-10-22T13:38:22.2676106Z     # Subtest: read-only
+2026-10-22T13:38:22.2676353Z     ok 3 - read-only
+2026-10-22T13:38:22.2676565Z       ---
+2026-10-22T13:38:22.2676758Z       duration_ms: 7.063324
+2026-10-22T13:38:22.2676992Z       type: 'test'
+2026-10-22T13:38:22.2677194Z       ...
+2026-10-22T13:38:22.2677454Z     # Subtest: required
+2026-10-22T13:38:22.2677786Z     ok 4 - required
+2026-10-22T13:38:22.2678084Z       ---
+2026-10-22T13:38:22.2678387Z       duration_ms: 6.111493
+2026-10-22T13:38:22.2678744Z       type: 'test'
+2026-10-22T13:38:22.2679024Z       ...
+2026-10-22T13:38:22.2679314Z     # Subtest: mask
+2026-10-22T13:38:22.2679629Z     ok 5 - mask
+2026-10-22T13:38:22.2679936Z       ---
+2026-10-22T13:38:22.2680233Z       duration_ms: 6.755677
+2026-10-22T13:38:22.2680601Z       type: 'test'
+2026-10-22T13:38:22.2680902Z       ...
+2026-10-22T13:38:22.2681218Z     # Subtest: source
+2026-10-22T13:38:22.2681688Z     ok 6 - source
+2026-10-22T13:38:22.2682013Z       ---
+2026-10-22T13:38:22.2682338Z       duration_ms: 6.051236
+2026-10-22T13:38:22.2682719Z       type: 'test'
+2026-10-22T13:38:22.2683033Z       ...
+2026-10-22T13:38:22.2683329Z     1..6
+2026-10-22T13:38:22.2683837Z ok 47 - 19 protected fields reject policy relaxation
+2026-10-22T13:38:22.2684337Z   ---
+2026-10-22T13:38:22.2684649Z   duration_ms: 41.62937
+2026-10-22T13:38:22.2685012Z   type: 'test'
+2026-10-22T13:38:22.2685312Z   ...
+2026-10-22T13:38:22.2686051Z # Subtest: 20 presentation override pins parent and isolates snapshot from future HQ edits
+2026-10-22T13:38:22.2687211Z ok 48 - 20 presentation override pins parent and isolates snapshot from future HQ edits
+2026-10-22T13:38:22.2687890Z   ---
+2026-10-22T13:38:22.2688201Z   duration_ms: 23.164439
+2026-10-22T13:38:22.2688573Z   type: 'test'
+2026-10-22T13:38:22.2688885Z   ...
+2026-10-22T13:38:22.2689399Z # Subtest: 21 overrides revalidate mandatory-field graph
+2026-10-22T13:38:22.2690133Z ok 49 - 21 overrides revalidate mandatory-field graph
+2026-10-22T13:38:22.2690623Z   ---
+2026-10-22T13:38:22.2690923Z   duration_ms: 20.318209
+2026-10-22T13:38:22.2691294Z   type: 'test'
+2026-10-22T13:38:22.2691725Z   ...
+2026-10-22T13:38:22.2692404Z # Subtest: 22 malformed untrusted input fails closed without traversal exceptions
+2026-10-22T13:38:22.2693082Z     # Subtest: shape 0
+2026-10-22T13:38:22.2693465Z     ok 1 - shape 0
+2026-10-22T13:38:22.2693794Z       ---
+2026-10-22T13:38:22.2694116Z       duration_ms: 0.263593
+2026-10-22T13:38:22.2694505Z       type: 'test'
+2026-10-22T13:38:22.2694835Z       ...
+2026-10-22T13:38:22.2695161Z     # Subtest: shape 1
+2026-10-22T13:38:22.2695520Z     ok 2 - shape 1
+2026-10-22T13:38:22.2695847Z       ---
+2026-10-22T13:38:22.2696172Z       duration_ms: 0.06936
+2026-10-22T13:38:22.2696505Z       type: 'test'
+2026-10-22T13:38:22.2696782Z       ...
+2026-10-22T13:38:22.2697055Z     # Subtest: shape 2
+2026-10-22T13:38:22.2697386Z     ok 3 - shape 2
+2026-10-22T13:38:22.2697663Z       ---
+2026-10-22T13:38:22.2697951Z       duration_ms: 0.055389
+2026-10-22T13:38:22.2698287Z       type: 'test'
+2026-10-22T13:38:22.2698589Z       ...
+2026-10-22T13:38:22.2698870Z     # Subtest: shape 3
+2026-10-22T13:38:22.2699206Z     ok 4 - shape 3
+2026-10-22T13:38:22.2699505Z       ---
+2026-10-22T13:38:22.2700016Z       duration_ms: 0.052527
+2026-10-22T13:38:22.2700381Z       type: 'test'
+2026-10-22T13:38:22.2700687Z       ...
+2026-10-22T13:38:22.2700987Z     # Subtest: shape 4
+2026-10-22T13:38:22.2701320Z     ok 5 - shape 4
+2026-10-22T13:38:22.2732012Z       ---
+2026-10-22T13:38:22.2732415Z       duration_ms: 0.050966
+2026-10-22T13:38:22.2732773Z       type: 'test'
+2026-10-22T13:38:22.2733105Z       ...
+2026-10-22T13:38:22.2733447Z     # Subtest: shape 5
+2026-10-22T13:38:22.2733836Z     ok 6 - shape 5
+2026-10-22T13:38:22.2734192Z       ---
+2026-10-22T13:38:22.2734539Z       duration_ms: 0.194232
+2026-10-22T13:38:22.2734961Z       type: 'test'
+2026-10-22T13:38:22.2735519Z       ...
+2026-10-22T13:38:22.2735816Z     # Subtest: shape 6
+2026-10-22T13:38:22.2736507Z     ok 7 - shape 6
+2026-10-22T13:38:22.2736874Z       ---
+2026-10-22T13:38:22.2737240Z       duration_ms: 0.102642
+2026-10-22T13:38:22.2737662Z       type: 'test'
+2026-10-22T13:38:22.2738016Z       ...
+2026-10-22T13:38:22.2738367Z     # Subtest: collection
+2026-10-22T13:38:22.2738817Z     ok 8 - collection
+2026-10-22T13:38:22.2739189Z       ---
+2026-10-22T13:38:22.2739542Z       duration_ms: 4.114803
+2026-10-22T13:38:22.2739956Z       type: 'test'
+2026-10-22T13:38:22.2740307Z       ...
+2026-10-22T13:38:22.2740647Z     # Subtest: null row
+2026-10-22T13:38:22.2741053Z     ok 9 - null row
+2026-10-22T13:38:22.2741411Z       ---
+2026-10-22T13:38:22.2741956Z       duration_ms: 8.711902
+2026-10-22T13:38:22.2742369Z       type: 'test'
+2026-10-22T13:38:22.2742714Z       ...
+2026-10-22T13:38:22.2743070Z     # Subtest: wrong boolean
+2026-10-22T13:38:22.2743498Z     ok 10 - wrong boolean
+2026-10-22T13:38:22.2743910Z       ---
+2026-10-22T13:38:22.2744262Z       duration_ms: 6.416727
+2026-10-22T13:38:22.2744673Z       type: 'test'
+2026-10-22T13:38:22.2745027Z       ...
+2026-10-22T13:38:22.2745368Z     # Subtest: blank ID
+2026-10-22T13:38:22.2745761Z     ok 11 - blank ID
+2026-10-22T13:38:22.2746140Z       ---
+2026-10-22T13:38:22.2746489Z       duration_ms: 6.286529
+2026-10-22T13:38:22.2746908Z       type: 'test'
+2026-10-22T13:38:22.2747263Z       ...
+2026-10-22T13:38:22.2747610Z     # Subtest: condition
+2026-10-22T13:38:22.2748026Z     ok 12 - condition
+2026-10-22T13:38:22.2748402Z       ---
+2026-10-22T13:38:22.2748760Z       duration_ms: 5.438631
+2026-10-22T13:38:22.2749172Z       type: 'test'
+2026-10-22T13:38:22.2749525Z       ...
+2026-10-22T13:38:22.2749865Z     # Subtest: range
+2026-10-22T13:38:22.2750252Z     ok 13 - range
+2026-10-22T13:38:22.2750599Z       ---
+2026-10-22T13:38:22.2750957Z       duration_ms: 6.947114
+2026-10-22T13:38:22.2751376Z       type: 'test'
+2026-10-22T13:38:22.2751841Z       ...
+2026-10-22T13:38:22.2782019Z     # Subtest: feature
+2026-10-22T13:38:22.2782476Z     ok 14 - feature
+2026-10-22T13:38:22.2782816Z       ---
+2026-10-22T13:38:22.2783170Z       duration_ms: 6.261813
+2026-10-22T13:38:22.2783575Z       type: 'test'
+2026-10-22T13:38:22.2783917Z       ...
+2026-10-22T13:38:22.2784310Z     # Subtest: missing catalog coverage
+2026-10-22T13:38:22.2784849Z     ok 15 - missing catalog coverage
+2026-10-22T13:38:22.2785290Z       ---
+2026-10-22T13:38:22.2785630Z       duration_ms: 7.05482
+2026-10-22T13:38:22.2786032Z       type: 'test'
+2026-10-22T13:38:22.2786373Z       ...
+2026-10-22T13:38:22.2786678Z     1..15
+2026-10-22T13:38:22.2787367Z ok 50 - 22 malformed untrusted input fails closed without traversal exceptions
+2026-10-22T13:38:22.2788019Z   ---
+2026-10-22T13:38:22.2788350Z   duration_ms: 53.117501
+2026-10-22T13:38:22.2788746Z   type: 'test'
+2026-10-22T13:38:22.2789065Z   ...
+2026-10-22T13:38:22.2789992Z # Subtest: 23 transition permission is separate from screen access and requires valid state and values
+2026-10-22T13:38:22.2791352Z ok 51 - 23 transition permission is separate from screen access and requires valid state and values
+2026-10-22T13:38:22.2792275Z   ---
+2026-10-22T13:38:22.2792618Z   duration_ms: 15.149757
+2026-10-22T13:38:22.2793001Z   type: 'test'
+2026-10-22T13:38:22.2793328Z   ...
+2026-10-22T13:38:22.2794467Z # Subtest: 24 missing additional current-screen coverage and process dependency cycles are rejected
+2026-10-22T13:38:22.2795315Z     # Subtest: additional OPS
+2026-10-22T13:38:22.2795749Z     ok 1 - additional OPS
+2026-10-22T13:38:22.2796140Z       ---
+2026-10-22T13:38:22.2796481Z       duration_ms: 6.172907
+2026-10-22T13:38:22.2796879Z       type: 'test'
+2026-10-22T13:38:22.2797214Z       ...
+2026-10-22T13:38:22.2797597Z     # Subtest: process self-cycle
+2026-10-22T13:38:22.2798048Z     ok 2 - process self-cycle
+2026-10-22T13:38:22.2798447Z       ---
+2026-10-22T13:38:22.2798785Z       duration_ms: 6.842426
+2026-10-22T13:38:22.2799178Z       type: 'test'
+2026-10-22T13:38:22.2799680Z       ...
+2026-10-22T13:38:22.2799989Z     1..2
+2026-10-22T13:38:22.2800800Z ok 52 - 24 missing additional current-screen coverage and process dependency cycles are rejected
+2026-10-22T13:38:22.2807234Z   ---
+2026-10-22T13:38:22.2807660Z   duration_ms: 13.248237
+2026-10-22T13:38:22.2808063Z   type: 'test'
+2026-10-22T13:38:22.2808406Z   ...
+2026-10-22T13:38:22.2809292Z # Subtest: 25 malformed exported conditions cannot succeed on missing operands or extra properties
+2026-10-22T13:38:22.2810688Z ok 53 - 25 malformed exported conditions cannot succeed on missing operands or extra properties
+2026-10-22T13:38:22.2811391Z   ---
+2026-10-22T13:38:22.2811838Z   duration_ms: 5.811007
+2026-10-22T13:38:22.2812218Z   type: 'test'
+2026-10-22T13:38:22.2812549Z   ...
+2026-10-22T13:38:22.2813329Z # Subtest: 26 malformed non-JSON override input is rejected without stringify exceptions
+2026-10-22T13:38:22.2814061Z     # Subtest: cyclic value
+2026-10-22T13:38:22.2814456Z     ok 1 - cyclic value
+2026-10-22T13:38:22.2814837Z       ---
+2026-10-22T13:38:22.2815181Z       duration_ms: 10.188673
+2026-10-22T13:38:22.2815574Z       type: 'test'
+2026-10-22T13:38:22.2815908Z       ...
+2026-10-22T13:38:22.2816279Z     # Subtest: undefined value
+2026-10-22T13:38:22.2816706Z     ok 2 - undefined value
+2026-10-22T13:38:22.2817092Z       ---
+2026-10-22T13:38:22.2817573Z       duration_ms: 9.27544
+2026-10-22T13:38:22.2820077Z       type: 'test'
+2026-10-22T13:38:22.2820397Z       ...
+2026-10-22T13:38:22.2820695Z     # Subtest: null patch
+2026-10-22T13:38:22.2821159Z     ok 3 - null patch
+2026-10-22T13:38:22.2821650Z       ---
+2026-10-22T13:38:22.2821991Z       duration_ms: 11.558574
+2026-10-22T13:38:22.2822400Z       type: 'test'
+2026-10-22T13:38:22.2822758Z       ...
+2026-10-22T13:38:22.2823097Z     # Subtest: wrong changes
+2026-10-22T13:38:22.2823521Z     ok 4 - wrong changes
+2026-10-22T13:38:22.2823892Z       ---
+2026-10-22T13:38:22.2824230Z       duration_ms: 18.007294
+2026-10-22T13:38:22.2825229Z       type: 'test'
+2026-10-22T13:38:22.2825600Z       ...
+2026-10-22T13:38:22.2825904Z     1..4
+2026-10-22T13:38:22.2826636Z ok 54 - 26 malformed non-JSON override input is rejected without stringify exceptions
+2026-10-22T13:38:22.2829237Z   ---
+2026-10-22T13:38:22.2836615Z   duration_ms: 50.904035
+2026-10-22T13:38:22.2837140Z   type: 'test'
+2026-10-22T13:38:22.2837452Z   ...
+2026-10-22T13:38:22.2838202Z # Subtest: 27 ancestor menu gates and immutable policy snapshots are enforced
+2026-10-22T13:38:22.2839310Z ok 55 - 27 ancestor menu gates and immutable policy snapshots are enforced
+2026-10-22T13:38:22.2840026Z   ---
+2026-10-22T13:38:22.2840387Z   duration_ms: 27.106755
+2026-10-22T13:38:22.2840826Z   type: 'test'
+2026-10-22T13:38:22.2841169Z   ...
+2026-10-22T13:38:22.2842146Z # Subtest: 28 ERP account request has thirteen action-specific mandatory inputs
+2026-10-22T13:38:22.2843296Z ok 56 - 28 ERP account request has thirteen action-specific mandatory inputs
+2026-10-22T13:38:22.2844014Z   ---
+2026-10-22T13:38:22.2844350Z   duration_ms: 19.656719
+2026-10-22T13:38:22.2844785Z   type: 'test'
+2026-10-22T13:38:22.2845133Z   ...
+2026-10-22T13:38:22.2845926Z # Subtest: 29 stable references survive array reordering and display-label changes
+2026-10-22T13:38:22.2847140Z ok 57 - 29 stable references survive array reordering and display-label changes
+2026-10-22T13:38:22.2847926Z   ---
+2026-10-22T13:38:22.2848471Z   duration_ms: 15.309781
+2026-10-22T13:38:22.2848891Z   type: 'test'
+2026-10-22T13:38:22.2849227Z   ...
+2026-10-22T13:38:22.2850138Z # Subtest: 30 B-H01 transition state declarations reject unregistered values and unrelated fields
+2026-10-22T13:38:22.2851115Z     # Subtest: unregistered destination
+2026-10-22T13:38:22.2851845Z     ok 1 - unregistered destination
+2026-10-22T13:38:22.2852307Z       ---
+2026-10-22T13:38:22.2852677Z       duration_ms: 6.094242
+2026-10-22T13:38:22.2853113Z       type: 'test'
+2026-10-22T13:38:22.2853473Z       ...
+2026-10-22T13:38:22.2853889Z     # Subtest: unregistered origin
+2026-10-22T13:38:22.2854496Z     ok 2 - unregistered origin
+2026-10-22T13:38:22.2855145Z       ---
+2026-10-22T13:38:22.2855488Z       duration_ms: 6.682446
+2026-10-22T13:38:22.2855913Z       type: 'test'
+2026-10-22T13:38:22.2856267Z       ...
+2026-10-22T13:38:22.2856677Z     # Subtest: non-state phone field
+2026-10-22T13:38:22.2857231Z     ok 3 - non-state phone field
+2026-10-22T13:38:22.2857697Z       ---
+2026-10-22T13:38:22.2858063Z       duration_ms: 6.238129
+2026-10-22T13:38:22.2858474Z       type: 'test'
+2026-10-22T13:38:22.2858847Z       ...
+2026-10-22T13:38:22.2859287Z     # Subtest: foreign-process state field
+2026-10-22T13:38:22.2859888Z     ok 4 - foreign-process state field
+2026-10-22T13:38:22.2860375Z       ---
+2026-10-22T13:38:22.2860677Z       duration_ms: 7.678011
+2026-10-22T13:38:22.2861066Z       type: 'test'
+2026-10-22T13:38:22.2861418Z       ...
+2026-10-22T13:38:22.2861990Z     # Subtest: state not readable
+2026-10-22T13:38:22.2862453Z     ok 5 - state not readable
+2026-10-22T13:38:22.2863969Z       ---
+2026-10-22T13:38:22.2864308Z       duration_ms: 6.502458
+2026-10-22T13:38:22.2864684Z       type: 'test'
+2026-10-22T13:38:22.2865013Z       ...
+2026-10-22T13:38:22.2865379Z     # Subtest: state not read-only
+2026-10-22T13:38:22.2865771Z     ok 6 - state not read-only
+2026-10-22T13:38:22.2866099Z       ---
+2026-10-22T13:38:22.2866347Z       duration_ms: 8.378241
+2026-10-22T13:38:22.2866708Z       type: 'test'
+2026-10-22T13:38:22.2867000Z       ...
+2026-10-22T13:38:22.2867345Z     # Subtest: state has no registered values
+2026-10-22T13:38:22.2867835Z     ok 7 - state has no registered values
+2026-10-22T13:38:22.2868236Z       ---
+2026-10-22T13:38:22.2868520Z       duration_ms: 10.960924
+2026-10-22T13:38:22.2868879Z       type: 'test'
+2026-10-22T13:38:22.2869198Z       ...
+2026-10-22T13:38:22.2869584Z     # Subtest: target reference missing
+2026-10-22T13:38:22.2870113Z     ok 8 - target reference missing
+2026-10-22T13:38:22.2870544Z       ---
+2026-10-22T13:38:22.2870878Z       duration_ms: 7.05712
+2026-10-22T13:38:22.2871265Z       type: 'test'
+2026-10-22T13:38:22.2871878Z       ...
+2026-10-22T13:38:22.2872316Z     # Subtest: target is not required input
+2026-10-22T13:38:22.2872809Z     ok 9 - target is not required input
+2026-10-22T13:38:22.2873174Z       ---
+2026-10-22T13:38:22.2873477Z       duration_ms: 5.99896
+2026-10-22T13:38:22.2873876Z       type: 'test'
+2026-10-22T13:38:22.2874224Z       ...
+2026-10-22T13:38:22.2874559Z     1..9
+2026-10-22T13:38:22.2875470Z ok 58 - 30 B-H01 transition state declarations reject unregistered values and unrelated fields
+2026-10-22T13:38:22.2876279Z   ---
+2026-10-22T13:38:22.2876633Z   duration_ms: 66.544243
+2026-10-22T13:38:22.2877042Z   type: 'test'
+2026-10-22T13:38:22.2877396Z   ...
+2026-10-22T13:38:22.2878400Z # Subtest: 31 B-H01 transition binds requested target to destination even when both are valid enum members
+2026-10-22T13:38:22.2879961Z ok 59 - 31 B-H01 transition binds requested target to destination even when both are valid enum members
+2026-10-22T13:38:22.2880689Z   ---
+2026-10-22T13:38:22.2880966Z   duration_ms: 13.141669
+2026-10-22T13:38:22.2881322Z   type: 'test'
+2026-10-22T13:38:22.2881810Z   ...
+2026-10-22T13:38:22.2882575Z # Subtest: 32 B-H01 direct-work input permissions follow the eligible approval action and current step
+2026-10-22T13:38:22.2883373Z ok 60 - 32 B-H01 direct-work input permissions follow the eligible approval action and current step
+2026-10-22T13:38:22.2883967Z   ---
+2026-10-22T13:38:22.2884168Z   duration_ms: 13.614748
+2026-10-22T13:38:22.2884395Z   type: 'test'
+2026-10-22T13:38:22.2884591Z   ...
+2026-10-22T13:38:22.2885000Z # Subtest: 33 B-H01 field write-action references must be present and own that input
+2026-10-22T13:38:22.2885421Z     # Subtest: unknown write action
+2026-10-22T13:38:22.2885697Z     ok 1 - unknown write action
+2026-10-22T13:38:22.2885928Z       ---
+2026-10-22T13:38:22.2886121Z       duration_ms: 6.788729
+2026-10-22T13:38:22.2886345Z       type: 'test'
+2026-10-22T13:38:22.2886549Z       ...
+2026-10-22T13:38:22.2886768Z     # Subtest: unrelated write action
+2026-10-22T13:38:22.2887130Z     ok 2 - unrelated write action
+2026-10-22T13:38:22.2887362Z       ---
+2026-10-22T13:38:22.2887550Z       duration_ms: 5.95241
+2026-10-22T13:38:22.2887768Z       type: 'test'
+2026-10-22T13:38:22.2887958Z       ...
+2026-10-22T13:38:22.2888150Z     1..2
+2026-10-22T13:38:22.2888536Z ok 61 - 33 B-H01 field write-action references must be present and own that input
+2026-10-22T13:38:22.2888901Z   ---
+2026-10-22T13:38:22.2889089Z   duration_ms: 13.012226
+2026-10-22T13:38:22.2889305Z   type: 'test'
+2026-10-22T13:38:22.2889491Z   ...
+2026-10-22T13:38:22.2889910Z # Subtest: 34 B-H01 numeric fallback domain must be a subset including integer constraints
+2026-10-22T13:38:22.2890340Z     # Subtest: valid numeric subset
+2026-10-22T13:38:22.2890619Z     ok 1 - valid numeric subset
+2026-10-22T13:38:22.2890855Z       ---
+2026-10-22T13:38:22.2891050Z       duration_ms: 7.282186
+2026-10-22T13:38:22.2891276Z       type: 'test'
+2026-10-22T13:38:22.2891477Z       ...
+2026-10-22T13:38:22.2891971Z     # Subtest: zero-only original reproduction
+2026-10-22T13:38:22.2892305Z     ok 2 - zero-only original reproduction
+2026-10-22T13:38:22.2892568Z       ---
+2026-10-22T13:38:22.2892766Z       duration_ms: 6.152761
+2026-10-22T13:38:22.2893004Z       type: 'test'
+2026-10-22T13:38:22.2893216Z       ...
+2026-10-22T13:38:22.2893449Z     # Subtest: lower bound expansion
+2026-10-22T13:38:22.2893745Z     ok 3 - lower bound expansion
+2026-10-22T13:38:22.2893980Z       ---
+2026-10-22T13:38:22.2894175Z       duration_ms: 6.501556
+2026-10-22T13:38:22.2894397Z       type: 'test'
+2026-10-22T13:38:22.2894603Z       ...
+2026-10-22T13:38:22.2894870Z     # Subtest: upper bound expansion
+2026-10-22T13:38:22.2895148Z     ok 4 - upper bound expansion
+2026-10-22T13:38:22.2895384Z       ---
+2026-10-22T13:38:22.2895579Z       duration_ms: 10.838075
+2026-10-22T13:38:22.2895804Z       type: 'test'
+2026-10-22T13:38:22.2895996Z       ...
+2026-10-22T13:38:22.2896223Z     # Subtest: integer condition missing
+2026-10-22T13:38:22.2896517Z     ok 5 - integer condition missing
+2026-10-22T13:38:22.2896766Z       ---
+2026-10-22T13:38:22.2896951Z       duration_ms: 6.437596
+2026-10-22T13:38:22.2897171Z       type: 'test'
+2026-10-22T13:38:22.2897363Z       ...
+2026-10-22T13:38:22.2897576Z     # Subtest: lower bound unbounded
+2026-10-22T13:38:22.2897851Z     ok 6 - lower bound unbounded
+2026-10-22T13:38:22.2898084Z       ---
+2026-10-22T13:38:22.2898281Z       duration_ms: 6.598102
+2026-10-22T13:38:22.2898507Z       type: 'test'
+2026-10-22T13:38:22.2898703Z       ...
+2026-10-22T13:38:22.2898886Z     1..6
+2026-10-22T13:38:22.2899282Z ok 62 - 34 B-H01 numeric fallback domain must be a subset including integer constraints
+2026-10-22T13:38:22.2899659Z   ---
+2026-10-22T13:38:22.2899861Z   duration_ms: 44.586524
+2026-10-22T13:38:22.2900085Z   type: 'test'
+2026-10-22T13:38:22.2900291Z   ...
+2026-10-22T13:38:22.2900712Z # Subtest: 35 B-H01 string fallback lengths and enumeration values must satisfy both fields
+2026-10-22T13:38:22.2901147Z     # Subtest: valid length subset
+2026-10-22T13:38:22.2901426Z     ok 1 - valid length subset
+2026-10-22T13:38:22.2901793Z       ---
+2026-10-22T13:38:22.2901988Z       duration_ms: 6.338515
+2026-10-22T13:38:22.2902214Z       type: 'test'
+2026-10-22T13:38:22.2902417Z       ...
+2026-10-22T13:38:22.2902646Z     # Subtest: expanded string bound
+2026-10-22T13:38:22.2903088Z     ok 2 - expanded string bound
+2026-10-22T13:38:22.2903357Z       ---
+2026-10-22T13:38:22.2903562Z       duration_ms: 12.247342
+2026-10-22T13:38:22.2903800Z       type: 'test'
+2026-10-22T13:38:22.2904006Z       ...
+2026-10-22T13:38:22.2904230Z     # Subtest: missing string bound
+2026-10-22T13:38:22.2904508Z     ok 3 - missing string bound
+2026-10-22T13:38:22.2904741Z       ---
+2026-10-22T13:38:22.2904940Z       duration_ms: 8.780461
+2026-10-22T13:38:22.2905163Z       type: 'test'
+2026-10-22T13:38:22.2905355Z       ...
+2026-10-22T13:38:22.2905564Z     # Subtest: valid enum subset
+2026-10-22T13:38:22.2905813Z     ok 4 - valid enum subset
+2026-10-22T13:38:22.2906105Z       ---
+2026-10-22T13:38:22.2906305Z       duration_ms: 6.814582
+2026-10-22T13:38:22.2906526Z       type: 'test'
+2026-10-22T13:38:22.2906719Z       ...
+2026-10-22T13:38:22.2906943Z     # Subtest: enum outside target domain
+2026-10-22T13:38:22.2907241Z     ok 5 - enum outside target domain
+2026-10-22T13:38:22.2907484Z       ---
+2026-10-22T13:38:22.2907688Z       duration_ms: 6.000073
+2026-10-22T13:38:22.2907917Z       type: 'test'
+2026-10-22T13:38:22.2908109Z       ...
+2026-10-22T13:38:22.2908352Z     # Subtest: enum violates own source constraint
+2026-10-22T13:38:22.2908686Z     ok 6 - enum violates own source constraint
+2026-10-22T13:38:22.2908955Z       ---
+2026-10-22T13:38:22.2909154Z       duration_ms: 7.222513
+2026-10-22T13:38:22.2909378Z       type: 'test'
+2026-10-22T13:38:22.2909573Z       ...
+2026-10-22T13:38:22.2909798Z     # Subtest: numeric options subset
+2026-10-22T13:38:22.2910085Z     ok 7 - numeric options subset
+2026-10-22T13:38:22.2910323Z       ---
+2026-10-22T13:38:22.2910523Z       duration_ms: 6.894502
+2026-10-22T13:38:22.2910766Z       type: 'test'
+2026-10-22T13:38:22.2910958Z       ...
+2026-10-22T13:38:22.2911195Z     # Subtest: numeric options violate target
+2026-10-22T13:38:22.2911500Z     ok 8 - numeric options violate target
+2026-10-22T13:38:22.2911898Z       ---
+2026-10-22T13:38:22.2912104Z       duration_ms: 6.764745
+2026-10-22T13:38:22.2912354Z       type: 'test'
+2026-10-22T13:38:22.2912558Z       ...
+2026-10-22T13:38:22.2912748Z     1..8
+2026-10-22T13:38:22.2913163Z ok 63 - 35 B-H01 string fallback lengths and enumeration values must satisfy both fields
+2026-10-22T13:38:22.2913558Z   ---
+2026-10-22T13:38:22.2913757Z   duration_ms: 61.952087
+2026-10-22T13:38:22.2913986Z   type: 'test'
+2026-10-22T13:38:22.2914172Z   ...
+2026-10-22T13:38:22.2914608Z # Subtest: 36 B-H01 merge inputs require primary UUID reference and one or two duplicate references
+2026-10-22T13:38:22.2915266Z ok 64 - 36 B-H01 merge inputs require primary UUID reference and one or two duplicate references
+2026-10-22T13:38:22.2915665Z   ---
+2026-10-22T13:38:22.2915850Z   duration_ms: 8.262976
+2026-10-22T13:38:22.2916072Z   type: 'test'
+2026-10-22T13:38:22.2916257Z   ...
+2026-10-22T13:38:22.2916688Z # Subtest: 37 B-H01 calendar/map queries cannot omit currently required date or coordinate inputs
+2026-10-22T13:38:22.2917109Z     # Subtest: ACT.calendar
+2026-10-22T13:38:22.2917341Z     ok 1 - ACT.calendar
+2026-10-22T13:38:22.2917550Z       ---
+2026-10-22T13:38:22.2917746Z       duration_ms: 0.274242
+2026-10-22T13:38:22.2917966Z       type: 'test'
+2026-10-22T13:38:22.2918159Z       ...
+2026-10-22T13:38:22.2918347Z     # Subtest: ACT.map
+2026-10-22T13:38:22.2918558Z     ok 2 - ACT.map
+2026-10-22T13:38:22.2918753Z       ---
+2026-10-22T13:38:22.2918950Z       duration_ms: 0.193188
+2026-10-22T13:38:22.2919170Z       type: 'test'
+2026-10-22T13:38:22.2919363Z       ...
+2026-10-22T13:38:22.2919537Z     1..2
+2026-10-22T13:38:22.2919966Z ok 65 - 37 B-H01 calendar/map queries cannot omit currently required date or coordinate inputs
+2026-10-22T13:38:22.2920371Z   ---
+2026-10-22T13:38:22.2920562Z   duration_ms: 9.87967
+2026-10-22T13:38:22.2920786Z   type: 'test'
+2026-10-22T13:38:22.2920975Z   ...
+2026-10-22T13:38:22.2921435Z # Subtest: 38 B-H01 direct delivery requires an address, while account delivery may use account address
+2026-10-22T13:38:22.2922465Z ok 66 - 38 B-H01 direct delivery requires an address, while account delivery may use account address
+2026-10-22T13:38:22.2922877Z   ---
+2026-10-22T13:38:22.2923084Z   duration_ms: 8.318035
+2026-10-22T13:38:22.2923303Z   type: 'test'
+2026-10-22T13:38:22.2923503Z   ...
+2026-10-22T13:38:22.2923934Z # Subtest: 39 B-H01 ERP account request blocks requesting and successfully approved duplicates
+2026-10-22T13:38:22.2924575Z ok 67 - 39 B-H01 ERP account request blocks requesting and successfully approved duplicates
+2026-10-22T13:38:22.2924973Z   ---
+2026-10-22T13:38:22.2925171Z   duration_ms: 9.320001
+2026-10-22T13:38:22.2925383Z   type: 'test'
+2026-10-22T13:38:22.2925571Z   ...
+2026-10-22T13:38:22.2926055Z # Subtest: 40 B-H01 evidence maps approval list/detail and training rules to the right screens
+2026-10-22T13:38:22.2926562Z     # Subtest: S21 is approval target list, not report creation
+2026-10-22T13:38:22.2926961Z     ok 1 - S21 is approval target list, not report creation
+2026-10-22T13:38:22.2927270Z       ---
+2026-10-22T13:38:22.2927471Z       duration_ms: 0.199823
+2026-10-22T13:38:22.2927755Z       type: 'test'
+2026-10-22T13:38:22.2927951Z       ...
+2026-10-22T13:38:22.2928172Z     # Subtest: S22 is approval detail
+2026-10-22T13:38:22.2928460Z     ok 2 - S22 is approval detail
+2026-10-22T13:38:22.2928709Z       ---
+2026-10-22T13:38:22.2928909Z       duration_ms: 0.077246
+2026-10-22T13:38:22.2929136Z       type: 'test'
+2026-10-22T13:38:22.2929330Z       ...
+2026-10-22T13:38:22.2929590Z     # Subtest: S525 is collection training
+2026-10-22T13:38:22.2929888Z     ok 3 - S525 is collection training
+2026-10-22T13:38:22.2930140Z       ---
+2026-10-22T13:38:22.2930339Z       duration_ms: 0.072793
+2026-10-22T13:38:22.2930567Z       type: 'test'
+2026-10-22T13:38:22.2930788Z       ...
+2026-10-22T13:38:22.2931158Z     # Subtest: S527 is order training, not fabricated completion evidence
+2026-10-22T13:38:22.2931807Z     ok 4 - S527 is order training, not fabricated completion evidence
+2026-10-22T13:38:22.2932174Z       ---
+2026-10-22T13:38:22.2932418Z       duration_ms: 0.095344
+2026-10-22T13:38:22.2932675Z       type: 'test'
+2026-10-22T13:38:22.2932900Z       ...
+2026-10-22T13:38:22.2933107Z     1..4
+2026-10-22T13:38:22.2933576Z ok 68 - 40 B-H01 evidence maps approval list/detail and training rules to the right screens
+2026-10-22T13:38:22.2933997Z   ---
+2026-10-22T13:38:22.2934247Z   duration_ms: 2.0983
+2026-10-22T13:38:22.2934497Z   type: 'test'
+2026-10-22T13:38:22.2934717Z   ...
+2026-10-22T13:38:22.3027510Z 1..68
+2026-10-22T13:38:22.3027833Z # tests 214
+2026-10-22T13:38:22.3028119Z # suites 1
+2026-10-22T13:38:22.3028399Z # pass 214
+2026-10-22T13:38:22.3028667Z # fail 0
+2026-10-22T13:38:22.3028964Z # cancelled 0
+2026-10-22T13:38:22.3029300Z # skipped 0
+2026-10-22T13:38:22.3029597Z # todo 0
+2026-10-22T13:38:22.3029953Z # duration_ms 1599.021038
+2026-10-22T13:38:22.3169192Z ##[group]Run pnpm hq:http
+2026-10-22T13:38:22.3169471Z [36;1mpnpm hq:http[0m
+2026-10-22T13:38:22.3206313Z shell: /usr/bin/bash -e {0}
+2026-10-22T13:38:22.3206569Z env:
+2026-10-22T13:38:22.3206826Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-22T13:38:22.3207131Z ##[endgroup]
+2026-10-22T13:38:22.6877212Z 
+2026-10-22T13:38:22.6878346Z > dio-crm@0.1.0 hq:http /home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj
+2026-10-22T13:38:22.6879404Z > node --experimental-strip-types --test scripts/hq-standard/h0*-http.mjs
+2026-10-22T13:38:22.6879947Z 
+2026-10-22T13:38:22.7292253Z TAP version 13
+2026-10-22T13:38:22.9654827Z # (node:2821) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj/backend/src/hq-mock/app.ts is not specified and it doesn't parse as CommonJS.
+2026-10-22T13:38:22.9656935Z # Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+2026-10-22T13:38:22.9658606Z # To eliminate this warning, add "type": "module" to /home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj/backend/package.json.
+2026-10-22T13:38:22.9660366Z # (Use `node --trace-warnings ...` to show where the warning was created)
+2026-10-22T13:38:22.9666078Z # (node:2821) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj/frontend/src/app/hq-standard-registry.ts is not specified and it doesn't parse as CommonJS.
+2026-10-22T13:38:22.9668321Z # Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+2026-10-22T13:38:22.9670067Z # To eliminate this warning, add "type": "module" to /home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj/frontend/package.json.
+2026-10-22T13:38:22.9672786Z # (node:2821) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj/packages/contracts/src/account-interface.ts is not specified and it doesn't parse as CommonJS.
+2026-10-22T13:38:22.9674609Z # Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+2026-10-22T13:38:22.9675526Z # To eliminate this warning, add "type": "module" to /home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj/packages/contracts/package.json.
+2026-10-22T13:38:23.0791262Z # Subtest: H02 HTTP authentication, real policy, ownership and fail-closed routes
+2026-10-22T13:38:23.0797829Z ok 1 - H02 HTTP authentication, real policy, ownership and fail-closed routes
+2026-10-22T13:38:23.0798597Z   ---
+2026-10-22T13:38:23.0798952Z   duration_ms: 125.667376
+2026-10-22T13:38:23.0799364Z   type: 'test'
+2026-10-22T13:38:23.0799708Z   ...
+2026-10-22T13:38:23.1633123Z # Subtest: H02 HTTP create/edit/list/detail, persistence restart and dataset-isolated reset
+2026-10-22T13:38:23.1635694Z ok 2 - H02 HTTP create/edit/list/detail, persistence restart and dataset-isolated reset
+2026-10-22T13:38:23.1636473Z   ---
+2026-10-22T13:38:23.1636884Z   duration_ms: 108.434844
+2026-10-22T13:38:23.1637305Z   type: 'test'
+2026-10-22T13:38:23.1637666Z   ...
+2026-10-22T13:38:23.2180707Z # Subtest: H02 HTTP request/result separation, correlated deduplication, failure retry and stale generation
+2026-10-22T13:38:23.2183387Z ok 3 - H02 HTTP request/result separation, correlated deduplication, failure retry and stale generation
+2026-10-22T13:38:23.2184091Z   ---
+2026-10-22T13:38:23.2184580Z   duration_ms: 54.506941
+2026-10-22T13:38:23.2185189Z   type: 'test'
+2026-10-22T13:38:23.2185596Z   ...
+2026-10-22T13:38:23.2843347Z # Subtest: H02 default adapter progresses after request and external transports are blocked in the dedicated process
+2026-10-22T13:38:23.2844865Z ok 4 - H02 default adapter progresses after request and external transports are blocked in the dedicated process
+2026-10-22T13:38:23.2845698Z   ---
+2026-10-22T13:38:23.2846010Z   duration_ms: 64.291531
+2026-10-22T13:38:23.2846416Z   type: 'test'
+2026-10-22T13:38:23.2846697Z   ...
+2026-10-22T13:38:23.3164681Z # Subtest: H02 B review regressions: generic interface preserves scope, required fields and dataset binding
+2026-10-22T13:38:23.3165729Z ok 5 - H02 B review regressions: generic interface preserves scope, required fields and dataset binding
+2026-10-22T13:38:23.3166175Z   ---
+2026-10-22T13:38:23.3166376Z   duration_ms: 48.08321
+2026-10-22T13:38:23.3166617Z   type: 'test'
+2026-10-22T13:38:23.3166814Z   ...
+2026-10-22T13:38:23.3321932Z 1..5
+2026-10-22T13:38:23.3322271Z # tests 5
+2026-10-22T13:38:23.3322594Z # suites 0
+2026-10-22T13:38:23.3322897Z # pass 5
+2026-10-22T13:38:23.3323222Z # fail 0
+2026-10-22T13:38:23.3324846Z # cancelled 0
+2026-10-22T13:38:23.3325222Z # skipped 0
+2026-10-22T13:38:23.3325526Z # todo 0
+2026-10-22T13:38:23.3325777Z # duration_ms 614.824047
+2026-10-22T13:38:23.3532689Z ##[group]Run pnpm regression:multi-market
+2026-10-22T13:38:23.3533031Z [36;1mpnpm regression:multi-market[0m
+2026-10-22T13:38:23.3569337Z shell: /usr/bin/bash -e {0}
+2026-10-22T13:38:23.3569594Z env:
+2026-10-22T13:38:23.3569864Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-22T13:38:23.3570170Z ##[endgroup]
+2026-10-22T13:38:23.7214953Z 
+2026-10-22T13:38:23.7215941Z > dio-crm@0.1.0 regression:multi-market /home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj
+2026-10-22T13:38:23.7216995Z > node scripts/regression/multi-market-ui-check.mjs
+2026-10-22T13:38:23.7217404Z 
+2026-10-22T13:38:23.7525833Z [regression:multi-market] PASS — 85 source-level architecture/responsive checks passed.
+2026-10-22T13:38:23.7527993Z INFO Viewport source matrix covered: Desktop 1440+ default, Laptop <=1100, Tablet <=920/coarse pointer, Android/iOS <=430 + safe-area rules.
+2026-10-22T13:38:23.7529077Z INFO This gate does not claim physical-device or deployed-runtime validation; those remain DEV/UAT Pilot Gate activities.
+2026-10-22T13:38:23.7665573Z ##[group]Run pnpm i18n:check
+2026-10-22T13:38:23.7665859Z [36;1mpnpm i18n:check[0m
+2026-10-22T13:38:23.7702907Z shell: /usr/bin/bash -e {0}
+2026-10-22T13:38:23.7703173Z env:
+2026-10-22T13:38:23.7703432Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-22T13:38:23.7703738Z ##[endgroup]
+2026-10-22T13:38:24.1474349Z 
+2026-10-22T13:38:24.1475154Z > dio-crm@0.1.0 i18n:check /home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj
+2026-10-22T13:38:24.1475616Z > node scripts/i18n/check.mjs
+2026-10-22T13:38:24.1475790Z 
+2026-10-22T13:38:24.1803823Z [i18n] translation key parity PASS (398 keys, ko-KR, en-US)
+2026-10-22T13:38:24.1940308Z ##[group]Run pnpm i18n:hardcode
+2026-10-22T13:38:24.1940613Z [36;1mpnpm i18n:hardcode[0m
+2026-10-22T13:38:24.1977953Z shell: /usr/bin/bash -e {0}
+2026-10-22T13:38:24.1978216Z env:
+2026-10-22T13:38:24.1978483Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-22T13:38:24.1978792Z ##[endgroup]
+2026-10-22T13:38:24.5700403Z 
+2026-10-22T13:38:24.5701345Z > dio-crm@0.1.0 i18n:hardcode /home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj
+2026-10-22T13:38:24.5702445Z > node scripts/i18n/hardcode-check.mjs
+2026-10-22T13:38:24.5702801Z 
+2026-10-22T13:38:24.6030449Z [i18n] hard-coded Korean TSX text check PASS
+2026-10-22T13:38:24.6169020Z ##[group]Run pnpm pwa:check
+2026-10-22T13:38:24.6169310Z [36;1mpnpm pwa:check[0m
+2026-10-22T13:38:24.6206332Z shell: /usr/bin/bash -e {0}
+2026-10-22T13:38:24.6206597Z env:
+2026-10-22T13:38:24.6206856Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-22T13:38:24.6207166Z ##[endgroup]
+2026-10-22T13:38:24.9861993Z 
+2026-10-22T13:38:24.9862910Z > dio-crm@0.1.0 pwa:check /home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj
+2026-10-22T13:38:24.9863533Z > node scripts/pwa/check.mjs
+2026-10-22T13:38:24.9863729Z 
+2026-10-22T13:38:25.0172401Z [pwa:check] PASS — manifest, installability baseline and API cache safety checks passed.
+2026-10-22T13:38:25.0304457Z ##[group]Run pnpm env:check
+2026-10-22T13:38:25.0304745Z [36;1mpnpm env:check[0m
+2026-10-22T13:38:25.0342206Z shell: /usr/bin/bash -e {0}
+2026-10-22T13:38:25.0342511Z env:
+2026-10-22T13:38:25.0342769Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-22T13:38:25.0343080Z ##[endgroup]
+2026-10-22T13:38:25.4055941Z 
+2026-10-22T13:38:25.4056877Z > dio-crm@0.1.0 env:check /home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj
+2026-10-22T13:38:25.4058640Z > node scripts/deploy/devuat-migration-plan.mjs --target DEV && node scripts/pilot/mobile-pwa-readiness.mjs && node scripts/integration/external-readiness.mjs
+2026-10-22T13:38:25.4059676Z 
+2026-10-22T13:38:25.4420187Z DIO CRM DEV Migration Plan
+2026-10-22T13:38:25.4421487Z Migrations:
+2026-10-22T13:38:25.4422450Z 01. 001_phase1_foundation.sql
+2026-10-22T13:38:25.4423005Z 02. 002_phase2_customer.sql
+2026-10-22T13:38:25.4423448Z 03. 003_phase3_activity.sql
+2026-10-22T13:38:25.4423934Z 04. 004_phase4_opportunity.sql
+2026-10-22T13:38:25.4424537Z 05. 005_phase5_contract_collection.sql
+2026-10-22T13:38:25.4425126Z 06. 006_phase6_order_delivery_sales.sql
+2026-10-22T13:38:25.4425645Z 07. 007_phase7_analytics.sql
+2026-10-22T13:38:25.4427914Z 08. 008_phase8_hardening.sql
+2026-10-22T13:38:25.4428455Z 09. 009_globalization_foundation.sql
+2026-10-22T13:38:25.4428937Z 10. 010_account_interface_fields.sql
+2026-10-22T13:38:25.4429464Z 11. 011_multi_market_foundation.sql
+2026-10-22T13:38:25.4429886Z Seeds:
+2026-10-22T13:38:25.4430179Z 01. 001_phase1_seed.sql
+2026-10-22T13:38:25.4430575Z 02. 002_phase2_seed.sql
+2026-10-22T13:38:25.4430968Z 03. 003_phase3_seed.sql
+2026-10-22T13:38:25.4431420Z 04. 004_phase4_seed.sql
+2026-10-22T13:38:25.4431950Z 05. 005_phase5_seed.sql
+2026-10-22T13:38:25.4432189Z 06. 006_phase6_seed.sql
+2026-10-22T13:38:25.4432501Z 07. 007_phase7_seed.sql
+2026-10-22T13:38:25.4432956Z 08. 008_phase8_seed.sql
+2026-10-22T13:38:25.4433342Z 09. 009_globalization_seed.sql
+2026-10-22T13:38:25.4433905Z PLAN ONLY No SQL was executed. Add --execute only after backup/snapshot and environment approval.
+2026-10-22T13:38:25.4688737Z DIO CRM Mobile/PWA Pilot Readiness
+2026-10-22T13:38:25.4690028Z Web: (not supplied)
+2026-10-22T13:38:25.4690755Z API: (not supplied)
+2026-10-22T13:38:25.4691404Z WARN HTTPS endpoint - CRM_WEB_BASE_URL or --baseUrl is required for runtime pilot validation
+2026-10-22T13:38:25.4692204Z INFO Runtime checks skipped. Use --strict with a deployed DEV/UAT HTTPS URL for Pilot Gate.
+2026-10-22T13:38:25.4951801Z DIO CRM External Integration Readiness
+2026-10-22T13:38:25.4953647Z SKIP  Map provider config - CRM_MAP_PROVIDER not configured
+2026-10-22T13:38:25.4954545Z SKIP  ERP test endpoint - CRM_ERP_BASE_URL and CRM_ERP_HEALTH_PATH are required
+2026-10-22T13:38:25.4955406Z INFO Connectivity PASS does not prove business transaction correctness. Validate request/response mappings in UAT using non-production test data.
+2026-10-22T13:38:25.5096774Z ##[group]Run pnpm audit:critical
+2026-10-22T13:38:25.5097231Z [36;1mpnpm audit:critical[0m
+2026-10-22T13:38:25.5154465Z shell: /usr/bin/bash -e {0}
+2026-10-22T13:38:25.5154899Z env:
+2026-10-22T13:38:25.5155312Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-22T13:38:25.5155878Z ##[endgroup]
+2026-10-22T13:38:25.8937191Z 
+2026-10-22T13:38:25.8938136Z > dio-crm@0.1.0 audit:critical /home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj
+2026-10-22T13:38:25.8939002Z > pnpm audit --audit-level=critical
+2026-10-22T13:38:25.8939347Z 
+2026-10-22T13:38:27.6581378Z 19 vulnerabilities found
+2026-10-22T13:38:27.6582160Z Severity: 2 low | 11 moderate | 6 high
+2026-10-22T13:38:27.6844054Z ##[group]Run actions/upload-artifact@v4
+2026-10-22T13:38:27.6844345Z with:
+2026-10-22T13:38:27.6844629Z   name: hq-validation-93a7c0372f7ce873a3c5c93975761e297394bce9
+2026-10-22T13:38:27.6845057Z   path: frontend/dist/
+docs/hq-standard/implementation/evidence/
+
+2026-10-22T13:38:27.6845398Z   retention-days: 7
+2026-10-22T13:38:27.6845615Z   if-no-files-found: warn
+2026-10-22T13:38:27.6845847Z   compression-level: 6
+2026-10-22T13:38:27.6846062Z   overwrite: false
+2026-10-22T13:38:27.6846276Z   include-hidden-files: false
+2026-10-22T13:38:27.6846505Z env:
+2026-10-22T13:38:27.6846741Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2026-10-22T13:38:27.6847054Z ##[endgroup]
+2026-10-22T13:38:27.8439350Z (node:3029) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-22T13:38:27.8440086Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-22T13:38:27.8511828Z Multiple search paths detected. Calculating the least common ancestor of all paths
+2026-10-22T13:38:27.8514403Z The least common ancestor is /home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj. This will be the root directory of the artifact
+2026-10-22T13:38:27.8515864Z With the provided path, there will be 8 files uploaded
+2026-10-22T13:38:27.8517678Z Artifact name is valid!
+2026-10-22T13:38:27.8518375Z Root directory input is valid!
+2026-10-22T13:38:28.2206984Z Beginning upload of artifact content to blob storage
+2026-10-22T13:38:28.2654624Z (node:3029) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-22T13:38:28.6039466Z Uploaded bytes 177576
+2026-10-22T13:38:28.6644839Z Finished uploading artifact content to blob storage!
+2026-10-22T13:38:28.6646731Z SHA256 digest of uploaded artifact zip is de3fdfb62227dfb000eac31d351369936dab077e4e180c545dd254cde0d231b8
+2026-10-22T13:38:28.6648008Z Finalizing artifact upload
+2026-10-22T13:38:29.1268225Z Artifact hq-validation-93a7c0372f7ce873a3c5c93975761e297394bce9.zip successfully finalized. Artifact ID 12430500958
+2026-10-22T13:38:29.1269549Z Artifact hq-validation-93a7c0372f7ce873a3c5c93975761e297394bce9 has been successfully uploaded! Final size is 177576 bytes. Artifact ID is 12430500958
+2026-10-22T13:38:29.1275489Z Artifact download URL: https://github.com/dio-securer/dio_crm_dev_proj/actions/runs/39788520604/artifacts/12430500958
+2026-10-22T13:38:29.1439668Z Post job cleanup.
+2026-10-22T13:38:29.2668209Z (node:3041) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-22T13:38:29.2669903Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-22T13:38:29.2798916Z Post job cleanup.
+2026-10-22T13:38:29.4284402Z Pruning is unnecessary.
+2026-10-22T13:38:29.4485648Z Post job cleanup.
+2026-10-22T13:38:29.5348504Z [command]/usr/bin/git version
+2026-10-22T13:38:29.5388830Z git version 2.55.0
+2026-10-22T13:38:29.5426478Z Temporarily overriding HOME='/home/runner/work/_temp/e811c4d2-c9a7-4935-a69f-2f10840f5098' before making global git config changes
+2026-10-22T13:38:29.5428051Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-22T13:38:29.5433722Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/dio_crm_dev_proj/dio_crm_dev_proj
+2026-10-22T13:38:29.5469852Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-22T13:38:29.5502260Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-22T13:38:29.5760127Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-22T13:38:29.5776155Z http.https://github.com/.extraheader
+2026-10-22T13:38:29.5786378Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-22T13:38:29.5816895Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-22T13:38:29.6021925Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-22T13:38:29.6053544Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-22T13:38:29.6434865Z Cleaning up orphan processes
+2026-10-22T13:38:29.6755509Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-node@v4, actions/upload-artifact@v4, pnpm/action-setup@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

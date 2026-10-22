@@ -2,10 +2,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { apiGet, apiPatch, apiPost } from './api';
 import { useGlobalization } from './market/globalization-context';
+import { useHqMock } from './hq-mock/HqMockProvider';
 import { formatCurrency } from './formatting/currency';
 
 type Opportunity = {
   public_id: string; opportunity_name: string; stage: string; record_type: string; amount: number;
+  erp_customer_code?: string | null; win_allowed?: boolean; order_allowed?: boolean;
   expected_close_date?: string | null; success_probability?: number | null; forecast_category?: string | null;
   account_name: string; account_public_id: string; erp_approved_yn: boolean; contract_created_yn: boolean;
 };
@@ -16,13 +18,14 @@ const stages = ['NEEDS_ANALYSIS','PROPOSAL','NEGOTIATION','CLOSED_WON','CLOSED_L
 
 export function OpportunitiesPage() {
   const { t } = useTranslation();
+  const hq = useHqMock();
   const { globalization } = useGlobalization();
   const money = (value:number) => formatCurrency(Number(value||0),globalization.locale,globalization.currencyCode);
   const stageName = (stage:string) => t(`opportunity.stages.${stage}`,{defaultValue:stage});
   const [rows, setRows] = useState<Opportunity[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [catalog, setCatalog] = useState<Catalog[]>([]);
-  const [selected, setSelected] = useState<string>('');
+  const [selected, setSelected] = useState<string>(() => hq.enabled ? new URLSearchParams(window.location.search).get('record') ?? '' : '');
   const [accountPublicId, setAccountPublicId] = useState('');
   const [name, setName] = useState('');
   const [reason, setReason] = useState('');
@@ -79,6 +82,7 @@ export function OpportunitiesPage() {
       <div style={{border:'1px solid #dde3ea',padding:14,borderRadius:10}}>
         <h3>{t('opportunity.work')}</h3>
         <div>{current ? `${current.opportunity_name} / ${stageName(current.stage)} / ${money(current.amount)}` : t('common.selectNone')}</div>
+        {hq.enabled && current && <p data-testid="linked-opportunity-ready" data-record-id={current.public_id}>{t('account.fields.erpCode')}: {current.erp_customer_code ?? '—'} · {t('hqCustomer.orderAllowed')}: {t(current.order_allowed ? 'hqCustomer.allowed' : 'hqCustomer.notAllowed')}</p>}
         <input value={reason} onChange={e=>setReason(e.target.value)} placeholder={t('opportunity.reason')} style={{width:'100%',boxSizing:'border-box',padding:8,margin:'8px 0'}}/>
         <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>{stages.map(s=><button key={s} onClick={()=>move(s)}>{stageName(s)}</button>)}</div>
         <button onClick={saveNegotiation} style={{marginTop:8}}>{t('opportunity.forecastSample')}</button>

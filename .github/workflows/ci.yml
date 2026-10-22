@@ -16,11 +16,35 @@ jobs:
         with:
           node-version: 22
       - run: pnpm install --no-frozen-lockfile
+      - name: Record resolved dependency lockfile changes
+        run: git diff -- pnpm-lock.yaml
       - run: pnpm build
       - run: pnpm test
+      - run: pnpm hq:check
+      - run: pnpm hq:http
+      - run: pnpm exec playwright install chromium
+      - name: Verify Chromium runtime and Korean font availability
+        run: |
+          if ! pnpm exec node --input-type=module -e 'import { chromium } from "playwright"; const browser = await chromium.launch({headless:true}); await browser.close();'; then
+            pnpm exec playwright install-deps chromium
+          fi
+          if [ -z "$(fc-list :lang=ko family)" ]; then
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends fonts-unifont
+          fi
+      - run: pnpm hq:browser
       - run: pnpm regression:multi-market
       - run: pnpm i18n:check
       - run: pnpm i18n:hardcode
       - run: pnpm pwa:check
       - run: pnpm env:check
       - run: pnpm audit:critical
+      - name: Upload HQ browser build and validation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hq-validation-${{ github.sha }}
+          path: |
+            frontend/dist/
+            docs/hq-standard/implementation/evidence/
+          retention-days: 7

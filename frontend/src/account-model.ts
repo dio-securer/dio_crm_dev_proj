@@ -148,8 +148,8 @@ export function applyForm(row: AccountSummary, form: AccountFormInput): AccountS
   };
 }
 
-export function listVisibleAccounts(rows: AccountSummary[], search: string, scope: AccountScope) {
-  return filterAccounts(rows, { search, scope, ownerUserId: SANDBOX_OWNER_ID });
+export function listVisibleAccounts(rows: AccountSummary[], search: string, scope: AccountScope, ownerUserId = SANDBOX_OWNER_ID) {
+  return filterAccounts(rows, { search, scope, ownerUserId });
 }
 
 export function erpMissingCodes(row: AccountSummary) {
