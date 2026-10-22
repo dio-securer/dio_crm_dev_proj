@@ -1,0 +1,30 @@
+✔ T71 feature dependencies and registry are validated (19.271713ms)
+✔ T72 registered screens, duplicate routes, cycles and section references (9.643152ms)
+✔ T48 opposing effects and cross-rule hidden required rejected regardless of condition (7.14291ms)
+✔ base readOnly cannot be weakened by DISPLAY/SAVE rules (3.474016ms)
+✔ condition AST has strict null, empty arrays, decimal and context semantics (0.512057ms)
+✔ extension five types reject precision/date/code/null/type/length errors (0.908843ms)
+✔ action allowlist rejects arbitrary operation (2.909157ms)
+✔ HQ TEMPLATE no-op validation and publish retain exact profile layout (105.529154ms)
+✔ business name invariant cannot be removed or weakened by a rule (3.800253ms)
+✔ T46 drafts isolated; published field/list/action affects only US_A; stale release409 (606.065095ms)
+✔ T47 create/update five extension types, required rule, nullable and omitted PATCH preservation (66.37458ms)
+✔ T71 feature OFF blocks direct API; menu hiding does not grant or revoke permission (439.304525ms)
+✔ T75 shared view unreadable field rejected during validation (91.116398ms)
+✔ T75 published view columns filtered and unreadable sort denied; metadata excludes secrets (30.82037ms)
+✔ T67 duplicate masked write422; readOnly mask cannot be replaced; raw value retained (26.309618ms)
+✔ extension type change with existing data blocked; inactive keeps stored value and rejects writes (232.45403ms)
+✔ registered text-only mask and extension privilege ceiling (26.669519ms)
+✔ LIST_VIEW context filter validates and executes against current company and role (185.098358ms)
+✔ create-only roles expose createWrite separately; blank name cannot create (39.265452ms)
+✔ registry, dependency and rule failures return HTTP422 before publication (478.846009ms)
+✔ field registry exposes only registered metadata to role readers and isolates companies (31.771794ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2577.923651
+$ node --test tests/admin/account-configuration.cjs tests/admin/account-http.cjs

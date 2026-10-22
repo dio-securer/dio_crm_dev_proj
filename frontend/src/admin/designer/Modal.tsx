@@ -1,0 +1,2 @@
+import React,{useLayoutEffect,useRef} from 'react';
+export function Modal({title,children,onClose}:{title:string;children:React.ReactNode;onClose:()=>void}){const ref=useRef<HTMLDialogElement>(null);useLayoutEffect(()=>{const before=document.activeElement as HTMLElement;ref.current?.showModal();return()=>{ref.current?.close();requestAnimationFrame(()=>{if(before?.isConnected)before.focus();});};},[]);return <dialog className="designer-modal" ref={ref} aria-label={title} onCancel={e=>{e.preventDefault();onClose();}}><h3>{title}</h3>{children}</dialog>;}

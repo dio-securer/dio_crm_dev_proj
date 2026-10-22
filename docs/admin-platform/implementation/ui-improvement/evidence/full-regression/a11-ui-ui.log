@@ -1,0 +1,4 @@
+BROWSER boundary checks 29 PASS: T46/T47/T48/T67/T71/T72/T75, nullable sort, AST, stable data
+PASS BROWSER_MOCK: typed drafts/publish, menu order, list columns, group order/3 columns, action label, required rule, five extension types, create/update/detail, US_B isolation, HQ profile, egress=0
+PASS API_MOCK: typed drafts/publish, menu order, list columns, group order/3 columns, action label, required rule, five extension types, create/update/detail, US_B isolation, HQ profile, egress=0
+$ node scripts/admin/run-account-ui.cjs

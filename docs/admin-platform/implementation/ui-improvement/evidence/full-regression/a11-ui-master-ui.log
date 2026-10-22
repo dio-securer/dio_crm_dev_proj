@@ -1,0 +1,4 @@
+BROWSER A06 boundary 12 checks PASS
+PASS BROWSER_MOCK: translation validation/escape, semantic override, ko/en stable values/context, company isolation, code publish, preview/allocation, holiday calendar; egress=0
+PASS API_MOCK: translation validation/escape, semantic override, ko/en stable values/context, company isolation, code publish, preview/allocation, holiday calendar; egress=0
+$ node scripts/admin/run-master-ui.cjs

@@ -1,0 +1,166 @@
+{
+  "executedAt": "2026-10-22T00:48:10.736Z",
+  "commit": "ca03694d59dad29e8d880dcaefbcfa2966c37a14",
+  "results": [
+    {
+      "name": "build",
+      "command": "pnpm build",
+      "status": "PASS",
+      "exitCode": 0,
+      "error": null,
+      "evidencePath": "docs/admin-platform/implementation/ui-improvement/evidence/full-regression/a11-build.log"
+    },
+    {
+      "name": "contracts",
+      "command": "pnpm test",
+      "status": "PASS",
+      "exitCode": 0,
+      "error": null,
+      "evidencePath": "docs/admin-platform/implementation/ui-improvement/evidence/full-regression/a11-contracts.log"
+    },
+    {
+      "name": "engine",
+      "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node --test --test-reporter=tap tests/admin/configuration.cjs tests/admin/account-configuration.cjs tests/admin/master-data.cjs tests/admin/approval-unit.cjs tests/admin/operations.cjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "error": null,
+      "evidencePath": "docs/admin-platform/implementation/ui-improvement/evidence/full-regression/a11-engine.log"
+    },
+    {
+      "name": "http",
+      "command": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node --test --test-reporter=tap tests/admin/api.cjs tests/admin/legacy-auth.cjs tests/admin/legacy-http.cjs tests/admin/organization.cjs tests/admin/security.cjs tests/admin/configuration-http.cjs tests/admin/account-http.cjs tests/admin/master-http.cjs tests/admin/approval-http.cjs tests/admin/notification-http.cjs tests/admin/integration-http.cjs tests/admin/operations-http.cjs tests/admin/reset-http.cjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "error": null,
+      "evidencePath": "docs/admin-platform/implementation/ui-improvement/evidence/full-regression/a11-http.log"
+    },
+    {
+      "name": "ui-entry",
+      "command": "pnpm test:admin:entry",
+      "status": "PASS",
+      "exitCode": 0,
+      "error": null,
+      "evidencePath": "docs/admin-platform/implementation/ui-improvement/evidence/full-regression/a11-ui-entry.log"
+    },
+    {
+      "name": "ui-browser",
+      "command": "pnpm test:admin:browser",
+      "status": "PASS",
+      "exitCode": 0,
+      "error": null,
+      "evidencePath": "docs/admin-platform/implementation/ui-improvement/evidence/full-regression/a11-ui-browser.log"
+    },
+    {
+      "name": "ui-baseline",
+      "command": "pnpm test:admin:baseline",
+      "status": "PASS",
+      "exitCode": 0,
+      "error": null,
+      "evidencePath": "docs/admin-platform/implementation/ui-improvement/evidence/full-regression/a11-ui-baseline.log"
+    },
+    {
+      "name": "ui-security-ui",
+      "command": "pnpm test:admin:security-ui",
+      "status": "PASS",
+      "exitCode": 0,
+      "error": null,
+      "evidencePath": "docs/admin-platform/implementation/ui-improvement/evidence/full-regression/a11-ui-security-ui.log"
+    },
+    {
+      "name": "ui-configuration-ui",
+      "command": "pnpm test:admin:configuration-ui",
+      "status": "PASS",
+      "exitCode": 0,
+      "error": null,
+      "evidencePath": "docs/admin-platform/implementation/ui-improvement/evidence/full-regression/a11-ui-configuration-ui.log"
+    },
+    {
+      "name": "ui-ui",
+      "command": "pnpm test:admin:ui",
+      "status": "PASS",
+      "exitCode": 0,
+      "error": null,
+      "evidencePath": "docs/admin-platform/implementation/ui-improvement/evidence/full-regression/a11-ui-ui.log"
+    },
+    {
+      "name": "ui-master-ui",
+      "command": "pnpm test:admin:master-ui",
+      "status": "PASS",
+      "exitCode": 0,
+      "error": null,
+      "evidencePath": "docs/admin-platform/implementation/ui-improvement/evidence/full-regression/a11-ui-master-ui.log"
+    },
+    {
+      "name": "ui-approval-ui",
+      "command": "pnpm test:admin:approval-ui",
+      "status": "PASS",
+      "exitCode": 0,
+      "error": null,
+      "evidencePath": "docs/admin-platform/implementation/ui-improvement/evidence/full-regression/a11-ui-approval-ui.log"
+    },
+    {
+      "name": "ui-notification-ui",
+      "command": "pnpm test:admin:notification-ui",
+      "status": "PASS",
+      "exitCode": 0,
+      "error": null,
+      "evidencePath": "docs/admin-platform/implementation/ui-improvement/evidence/full-regression/a11-ui-notification-ui.log"
+    },
+    {
+      "name": "ui-integration-ui",
+      "command": "pnpm test:admin:integration-ui",
+      "status": "PASS",
+      "exitCode": 0,
+      "error": null,
+      "evidencePath": "docs/admin-platform/implementation/ui-improvement/evidence/full-regression/a11-ui-integration-ui.log"
+    },
+    {
+      "name": "ui-operations-ui",
+      "command": "pnpm test:admin:operations-ui",
+      "status": "PASS",
+      "exitCode": 0,
+      "error": null,
+      "evidencePath": "docs/admin-platform/implementation/ui-improvement/evidence/full-regression/a11-ui-operations-ui.log"
+    },
+    {
+      "name": "ui-routes-ui",
+      "command": "pnpm test:admin:routes-ui",
+      "status": "PASS",
+      "exitCode": 0,
+      "error": null,
+      "evidencePath": "docs/admin-platform/implementation/ui-improvement/evidence/full-regression/a11-ui-routes-ui.log"
+    },
+    {
+      "name": "regression-multi-market",
+      "command": "pnpm regression:multi-market",
+      "status": "PASS",
+      "exitCode": 0,
+      "error": null,
+      "evidencePath": "docs/admin-platform/implementation/ui-improvement/evidence/full-regression/a11-regression-multi-market.log"
+    },
+    {
+      "name": "i18n-check",
+      "command": "pnpm i18n:check",
+      "status": "PASS",
+      "exitCode": 0,
+      "error": null,
+      "evidencePath": "docs/admin-platform/implementation/ui-improvement/evidence/full-regression/a11-i18n-check.log"
+    },
+    {
+      "name": "i18n-hardcode",
+      "command": "pnpm i18n:hardcode",
+      "status": "PASS",
+      "exitCode": 0,
+      "error": null,
+      "evidencePath": "docs/admin-platform/implementation/ui-improvement/evidence/full-regression/a11-i18n-hardcode.log"
+    },
+    {
+      "name": "pwa-check",
+      "command": "pnpm pwa:check",
+      "status": "PASS",
+      "exitCode": 0,
+      "error": null,
+      "evidencePath": "docs/admin-platform/implementation/ui-improvement/evidence/full-regression/a11-pwa-check.log"
+    }
+  ]
+}

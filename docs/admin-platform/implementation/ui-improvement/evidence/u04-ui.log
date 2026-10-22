@@ -1,0 +1,7 @@
+$ node scripts/admin/run-designer-ui.cjs
+PASS U02 BROWSER_MOCK: 10 stable-key row edits, group roundtrip, detail, 390px save access
+PASS U03 BROWSER_MOCK: filtered selection reset, ten-row atomic bulk/undo/redo, invariant rollback, extension create/deactivate
+PASS U04 BROWSER_MOCK: SCREEN success/FIELD failure, preserved inputs, failed-only same-key retry, validation, reason-required one-release publish
+PASS U02 API_MOCK: 10 stable-key row edits, group roundtrip, detail, 390px save access
+PASS U03 API_MOCK: filtered selection reset, ten-row atomic bulk/undo/redo, invariant rollback, extension create/deactivate
+PASS U04 API_MOCK: SCREEN success/FIELD failure, preserved inputs, failed-only same-key retry, validation, reason-required one-release publish

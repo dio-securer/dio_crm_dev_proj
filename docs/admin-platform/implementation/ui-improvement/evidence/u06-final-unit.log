@@ -1,0 +1,11 @@
+$ pnpm --filter @dio-crm/web exec vitest run src/admin/designer/model.test.ts
+
+ RUN  v3.2.7 /workspace/scratch/60bbf1e11d53/crm-ui-verify/frontend
+
+ ✓ src/admin/designer/model.test.ts (10 tests) 116ms
+
+ Test Files  1 passed (1)
+      Tests  10 passed (10)
+   Start at  20:42:14
+   Duration  743ms (transform 279ms, setup 0ms, collect 402ms, tests 116ms, environment 0ms, prepare 60ms)
+
