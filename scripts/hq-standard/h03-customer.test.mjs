@@ -149,3 +149,93 @@ test('H03 persistence errors roll back conversion rows and the idempotency recei
   const before=app.repository('HQ_DEMO').read();fail=true;await sales.fails('POST',`/api/leads/${ids.lead}/convert`,conversion(1),500,'HQ_INTERNAL_ERROR');assert.deepEqual(app.repository('HQ_DEMO').read(),before);
   fail=false;await sales.ok('POST',`/api/leads/${ids.lead}/convert`,conversion(1));assert.equal(app.repository('HQ_DEMO').read().collections.accounts.length,before.collections.accounts.length+1);
 });
+
+test('H03 B-P1-01 primary pending, failed and timed-out ERP requests block merging atomically',async t=>{
+  for(const scenario of ['DELAYED','TRANSIENT_FAILURE','TIMEOUT'])await t.test(scenario,async()=>{
+    const app=createHqApplication(),admin=await client(app),repo=app.repository('HQ_DEMO');
+    const requested=await admin.ok('POST',`/api/erp-accounts/${ids.pendingAccount}/request`,{expectedVersion:1,idempotencyKey:`pending-${scenario}`},{'x-hq-scenario':scenario});
+    if(scenario!=='DELAYED')await admin.ok('POST','/api/hq/interfaces/advance',{requestId:requested.requestId,scenario});
+    const account=await admin.ok('GET',`/api/accounts/${ids.pendingAccount}`),before=repo.read();
+    await admin.fails('POST','/api/accounts/merge',{primaryPublicId:ids.pendingAccount,duplicatePublicIds:[ids.approvedAccount],expectedVersions:{[ids.pendingAccount]:account.version,[ids.approvedAccount]:1},idempotencyKey:`merge-${scenario}`},409,'MERGE_INTERFACE_PENDING');
+    assert.deepEqual(repo.read(),before);
+    const log=before.collections.interfaceLogs.find(row=>row.requestId===requested.requestId);
+    await admin.ok('POST','/api/hq/interfaces/result',{requestId:log.requestId,resultId:`late-${scenario}`,interfaceCode:'IF-ERP-003',datasetId:log.datasetId,generation:log.generation,businessKey:log.businessKey,success:true,payload:{erpCustomerCode:'PENDING-OWN-IDENTITY',approved:true},version:log.resultVersion+1});
+    assert.equal((await admin.ok('GET',`/api/accounts/${ids.pendingAccount}`)).erp_customer_code,'PENDING-OWN-IDENTITY');
+    assert.equal((await admin.ok('GET',`/api/accounts/${ids.approvedAccount}`)).erp_customer_code,'MOCK-CUST-0001');
+  });
+});
+test('H03 B-P1-01 ERP customer identity is immutable even for a newer successful result',async()=>{
+  const app=createHqApplication(),admin=await client(app),repo=app.repository('HQ_DEMO');
+  const requested=await admin.ok('POST',`/api/erp-accounts/${ids.pendingAccount}/request`,{expectedVersion:1,idempotencyKey:'identity'},{'x-hq-scenario':'DELAYED'});
+  await admin.ok('POST','/api/hq/interfaces/advance',{requestId:requested.requestId,scenario:'SUCCESS'});
+  const before=repo.read(),log=before.collections.interfaceLogs.find(row=>row.requestId===requested.requestId),response={...log.result,resultId:'different-identity',version:log.resultVersion+1,payload:{...log.result.payload,erpCustomerCode:'MUST-NOT-REPLACE'}};
+  await admin.fails('POST','/api/hq/interfaces/result',response,409,'ERP_ACCOUNT_IDENTITY_CONFLICT');assert.deepEqual(repo.read(),before);
+  await admin.ok('POST','/api/hq/interfaces/result',{...response,resultId:'same-identity',payload:{...log.result.payload}});
+  assert.equal((await admin.ok('GET',`/api/accounts/${ids.pendingAccount}`)).erp_customer_code,log.result.payload.erpCustomerCode);
+});
+test('H03 B-P1-02 field masking covers detail, history, timeline, mutation replay, bulk inputs and audit receipts',async()=>{
+  const standard=structuredClone(createHqApplication().standard);
+  for(const key of ['lead.phone','account.erp.tel','contact.mobile']){const field=standard.fields.find(row=>row.fieldKey===key);field.masking='last4';delete field.unmaskPermission;}
+  const app=createHqApplication({standard}),admin=await client(app),leadPhone='010-1111-9999',accountPhone='010-2222-8888',contactPhone='010-3333-7777';
+  const leadInput={phone:leadPhone,expectedVersion:1,idempotencyKey:'masked-lead'};
+  for(const result of [await admin.ok('PATCH',`/api/leads/${ids.lead}`,leadInput),await admin.ok('PATCH',`/api/leads/${ids.lead}`,leadInput),await admin.ok('GET',`/api/leads/${ids.lead}`),await admin.ok('GET',`/api/leads/${ids.lead}/history`)]){
+    assert.equal(JSON.stringify(result).includes(leadPhone),false);assert.ok(JSON.stringify(result).includes('9999'));
+  }
+  const accountInput={phone:accountPhone,expectedVersion:1,idempotencyKey:'masked-account'};
+  await admin.ok('PATCH',`/api/accounts/${ids.approvedAccount}`,accountInput);
+  for(const path of [`/api/accounts/${ids.approvedAccount}/customer-detail`,`/api/analytics/accounts/${ids.approvedAccount}/360`]){
+    const result=await admin.ok('GET',path);assert.equal(JSON.stringify(result).includes(accountPhone),false);assert.ok(result.timeline.some(row=>row.changes?.phone?.after?.endsWith('8888')));
+  }
+  const contactInput={mobile:contactPhone,expectedVersion:1,idempotencyKey:'masked-contact'};
+  for(const result of [await admin.ok('PATCH',`/api/contacts/${ids.contact}`,contactInput),await admin.ok('PATCH',`/api/contacts/${ids.contact}`,contactInput)])assert.equal(JSON.stringify(result).includes(contactPhone),false);
+  const bulkPhone='010-4444-6666',bulk=await admin.ok('POST','/api/accounts/bulk-update',{idempotencyKey:'masked-bulk',rows:[{rowKey:'masked-row',publicId:ids.approvedAccount,expectedVersion:2,values:{phone:bulkPhone}}]});
+  assert.equal(JSON.stringify(bulk).includes(bulkPhone),false);assert.ok(bulk.results[0].input.values.phone.endsWith('6666'));
+  const mergeInput={primaryPublicId:ids.pendingAccount,duplicatePublicIds:[ids.approvedAccount],fieldSources:{phone:ids.approvedAccount},expectedVersions:{[ids.pendingAccount]:1,[ids.approvedAccount]:3},idempotencyKey:'masked-merge'};
+  for(const result of [await admin.ok('POST','/api/accounts/merge',mergeInput),await admin.ok('POST','/api/accounts/merge',mergeInput)])assert.equal(JSON.stringify(result).includes(bulkPhone),false);
+  const audit=await admin.ok('GET','/api/audit-logs'),raw=JSON.stringify(audit);
+  for(const value of [leadPhone,accountPhone,contactPhone,bulkPhone])assert.equal(raw.includes(value),false,value);
+  assert.equal(raw.includes('fingerprint'),false);assert.ok(audit.some(row=>row.action==='HQ_MUTATION_RECEIPT'&&row.detail.receiptRecorded));
+});
+test('H03 B-P1-02 field visibility is reapplied when replaying an old mutation receipt',async()=>{
+  const original=createHqApplication(),writer=await client(original),input={phone:'010-5555-1234',expectedVersion:1,idempotencyKey:'hidden-replay'};
+  await writer.ok('PATCH',`/api/leads/${ids.lead}`,input);const saved=original.repository('HQ_DEMO').read(),standard=structuredClone(original.standard);
+  standard.fields.find(row=>row.fieldKey==='lead.phone').visible=false;
+  const app=createHqApplication({standard,repositoryFactory:datasetId=>new HqRepository({datasetId,load:()=>structuredClone(saved)})}),reader=await client(app);
+  for(const result of [await reader.ok('GET',`/api/leads/${ids.lead}`),await reader.ok('GET',`/api/leads/${ids.lead}/history`),await reader.ok('PATCH',`/api/leads/${ids.lead}`,input)]){
+    assert.equal(JSON.stringify(result).includes(input.phone),false);assert.equal(result.phone,undefined);
+  }
+});
+test('H03 B-P1-02 related options and account360 cannot bypass entity READ or screen policies',async()=>{
+  const app=createHqApplication();const salesPersona=app.personas.find(row=>row.loginId==='hq-sales');
+  salesPersona.permissions=salesPersona.permissions.filter(permission=>!['ACCOUNT.READ','CONTACT.READ','OPPORTUNITY.READ'].includes(permission));
+  const sales=await client(app,'hq-sales'),options=await sales.ok('GET',`/api/leads/${ids.lead}/conversion-options`);
+  for(const key of ['accounts','contacts','opportunities','duplicates'])assert.deepEqual(options[key],[]);
+  for(const path of [`/api/accounts/${ids.approvedAccount}`,`/api/contacts/${ids.contact}`,`/api/opportunities/${ids.approvedOpportunity}`,`/api/analytics/accounts/${ids.approvedAccount}/360`])await sales.fails('GET',path,undefined,403);
+  const app2=createHqApplication();app2.personas.find(row=>row.loginId==='hq-sales').permissions=app2.personas.find(row=>row.loginId==='hq-sales').permissions.filter(permission=>!['CONTACT.READ','OPPORTUNITY.READ','CONTRACT.READ','ORDER.READ','SALES.READ','ACTIVITY.READ'].includes(permission));
+  const sales2=await client(app2,'hq-sales'),detail=await sales2.ok('GET',`/api/accounts/${ids.approvedAccount}/customer-detail`);
+  for(const key of ['contacts','opportunities','contracts','orders','sales','collections','activities','services'])assert.deepEqual(detail[key],[]);
+  assert.equal(detail.account.contact_count,0);
+  const standard=structuredClone(createHqApplication().standard);standard.screens.find(row=>row.screenKey==='HQ_OPPORTUNITY').permissions.push('SCREEN.OPPORTUNITY.READ');
+  const blocked=createHqApplication({standard});blocked.personas[0].permissions=blocked.personas[0].permissions.filter(permission=>permission!=='SCREEN.OPPORTUNITY.READ');const reader=await client(blocked);
+  assert.deepEqual((await reader.ok('GET',`/api/leads/${ids.lead}/conversion-options`)).opportunities,[]);
+  assert.deepEqual((await reader.ok('GET',`/api/accounts/${ids.approvedAccount}/customer-detail`)).opportunities,[]);
+  await reader.fails('GET',`/api/opportunities/${ids.approvedOpportunity}`,undefined,403,'SCREEN_ACCESS_DENIED');
+});
+test('H03 B-P1-03 conversion preserves HIRA exclusion and mapped manual fields',async t=>{
+  for(const excluded of [true,false])await t.test(`excluded=${excluded}`,async()=>{
+    const app=createHqApplication(),sales=await client(app,'hq-sales'),repo=app.repository('HQ_DEMO');
+    const lead=await sales.ok('PATCH',`/api/leads/${ids.lead}`,{hospitalName:'수동 병원 유지',phone:'051-MANUAL',hiraExcluded:excluded,expectedVersion:1,idempotencyKey:'manual-values'});
+    const converted=await sales.ok('POST',`/api/leads/${ids.lead}/convert`,conversion(lead.version,{contactMode:'SKIP',opportunityMode:'SKIP'}));
+    const accountBefore=repo.read().collections.accounts.find(row=>row.public_id===converted.accountPublicId);
+    assert.equal(accountBefore.hira_sync_exclude_yn,excluded);assert.ok(accountBefore.manual_fields.includes('account_name'));assert.ok(accountBefore.manual_fields.includes('business_name'));assert.ok(accountBefore.manual_fields.includes('phone'));
+    repo.transact(d=>{const actor=app.personas[0],log=enqueueInterface(d,actor,{interfaceCode:'IF-HIRA-001',entityType:'HIRA_BATCH',entityPublicId:ids.lead,idempotencyKey:'after-conversion-hira',payload:{hospitals:[{encryptedProviderNo:lead.encrypted_provider_no,hospitalName:'원천 변경 병원',phone:'051-SOURCE',address:'새 원천 주소'}]}});advanceInterface(d,actor,log.requestId);});
+    const account=await sales.ok('GET',`/api/accounts/${converted.accountPublicId}`);assert.equal(account.account_name,'수동 병원 유지');assert.equal(account.phone,'051-MANUAL');assert.equal(account.address,excluded?accountBefore.address:'새 원천 주소');
+  });
+});
+test('H03 B-P1-03 unchanged full-form source values do not become manual overrides',async()=>{
+  const app=createHqApplication(),sales=await client(app,'hq-sales'),repo=app.repository('HQ_DEMO'),initial=await sales.ok('GET',`/api/leads/${ids.lead}`);
+  const changed=await sales.ok('PATCH',`/api/leads/${ids.lead}`,{hospitalName:initial.hospital_name,phone:initial.phone,address:initial.address,keymanNote:'메모만 변경',expectedVersion:initial.version,idempotencyKey:'full-form'});
+  assert.deepEqual(repo.read().collections.leads.find(row=>row.public_id===ids.lead).manual_fields,['keyman_note']);
+  repo.transact(d=>{const actor=app.personas[0],log=enqueueInterface(d,actor,{interfaceCode:'IF-HIRA-001',entityType:'HIRA_BATCH',entityPublicId:ids.lead,idempotencyKey:'refresh-after-full-form',payload:{hospitals:[{encryptedProviderNo:changed.encrypted_provider_no,hospitalName:'최신 원천명',phone:'051-NEW-SOURCE',address:'최신 원천주소'}]}});advanceInterface(d,actor,log.requestId);});
+  const after=await sales.ok('GET',`/api/leads/${ids.lead}`);assert.equal(after.hospital_name,'최신 원천명');assert.equal(after.phone,'051-NEW-SOURCE');assert.equal(after.address,'최신 원천주소');assert.equal(after.keyman_note,'메모만 변경');
+});

@@ -175,8 +175,10 @@ export function AccountsPage() {
     try {
       if (hqMock) {
         const payload = hqPolicy.writablePayload('account', toWritePayload(form) as unknown as Record<string, unknown>, hqFormBaseline ?? {});
-        if (selectedId) await hqCommand.run('PATCH', `/api/accounts/${selectedId}`, { ...payload, expectedVersion: hqFormBaseline?.version });
-        else { const created = await hqCommand.run<AccountSummary>('POST', '/api/accounts', payload); setSelectedId(created.public_id); }
+        const savedAccount = selectedId
+          ? await hqCommand.run<AccountSummary>('PATCH', `/api/accounts/${selectedId}`, { ...payload, expectedVersion: hqFormBaseline?.version })
+          : await hqCommand.run<AccountSummary>('POST', '/api/accounts', payload);
+        setSelectedId(savedAccount.public_id); setHqFormBaseline(savedAccount as unknown as CustomerRecord); setForm(formFromAccount(savedAccount));
         await query.refetch();
         setParams(previous => { const next = new URLSearchParams(previous); ['record', 'tab', 'contact'].forEach(key => next.delete(key)); return next; });
       } else if (sandbox) {

@@ -268,6 +268,7 @@ function applyBusiness(d: HqDataset, actor: HqActor, log: HqInterfaceLog, result
   }
   if (code === 'IF-ERP-003') {
     hqAssert(p.approved !== false, 422, 'INTERFACE_APPROVAL_SUCCESS_MISMATCH');
+    hqAssert(!entity!.erp_customer_code || entity!.erp_customer_code === p.erpCustomerCode, 409, 'ERP_ACCOUNT_IDENTITY_CONFLICT', 'An established ERP customer code cannot be replaced by a later result');
     Object.assign(entity!, { erp_customer_code: p.erpCustomerCode, erp_account_name: typeof log.payload.accountName === 'string' ? log.payload.accountName : entity!.erp_account_name ?? null, erp_approved_yn: true, integration_status: 'SUCCESS', erp_approval_code: 'CM840500', erp_trade_code: 'BC5110', account_status: 'ACTIVE', updated_at: d.clock, version: entity!.version + 1 });
   } else if (code === 'IF-ERP-005') {
     hqAssert(p.approved !== false, 422, 'INTERFACE_APPROVAL_SUCCESS_MISMATCH');
