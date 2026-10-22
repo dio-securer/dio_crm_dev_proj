@@ -161,4 +161,11 @@ pnpm.cmd i18n:hardcode
 pnpm.cmd pwa:check
 ```
 
-`hq:check`는 TypeScript type-stripping을 지원하는 Node에서 실행한다. 현재 실제 검증은 위 Node 24.19.0으로 수행했다. 소스 검토 후 별도 프로세스 없이 H02로 자동 진행하지 않는다.
+`hq:check`는 TypeScript type-stripping을 지원하는 Node에서 실행한다. 현재 실제 검증은 위 Node 24.19.0으로 수행했다. 사용자의 2026-10-22 추가 지시에 따라 H01 게이트 통과 후 H02~H07을 순차 구현·실행 검증·작업자 B 검증으로 진행한다.
+
+
+## 2026-10-22 보안 보완 및 H01 게이트 종결
+
+위 보류 기록은 당시 결과를 보존한다. 후속 보안 수정 커밋 `e360473c5fb0b80b3a1f68a9e5f9f532bd7b1f81`의 [CI 39784369288](https://github.com/dio-securer/dio_crm_dev_proj/actions/runs/39784369288)은 전체 success다. frontend 70, backend 59, HQ 141 및 build/회귀/i18n/PWA가 통과했고 audit Critical은 0건이다. 실제 설치로 생성된 lockfile을 회수해 저장소에 반영했으며 blob SHA는 `6ca05e8a3a85e209a5cc693abbc8d6429afeaf72`이다.
+
+작업자 B가 해당 job 119843515751 및 로그·잠금 파일을 독립 확인하여 **H01 기능·보안 게이트 PASS, H02 진행 승인**을 판정했다. High 6·Moderate 11·Low 2건 및 실 ERP/운영 환경 검증은 [별도 보안 기록](security-remediation.md)에 남겼다. H01 기능 구현을 다시 시작하지 않고 이 승인된 기준에서 H02로 이어간다.
