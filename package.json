@@ -42,7 +42,8 @@
     "test:admin:operations": "node --test tests/admin/operations.cjs tests/admin/operations-http.cjs",
     "test:admin:operations-ui": "node scripts/admin/run-operations-ui.cjs",
     "test:admin:all": "node scripts/admin/run-all.cjs",
-    "test:admin:routes-ui": "node scripts/admin/run-routes-ui.cjs"
+    "test:admin:routes-ui": "node scripts/admin/run-routes-ui.cjs",
+    "test:admin:designer-unit": "pnpm --filter @dio-crm/web exec vitest run src/admin/designer/model.test.ts"
   },
   "devDependencies": {
     "playwright": "1.62.1"
