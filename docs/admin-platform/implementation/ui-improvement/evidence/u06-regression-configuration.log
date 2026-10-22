@@ -1,11 +1,11 @@
-✔ HTTP platform-owned target draft is editable by company admin; validate/publish/runtime/rollback and permissions (716.243339ms)
-✔ false/0/empty stable keys, tombstones, RESET, locks and unsafe properties (5.60583ms)
-✔ draft isolation, validation modification, concurrent publish, idempotency and rollback preserve security/sequence (376.54186ms)
-✔ T56 immutable parent chain and explicit rebase through all levels; US_B unchanged (787.334499ms)
-✔ stale rebase TTL and edit reject without partial changes; unauthorized access (77.758206ms)
-✔ unknown parent and locked tax field fail validation (20.992151ms)
-✔ rollback restores immutable company profile and A02 edit remains usable (147.142828ms)
-✔ new company is pinned at creation and scope conflict/expired preview are atomic (57.454741ms)
+✔ HTTP platform-owned target draft is editable by company admin; validate/publish/runtime/rollback and permissions (675.746694ms)
+✔ false/0/empty stable keys, tombstones, RESET, locks and unsafe properties (6.142182ms)
+✔ draft isolation, validation modification, concurrent publish, idempotency and rollback preserve security/sequence (448.256881ms)
+✔ T56 immutable parent chain and explicit rebase through all levels; US_B unchanged (738.944389ms)
+✔ stale rebase TTL and edit reject without partial changes; unauthorized access (84.0661ms)
+✔ unknown parent and locked tax field fail validation (25.339755ms)
+✔ rollback restores immutable company profile and A02 edit remains usable (173.563918ms)
+✔ new company is pinned at creation and scope conflict/expired preview are atomic (64.011631ms)
 ℹ tests 8
 ℹ suites 0
 ℹ pass 8
@@ -13,5 +13,5 @@
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 1592.800166
+ℹ duration_ms 1681.899492
 $ node --test tests/admin/configuration.cjs tests/admin/configuration-http.cjs

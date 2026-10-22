@@ -6,7 +6,7 @@
 
 키보드 Escape/Enter·상세창 포커스 복귀·locale·390/1024/1440px, 실제 두 탭 충돌, 응답 유실 후 같은 요청키로 revision 1회 증가, 숨겨진 오류 셀 이동, 부분 저장/재시도, 게시 후 실제 SALES 입력 화면과 표시·필수·읽기전용·순서 동일성, 실제 읽기전용 역할과 직접 API 거부, 법인 전환 저장/폐기/취소/실패 차단, 지연된 A 응답과 B scope 분리, 브라우저 재조회 및 새 API 프로세스 시드 복원을 확인했다.
 
-API context의 축약된 membership과 브라우저 membership의 차이를 처리하기 위해 기존 membership 조회 API로 실제 역할을 확인한다. 확인 전에는 편집·검증·게시를 잠근다. 새로운 API나 권한 엔진 변경은 없다. 조회 중 입력을 잠그고 오래된 응답을 무시한다. 상세창 포커스 복귀는 layout effect 및 종료 후 프레임에서 보완했다.
+당시 API context의 축약된 membership을 보완하기 위해 membership/roles 조회로 권한을 계산했으나, U07 독립 검토에서 role.read 추가 의존을 발견했다. U07에서 자기 법인의 기존 approval-metadata permissions로 교체했다. 확인 전에는 편집·검증·게시를 잠근다. 새로운 API나 권한 엔진 변경은 없다. 조회 중 입력을 잠그고 오래된 응답을 무시한다. 상세창 포커스 복귀는 layout effect 및 종료 후 프레임에서 보완했다.
 
 ## UI29 보류 근거
 

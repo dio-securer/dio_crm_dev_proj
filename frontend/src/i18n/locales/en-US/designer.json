@@ -71,7 +71,7 @@
   "removeField": "Remove field placement",
   "deactivate": "Deactivate extension",
   "references": "References",
-  "confirmDiscard": "Discard unsaved changes?",
+  "confirmDiscard": "Discard changes and close?",
   "confirmInheritance": "Restore this item from inherited settings?",
   "selectionReset": "Selection cleared after filtering.",
   "changeCount": "Changed domains",

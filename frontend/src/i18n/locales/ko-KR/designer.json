@@ -71,7 +71,7 @@
   "removeField": "화면 배치에서 제거",
   "deactivate": "확장 필드 비활성화",
   "references": "참조 관계",
-  "confirmDiscard": "저장하지 않은 변경을 폐기하시겠습니까?",
+  "confirmDiscard": "변경한 내용을 버리고 닫으시겠습니까?",
   "confirmInheritance": "해당 항목을 상속값으로 복원하시겠습니까?",
   "selectionReset": "필터 변경으로 선택이 해제되었습니다.",
   "changeCount": "변경 영역",

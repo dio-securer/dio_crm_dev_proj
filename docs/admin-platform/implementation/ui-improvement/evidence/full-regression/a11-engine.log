@@ -1,0 +1,220 @@
+TAP version 13
+# Subtest: T71 feature dependencies and registry are validated
+ok 1 - T71 feature dependencies and registry are validated
+  ---
+  duration_ms: 16.170442
+  type: 'test'
+  ...
+# Subtest: T72 registered screens, duplicate routes, cycles and section references
+ok 2 - T72 registered screens, duplicate routes, cycles and section references
+  ---
+  duration_ms: 13.13603
+  type: 'test'
+  ...
+# Subtest: T48 opposing effects and cross-rule hidden required rejected regardless of condition
+ok 3 - T48 opposing effects and cross-rule hidden required rejected regardless of condition
+  ---
+  duration_ms: 5.76742
+  type: 'test'
+  ...
+# Subtest: base readOnly cannot be weakened by DISPLAY/SAVE rules
+ok 4 - base readOnly cannot be weakened by DISPLAY/SAVE rules
+  ---
+  duration_ms: 4.083583
+  type: 'test'
+  ...
+# Subtest: condition AST has strict null, empty arrays, decimal and context semantics
+ok 5 - condition AST has strict null, empty arrays, decimal and context semantics
+  ---
+  duration_ms: 0.466739
+  type: 'test'
+  ...
+# Subtest: extension five types reject precision/date/code/null/type/length errors
+ok 6 - extension five types reject precision/date/code/null/type/length errors
+  ---
+  duration_ms: 1.242566
+  type: 'test'
+  ...
+# Subtest: action allowlist rejects arbitrary operation
+ok 7 - action allowlist rejects arbitrary operation
+  ---
+  duration_ms: 4.352774
+  type: 'test'
+  ...
+# Subtest: HQ TEMPLATE no-op validation and publish retain exact profile layout
+ok 8 - HQ TEMPLATE no-op validation and publish retain exact profile layout
+  ---
+  duration_ms: 159.727508
+  type: 'test'
+  ...
+# Subtest: business name invariant cannot be removed or weakened by a rule
+ok 9 - business name invariant cannot be removed or weakened by a rule
+  ---
+  duration_ms: 5.10406
+  type: 'test'
+  ...
+# Subtest: A07 config rejects terminal restart, mistyped conditions and duplicate steps
+ok 10 - A07 config rejects terminal restart, mistyped conditions and duplicate steps
+  ---
+  duration_ms: 16.382751
+  type: 'test'
+  ...
+# Subtest: A07 deputy boundary start inclusive/end exclusive and self-document denial
+ok 11 - A07 deputy boundary start inclusive/end exclusive and self-document denial
+  ---
+  duration_ms: 119.777417
+  type: 'test'
+  ...
+# Subtest: A07 inactive principal blocks deputy and permission denied writes leave business data unchanged
+ok 12 - A07 inactive principal blocks deputy and permission denied writes leave business data unchanged
+  ---
+  duration_ms: 45.318517
+  type: 'test'
+  ...
+# Subtest: A07 SLA includes holiday and calendar remains fixed after release changes
+ok 13 - A07 SLA includes holiday and calendar remains fixed after release changes
+  ---
+  duration_ms: 36.907732
+  type: 'test'
+  ...
+# Subtest: A07 simulation facade atomic on feature/policy failure and successful normal engine submit
+ok 14 - A07 simulation facade atomic on feature/policy failure and successful normal engine submit
+  ---
+  duration_ms: 37.033167
+  type: 'test'
+  ...
+# Subtest: false/0/empty stable keys, tombstones, RESET, locks and unsafe properties
+ok 15 - false/0/empty stable keys, tombstones, RESET, locks and unsafe properties
+  ---
+  duration_ms: 7.146938
+  type: 'test'
+  ...
+# Subtest: draft isolation, validation modification, concurrent publish, idempotency and rollback preserve security/sequence
+ok 16 - draft isolation, validation modification, concurrent publish, idempotency and rollback preserve security/sequence
+  ---
+  duration_ms: 416.789461
+  type: 'test'
+  ...
+# Subtest: T56 immutable parent chain and explicit rebase through all levels; US_B unchanged
+ok 17 - T56 immutable parent chain and explicit rebase through all levels; US_B unchanged
+  ---
+  duration_ms: 775.046164
+  type: 'test'
+  ...
+# Subtest: stale rebase TTL and edit reject without partial changes; unauthorized access
+ok 18 - stale rebase TTL and edit reject without partial changes; unauthorized access
+  ---
+  duration_ms: 88.158457
+  type: 'test'
+  ...
+# Subtest: unknown parent and locked tax field fail validation
+ok 19 - unknown parent and locked tax field fail validation
+  ---
+  duration_ms: 20.185735
+  type: 'test'
+  ...
+# Subtest: rollback restores immutable company profile and A02 edit remains usable
+ok 20 - rollback restores immutable company profile and A02 edit remains usable
+  ---
+  duration_ms: 145.718793
+  type: 'test'
+  ...
+# Subtest: new company is pinned at creation and scope conflict/expired preview are atomic
+ok 21 - new company is pinned at creation and scope conflict/expired preview are atomic
+  ---
+  duration_ms: 56.60226
+  type: 'test'
+  ...
+# Subtest: T51 Seoul holiday and zero business days; snapshot independent
+ok 22 - T51 Seoul holiday and zero business days; snapshot independent
+  ---
+  duration_ms: 25.583393
+  type: 'test'
+  ...
+# Subtest: T51 DST gap advances to first valid wall time; overlap selects earlier instant
+ok 23 - T51 DST gap advances to first valid wall time; overlap selects earlier instant
+  ---
+  duration_ms: 18.575722
+  type: 'test'
+  ...
+# Subtest: calendar validation rejects duplicate holidays/weekdays, impossible date, empty schedule and timezone
+ok 24 - calendar validation rejects duplicate holidays/weekdays, impossible date, empty schedule and timezone
+  ---
+  duration_ms: 4.926067
+  type: 'test'
+  ...
+# Subtest: T74 placeholders, immutable semantic keys and blank translations rejected
+ok 25 - T74 placeholders, immutable semantic keys and blank translations rejected
+  ---
+  duration_ms: 1.339479
+  type: 'test'
+  ...
+# Subtest: term mapping and full fallback, missing marker, placeholders preserve literal markup
+ok 26 - term mapping and full fallback, missing marker, placeholders preserve literal markup
+  ---
+  duration_ms: 0.708817
+  type: 'test'
+  ...
+# Subtest: number period uses company timezone; strict pattern and padding exhaustion
+ok 27 - number period uses company timezone; strict pattern and padding exhaustion
+  ---
+  duration_ms: 1.001829
+  type: 'test'
+  ...
+# Subtest: T30 preview does not consume; concurrent allocation unique, retry idempotent and cross-company independent
+ok 28 - T30 preview does not consume; concurrent allocation unique, retry idempotent and cross-company independent
+  ---
+  duration_ms: 127.099993
+  type: 'test'
+  ...
+# Subtest: A10 T33/T81 schedule cancellation, version conflict and fake clock apply
+ok 29 - A10 T33/T81 schedule cancellation, version conflict and fake clock apply
+  ---
+  duration_ms: 415.98237
+  type: 'test'
+  ...
+# Subtest: A10 T81 inactive company cannot execute scheduled release
+ok 30 - A10 T81 inactive company cannot execute scheduled release
+  ---
+  duration_ms: 64.362339
+  type: 'test'
+  ...
+# Subtest: A10 T43-INTEGRATION actual SECURITY release strengthens MFA and session limits
+ok 31 - A10 T43-INTEGRATION actual SECURITY release strengthens MFA and session limits
+  ---
+  duration_ms: 109.497666
+  type: 'test'
+  ...
+# Subtest: A10 T58-INTEGRATION template preview/apply remains draft then release changes runtime
+ok 32 - A10 T58-INTEGRATION template preview/apply remains draft then release changes runtime
+  ---
+  duration_ms: 77.218916
+  type: 'test'
+  ...
+# Subtest: A10 policy rollback and template reverse rollback restore settings only
+ok 33 - A10 policy rollback and template reverse rollback restore settings only
+  ---
+  duration_ms: 293.171742
+  type: 'test'
+  ...
+# Subtest: A10 tightened absolute max lifetime survives refresh origin
+ok 34 - A10 tightened absolute max lifetime survives refresh origin
+  ---
+  duration_ms: 71.114594
+  type: 'test'
+  ...
+# Subtest: A10 template validation pins target parent and inherited REQUIRED cannot be weakened
+ok 35 - A10 template validation pins target parent and inherited REQUIRED cannot be weakened
+  ---
+  duration_ms: 175.153922
+  type: 'test'
+  ...
+1..35
+# tests 35
+# suites 0
+# pass 35
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1643.557149
