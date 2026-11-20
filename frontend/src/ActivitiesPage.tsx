@@ -1,9 +1,13 @@
+import {ConfiguredActivities} from './customization/ConfiguredActivities';
+import {ReportModeBoundary} from './customization/ConfiguredReport';
 import React, { useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import type { ActivityCalendarItem, AccountSummary, LeadSummary } from '@dio-crm/contracts';
 import { apiGet, apiPatch, apiPost } from './api';
 import { useGlobalization } from './market/globalization-context';
+import { isHqMockMode } from './hq-mock/mode';
+import { HqActivitiesPage } from './hq-mock/HqActivityPages';
 
 const box: React.CSSProperties = { border: '1px solid #dfe4ea', borderRadius: 12, padding: 16, background: '#fff' };
 const input: React.CSSProperties = { padding: '8px 10px', border: '1px solid #ccd3dd', borderRadius: 8, minWidth: 160 };
@@ -25,7 +29,9 @@ function position(): Promise<{ latitude: number; longitude: number; accuracyM: n
   });
 }
 
-export function ActivitiesPage() {
+export function ActivitiesPage() { return isHqMockMode() ? <HqActivitiesPage /> : <ReportModeBoundary spec={{screen:'HQ_ACTIVITY',path:'/api/activities/calendar',sections:[]}} legacy={<ExistingActivitiesPage/>} configured={<ConfiguredActivities/>}/>; }
+
+function ExistingActivitiesPage() {
   const { t } = useTranslation();
   const { featureEnabled } = useGlobalization();
   const qc = useQueryClient();

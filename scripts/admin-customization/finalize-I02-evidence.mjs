@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+const dir='docs/admin-platform/customization';
+const banner='<section><h2>이전 확장 단계 기록</h2><p>이 문서는 업무 연결·표준 발행 구현 전의 기록입니다. 현재 구현과 남은 작업은 <a href="07_I02_Legacy_Standard_Report.html">최신 I02 보고서</a>를 확인하세요.</p></section>';
+const report=`${dir}/06_I02_Extension_Report.html`;
+let html=fs.readFileSync(report,'utf8');
+if(!html.includes('07_I02_Legacy_Standard_Report.html'))fs.writeFileSync(report,html.replace('</header>','</header>'+banner));
+const evidence=`${dir}/implementation/evidence/I02`;
+const log=fs.readFileSync(`${evidence}/backend-suite.log`,'utf8');
+if(!/Tests:\s+92 passed, 92 total/.test(log))throw Error('Expected current backend verification');
+fs.writeFileSync(`${evidence}/backend-suite.json`,JSON.stringify({stage:'I02 backend regression',status:'PASS',testSuites:20,tests:92,command:'node scripts/admin-customization/verify-I02.mjs',scope:'Unit, HTTP and synthetic transaction tests; no actual SQL or UAT',summary:log.slice(log.lastIndexOf('Test Suites:')),atUtc:JSON.parse(fs.readFileSync(`${evidence}/verification.json`,'utf8')).atUtc},null,2)+'\n');

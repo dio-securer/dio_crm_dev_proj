@@ -103,6 +103,7 @@ test('H02 inbound account and contract results, fulfillment, collections, sales,
   const repo = repository();
   advance(repo, enqueue(repo, 'IF-ERP-003', seedIDs.pendingAccount));
   advance(repo, enqueue(repo, 'IF-ERP-005', seedIDs.pendingContract));
+  advance(repo, enqueue(repo, 'IF-ERP-007', seedIDs.readyOrder));
   advance(repo, enqueue(repo, 'IF-ERP-008', seedIDs.readyOrder));
   assert.equal(read(repo, 'orders', seedIDs.readyOrder).status, 'COMPLETED'); assert.equal(repo.read().collections.deliveries.length, 1);
   advance(repo, enqueue(repo, 'IF-ERP-009', seedIDs.approvedContract));

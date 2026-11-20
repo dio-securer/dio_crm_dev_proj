@@ -7,3 +7,19 @@ coverage/
 .idea/
 .DS_Store
 backend/.hq-mock/
+
+# Local-only data, secrets and generated assets
+.env.*
+!.env.example
+.pnpm-store/
+.tmp/
+.playwright-mcp/
+.local-manual-review/
+.sfdx/
+.sf/
+*.har
+*.pem
+*.pfx
+backend/.hq-mock*/
+backend/storage/
+frontend/dist-*/

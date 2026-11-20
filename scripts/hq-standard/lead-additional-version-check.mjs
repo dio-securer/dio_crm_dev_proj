@@ -1,0 +1,37 @@
+import assert from 'node:assert/strict';
+import { chromium } from 'playwright';
+import { startHqServer } from './server.mjs';
+const server=await startHqServer({port:0,storageDir:false,autoAdvance:false});
+const browser=await chromium.launch({headless:true});
+try {
+ const page=await browser.newPage();
+ await page.goto(server.url+'/leads');
+ await page.getByRole('button',{name:'신규병원 등록'}).click();
+ const dialog=page.locator('dialog[open]');
+ await dialog.locator('[data-field-key="hospitalName"]').fill('CODEX 버전 시험');
+ await dialog.getByRole('button',{name:'생성',exact:true}).click();
+ await page.locator('.hq-lead-detail').waitFor();
+ await page.getByRole('button',{name:'초도방문',exact:true}).click();
+ await page.getByTestId('save-stage').click();
+ await page.getByTestId('saved-lead-stage').getByText('초도방문').waitFor();
+ await page.getByRole('tab',{name:'심평원 인입정보'}).click();
+ await page.getByLabel('병원 유형').fill('시험 치과');
+ const response=page.waitForResponse(r=>r.url().endsWith('/additional')&&r.request().method()==='PATCH');
+ await page.getByRole('button',{name:'추가 정보 저장'}).click();
+ const result=await response;
+ assert.equal(result.status(),200,await result.text());
+ await page.reload();
+ await page.getByRole('tab',{name:'심평원 인입정보'}).click();
+ assert.equal(await page.getByLabel('병원 유형').inputValue(),'시험 치과');
+ await page.getByRole('tab',{name:'세부 사항'}).click();
+ await page.getByLabel('관심 품목').fill('보존할 입력');
+ await page.getByRole('button',{name:'키맨미팅',exact:true}).click();
+ await page.getByTestId('save-stage').click();
+ await page.getByTestId('saved-lead-stage').getByText('키맨미팅').waitFor();
+ assert.equal(await page.getByLabel('관심 품목').inputValue(),'보존할 입력');
+ const conflict=page.waitForResponse(r=>r.url().endsWith('/additional')&&r.request().method()==='PATCH');
+ await page.getByRole('button',{name:'추가 정보 저장'}).click();
+ assert.equal((await conflict).status(),409);
+ assert.equal(await page.getByLabel('관심 품목').inputValue(),'보존할 입력');
+ console.log('PASS: stage change then additional save and reload');
+} finally {await browser.close();server.server.closeAllConnections();await server.close();}

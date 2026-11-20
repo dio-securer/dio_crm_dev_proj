@@ -1,3 +1,5 @@
+import {ReportModeBoundary} from './customization/ConfiguredReport';
+import {ConfiguredLedger} from './customization/ConfiguredLedger';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { AccountSummary, MonthlyStatement, PackageLedger } from '@dio-crm/contracts';
@@ -15,7 +17,8 @@ function previousMonth() {
   return { from: first.toISOString().slice(0,10), to: last.toISOString().slice(0,10) };
 }
 
-export function LedgerStatementsPage() {
+export function LedgerStatementsPage() { return <ReportModeBoundary spec={{screen:'HQ_LEDGER',path:'/api/me/context',sections:[]}} configured={<ConfiguredLedger/>} legacy={<LegacyLedgerStatementsPage/>}/>; }
+function LegacyLedgerStatementsPage() {
   const { t } = useTranslation();
   const { globalization, featureEnabled } = useGlobalization();
   const money=(value:number)=>formatCurrency(Number(value||0),globalization.locale,globalization.currencyCode);

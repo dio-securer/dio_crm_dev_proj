@@ -1,3 +1,5 @@
+import {ReportModeBoundary} from './customization/ConfiguredReport';
+import {opsReportSpec} from './customization/report-specs';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { apiGet } from './api';
@@ -11,7 +13,8 @@ type OpsStatus = {
   at:string;
 };
 
-export function OpsStatusPage() {
+export function OpsStatusPage() { return <ReportModeBoundary spec={opsReportSpec} legacy={<LegacyOpsStatusPage/>}/>; }
+function LegacyOpsStatusPage() {
   const { t } = useTranslation();
   const [data, setData] = useState<OpsStatus | null>(null);
   const [error, setError] = useState('');

@@ -14,11 +14,16 @@ export function normalizeLocale(value?: string | null): SupportedLocale | undefi
 
 export function resolveInitialLocale(): SupportedLocale {
   if (typeof window === 'undefined') return DEFAULT_LOCALE;
-  return normalizeLocale(localStorage.getItem(STORAGE_KEY))
+  const preview = window as Window & { __DIO_VISUAL_PREVIEW__?: boolean; __DIO_VISUAL_PREVIEW_BOOT__?: { locale?: string } };
+  if (preview.__DIO_VISUAL_PREVIEW__) return normalizeLocale(preview.__DIO_VISUAL_PREVIEW_BOOT__?.locale) ?? DEFAULT_LOCALE;
+  let stored: string | null = null;
+  try { stored = localStorage.getItem(STORAGE_KEY); } catch { /* An opaque preview origin has no storage. */ }
+  return normalizeLocale(stored)
     ?? normalizeLocale(navigator.language)
     ?? DEFAULT_LOCALE;
 }
 
 export function saveLocale(locale: SupportedLocale) {
-  if (typeof window !== 'undefined') localStorage.setItem(STORAGE_KEY, locale);
+  if (typeof window === 'undefined' || (window as Window & { __DIO_VISUAL_PREVIEW__?: boolean }).__DIO_VISUAL_PREVIEW__) return;
+  try { localStorage.setItem(STORAGE_KEY, locale); } catch { /* Locale remains in memory. */ }
 }

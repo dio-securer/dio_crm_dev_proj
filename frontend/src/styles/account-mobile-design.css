@@ -1,0 +1,74 @@
+.account-required-text{display:none}
+@media(max-width:599px){
+ .app-shell.account-route .account-mobile{background:#f4f7fc;padding:0 0 95px;color:#14284c}
+ .app-shell.account-route .mob-list-header{background:#0c2859;color:#fff;padding:20px 16px 10px;border-radius:16px 16px 0 0;margin:0 10px;width:calc(100% - 20px)}
+ .app-shell.account-route .mob-list-header h2{color:white;font-size:21px;font-weight:800}
+ .app-shell.account-route .mob-list-header .mob-new{background:#1766e2!important;color:#fff!important;border-radius:10px!important;padding:0 15px!important;font-size:13px!important;min-height:44px}
+ .app-shell.account-route .mob-search-wrap{background:white;margin:0 10px;padding:0 12px;border-radius:0;border-left:16px solid #0c2859;border-right:16px solid #0c2859;box-sizing:border-box;width:calc(100% - 20px)}
+ .app-shell.account-route .mob-search-wrap svg{color:#557aa9}
+ .app-shell.account-route .mob-search{min-height:46px;font-size:14px}
+ .app-shell.account-route .mob-filters{margin:0 10px;padding:11px 13px 14px;background:#0c2859;border-radius:0 0 16px 16px;display:flex;gap:7px;overflow:auto}
+ .app-shell.account-route .mob-filters button{min-height:42px;width:auto;flex:0 0 auto;border:1px solid #5576a8!important;border-radius:10px!important;background:#284a80!important;color:#e5efff!important;padding:0 10px!important;font-size:12px}
+ .app-shell.account-route .mob-filters button.active{background:#fff!important;color:#174b9e!important;border-color:white!important}
+ .app-shell.account-route .mob-filter-plain{padding:0}
+ .app-shell.account-route .mob-recent-label{padding:18px 15px 10px;font-size:14px;color:#263d61}
+ .app-shell.account-route .mob-account-list{padding:0 10px 20px;gap:9px}
+ .app-shell.account-route .mob-account-row{min-height:76px;padding:13px!important;border:1px solid #e0e9f6!important;border-radius:15px!important;box-shadow:0 5px 16px #17365b0d}
+ .app-shell.account-route .mob-account-icon{width:44px;height:44px;flex-basis:44px;border-radius:12px;color:#0867e7;background:#e4f0ff}
+ .app-shell.account-route .mob-account-content strong{font-size:15px;color:#152b4e}
+ .app-shell.account-route .mob-account-content small{font-size:12px;line-height:1.45;color:#7083a0}
+ .app-shell.account-route .mob-layer{background:#f4f7fc;padding-bottom:20px}
+ .app-shell.account-route .mob-detail-top{position:sticky;top:0;z-index:5;min-height:60px;margin:10px 10px 0;padding:7px 10px;border:1px solid #e1eafa;border-radius:14px;background:white;box-shadow:0 3px 12px #16365c0a}
+ .app-shell.account-route .mob-detail-top strong{font-size:15px;color:#142c54;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .app-shell.account-route .mob-detail-top button{border-radius:9px!important;background:#edf4ff!important;color:#2059ad!important;padding:0 8px!important;font-size:12px}
+ .app-shell.account-route .hq-account-workspace{padding:0 10px 30px}
+ .app-shell.account-route .hq-account-glance{margin:12px 0;padding:15px;background:#fff;border:1px solid #dfe9f8;border-radius:16px;box-shadow:0 5px 18px #16365c0d}
+ .app-shell.account-route .hq-account-glance-icon{width:44px;height:44px;border-radius:12px;background:#e4f0ff;color:#0867e7}
+ .app-shell.account-route .hq-account-glance strong{font-size:17px;color:#10284e}
+ .app-shell.account-route .hq-account-glance-meta{font-size:12px;color:#627998}
+ .app-shell.account-route .hq-account-workspace .hq-customer-tabs{gap:3px;padding:4px;margin:0 0 12px;background:#fff;border:1px solid #e3ebf7;border-radius:12px;overflow-x:auto}
+ .app-shell.account-route .hq-account-workspace .hq-customer-tabs button{min-height:42px;padding:9px 12px;border:0;border-radius:9px;font-size:12px;white-space:nowrap;color:#667a96}
+ .app-shell.account-route .hq-account-workspace .hq-customer-tabs button[aria-selected=true]{background:#e7f1ff;color:#0758d7;box-shadow:none;font-weight:800}
+ .app-shell.account-route .hq-account-workspace .hq-customer-panel,.app-shell.account-route .hq-account-workspace .mob-edit-form{background:#fff;border:1px solid #e2eaf6;border-radius:15px;padding:15px;box-shadow:0 5px 18px #16365c0a;margin:10px 0}
+ .app-shell.account-route .hq-account-workspace h3{color:#15335e;font-size:15px}
+ .app-shell.account-route .hq-account-workspace .hq-customer-fields,.app-shell.account-route .account-form-grid{gap:12px}
+ .app-shell.account-route .hq-account-workspace label,.app-shell.account-route .mob-edit-form label{font-size:13px;font-weight:700;color:#405576;gap:6px}
+ .app-shell.account-route .hq-account-workspace input:not([type=checkbox]),.app-shell.account-route .hq-account-workspace select,.app-shell.account-route .hq-account-workspace textarea,.app-shell.account-route .mob-edit-form input:not([type=checkbox]),.app-shell.account-route .mob-edit-form select,.app-shell.account-route .mob-edit-form textarea{min-height:44px;border:1px solid #d8e4f3;border-radius:9px;background:white;color:#172d4e}
+ .app-shell.account-route .account-form-sections{gap:12px}
+ .app-shell.account-route .account-form-sections fieldset{padding:13px;border:1px solid #e1eafa;border-radius:12px;background:#f9fbff}
+ .app-shell.account-route .account-form-sections legend{color:#1b57ae;font-size:13px}
+ .app-shell.account-route .account-required-star{display:none}.app-shell.account-route .account-required-text{display:inline;margin-left:6px;color:#c93647;font-size:11px;font-weight:800}
+ .app-shell.account-route .account-form-actions,.app-shell.account-route .hq-account-workspace footer{gap:8px}
+ .app-shell.account-route .account-form-actions button,.app-shell.account-route .hq-account-workspace footer button{min-height:44px;border-radius:10px}
+ .app-shell.account-route .hq-account-workspace .button-primary,.app-shell.account-route .account-form-actions .button-primary{background:#0758d7!important;border-color:#0758d7!important;color:#fff!important}
+ .app-shell.account-route .hq-account-workspace .hq-customer-summary>div{padding:11px 0;border-bottom:1px solid #edf2f9}
+ .app-shell.account-route .hq-account-workspace .hq-customer-table{border:1px solid #e2eaf6;border-radius:12px;background:white}
+ .app-shell.account-route .hq-account-workspace .hq-customer-error{padding:10px 12px;border:1px solid #f3c4cb;border-radius:9px;background:#fff3f4;color:#a72b3b}
+ .app-shell.account-route .mobile-bottom-nav{left:8px;right:8px;bottom:6px;width:auto;height:calc(68px + env(safe-area-inset-bottom));padding:6px 5px calc(6px + env(safe-area-inset-bottom));border:1px solid #dce8f8;border-radius:18px;background:rgba(255,255,255,.98);box-shadow:0 8px 28px #102b5540;gap:3px}
+ .app-shell.account-route .mobile-bottom-nav .shell-nav-link.mobile,.app-shell.account-route .mobile-more-button{position:relative;gap:4px;border-radius:12px;color:#667d9d;font-size:10px;font-weight:650}
+ .app-shell.account-route .mobile-bottom-nav .shell-nav-link.mobile.active,.app-shell.account-route .mobile-more-button.active{color:#0757d5;background:#e8f1ff;box-shadow:inset 0 0 0 1px #d4e5ff}
+}
+@media(max-width:599px){
+ .app-shell.account-route .mob-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));overflow:visible;align-items:stretch}
+ .app-shell.account-route .mob-filters button{width:100%;min-width:0;min-height:48px;white-space:normal;line-height:1.25;text-align:center;justify-content:center;padding:5px!important;font-size:11px}
+ .app-shell.account-route .mob-filters button svg{display:none}
+}
+@media(max-width:599px){
+ .app-shell.account-route .hq-account-workspace .hq-customer-tabs{scrollbar-width:none;-webkit-overflow-scrolling:touch}
+ .app-shell.account-route .hq-account-workspace .hq-customer-tabs::-webkit-scrollbar{display:none}
+ .app-shell.account-route .account-related-panel .hq-customer-toolbar{display:flex;gap:8px;align-items:center;justify-content:space-between;margin:0 0 12px}
+ .app-shell.account-route .account-related-panel .hq-customer-toolbar h3{margin:0;flex:1}
+ .app-shell.account-route .account-related-panel .hq-customer-toolbar button{min-height:42px;border:1px solid #bdd5fa;border-radius:10px;background:#edf4ff;color:#0758c5;font-weight:700}
+ .app-shell.account-route .account-related-panel .hq-customer-fields{display:grid;gap:12px}
+ .app-shell.account-route .account-related-panel ul{list-style:none;margin:14px 0 0;padding:0}
+ .app-shell.account-route .account-related-panel li{border:1px solid #e2eaf6;border-radius:12px;background:#f9fbff;padding:12px!important;margin:8px 0}
+ .app-shell.account-route .account-related-panel footer button{background:#eef4ff;border-color:#d4e3fa;color:#1754a8;font-weight:700}
+ .app-shell.account-route .account-related-panel footer button[type=submit]{background:#0758d7;color:#fff;border-color:#0758d7}
+}
+@media(max-width:599px){
+ .app-shell.account-route .hq-account-workspace .hq-customer-tabs{gap:6px;padding:6px;background:#eaf1fb;border:1px solid #d9e6f7;border-radius:14px;box-shadow:inset 0 1px 3px #153c5910}
+ .app-shell.account-route .hq-account-workspace .hq-customer-tabs button{flex:0 0 auto;min-height:44px;padding:9px 15px;color:#3b5272;font-size:13px;font-weight:700;line-height:1.25;letter-spacing:-.02em}
+ .app-shell.account-route .hq-account-workspace .hq-customer-tabs button[aria-selected=true]{color:#fff;background:#155bd0;box-shadow:0 3px 9px #155bd033;font-weight:800}
+ .app-shell.account-route .hq-account-workspace .hq-customer-tabs button:focus-visible{outline:3px solid #7fb0ff;outline-offset:1px}
+}
+@media(max-width:599px){.app-shell.account-route .mobile-bottom-nav .nav-icon{width:24px;height:24px}.app-shell.account-route .mobile-bottom-nav .shell-nav-link.mobile,.app-shell.account-route .mobile-bottom-nav .mobile-more-button{font-size:11px;font-weight:800;color:#344b6d}.app-shell.account-route .mobile-bottom-nav .shell-nav-link.mobile.active,.app-shell.account-route .mobile-bottom-nav .mobile-more-button.active{color:#064dbd;font-weight:850}}

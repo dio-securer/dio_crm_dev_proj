@@ -1,0 +1,3 @@
+.crm-button-emphasis-primary{background:#173f69!important;border-color:#173f69!important;color:#fff!important}
+.crm-button-emphasis-secondary{background:#fff!important;border-color:#94a3b8!important;color:#173f69!important}
+.crm-button-emphasis-primary:focus-visible,.crm-button-emphasis-secondary:focus-visible{outline:3px solid #2864c8;outline-offset:3px}

@@ -239,3 +239,43 @@ test('H03 B-P1-03 unchanged full-form source values do not become manual overrid
   repo.transact(d=>{const actor=app.personas[0],log=enqueueInterface(d,actor,{interfaceCode:'IF-HIRA-001',entityType:'HIRA_BATCH',entityPublicId:ids.lead,idempotencyKey:'refresh-after-full-form',payload:{hospitals:[{encryptedProviderNo:changed.encrypted_provider_no,hospitalName:'최신 원천명',phone:'051-NEW-SOURCE',address:'최신 원천주소'}]}});advanceInterface(d,actor,log.requestId);});
   const after=await sales.ok('GET',`/api/leads/${ids.lead}`);assert.equal(after.hospital_name,'최신 원천명');assert.equal(after.phone,'051-NEW-SOURCE');assert.equal(after.address,'최신 원천주소');assert.equal(after.keyman_note,'메모만 변경');
 });
+
+
+test('Account hospital survey attributes persist with audit and reject stale or invalid edits', async () => {
+  const app=createHqApplication(),admin=await client(app),viewer=await client(app,'hq-viewer');
+  const row=await admin.ok('GET',`/api/accounts/${ids.approvedAccount}`);
+  const payload={monthlyRevenue:100,payDoctorCount:2,staffCount:5,chairCount:3,monthlyImplants:10,competitorShare:'30% 오스템',hospitalNotes:'샌드박스 확인 상세',expectedVersion:row.version,idempotencyKey:'hospital-survey'};
+  const saved=await admin.ok('PATCH',`/api/accounts/${row.public_id}/hospital`,payload);
+  const detail=await admin.ok('GET',`/api/accounts/${row.public_id}/customer-detail`);
+  for(const [key,value] of Object.entries({monthly_revenue:100,pay_doctor_count:2,staff_count:5,chair_count:3,monthly_implants:10,competitor_share:'30% 오스템',hospital_notes:'샌드박스 확인 상세'})) assert.equal(detail.hospital[key],value,key);
+  assert.ok(saved.history.some(h=>h.changes?.monthly_revenue?.after===100));
+  await admin.fails('PATCH',`/api/accounts/${row.public_id}/hospital`,{...payload,idempotencyKey:'stale-survey'},409,'VERSION_CONFLICT');
+  for(const invalid of [{staffCount:1.5},{monthlyRevenue:-1}]) {
+    const response=await admin.request('PATCH',`/api/accounts/${row.public_id}/hospital`,{...invalid,expectedVersion:saved.version,idempotencyKey:JSON.stringify(invalid)});
+    assert.ok([400,422].includes(response.status),JSON.stringify(response));
+  }
+  await viewer.fails('PATCH',`/api/accounts/${row.public_id}/hospital`,{...payload,expectedVersion:saved.version},403);
+});
+
+test('new account resolves its owner name in create, list and customer detail',async()=>{
+ const app=createHqApplication(),admin=await client(app);
+ const created=await admin.ok('POST','/api/accounts',{accountName:'Owner display test',idempotencyKey:'owner-display'});
+ const expected=app.personas.find(person=>person.userId===created.owner_user_id).name;
+ assert.equal(created.owner_name,expected);
+ assert.equal((await admin.ok('GET','/api/accounts')).find(row=>row.public_id===created.public_id).owner_name,expected);
+ assert.equal((await admin.ok('GET',`/api/accounts/${created.public_id}/customer-detail`)).account.owner_name,expected);
+});
+
+test('account owner label remains hidden under field visibility and revoked writes leave hospital data intact',async()=>{
+ const source=createHqApplication(),standard=structuredClone(source.standard);
+ const ownerField=standard.fields.find(field=>field.entity==='account'&&field.current.dbField==='owner_name');
+ assert.ok(ownerField); ownerField.visible=false;
+ const app=createHqApplication({standard}),admin=await client(app),viewer=await client(app,'hq-viewer');
+ const created=await admin.ok('POST','/api/accounts',{accountName:'Owner privacy test',idempotencyKey:'owner-privacy'});
+ assert.equal(created.owner_name,undefined);
+ const detail=await admin.ok('GET',`/api/accounts/${created.public_id}/customer-detail`);
+ assert.equal(detail.account.owner_name,undefined);
+ const before=app.repository('HQ_DEMO').read();
+ await viewer.fails('PATCH',`/api/accounts/${created.public_id}/hospital`,{staffCount:9,expectedVersion:created.version,idempotencyKey:'revoked'},403);
+ assert.deepEqual(app.repository('HQ_DEMO').read(),before);
+});

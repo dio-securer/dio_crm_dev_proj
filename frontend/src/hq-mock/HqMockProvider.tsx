@@ -2,7 +2,8 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { apiGet, apiPost } from '../api';
-import { getHqScenario, getHqToken, isHqMockMode, setHqScenario, setHqToken, type HqScenario } from './mode';
+import { getHqScenario, getHqToken, isHqMockMode, isVisualPreviewMode, setHqScenario, setHqToken, type HqScenario } from './mode';
+import { visualPreviewActor } from '../customization/visual-preview-fixture';
 import './hq-mock.css';
 
 export interface HqMockUser {
@@ -94,6 +95,7 @@ export function HqMockProvider({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
   const client = useQueryClient();
   const enabled = isHqMockMode();
+  const visualPreview = isVisualPreviewMode();
   const [session, setSession] = useState<HqMockSession | null>(null);
   const [busy, setBusy] = useState(enabled);
   const [error, setError] = useState('');
@@ -103,7 +105,7 @@ export function HqMockProvider({ children }: { children: React.ReactNode }) {
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || visualPreview) return;
     let current = true;
     setBusy(true);
     setError('');
@@ -116,7 +118,7 @@ export function HqMockProvider({ children }: { children: React.ReactNode }) {
       if (current) { setSession(null); setError(reason instanceof Error ? reason.message : String(reason)); }
     }).finally(() => { if (current) setBusy(false); });
     return () => { current = false; };
-  }, [enabled, attempt, client]);
+  }, [enabled, visualPreview, attempt, client]);
 
   const changeActor = useCallback(async (loginId: string) => {
     setBusy(true);
@@ -158,6 +160,7 @@ export function HqMockProvider({ children }: { children: React.ReactNode }) {
     enabled, session, busy, scenario, notice, changeActor, changeScenario, reset
   }), [enabled, session, busy, scenario, notice, changeActor, changeScenario, reset]);
 
+  if (visualPreview) return <HqMockContext.Provider value={{ enabled: true, session: visualPreviewActor as HqMockSession, busy: false, scenario: 'SUCCESS', notice: '', changeActor: unavailable, reset: unavailable, changeScenario: () => {} }}>{children}</HqMockContext.Provider>;
   if (!enabled) return <>{children}</>;
   return <HqMockContext.Provider value={value}>
     {busy || !session ? <main className="hq-mock-session" aria-busy={busy}>

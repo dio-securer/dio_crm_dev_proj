@@ -1,3 +1,5 @@
+import {RecordModeBoundary} from './customization/ConfiguredRecords';
+import {orderRecordSpec} from './customization/record-specs';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { apiGet, apiPatch, apiPost } from './api';
@@ -7,7 +9,8 @@ import { formatCurrency } from './formatting/currency';
 
 type EligibleContract = { public_id:string; contract_name:string; contract_amount:number; erp_contract_no?:string|null; account_name:string; address?:string|null };
 
-export function OrdersPage() {
+export function OrdersPage() { return <RecordModeBoundary spec={orderRecordSpec} legacy={<LegacyOrdersPage/>}/>; }
+function LegacyOrdersPage() {
   const { t } = useTranslation();
   const { globalization } = useGlobalization();
   const money=(value:number)=>formatCurrency(Number(value||0),globalization.locale,globalization.currencyCode);

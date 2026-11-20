@@ -5,10 +5,11 @@ import type { LeadSummary } from '@dio-crm/contracts';
 import { apiGet } from './api';
 import { useHqMock } from './hq-mock/HqMockProvider';
 import { HqLeadsPage } from './hq-mock/HqLeadsPage';
+import {LeadModeBoundary} from './customization/ConfiguredLeads';
 
 export function LeadsPage() {
   const { enabled } = useHqMock();
-  return enabled ? <HqLeadsPage /> : <LegacyLeadsPage />;
+  return enabled ? <HqLeadsPage /> : <LeadModeBoundary legacy={<LegacyLeadsPage />}/>;
 }
 function LegacyLeadsPage() {
   const { t } = useTranslation();

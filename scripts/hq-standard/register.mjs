@@ -7,6 +7,10 @@ import path from 'node:path';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 registerHooks({
   resolve(specifier, context, nextResolve) {
+    // Frontend JSON imports are accepted by Vite; Node's source test host needs an explicit attribute.
+    if (specifier.endsWith('.json') && context.parentURL?.startsWith(pathToFileURL(path.join(root, 'frontend') + path.sep).href)) {
+      return { ...nextResolve(specifier, context), importAttributes: { ...context.importAttributes, type: 'json' } };
+    }
     if (specifier === '@dio-crm/contracts' || specifier.startsWith('@dio-crm/contracts/')) {
       const file = specifier === '@dio-crm/contracts' ? 'index' : specifier.slice('@dio-crm/contracts/'.length);
       return nextResolve(pathToFileURL(path.join(root, 'packages/contracts/src', `${file}.ts`)).href, context);

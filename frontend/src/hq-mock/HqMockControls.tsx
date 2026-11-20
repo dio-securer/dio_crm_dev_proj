@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { apiPost } from '../api';
 import { HQ_SCENARIOS, type HqScenario } from './mode';
 import { useHqMock, type HqResetPreview } from './HqMockProvider';
+import { useLocation } from 'react-router-dom';
 
 const PERSONAS = ['hq-admin', 'hq-sales', 'hq-branch', 'hq-division', 'hq-viewer'] as const;
 
@@ -50,6 +51,8 @@ function ResetDialog({ preview, onClose }: { preview: HqResetPreview; onClose: (
 
 export function HqMockControls() {
   const { t } = useTranslation();
+  const location = useLocation();
+  const [expanded, setExpanded] = useState(false);
   const { enabled, session, busy, scenario, notice, changeActor, changeScenario } = useHqMock();
   const [preview, setPreview] = useState<HqResetPreview | null>(null);
   const [preparing, setPreparing] = useState(false);
@@ -66,7 +69,8 @@ export function HqMockControls() {
     } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); }
     finally { setPreparing(false); }
   };
-  return <section className="hq-mock-controls" aria-label={t('hqMock.title')}>
+  return <section className={`hq-mock-controls${location.pathname === '/leads' ? ' hq-mock-leads' : ''}${expanded ? ' is-expanded' : ''}`} aria-label={t('hqMock.title')}>
+    <button type="button" className="hq-mock-mobile-toggle" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>시험 환경 설정</button>
     <div className="hq-mock-heading">
       <span className="hq-mock-badge">MOCK</span>
       <div><strong>{t('hqMock.title')}</strong><small>{session.dataset.datasetId} · {t(session.dataset.storageLifetime === 'FILE' ? 'hqMock.persisted' : 'hqMock.sessionStorage')}</small></div>

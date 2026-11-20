@@ -1,7 +1,11 @@
+import {RecordModeBoundary} from './customization/ConfiguredRecords';
+import {activityReportRecordSpec} from './customization/activity-record-specs';
 import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { apiGet, apiPatch, apiPost } from './api';
+import { isHqMockMode } from './hq-mock/mode';
+import { HqActivityReportsPage } from './hq-mock/HqActivityPages';
 
 const box: React.CSSProperties = { border: '1px solid #dfe4ea', borderRadius: 12, padding: 16, background: '#fff' };
 function localDate() {
@@ -12,7 +16,9 @@ function localDate() {
   return `${y}-${m}-${day}`;
 }
 
-export function ActivityReportsPage() {
+export function ActivityReportsPage() { return isHqMockMode() ? <HqActivityReportsPage /> : <RecordModeBoundary spec={activityReportRecordSpec} legacy={<ExistingActivityReportsPage />}/>; }
+
+function ExistingActivityReportsPage() {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [date, setDate] = useState(localDate());

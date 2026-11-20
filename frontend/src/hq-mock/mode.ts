@@ -6,6 +6,9 @@ export const HQ_SCENARIOS = ['SUCCESS', 'FAILURE', 'DELAY'] as const;
 export type HqScenario = typeof HQ_SCENARIOS[number];
 
 const volatile = new Map<string, string>();
+export function isVisualPreviewMode(): boolean {
+  return typeof window !== 'undefined' && (window as Window & { __DIO_VISUAL_PREVIEW__?: boolean }).__DIO_VISUAL_PREVIEW__ === true;
+}
 function read(key: string): string | null {
   if (typeof window === 'undefined') return null;
   try { return window.sessionStorage.getItem(key) ?? volatile.get(key) ?? null; }
@@ -22,6 +25,7 @@ function write(key: string, value: string | null) {
 
 export function isHqMockMode(): boolean {
   if (typeof window === 'undefined') return false;
+  if (isVisualPreviewMode()) return true;
   const query = new URLSearchParams(window.location.search);
   const demo = query.get('demo');
   if (demo === 'global' || demo === 'global-executive') {
@@ -43,8 +47,8 @@ export function isHqMockMode(): boolean {
   return (window as Window & { __DIO_CRM_HQ_MOCK__?: boolean }).__DIO_CRM_HQ_MOCK__ === true;
 }
 
-export function getHqToken(): string | null { return read(HQ_TOKEN_KEY); }
-export function setHqToken(token: string | null) { write(HQ_TOKEN_KEY, token); }
+export function getHqToken(): string | null { return isVisualPreviewMode() ? 'VISUAL_PREVIEW_FIXTURE_ONLY' : read(HQ_TOKEN_KEY); }
+export function setHqToken(token: string | null) { if (!isVisualPreviewMode()) write(HQ_TOKEN_KEY, token); }
 export function getHqScenario(): HqScenario {
   const value = read(HQ_SCENARIO_KEY);
   return HQ_SCENARIOS.includes(value as HqScenario) ? value as HqScenario : 'SUCCESS';

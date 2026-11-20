@@ -9,9 +9,16 @@ import {installHqEgressFence} from './egress-fence.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 const types = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.svg':'image/svg+xml','.png':'image/png','.ico':'image/x-icon','.webmanifest':'application/manifest+json','.woff2':'font/woff2'};
+const loopbackHosts = new Set(['127.0.0.1','localhost','::1']);
+export function isPrivateIpv4(host) {
+  if(!/^(?:\d{1,3}\.){3}\d{1,3}$/.test(host)) return false;
+  const parts = host.split('.').map(Number);
+  if(parts.some(part=>part>255)) return false;
+  return parts[0]===10 || (parts[0]===172 && parts[1]>=16 && parts[1]<=31) || (parts[0]===192 && parts[1]===168);
+}
 export async function startHqServer(options = {}) {
   const host = options.host ?? '127.0.0.1';
-  if(!['127.0.0.1','localhost','::1'].includes(host)) throw new Error('HQ mock host must be loopback; this service is a local mock, not production authentication');
+  if(!loopbackHosts.has(host) && !isPrivateIpv4(host)) throw new Error('HQ mock host must be loopback or an explicitly configured private IPv4 address');
   const storageDir = options.storageDir === false ? undefined : path.resolve(options.storageDir ?? path.join(repoRoot,'backend/.hq-mock'));
   const dist = path.resolve(options.dist ?? path.join(repoRoot,'frontend/dist'));
   const repositoryFactory = datasetId => {
@@ -30,7 +37,9 @@ export async function startHqServer(options = {}) {
     res.setHeader('X-HQ-Mock','true');res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');
     try {
       const authority = req.headers.host ?? '';
-      if(!/^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/.test(authority)) {res.writeHead(403);res.end('HQ_HOST_NOT_ALLOWED');return;}
+      const localAuthority = /^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/.test(authority);
+      const privateAuthority = isPrivateIpv4(host) && authority === `${host}:${server.address()?.port}`;
+      if(!(loopbackHosts.has(host) ? localAuthority : privateAuthority)) {res.writeHead(403);res.end('HQ_HOST_NOT_ALLOWED');return;}
       if(req.headers.origin && req.headers.origin !== `http://${authority}`) {res.writeHead(403);res.end('HQ_ORIGIN_NOT_ALLOWED');return;}
       const url = new URL(req.url ?? '/','http://hq.invalid');
       if(url.pathname.startsWith('/api/')) {
@@ -69,7 +78,7 @@ export async function startHqServer(options = {}) {
 }
 if(process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url) {
   const fence=installHqEgressFence();
-  const runtime = await startHqServer({port:Number(process.env.HQ_MOCK_PORT ?? 3210),storageDir:process.env.HQ_MOCK_STORAGE_DIR,application:{outboundAttemptCount:fence.attemptCount}});
+  const runtime = await startHqServer({host:process.env.HQ_MOCK_HOST ?? '127.0.0.1',port:Number(process.env.HQ_MOCK_PORT ?? 3210),storageDir:process.env.HQ_MOCK_STORAGE_DIR,application:{outboundAttemptCount:fence.attemptCount}});
   console.log(`HQ MOCK: ${runtime.url}/?hq=1 — persisted isolated dataset; real ERP/SQL/HIRA/mail/map disconnected`);
   for(const signal of ['SIGTERM','SIGINT'])process.once(signal,()=>{runtime.server.close();});
 }

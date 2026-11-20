@@ -1,0 +1,21 @@
+import {Injectable} from '@nestjs/common';import {z} from 'zod';import {CompanyConfigurationService,type ConfigActor,type SqlReportSection} from './config-service';import {configAssert} from './config-store';import type {AuthenticatedRequest} from '../security/security';
+const date=z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(s=>Number.isFinite(Date.parse(s))&&new Date(s).toISOString().slice(0,10)===s);
+@Injectable()
+export class ConfiguredAnalyticsDashboardGateway{
+ constructor(private readonly service:CompanyConfigurationService){}
+ async handle(req:AuthenticatedRequest,actor:ConfigActor,userKey:number){
+  configAssert(req.method==='GET'&&req.path.replace(/\/$/,'')==='/api/analytics/dashboard',404,'NOT_FOUND');const q=z.object({from:date.optional(),to:date.optional()}).strict().parse(req.query??{});configAssert(!q.from||!q.to||q.from<=q.to,422,'INVALID_REQUEST');
+  const sections:Record<string,SqlReportSection>={},period=(column:string)=>' AND (@from IS NULL OR CAST('+column+' AS date)>=@from) AND (@to IS NULL OR CAST('+column+' AS date)<=@to)';
+  const add=(name:string,fields:string[],sources:string[],sql:string,dateField:string)=>sections[name]={visibilityId:'section:analytics.'+name,bindings:fields.map(id=>({fieldId:'analytics.'+name+'.'+id,input:id,column:id,output:id})),sourceFields:[...sources,...(q.from||q.to?[dateField]:[])],load:async domain=>(await domain.query<Record<string,unknown>>(sql,{companyKey:domain.companyKey,userKey,from:q.from??null,to:q.to??null})).recordset};
+  add('leads',['status','count'],['lead.status'],'SELECT status,COUNT_BIG(*) count FROM crm_lead WITH(HOLDLOCK) WHERE company_id=@companyKey AND owner_user_id=@userKey AND deleted_yn=0'+period('created_at')+' GROUP BY status','analyticsSource.leadCreatedAt');
+  add('activities',['status','count'],['activity.status'],'SELECT status,COUNT_BIG(*) count FROM crm_activity WITH(HOLDLOCK) WHERE company_id=@companyKey AND owner_user_id=@userKey'+period('planned_at')+' GROUP BY status','activity.plannedAt');
+  add('pipeline',['stage','count','amount','weightedAmount'],['opportunity.stage','opportunity.amount','opportunity.successProbability'],'SELECT stage,COUNT_BIG(*) count,ISNULL(SUM(amount),0) amount,ISNULL(SUM(amount*ISNULL(success_probability,0)/100.0),0) weightedAmount FROM crm_opportunity WITH(HOLDLOCK) WHERE company_id=@companyKey AND owner_user_id=@userKey AND deleted_yn=0'+period('expected_close_date')+' GROUP BY stage','opportunity.expectedCloseDate');
+  add('contracts',['status','count','amount'],['contract.status','contract.contractAmount'],'SELECT status,COUNT_BIG(*) count,ISNULL(SUM(contract_amount),0) amount FROM crm_contract WITH(HOLDLOCK) WHERE company_id=@companyKey AND owner_user_id=@userKey AND deleted_yn=0'+period('contract_date')+' GROUP BY status','contract.contractDate');
+  add('orders',['status','count'],['order.status'],'SELECT status,COUNT_BIG(*) count FROM crm_order WITH(HOLDLOCK) WHERE company_id=@companyKey AND owner_user_id=@userKey AND deleted_yn=0'+period('created_at')+' GROUP BY status','analyticsSource.orderCreatedAt');
+  const sales=' FROM crm_sales s WITH(HOLDLOCK) JOIN crm_account a WITH(HOLDLOCK) ON a.account_id=s.account_id AND a.company_id=s.company_id AND a.deleted_yn=0 WHERE s.company_id=@companyKey AND a.owner_user_id=@userKey'+period('s.sales_date');
+  add('sales',['count','amount'],['sales.amount'],'SELECT COUNT_BIG(*) count,ISNULL(SUM(s.amount),0) amount'+sales,'sales.salesDate');
+  add('collections',['count','amount'],['actual.amount'],'SELECT COUNT_BIG(*) count,ISNULL(SUM(a.amount),0) amount FROM crm_collection_actual a WITH(HOLDLOCK) JOIN crm_contract c WITH(HOLDLOCK) ON c.contract_id=a.contract_id AND c.company_id=a.company_id AND c.deleted_yn=0 WHERE a.company_id=@companyKey AND c.owner_user_id=@userKey'+period('a.collected_at'),'actual.collectedAt');
+  add('topAccounts',['accountPublicId','accountName','amount'],['sales.amount','account.crmName'],'SELECT TOP 10 CONVERT(varchar(36),a.public_id) accountPublicId,a.account_name accountName,ISNULL(SUM(s.amount),0) amount'+sales+' GROUP BY a.public_id,a.account_name ORDER BY SUM(s.amount) DESC,a.public_id','sales.salesDate');
+  return this.service.readSqlReport(actor,'HQ_ANALYTICS',sections,[],Object.keys(q).map(k=>'analytics.'+k));
+ }
+}

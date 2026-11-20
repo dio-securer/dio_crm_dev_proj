@@ -1,4 +1,5 @@
-import { getHqScenario, getHqToken, hqApiPath, isHqMockMode } from './hq-mock/mode';
+import { getHqScenario, getHqToken, hqApiPath, isHqMockMode, isVisualPreviewMode } from './hq-mock/mode';
+import { visualPreviewResponse } from './customization/visual-preview-fixture';
 
 const API_BASE = (typeof window === 'undefined' ? '' : (window as unknown as { __DIO_CRM_API_BASE__?: string }).__DIO_CRM_API_BASE__ ?? '').replace(/\/$/, '');
 
@@ -26,6 +27,7 @@ function headers(json = false): HeadersInit {
 }
 
 async function request(path: string, init: RequestInit = {}): Promise<Response> {
+  if (isVisualPreviewMode()) return visualPreviewResponse(path, init);
   const hq = isHqMockMode();
   const response = await fetch(hq ? hqApiPath(path) : `${API_BASE}${path}`, {
     ...init,
@@ -66,6 +68,22 @@ export async function apiGet<T>(path: string): Promise<T> {
   return parse<T>(await request(path, { headers: headers() }));
 }
 
+export interface ConfigurationContext {releaseId:string;permissionVersion:number}
+export async function apiAdminCommand<T>(path:string,method:'POST'|'PATCH'|'PUT',body:unknown,key:string,revision?:number):Promise<T>{
+ if(isHqMockMode())throw new ApiError('Managed administration requires an authenticated managed session.',409,'HQ_MANAGED_RUNTIME_REQUIRED');
+ return parse<T>(await request(path,{method,headers:{...headers(true),'Idempotency-Key':key,...(revision===undefined?{}:{'If-Match':'"'+revision+'"'})},body:JSON.stringify(body)}));
+}
+export async function apiGetConfigured<T>(path:string,expected?:ConfigurationContext):Promise<{data:T;context:ConfigurationContext|null}>{
+ const response=await request(path,{headers:{...headers(),...(expected?{'X-Config-Release-Id':expected.releaseId,'X-Config-Permission-Version':String(expected.permissionVersion)}:{})}});const data=await parse<T>(response);
+ const releaseId=response.headers.get('X-Config-Release-Id'),version=response.headers.get('X-Config-Permission-Version');
+ if(!releaseId&&!version)return {data,context:null};
+ if(!releaseId||!version||!Number.isSafeInteger(Number(version))||Number(version)<1)throw new ApiError('Invalid configuration context',502,'INVALID_CONFIG_CONTEXT');
+ return {data,context:{releaseId,permissionVersion:Number(version)}};
+}
+export async function apiConfiguredCommand<T>(path:string,method:'POST'|'PATCH'|'DELETE',body:unknown,context:ConfigurationContext,key:string):Promise<T>{
+ return parse<T>(await request(path,{method,headers:{...headers(true),'X-Config-Release-Id':context.releaseId,'X-Config-Permission-Version':String(context.permissionVersion),'Idempotency-Key':key},body:JSON.stringify(body)}));
+}
+
 export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
   return parse<T>(await request(path, {
     method: 'POST', headers: headers(true), body: body === undefined ? undefined : JSON.stringify(body)
@@ -91,6 +109,13 @@ export async function apiDownload(path: string) {
 
 export async function apiPostDownload(path: string, body: unknown) {
   return parseBlob(await request(path, { method: 'POST', headers: headers(true), body: JSON.stringify(body) }));
+}
+export async function apiConfiguredDownload(path:string,method:'GET'|'POST',body:unknown,context:ConfigurationContext,key?:string){
+ const response=await request(path,{method,headers:{...headers(method==='POST'),'X-Config-Release-Id':context.releaseId,'X-Config-Permission-Version':String(context.permissionVersion),...(key?{'Idempotency-Key':key}:{})},...(method==='POST'?{body:JSON.stringify(body)}:{})});
+ if(!response.ok)throw await responseError(response);
+ if(response.headers.get('X-Config-Release-Id')!==context.releaseId||Number(response.headers.get('X-Config-Permission-Version'))!==context.permissionVersion)throw new ApiError('Configuration changed during export',409,'CONFIG_CHANGED');
+ const type=response.headers.get('Content-Type')??'';if(!['application/pdf','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'].some(t=>type.startsWith(t)))throw new ApiError('Invalid export response',502,'INVALID_EXPORT_RESPONSE');
+ return {blob:await response.blob(),locale:response.headers.get('X-DIO-Export-Locale')};
 }
 
 export function saveBlob(blob: Blob, filename: string) {

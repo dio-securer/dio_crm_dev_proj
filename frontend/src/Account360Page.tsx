@@ -1,3 +1,5 @@
+import {RecordModeBoundary} from './customization/ConfiguredRecords';
+import {account360RecordSpec} from './customization/inspection-specs';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Account360, AccountSummary } from '@dio-crm/contracts';
@@ -11,7 +13,7 @@ function Box({title,children}:{title:string;children:React.ReactNode}) { return 
 
 export function Account360Page() {
   const { enabled } = useHqMock();
-  return enabled ? <HqAccount360Page /> : <LegacyAccount360Page />;
+  return enabled ? <HqAccount360Page /> : <RecordModeBoundary spec={account360RecordSpec} legacy={<LegacyAccount360Page/>}/>;
 }
 function LegacyAccount360Page() {
   const { t } = useTranslation();

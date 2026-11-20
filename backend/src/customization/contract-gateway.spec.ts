@@ -1,0 +1,52 @@
+import fs from 'node:fs';import path from 'node:path';
+import {ConfiguredContractGateway} from './contract-gateway';
+import {CompanyConfigurationService} from './config-service';
+import {emptyConfigState} from './config-store';
+import {resolveCompanyConfig} from '@dio-crm/contracts/crm-customization';
+const artifact=JSON.parse(fs.readFileSync(path.resolve(__dirname,'../../../packages/contracts/catalogs/hq-contract-review.json'),'utf8'));
+const id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',companyId='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',actor={id,companyId};
+describe('configured contract transactions',()=>{
+ function fixture(){
+  const permissions=[...new Set(['runtime.read','runtime.write',...artifact.catalog.entries.flatMap((e:any)=>[...e.permissions,...e.readPermissions,...e.writePermissions])])];
+  let state:any=emptyConfigState(companyId,{[id]:{active:true,permissions:permissions as string[],denied:[]}});state.activeReleaseId=id;state.releases[id]={id,effective:resolveCompanyConfig(artifact.catalog,{companyId,baseStandardReleaseId:artifact.catalog.standardReleaseId,patches:[]} as any)};
+  state.fixture={owner:7,contract:false,stage:'CLOSED_WON',approved:true,total:100,status:'DRAFT',actual:0,version:0,writes:[]};let fail=false;const queries:string[]=[];
+  const repo={transact:async(_c:any,_a:any,work:any)=>{const copy=JSON.parse(JSON.stringify(state)),f=copy.fixture,domain={companyKey:9,query:async(sql:string,p:any)=>{
+   queries.push(sql);
+   if(sql.startsWith('SELECT o.opportunity_id'))return {recordset:f.owner===p.userKey?[{opportunity_id:1,account_id:2,owner_user_id:7,stage:f.stage,amount:f.total,contract_created_yn:f.contract,erp_approved_yn:f.approved,account_public_id:id}]:[]};
+   if(sql.startsWith('SELECT pp.item_type'))return {recordset:[{item_type:'PRODUCT',item_name:'Implant',erp_item_code:null,quantity:2,proposed_unit_price:50,opportunity_product_id:3}]};
+   if(sql.startsWith('SELECT collection_plan_id,installment_no'))return {recordset:f.existingPlans??[]};
+   if(sql.startsWith('SELECT ISNULL(MAX'))return {recordset:[{version:f.version,currentVersion:f.currentVersion??f.version}]};
+   if(sql.startsWith('SELECT ISNULL(SUM'))return {recordset:[{amount:f.actual}]};
+   if(sql.startsWith('SELECT collection_plan_id'))return {recordset:(sql.includes("erp_sync_status='REQUESTING'")?f.pendingPlan:f.lockedPlan)?[{collection_plan_id:1}]:[]};
+   if(sql.startsWith('SELECT'))return {recordset:f.owner===p.userKey?[{company_id:9,contract_id:4,public_id:id,contract_name:'Contract',contract_amount:f.total,status:f.status,opportunity_public_id:id,account_public_id:id,owner_user_id:7}]:[]};
+   f.writes.push(sql);if(fail&&sql.startsWith('INSERT INTO crm_contract_product'))throw Error('snapshot failure');
+   if(sql.startsWith('UPDATE crm_opportunity'))f.contract=true;
+   if(sql.startsWith('INSERT INTO crm_collection_plan'))f.version=p.version;
+   return {recordset:sql.startsWith('INSERT INTO crm_contract(')?[{public_id:id,contract_id:4}]:[],rowsAffected:[1]};
+  }};const result=await work({state:copy,identityActive:true,domain});state=copy;return result;}};
+  const gateway=new ConfiguredContractGateway(new CompanyConfigurationService(repo as any,[]));
+  const run=(method:string,suffix='',body?:unknown,query={})=>gateway.handle({method,path:'/api/contracts'+suffix,query,body,headers:{'x-config-release-id':id,'x-config-permission-version':'1','idempotency-key':'request'}} as any,actor,7);
+  return {run,queries,get:()=>state,edit:(fn:(s:any)=>void)=>fn(state),fail:()=>fail=true};
+ }
+ const create={opportunityPublicId:id,contractName:'Contract',productAmount:100};
+ const rows=[{installmentNo:1,collectionMethod:'BANK',amount:100,plannedDate:'2026-12-01'}];
+ it('create writes contract snapshot and source lock exactly once',async()=>{const f=fixture();await f.run('POST','',create);await f.run('POST','',create);expect(f.get().fixture.contract).toBe(true);expect(f.get().fixture.writes).toHaveLength(3);});
+ it('unapproved account cannot create contract',async()=>{const f=fixture();f.edit(s=>s.fixture.approved=false);await expect(f.run('POST','',create)).rejects.toMatchObject({code:'CONTRACT_CREATION_DENIED'});});
+ it('stored opportunity total must match copied products',async()=>{const f=fixture();f.edit(s=>s.fixture.total=99);await expect(f.run('POST','',create)).rejects.toMatchObject({code:'CONTRACT_AMOUNT_MISMATCH'});});
+ it('fractional cents cannot be silently rounded',async()=>{const f=fixture();await expect(f.run('POST','',{...create,productAmount:99.999})).rejects.toMatchObject({code:'INVALID_FIELD_VALUE'});});
+ it('snapshot failure rolls back contract and receipt',async()=>{const f=fixture(),before=JSON.stringify(f.get());f.fail();await expect(f.run('POST','',create)).rejects.toThrow('snapshot failure');expect(JSON.stringify(f.get())).toBe(before);});
+ it('hidden opportunity price prevents copying values',async()=>{const f=fixture();f.edit(s=>s.releases[id].effective.entries.find((e:any)=>e.id==='opportunity.price').settings.visible=false);await expect(f.run('POST','',create)).rejects.toMatchObject({code:'QUERY_FIELD_DENIED'});});
+ it('readonly selected opportunity is denied',async()=>{const f=fixture();f.edit(s=>s.releases[id].effective.entries.find((e:any)=>e.id==='contract.opportunityPublicId').settings.readOnly=true);await expect(f.run('POST','',create)).rejects.toMatchObject({code:'FIELD_WRITE_DENIED'});});
+ it('original plan accepts exact total and replays once',async()=>{const f=fixture();await f.run('POST','/'+id+'/collection-plans',{rows});await f.run('POST','/'+id+'/collection-plans',{rows});expect(f.get().fixture.version).toBe(1);expect(f.get().fixture.writes).toHaveLength(1);});
+ it('original plan edit preserves the existing row instead of deleting it',async()=>{const f=fixture();f.edit(s=>{s.fixture.version=1;s.fixture.existingPlans=[{collection_plan_id:17,installment_no:1}];});await f.run('POST','/'+id+'/collection-plans',{rows});expect(f.get().fixture.writes.some((sql:string)=>sql.startsWith('DELETE FROM crm_collection_plan'))).toBe(false);expect(f.get().fixture.writes.some((sql:string)=>sql.startsWith('UPDATE crm_collection_plan SET collection_method'))).toBe(true);});
+ it('original plan replacement refuses to discard an existing row',async()=>{const f=fixture();f.edit(s=>{s.fixture.version=1;s.fixture.existingPlans=[{collection_plan_id:17,installment_no:2}];});await expect(f.run('POST','/'+id+'/collection-plans',{rows})).rejects.toMatchObject({code:'PLAN_REMOVAL_REQUIRES_PRESERVATION'});expect(f.get().fixture.writes).toHaveLength(0);});
+ it('plan requires exact total',async()=>{const f=fixture();await expect(f.run('POST','/'+id+'/collection-plans',{rows:[{...rows[0],amount:99}]})).rejects.toMatchObject({code:'PLAN_TOTAL_MISMATCH'});});
+ it('invalid date and duplicate installment are rejected',async()=>{const f=fixture();await expect(f.run('POST','/'+id+'/collection-plans',{rows:[{...rows[0],plannedDate:'2026-02-30'}]})).rejects.toMatchObject({code:'INVALID_FIELD_VALUE'});await expect(f.run('POST','/'+id+'/collection-plans',{rows:[rows[0],rows[0]]})).rejects.toMatchObject({code:'INVALID_REQUEST'});});
+ it('ERP-approved contract prevents original replacement',async()=>{const f=fixture();f.edit(s=>s.fixture.status='ERP_APPROVED');await expect(f.run('POST','/'+id+'/collection-plans',{rows})).rejects.toMatchObject({code:'CONTRACT_LOCKED'});});
+ it('locked original plan cannot be mixed with new installments',async()=>{const f=fixture();f.edit(s=>s.fixture.lockedPlan=true);const before=JSON.stringify(f.get());await expect(f.run('POST','/'+id+'/collection-plans',{rows:[{...rows[0],installmentNo:2}]})).rejects.toMatchObject({code:'CONTRACT_LOCKED'});expect(JSON.stringify(f.get())).toBe(before);});
+ it('plan fixed metadata rejects conflicting company defaults',async()=>{const f=fixture();f.edit(s=>s.releases[id].effective.entries.find((e:any)=>e.id==='plan.planVersion').settings.default=2);await expect(f.run('POST','/'+id+'/collection-plans',{rows})).rejects.toMatchObject({code:'CREATION_DEFAULT_CONFLICT'});});
+ it('pending changed plan cannot be superseded',async()=>{const f=fixture();f.edit(s=>Object.assign(s.fixture,{status:'ERP_APPROVED',version:2,pendingPlan:true}));await expect(f.run('POST','/'+id+'/collection-plans/change',{rows})).rejects.toMatchObject({code:'ERP_REQUEST_CONFLICT'});expect(f.get().fixture.writes).toHaveLength(0);});
+ it('new changed plan records the active previous version after a failed version gap',async()=>{const f=fixture();f.edit(s=>Object.assign(s.fixture,{status:'ERP_APPROVED',version:3,currentVersion:1}));await f.run('POST','/'+id+'/collection-plans/change',{rows});expect(f.get().outbox[0].delivery.payload).toMatchObject({planVersion:4,previousVersion:1});});
+ it('changed plan uses actual outstanding amount under same transaction',async()=>{const f=fixture();f.edit(s=>Object.assign(s.fixture,{status:'ERP_APPROVED',actual:40,version:1}));await f.run('POST','/'+id+'/collection-plans/change',{rows:[{...rows[0],amount:60}]});expect(f.get().fixture.version).toBe(2);});
+ it('revoked collection read omits plans from detail',async()=>{const f=fixture();f.edit(s=>s.members[id].denied.push('COLLECTION.READ'));const r=await f.run('GET','/'+id);expect(r.data).not.toHaveProperty('plans');expect(f.queries.some(sql=>sql.includes('FROM crm_collection_plan p'))).toBe(false);});
+});
