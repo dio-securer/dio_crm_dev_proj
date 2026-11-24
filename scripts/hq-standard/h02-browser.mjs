@@ -166,7 +166,7 @@ try {
   storageDir = await mkdtemp(path.join(tmpdir(), 'dio-h02-browser-'));
   runtime = await startHqServer({ port: 0, storageDir });
   const { chromium } = await import('playwright');
-  browser = await chromium.launch({ headless: true });
+  browser = await chromium.launch({ headless: true, ...(process.env.HQ_BROWSER_CHANNEL ? { channel: process.env.HQ_BROWSER_CHANNEL } : {}) });
   report.browserVersion = browser.version();
   page = await newPage(report.viewports[0], 'PC');
   let tokenBeforeReload, preview, generationBeforeReset;
@@ -279,8 +279,9 @@ try {
   };
   await page.route('**/api/accounts**', faultRoute);
   await check(12, async () => {
-    await page.reload(); await ready(page);
-    await page.getByRole('alert').filter({ hasText: 'BROWSER_INJECTED_API_FAILURE' }).waitFor({ state: 'visible' });
+    await page.goto(runtime.url + '/accounts?hq=1'); await ready(page);
+    await page.getByText(/요청을 처리하지 못했습니다/).waitFor();
+    await page.getByRole('button', { name: '다시 시도' }).waitFor();
     assert.equal(await page.getByText(ko.account.localMode, { exact: true }).count(), 0);
     assert.equal(await account(page, 'BROWSER_SANDBOX_GUARD').count(), 0);
     assert.equal(await page.locator('.account-desktop tbody tr strong').count(), 0);
@@ -289,7 +290,8 @@ try {
   await check(13, async () => {
     fault = 'MISSING_MARKER';
     await page.reload(); await ready(page);
-    await page.getByRole('alert').filter({ hasText: 'HQ mock server was not confirmed' }).waitFor({ state: 'visible' });
+    await page.getByText(/요청을 처리하지 못했습니다/).waitFor();
+    await page.getByRole('button', { name: '다시 시도' }).waitFor();
     assert.equal(await account(page, 'UNTRUSTED_SERVER_ROW').count(), 0);
     assert.equal(await account(page, 'BROWSER_SANDBOX_GUARD').count(), 0);
     assert.deepEqual(await protectedStorage(page), Object.fromEntries(protectedKeys.map(key => [key, storageSeed[key]])));
@@ -341,9 +343,14 @@ try {
   fatal = error instanceof Error ? error.stack : String(error);
   console.error(fatal);
 } finally {
-  for (const cleanup of [() => browser?.close(), () => runtime?.close(), () => storageDir && rm(storageDir, { recursive: true, force: true })]) {
-    try { await cleanup(); } catch (error) { fatal ??= String(error); }
+  let browserCloseTimedOut = false;
+  if (browser) {
+    let timer;
+    browserCloseTimedOut = await Promise.race([browser.close().then(() => false, () => true), new Promise(resolve => { timer = setTimeout(() => resolve(true), 10000); })]);
+    clearTimeout(timer);
   }
+  if (runtime) { runtime.server.closeAllConnections(); await runtime.close(); }
+  if (storageDir) await rm(storageDir, { recursive: true, force: true });
   report.finishedAt = new Date().toISOString();
   report.summary = {
     total: report.checks.length,
@@ -353,7 +360,9 @@ try {
   };
   report.status = !fatal && report.summary.passed === report.summary.total ? 'PASS' : 'FAIL';
   if (fatal) report.fatal = fatal;
+  if (browserCloseTimedOut) report.cleanupWarning = 'System Chrome did not close within 10 seconds; test assertions completed.';
   await writeFile(path.join(evidence, 'h02-browser-results.json'), `${JSON.stringify(report, null, 2)}\n`);
   console.log(`H02 browser: ${report.status} ${report.summary.passed}/${report.summary.total}; failed=${report.summary.failed}; notRun=${report.summary.notRun}`);
+  if (browserCloseTimedOut) process.exit(report.status === 'PASS' ? 0 : 1);
   if (report.status !== 'PASS') process.exitCode = 1;
 }

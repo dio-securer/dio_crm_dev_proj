@@ -41,6 +41,8 @@
 .mob-account-row small{color:var(--text-muted);font-size:11px;font-weight:400;white-space:normal;line-height:1.4}
 .mob-detail-top{display:grid;grid-template-columns:72px 1fr 72px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--border)}
 .mob-detail-top strong{text-align:center;font-size:14px}
+.account-tablet-detail-title{display:none}
+.account-window-back-label{display:none}
 .mob-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:12px 10px;border-bottom:1px solid var(--border)}
 .mob-actions button{min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:0!important;background:transparent!important;color:var(--text-muted)!important;font-size:10px;padding:6px!important}
 .mob-actions button svg{width:22px;height:22px;color:#7a8ca3}
@@ -65,3 +67,15 @@
 @media(max-width:1080px){.kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:920px),((hover:none) and (pointer:coarse) and (max-width:1400px)){.workspace-page{gap:12px}.page-header{align-items:stretch;flex-direction:column}.page-actions,.search-input{width:100%}.search-input{max-width:none}.kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.kpi-card{min-height:96px;padding:13px}.kpi-card>strong{font-size:22px}.data-card{border-radius:11px}.data-card-header{padding:12px}}
 @media(max-width:390px){.kpi-grid{grid-template-columns:1fr 1fr}.kpi-card{min-height:92px}.kpi-card>small{display:none}.mob-actions{grid-template-columns:repeat(4,minmax(0,1fr));font-size:9px}}
+
+/* Compact, touch-friendly account navigation and cards. */
+@media(max-width:920px),((hover:none) and (pointer:coarse) and (max-width:1400px)){
+ .mob-filters{display:flex;flex-direction:row;gap:4px;overflow-x:auto;padding:4px 16px 8px;border-bottom:1px solid var(--border)}
+ .mob-filters button{flex:0 0 auto;width:auto;min-height:44px;padding:0 12px!important;border:0!important;border-bottom:2px solid transparent!important;color:#5d6f88!important}
+ .mob-filters button.active{color:#244cb7!important;border-bottom-color:#2858c5!important}
+ .mob-filter-plain{padding-left:0}
+ .mob-account-list{display:grid;gap:8px;padding:0 12px 16px}
+ .mob-account-row{flex-direction:row;align-items:center;gap:12px;min-height:76px;padding:12px!important;border:1px solid #dce5f2!important;border-radius:12px!important;box-shadow:0 3px 14px rgba(16,38,74,.04)}
+ .mob-account-icon{display:grid;place-items:center;flex:0 0 40px;height:40px;border-radius:10px;background:#edf3ff;color:#2858c5}
+ .mob-account-content{display:grid;gap:4px;min-width:0}.mob-account-content small{overflow-wrap:anywhere}
+}

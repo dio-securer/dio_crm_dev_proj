@@ -1,0 +1,12 @@
+import {readLeadOwnActivities} from './lead-activities';
+const id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',actor={id,companyId:id};
+function fixture(){
+ const state={owner:7,companyKey:9,rowCompany:9,allowed:['LEAD.READ'],denied:[] as string[],tab:true,field:true,rows:[{public_id:id,subject:'Visit',planned_at:'2026-10-30T09:00:00',status:'PLANNED'}]};
+ const query=jest.fn(async(sql:string,p:any)=>sql.includes('FROM crm_lead')?{recordset:[{lead_id:3,company_id:state.rowCompany,owner_user_id:state.owner}]}:{recordset:state.rows});
+ const service:any={readRuntimeContext:async(_actor:any,load:any)=>({releaseId:id,permissionVersion:1,data:await load({companyKey:state.companyKey,query},{},[{id:'HQ_LEAD',enabled:true,visible:true,readable:true},{id:'tab:HQ_LEAD.activities',enabled:state.tab,visible:state.tab,readable:state.tab},{id:'LEAD.open',enabled:true},...['activity.subject','activity.plannedAt','activity.status'].map(key=>({id:key,readable:state.field,masking:'none'}))],{allowed:state.allowed,denied:state.denied})})};
+ const run=(params:any={from:'2026-10-01',to:'2026-10-30'})=>readLeadOwnActivities(service,{path:'/api/leads/'+id+'/activities',query:params} as any,actor,7);
+ return {state,query,run};
+}
+it('reads only own activities tied to the exact lead and date range',async()=>{const f=fixture(),result=await f.run();expect(result.data.items).toEqual([{publicId:id,subject:'Visit',plannedAt:'2026-10-30T09:00:00',status:'PLANNED'}]);const call=f.query.mock.calls[1];expect(call[0]).toContain("a.related_type='LEAD'");expect(call[0]).toContain('a.owner_user_id=@userKey');expect(call[1]).toMatchObject({companyKey:9,leadId:3,userKey:7,from:'2026-10-01',to:'2026-10-30'});});
+it('denies hidden tab, field, other-company lead and nonowner lead',async()=>{for(const change of [(f:any)=>f.state.tab=false,(f:any)=>f.state.field=false,(f:any)=>f.state.rowCompany=10,(f:any)=>f.state.owner=8]){const f=fixture();change(f);await expect(f.run()).rejects.toBeDefined();expect(f.query.mock.calls.filter((c:any)=>c[0].includes('FROM crm_activity'))).toHaveLength(0);}});
+it('rejects invalid ranges and revoked permission before SQL',async()=>{const f=fixture();await expect(f.run({from:'2026-10-31',to:'2026-10-01'})).rejects.toBeDefined();await expect(f.run({from:'2026-10-01',to:'2026-10-30',ownerUserId:'8'})).rejects.toBeDefined();f.state.denied=['LEAD.READ'];await expect(f.run()).rejects.toBeDefined();expect(f.query).not.toHaveBeenCalled();});

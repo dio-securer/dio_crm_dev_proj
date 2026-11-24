@@ -1,0 +1,24 @@
+import fs from 'node:fs';import path from 'node:path';
+import {ConfiguredApprovalRouteGateway} from './approval-route-gateway';import {CompanyConfigurationService} from './config-service';import {emptyConfigState} from './config-store';import {resolveCompanyConfig} from '@dio-crm/contracts/crm-customization';
+const artifact=JSON.parse(fs.readFileSync(path.resolve(__dirname,'../../../packages/contracts/catalogs/hq-approval-route-review.json'),'utf8')),id='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',companyId='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',actor={id,companyId};
+describe('configured approval route management',()=>{
+ function fixture(){
+  const permissions=[...new Set(['runtime.read','runtime.write',...artifact.catalog.entries.flatMap((e:any)=>[...e.permissions,...e.readPermissions,...e.writePermissions])])];let state:any=emptyConfigState(companyId,{[id]:{active:true,permissions:permissions as string[],denied:[]}});state.activeReleaseId=id;state.releases[id]={id,effective:resolveCompanyConfig(artifact.catalog,{companyId,baseStandardReleaseId:artifact.catalog.standardReleaseId,patches:[]} as any)};state.fixture={valid:true,writes:[],exists:false};
+  const queries:string[]=[],repo={transact:async(_c:any,_a:any,work:any)=>{const copy=JSON.parse(JSON.stringify(state)),f=copy.fixture;const r=await work({state:copy,identityActive:true,domain:{companyKey:9,query:async(sql:string,p:any)=>{
+   queries.push(sql);if(sql.startsWith('SELECT o.organization_id'))return {recordset:f.valid?[{organization_id:1,branch_user_id:2,division_user_id:3}]:[]};
+   if(sql.startsWith('SELECT approval_route_id'))return {recordset:f.exists?[{approval_route_id:1,is_active:f.active??false}]:[]};
+   if(sql.startsWith('SELECT'))return {recordset:[{organization_public_id:id,approval_type:'ACTIVITY_REPORT',branch_approver_public_id:id,division_approver_public_id:id,is_active:true,organization_name:'Sales',branch_approver_name:'Branch',division_approver_name:'Division'}]};
+   f.writes.push({sql,p});f.exists=true;return {recordset:[],rowsAffected:[1]};
+  }}});state=copy;return r;}};
+  const gateway=new ConfiguredApprovalRouteGateway(new CompanyConfigurationService(repo as any,[])),run=(method='POST',extra={})=>gateway.handle({method,path:'/api/approval-routes/activity',body:{organizationPublicId:id,approvalType:'ACTIVITY_REPORT',branchApproverPublicId:id,divisionApproverPublicId:id,...extra},query:{},headers:{'x-config-release-id':id,'x-config-permission-version':'1','idempotency-key':'request'}} as any,actor,7);
+  return {run,queries,get:()=>state,edit:(fn:(s:any)=>void)=>fn(state),field:(key:string,patch:any)=>Object.assign(state.releases[id].effective.entries.find((e:any)=>e.id===key).settings,patch)};
+ }
+ it('creates once with catalog active default',async()=>{const f=fixture();await f.run();await f.run();expect(f.get().fixture.writes).toHaveLength(1);expect(f.get().fixture.writes[0].p.active).toBe(true);});
+ it('existing key updates under same company',async()=>{const f=fixture();f.edit(s=>s.fixture.exists=true);await f.run();expect(f.get().fixture.writes[0].sql).toContain('WHERE company_id=@companyKey AND approval_route_id=@id');});
+ it.each(['readOnly','visible'])('existing inactive route stays inactive when %s prevents editing active flag',async setting=>{const f=fixture();f.edit(s=>s.fixture.exists=true);f.field('approvalRoute.isActive',{[setting]:setting==='readOnly'});await f.run();expect(f.get().fixture.writes[0].p.active).toBe(false);});
+ it('inactive approver references prevent initial write and replay',async()=>{const f=fixture();await f.run();f.edit(s=>s.fixture.valid=false);await expect(f.run()).rejects.toMatchObject({code:'APPROVAL_ROUTE_REQUIRED'});expect(f.get().fixture.writes).toHaveLength(1);expect(f.queries[0]).toContain('b.is_active=1 AND b.deleted_yn=0');});
+ it('readonly selected approver denies write',async()=>{const f=fixture();f.field('approvalRoute.branchApproverPublicId',{readOnly:true});await expect(f.run()).rejects.toMatchObject({code:'FIELD_WRITE_DENIED'});expect(f.get().fixture.writes).toHaveLength(0);});
+ it('tenant active default is honored',async()=>{const f=fixture();f.field('approvalRoute.isActive',{default:false});await f.run();expect(f.get().fixture.writes[0].p.active).toBe(false);});
+ it('hidden approval names never emitted',async()=>{const f=fixture();f.field('approvalRoute.branchApproverName',{visible:false});const r=await f.run('GET');expect((r.data as any).routes[0]).not.toHaveProperty('branch_approver_name');expect(f.queries[0]).toContain('b.company_id=ar.company_id');});
+ it('current management permission denial prevents query',async()=>{const f=fixture();f.edit(s=>s.members[id].denied=['APPROVAL.ROUTE.MANAGE']);await expect(f.run('GET')).rejects.toMatchObject({code:'SCREEN_DENIED'});expect(f.queries).toHaveLength(0);});
+});

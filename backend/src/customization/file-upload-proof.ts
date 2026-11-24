@@ -1,0 +1,10 @@
+import {createHmac,timingSafeEqual} from 'node:crypto';import {z} from 'zod';import {configAssert} from './config-store';
+export const fileEntity=z.enum(['LEAD','ACCOUNT','OPPORTUNITY','CONTRACT','ACTIVITY','ORDER']);
+export const uploadProofSchema=z.object({receiptId:z.string().uuid(),companyId:z.string().uuid(),actorId:z.string().uuid(),entityType:fileEntity,entityPublicId:z.string().uuid(),originalName:z.string().min(1).max(255).refine(s=>!/[\\/\x00-\x1f]/.test(s)),contentType:z.enum(['application/pdf','image/png','image/jpeg','text/plain','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']),sizeBytes:z.number().int().positive().max(20*1024*1024),storageKey:z.string().regex(/^[a-f0-9-]{36}\/[a-f0-9-]{36}(?:\.[a-z0-9]{1,12})?$/),sha256:z.string().regex(/^[a-f0-9]{64}$/),expiresAt:z.number().int().positive().safe()}).strict();
+export type UploadProof=z.infer<typeof uploadProofSchema>;
+export interface UploadReceiptVerifier {verify(token:string):UploadProof}
+/** Upload provider signs receipts only after content hash, size and MIME inspection succeeds. */
+export class HmacUploadReceiptVerifier implements UploadReceiptVerifier{
+ constructor(private readonly secret:Buffer,private readonly now=()=>Date.now()){configAssert(secret.length>=32,500,'UPLOAD_SIGNING_KEY_INVALID');}
+ verify(token:string){configAssert(token.length<=8192&&/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(token),422,'UPLOAD_RECEIPT_INVALID');const [payload,signature]=token.split('.'),expected=createHmac('sha256',this.secret).update(payload).digest(),received=Buffer.from(signature,'base64url');configAssert(received.length===expected.length&&timingSafeEqual(received,expected),403,'UPLOAD_RECEIPT_INVALID');let decoded:unknown;try{decoded=JSON.parse(Buffer.from(payload,'base64url').toString('utf8'));}catch{configAssert(false,422,'UPLOAD_RECEIPT_INVALID');}const proof=uploadProofSchema.parse(decoded);configAssert(proof.expiresAt>this.now()&&proof.expiresAt<=this.now()+3600000,403,'UPLOAD_RECEIPT_EXPIRED');configAssert(proof.storageKey.startsWith(proof.companyId.toLowerCase()+'/'),403,'UPLOAD_RECEIPT_INVALID');return proof;}
+}

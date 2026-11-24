@@ -1,0 +1,4 @@
+/* Shared row density tokens for the managed lead grid and its isolated preview. */
+.crm-grid-density.grid-density-compact td{padding-top:4px;padding-bottom:4px}
+.crm-grid-density.grid-density-default td{padding-top:10px;padding-bottom:10px}
+.crm-grid-density.grid-density-comfortable td{padding-top:16px;padding-bottom:16px}

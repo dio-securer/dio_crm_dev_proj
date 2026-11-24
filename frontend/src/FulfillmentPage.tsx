@@ -1,3 +1,5 @@
+import {RecordModeBoundary} from './customization/ConfiguredRecords';
+import {fulfillmentRecordSpec} from './customization/inspection-specs';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { apiGet } from './api';
@@ -7,7 +9,8 @@ import { formatCurrency } from './formatting/currency';
 
 type Fulfillment = { order:OrderSummary; deliveries:DeliverySummary[]; sales:SalesSummary[]; returnExchanges:ReturnExchangeSummary[] };
 
-export function FulfillmentPage() {
+export function FulfillmentPage(){return <RecordModeBoundary spec={fulfillmentRecordSpec} legacy={<LegacyFulfillmentPage/>}/>;}
+function LegacyFulfillmentPage() {
   const { t } = useTranslation();
   const { globalization } = useGlobalization();
   const money=(value:number)=>formatCurrency(Number(value||0),globalization.locale,globalization.currencyCode);

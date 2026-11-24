@@ -1,0 +1,40 @@
+import assert from 'node:assert/strict';
+import { chromium } from 'playwright';
+import { startHqServer } from './server.mjs';
+const server = await startHqServer({port:0,storageDir:false,autoAdvance:false});
+const browser = await chromium.launch({headless:true});
+try {
+ const tablet = await browser.newPage({viewport:{width:768,height:1024},locale:'ko-KR'});
+ await tablet.goto(server.url+'/leads'); await tablet.locator('.lead-mobile-card').first().waitFor();
+ assert.equal(await tablet.locator('.lead-mobile-card').first().isVisible(),true, '세로 패드에서 터치하기 쉬운 카드 표시');
+ await tablet.close();
+ const page = await browser.newPage({viewport:{width:390,height:844},locale:'ko-KR'});
+ await page.goto(server.url+'/leads');
+ await page.locator('.lead-mobile-card').first().waitFor();
+ const toggle=page.getByRole('button',{name:'시험 환경 설정'});
+ assert.equal(await toggle.getAttribute('aria-expanded'),'false');
+ assert.equal(await page.locator('.hq-mock-inputs').isVisible(),false);
+ await toggle.click(); assert.equal(await page.locator('.hq-mock-inputs').isVisible(),true); await toggle.click();
+ await page.locator('.lead-mobile-card-title').first().click();
+ await page.locator('.hq-lead-detail').waitFor();
+ assert.equal(await page.getByRole('navigation',{name:'리드 화면 구역'}).getByRole('button',{name:'요약',exact:true}).isVisible(),true);
+ assert.equal(await page.getByRole('heading',{name:'진행 단계',exact:true}).isVisible(),true);
+ await page.screenshot({path:'docs/Codex/lead-mobile-implemented-20261112.png',fullPage:true});
+ const sections=page.getByRole('navigation',{name:'리드 화면 구역'});
+ await sections.getByRole('button',{name:'상세 정보'}).click();
+ assert.equal(await page.locator('.lead-details-form:visible').first().isVisible(),true);
+ await sections.getByRole('button',{name:'관련 정보'}).click();
+ assert.equal(await page.locator('.lead-related').isVisible(),true);
+ await sections.getByRole('button',{name:'요약',exact:true}).click();
+ assert.equal(await page.locator('.hq-record-id').isVisible(),false);
+ assert.equal(await page.getByRole('navigation',{name:'리드 바로가기'}).isVisible(),true);
+ await page.getByRole('button',{name:'활동 등록'}).click();
+ assert.equal(await page.locator('.lead-feed').isVisible(),true);
+ await page.goto(server.url+'/leads');
+ await page.getByRole('button',{name:'신규병원 등록'}).click();
+ const modal=page.locator('dialog.hq-customer-modal[open]');
+ const button=modal.getByRole('button',{name:'생성',exact:true});
+ const rect=await button.boundingBox(); assert.ok(rect && rect.y+rect.height<=844, '생성 버튼이 화면 안에 있어야 합니다');
+ console.log('PASS mobile usability');
+} finally {await browser.close(); server.server.closeAllConnections(); await server.close();}
+

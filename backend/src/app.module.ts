@@ -27,9 +27,10 @@ import { InterfaceService } from './integration/interface.service';
 import { GlobalizationController } from './globalization/globalization.controller';
 import { GlobalizationService } from './globalization/globalization.service';
 import { MarketFeatureGuard } from './globalization/feature.guard';
+import { ConfigurationModule } from './customization/config.module';
 
 @Module({
-  imports: [JwtModule.register({})],
+  imports: [JwtModule.register({}), ConfigurationModule],
   controllers: [
     AuthController,
     PlatformController,

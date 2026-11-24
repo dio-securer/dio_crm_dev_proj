@@ -1,9 +1,13 @@
-import { createHqPolicy } from '@dio-crm/contracts';
+import { installAccountLogisticsRoutes } from './account-logistics-routes.js';
+import { installAccountServiceRoutes } from './account-service-routes.js';
+import { installAccountRelatedRoutes } from './account-related-routes.js';
 import { hqCanRead, hqFind, hqNumber, hqObject, hqOnlyKeys, hqRequire, hqText } from './app.js';
 import type { HqApplication, HqRouteContext } from './app.js';
 import { auditHq, canonicalHq, cloneHq, hqAssert, HqMockError, newHqId } from './model.js';
 import type { HqActor, HqDataset, HqRow } from './model.js';
 import { enqueueInterface } from './interfaces.js';
+import { visibleContractFields } from './contract-visibility.js';
+import { visibleOrderDelivery } from './order-visibility.js';
 import { canTransitionLead } from '../modules/customer/customer.rules.js';
 import type { LeadStatus } from '../modules/customer/customer.rules.js';
 
@@ -15,12 +19,14 @@ const LEAD_FIELDS: Record<string, string> = {
   contactExcludeReason:'contact_exclude_reason',exclusionDetail:'exclusion_detail',mapExcluded:'map_excluded_yn',hiraExcluded:'hira_sync_exclude_yn'
 };
 const ACCOUNT_FIELDS: Record<string, string> = {
+  monthlyRevenue:'monthly_revenue',payDoctorCount:'pay_doctor_count',staffCount:'staff_count',chairCount:'chair_count',monthlyImplants:'monthly_implants',competitorShare:'competitor_share',hospitalNotes:'hospital_notes',
   accountName:'account_name',accountStatus:'account_status',accountGrade:'account_grade',businessNo:'business_no',businessName:'business_name',
   ceoName:'ceo_name',phone:'phone',fax:'fax',homepage:'homepage',address:'address',addressLine1:'address_line1',addressLine2:'address_line2',
   hospitalAddress:'hospital_address',zipCode:'zip_code',taxEmail:'tax_email',providerNo:'provider_no',encryptedProviderNo:'encrypted_provider_no',
-  openDate:'open_date',doctorLicenseNo:'doctor_license_no',accountType:'account_type',hospitalSize:'hospital_size',mainSystem:'main_system',subSystem:'sub_system',dioProductUsage:'dio_product_usage'
+  openDate:'open_date',doctorLicenseNo:'doctor_license_no',accountType:'account_type',hospitalSize:'hospital_size',mainSystem:'main_system',subSystem:'sub_system',dioProductUsage:'dio_product_usage',
+  ctOwned:'ct_owned_yn',oralScannerOwned:'oral_scanner_owned_yn',printer3dOwned:'printer_3d_owned_yn',millingMachineOwned:'milling_machine_owned_yn',activatorOwned:'activator_owned_yn',dentalLabOwned:'dental_lab_owned_yn'
 };
-const HOSPITAL_FIELDS = ['hospitalSize','mainSystem','subSystem','dioProductUsage'] as const;
+const HOSPITAL_FIELDS = ['monthlyRevenue','payDoctorCount','staffCount','chairCount','monthlyImplants','competitorShare','hospitalNotes','hospitalSize','mainSystem','subSystem','ctOwned','oralScannerOwned','printer3dOwned','millingMachineOwned','activatorOwned','dentalLabOwned','dioProductUsage'] as const;
 const CONTACT_FIELDS: Record<string, string> = {contactName:'contact_name',contactType:'contact_type',mobile:'mobile',email:'email',isKeyman:'is_keyman',school:'school',cohort:'cohort',major:'major',note:'note'};
 const SOURCE_LOCKED = ['erpCustomerCode','erp_customer_code','erpApprovedYn','erp_approved_yn','erpTradeCode','erp_trade_code','erpApprovalCode','erp_approval_code','integrationStatus','integration_status','useYn','use_yn','churnRiskYn','churn_risk_yn','accountStatCode','account_stat_code','companyId','company_id'];
 const STATUS: LeadStatus[] = ['NEW','FIRST_VISIT','KEYMAN_MEETING','CONTACT_EXCLUDED','CONVERTED'];
@@ -39,6 +45,7 @@ function existing(d: HqDataset, c: HqRouteContext, collection: 'leads'|'accounts
   const row = hqFind(d,c.actor,collection,publicId); hqAssert(active(row),404,'NOT_FOUND'); return row;
 }
 function ownerWrite(actor: HqActor, row: HqRow, permission: string) {
+  if(Array.isArray(row.mock_shares)&&!hqCanRead(actor,{...row,mock_shares:[]}))hqAssert(row.mock_shares.some((share:Record<string,unknown>)=>share.userId===actor.userId&&share.access==='EDIT'&&share.deleted!==true),403,'SHARE_READ_ONLY');
   hqAssert(row.owner_user_id === actor.userId || actor.permissions.includes(permission),403,'OWNER_REQUIRED','Only the owner or an authorized manager can change this record');
 }
 function history(d: HqDataset, actor: HqActor, row: HqRow, action: string, detail: Record<string,unknown>) {
@@ -48,11 +55,13 @@ function history(d: HqDataset, actor: HqActor, row: HqRow, action: string, detai
 }
 function writeValues(input: Record<string,unknown>, map: Record<string,string>, entity: 'lead'|'account'|'contact'): Record<string,unknown> {
   const output: Record<string,unknown> = {};
-  const lengths:Record<string,number>={accountName:300,businessName:300,businessNo:20,zipCode:20,accountType:20,accountGrade:30,ceoName:50,phone:50,fax:50,providerNo:50,homepage:100,taxEmail:100,encryptedProviderNo:100,address:500,addressLine1:400,addressLine2:400,hospitalAddress:400,openDate:10,doctorLicenseNo:500,hospitalName:300,contactName:200,keymanName:200,keymanNote:4000,exclusionDetail:4000,note:4000,dioProductUsage:4000};
+  const lengths:Record<string,number>={accountName:300,businessName:300,businessNo:20,zipCode:20,accountType:20,accountGrade:30,ceoName:50,phone:50,fax:50,providerNo:50,homepage:100,taxEmail:100,encryptedProviderNo:100,address:500,addressLine1:400,addressLine2:400,hospitalAddress:400,openDate:10,doctorLicenseNo:500,hospitalName:300,contactName:200,keymanName:200,keymanNote:4000,contactExcludeReason:500,exclusionDetail:4000,note:4000,dioProductUsage:4000,hospitalNotes:4000,competitorShare:4000};
   for (const [key,db] of Object.entries(map)) if (Object.hasOwn(input,key)) {
     const value = input[key];
     if (['mapExcluded','hiraExcluded','isKeyman'].includes(key)) {hqAssert(typeof value==='boolean',400,'FIELD_INVALID',key);output[db]=value;continue;}
-    if (['hospitalSize','doctorCount','chairCount'].includes(key)) {hqAssert(value===null || Number.isSafeInteger(value) && Number(value)>=0,400,'FIELD_INVALID',key);output[db]=value;continue;}
+    if (['ctOwned','oralScannerOwned','printer3dOwned','millingMachineOwned','activatorOwned','dentalLabOwned'].includes(key)) {hqAssert(value===null||typeof value==='boolean',400,'FIELD_INVALID',key);output[db]=value;continue;}
+    if (['hospitalSize','doctorCount','chairCount','payDoctorCount','staffCount','monthlyImplants'].includes(key)) {hqAssert(value===null || Number.isSafeInteger(value) && Number(value)>=0,400,'FIELD_INVALID',key);output[db]=value;continue;}
+    if (key==='monthlyRevenue') {hqAssert(value===null || typeof value==='number' && Number.isFinite(value) && value>=0,400,'FIELD_INVALID',key);output[db]=value;continue;}
     hqAssert(value===null || typeof value==='string',400,'FIELD_INVALID',key);
     if (value===null) {hqAssert(!['hospitalName','accountName','contactName'].includes(key),400,'FIELD_REQUIRED',key);output[db]=null;continue;}
     const text = (value as string).trim(); hqAssert(text.length <= (lengths[key] ?? 1000),400,'FIELD_TOO_LONG',key);
@@ -77,7 +86,7 @@ function mutation(c:HqRouteContext,action:string,target:string,requiredKey:boole
   hqAssert(definition?.enabled&&definition.support!=='planned'&&definition.screenKey,409,'ACTION_NOT_REGISTERED',action);
   definition.permissions.forEach(permission=>hqRequire(c.actor,permission));
   const context=c.app.context(c.actor);
-  hqAssert(context.activeProcesses.includes(definition.processKey)&&definition.features.every(feature=>context.features.includes(feature))&&createHqPolicy(c.app.standard,c.app.capabilities).screenAllowed(definition.screenKey,context),403,'ACTION_ACCESS_DENIED',action);
+  hqAssert(context.activeProcesses.includes(definition.processKey)&&definition.features.every(feature=>context.features.includes(feature))&&c.app.policyFor(c.actor).screenAllowed(definition.screenKey,context),403,'ACTION_ACCESS_DENIED',action);
   const rawKey=c.body.idempotencyKey ?? c.headers['idempotency-key'];
   const key=rawKey===undefined&&!requiredKey ? undefined : hqText(rawKey,'idempotencyKey',200);
   const fingerprint=canonicalHq({action,target,body:Object.fromEntries(Object.entries(c.body).filter(([k])=>k!=='idempotencyKey'))});
@@ -90,7 +99,7 @@ function mutation(c:HqRouteContext,action:string,target:string,requiredKey:boole
     const response=work(d);
     if(key)auditHq(d,c.actor,'HQ_MUTATION_RECEIPT',target,{key,fingerprint,response:cloneHq(response)});
     return response;
-  });
+  },true);
 }
 function duplicateAccounts(d:HqDataset,company:number,business:unknown,excluded:string[]=[]):HqRow[]{
   const normalized=normalizeBusiness(business);return normalized?d.collections.accounts.filter(row=>row.company_id===company&&active(row)&&!excluded.includes(row.public_id)&&normalizeBusiness(row.business_no)===normalized):[];
@@ -99,21 +108,28 @@ function orderAllowed(account:HqRow) {return account.erp_approved_yn===true&&acc
 
 /** H03 customer-only routes; runtime explicitly installs this extension after the H02 foundation. */
 export function installCustomerRoutes(app:HqApplication):void {
-  const policy=createHqPolicy(app.standard,app.capabilities);
+  installAccountRelatedRoutes(app);
+  installAccountServiceRoutes(app); installAccountLogisticsRoutes(app);
   const fields = (c:HqRouteContext,entity:string,row:HqRow,input:Record<string,unknown>,map:Record<string,string>) => {
     const context=app.context(c.actor,app.values(row,input));
     for(const key of Object.keys(input).filter(key=>Object.hasOwn(map,key))){
       const field=app.standard.fields.find(field=>field.entity===entity&&field.current.apiField===key);
-      hqAssert(field&&policy.fieldWritable(field.fieldKey,context),403,'FIELD_READ_ONLY',key);
+      hqAssert(field&&app.policyFor(c.actor).fieldWritable(field.fieldKey,context),403,'FIELD_READ_ONLY',key);
     }
   };
   const readValue=(c:HqRouteContext,row:HqRow,entity:string,db:string,value:unknown):unknown=>{
     const field=app.standard.fields.find(field=>field.entity===entity&&field.current.dbField===db);
     if(!field)return undefined;
-    return policy.readField(field.fieldKey,app.context(c.actor,{...app.values(row),[field.fieldKey]:value}));
+    return app.policyFor(c.actor).readField(field.fieldKey,app.context(c.actor,{...app.values(row),[field.fieldKey]:value}));
   };
   const historyEntry=(c:HqRouteContext,row:HqRow,entity:string,value:unknown):Record<string,unknown>=>{
     const entry=cloneHq(value as Record<string,unknown>);
+    if(entity==='lead'&&!c.actor.permissions.includes('LEAD.WRITE'))delete entry.additional_changes;
+    if(entity==='lead' && entry.conversion && typeof entry.conversion==='object') {
+      const visible=readConversion(c,entry.conversion as Record<string,unknown>);
+      if(visible)entry.conversion=visible;else delete entry.conversion;
+    }
+    if(entity==='lead')for(const key of ['account_public_id','converted_account_public_id'])if(entry[key]&&!readConversion(c,{accountPublicId:entry[key]}))delete entry[key];
     if(entry.changes&&typeof entry.changes==='object'&&!Array.isArray(entry.changes)){
       const changes:Record<string,unknown>={};
       for(const [db,raw] of Object.entries(entry.changes as Record<string,unknown>)){
@@ -131,13 +147,29 @@ export function installCustomerRoutes(app:HqApplication):void {
   };
   const project=(c:HqRouteContext,row:HqRow,entity:string):HqRow=>{
     const output=cloneHq(row);
+    for (const key of ['mock_timeline','mock_quotes','mock_contract_products','mock_contact_roles','mock_notes']) delete output[key];
+    delete output.mock_files;
+    delete output.mock_shares;
+    delete output.mock_cases; delete output.mock_destinations; delete output.mock_rentals;
     for(const db of new Set(app.standard.fields.filter(field=>field.entity===entity&&field.current.dbField).map(field=>field.current.dbField!))){
       if(!Object.hasOwn(row,db))continue;const value=readValue(c,row,entity,db,row[db]);if(value===undefined)delete output[db];else output[db]=value;
     }
+    if(Array.isArray(output.history)&&entity==='account'&&!hqCanRead(c.actor,{...row,mock_shares:[]}))output.history=output.history.filter(entry=>!String((entry as Record<string,unknown>).action).startsWith('ACC.case'));
     if(Array.isArray(output.history))output.history=output.history.map(entry=>historyEntry(c,row,entity,entry));
     return output;
   };
-  const relatedReadable=(c:HqRouteContext,permission:string,screen:string)=>c.actor.permissions.includes(permission)&&policy.screenAllowed(screen,app.context(c.actor));
+  const relatedReadable=(c:HqRouteContext,permission:string,screen:string)=>c.actor.permissions.includes(permission)&&app.screenAllowed(c.actor,screen);
+  const readConversion=(c:HqRouteContext,input:Record<string,unknown>):Record<string,unknown>|undefined=>{
+    const d=c.repository.read();
+    const account=d.collections.accounts.find(row=>row.public_id===input.accountPublicId&&active(row)&&hqCanRead(c.actor,row));
+    if(!account||!relatedReadable(c,'ACCOUNT.READ','HQ_ACCOUNT'))return undefined;
+    const result=cloneHq(input);
+    const contact=d.collections.contacts.find(row=>row.public_id===input.contactPublicId&&row.account_public_id===account.public_id&&active(row)&&hqCanRead(c.actor,row));
+    if(input.contactPublicId&&(!contact||!relatedReadable(c,'CONTACT.READ','HQ_ACCOUNT')))delete result.contactPublicId;
+    const opportunity=d.collections.opportunities.find(row=>row.public_id===input.opportunityPublicId&&row.account_public_id===account.public_id&&active(row)&&hqCanRead(c.actor,row));
+    if(input.opportunityPublicId&&(!opportunity||!relatedReadable(c,'OPPORTUNITY.READ','HQ_OPPORTUNITY'))){delete result.opportunityPublicId;delete result.opportunitySkipped;}
+    return result;
+  };
   const owners=(c:HqRouteContext)=>app.personas.filter(person=>person.companyId===c.actor.companyId&&(c.actor.permissions.includes('LEAD.MANAGE')||person.userId===c.actor.userId)&&(c.actor.scope!=='BRANCH'||person.organizationId===c.actor.organizationId)).map(person=>({userId:person.userId,name:person.name,organizationId:person.organizationId}));
   const owner=(c:HqRouteContext,userId:unknown,fallback:number)=>{
     const selected=userId===undefined?fallback:hqNumber(userId,'ownerUserId',1);hqAssert(Number.isInteger(selected),400,'OWNER_INVALID');
@@ -146,28 +178,90 @@ export function installCustomerRoutes(app:HqApplication):void {
     hqAssert(selected===c.actor.userId||c.actor.permissions.includes('LEAD.MANAGE'),403,'OWNER_ASSIGNMENT_DENIED');
     hqAssert(c.actor.scope!=='BRANCH'||person.organizationId===c.actor.organizationId,403,'OWNER_OUTSIDE_SCOPE');return person;
   };
-  const leadDto=(c:HqRouteContext,row:HqRow)=>({...project(c,row,'lead'),publicId:row.public_id,hira_check_needed:row.hira_check_needed??null,engagement_score:row.engagement_score??null,calculation_status:'UNCONFIRMED',mode:'MOCK'});
-  const accountDto=(c:HqRouteContext,d:HqDataset,row:HqRow)=>({...project(c,row,'account'),publicId:row.public_id,contact_count:relatedReadable(c,'CONTACT.READ','HQ_ACCOUNT')?d.collections.contacts.filter(contact=>active(contact)&&contact.account_public_id===row.public_id&&hqCanRead(c.actor,contact)).length:0,order_allowed:orderAllowed(row),mode:'MOCK'});
+  const leadDto=(c:HqRouteContext,row:HqRow)=>{const visible=project(c,row,'lead');delete visible.mock_timeline;if(row.conversion&&typeof row.conversion==='object'){const conversion=readConversion(c,row.conversion as Record<string,unknown>);if(conversion)visible.conversion=conversion;else delete visible.conversion;}if(row.converted_account_public_id&&!readConversion(c,{accountPublicId:row.converted_account_public_id}))delete visible.converted_account_public_id;return {...visible,publicId:row.public_id,hira_check_needed:row.hira_check_needed??null,engagement_score:row.engagement_score??null,calculation_status:'UNCONFIRMED',mode:'MOCK'};};
+  const accountDto=(c:HqRouteContext,d:HqDataset,row:HqRow)=>{const ownerName=app.personas.find(person=>person.companyId===row.company_id&&person.userId===row.owner_user_id)?.name;const visible=project(c,{...row,owner_name:ownerName??row.owner_name??null},'account');if(readValue(c,row,'account','account_status',row.account_status)!==row.account_status)delete visible.erp_status_conflict;return {...visible,shared_access:!hqCanRead(c.actor,{...row,mock_shares:[]})?(Array.isArray(row.mock_shares)?row.mock_shares.find((share:Record<string,unknown>)=>share.userId===c.actor.userId&&share.deleted!==true)?.access:null):null,publicId:row.public_id,contact_count:relatedReadable(c,'CONTACT.READ','HQ_ACCOUNT')?d.collections.contacts.filter(contact=>active(contact)&&contact.account_public_id===row.public_id&&hqCanRead(c.actor,contact)).length:0,order_allowed:orderAllowed(row),mode:'MOCK'};};
   const contactDto=(c:HqRouteContext,row:HqRow)=>({...project(c,row,'contact'),publicId:row.public_id,mode:'MOCK'});
   const opportunityDto=(c:HqRouteContext,d:HqDataset,row:HqRow)=>{
     const account=existing(d,c,'accounts',String(row.account_public_id)),visibleAccount=project(c,account,'account');return {...project(c,row,'opportunity'),account_name:visibleAccount.account_name,erp_approved_yn:visibleAccount.erp_approved_yn,erp_customer_code:visibleAccount.erp_customer_code??null,win_allowed:orderAllowed(account),order_allowed:orderAllowed(account)};
   };
   const requireLeadWrite=(c:HqRouteContext,d:HqDataset)=>{const row=existing(d,c,'leads',c.params.publicId);ownerWrite(c.actor,row,'LEAD.MANAGE');return row;};
-  const requireAccountWrite=(c:HqRouteContext,d:HqDataset,publicId=c.params.publicId)=>{const row=existing(d,c,'accounts',publicId);ownerWrite(c.actor,row,'ACCOUNT.MERGE');return row;};
+  const requireAccountWrite=(c:HqRouteContext,d:HqDataset,publicId=c.params.publicId)=>{hqRequire(c.actor,'ACCOUNT.WRITE');const row=existing(d,c,'accounts',publicId);if(!(Array.isArray(row.mock_shares)&&row.mock_shares.some((share:Record<string,unknown>)=>share.userId===c.actor.userId&&share.access==='EDIT'&&share.deleted!==true)))ownerWrite(c.actor,row,'ACCOUNT.MERGE');return row;};
 
   app.replaceRoute('GET','/api/leads',c=>{
     hqRequire(c.actor,'LEAD.READ');app.requireAction(c.actor,'LEAD.search',{},Object.fromEntries(c.query));
     const search=(c.query.get('search')??'').toLocaleLowerCase(),status=c.query.get('status'),ownerId=c.query.get('ownerUserId');
-    return c.repository.read().collections.leads.filter(row=>active(row)&&hqCanRead(c.actor,row)&&(!status||row.status===status)&&(!ownerId||String(row.owner_user_id)===ownerId)&&(!search||[row.hospital_name,row.business_no,row.phone,row.keyman_name].some(value=>String(value??'').toLocaleLowerCase().includes(search)))).map(row=>leadDto(c,row));
+    return c.repository.read().collections.leads.filter(row=>active(row)&&hqCanRead(c.actor,row)&&(!status||row.status===status)&&(!ownerId||String(row.owner_user_id)===ownerId)&&(!search||['hospital_name','business_no','phone','keyman_name'].some(db=>String(readValue(c,row,'lead',db,row[db])??'').toLocaleLowerCase().includes(search)))).map(row=>leadDto(c,row));
   });
   app.route('GET','/api/leads/options',c=>{hqRequire(c.actor,'LEAD.READ');app.requireAction(c.actor,'LEAD.search');return {owners:owners(c),statuses:STATUS,mode:'MOCK'};});
   app.replaceRoute('GET','/api/leads/:publicId',c=>{hqRequire(c.actor,'LEAD.READ');const row=existing(c.repository.read(),c,'leads',c.params.publicId);app.requireAction(c.actor,'LEAD.open',row);return leadDto(c,row);});
   app.route('GET','/api/leads/:publicId/history',c=>{hqRequire(c.actor,'LEAD.READ');const row=existing(c.repository.read(),c,'leads',c.params.publicId);app.requireAction(c.actor,'LEAD.open',row);return project(c,row,'lead').history??[];});
+  // These isolated mock items are independent of planned activities and their report/direct-work references.
+  app.route('GET','/api/leads/:publicId/timeline',c=>{
+    hqRequire(c.actor,'LEAD.READ');hqRequire(c.actor,'ACTIVITY.READ');const row=existing(c.repository.read(),c,'leads',c.params.publicId);app.requireAction(c.actor,'LEAD.open',row);
+    return {items:((row.mock_timeline as Array<Record<string,unknown>>|undefined)??[]).filter(item=>item.deleted!==true),mode:'MOCK'};
+  });
+  app.route('POST','/api/leads/:publicId/timeline',c=>{
+    hqRequire(c.actor,'LEAD.WRITE');hqRequire(c.actor,'ACTIVITY.WRITE');hqOnlyKeys(c.body,['kind','subject','note','dueDate','status','priority','idempotencyKey']);
+    return mutation(c,'LEAD.save',c.params.publicId,true,d=>{requireLeadWrite(c,d);},d=>{
+      const row=requireLeadWrite(c,d);app.requireAction(c.actor,'LEAD.save',row,c.body);hqAssert(row.status!=='CONVERTED',409,'LEAD_CONVERTED');
+      hqAssert(['TASK','CALL','EVENT'].includes(String(c.body.kind)),400,'FIELD_INVALID','kind');
+      const item={public_id:newHqId(d),kind:c.body.kind,subject:hqText(c.body.subject,'subject',200),note:typeof c.body.note==='string'?c.body.note:'',dueDate:c.body.dueDate??'',status:c.body.status??'PLANNED',priority:c.body.priority??'NORMAL',version:1,created_at:d.clock};
+      hqAssert(typeof item.dueDate==='string'&&(!item.dueDate||/^\d{4}-\d{2}-\d{2}$/.test(item.dueDate)&&!Number.isNaN(Date.parse(item.dueDate))),400,'FIELD_INVALID','dueDate');hqAssert(['PLANNED','COMPLETED','CANCELED'].includes(String(item.status)),400,'FIELD_INVALID','status');hqAssert(['LOW','NORMAL','HIGH'].includes(String(item.priority)),400,'FIELD_INVALID','priority');
+      hqAssert(item.note.length<=4000,400,'FIELD_INVALID','note');row.mock_timeline=[...((row.mock_timeline as unknown[])??[]),item];return {item,mode:'MOCK'};
+    });
+  });
+  for(const method of ['PATCH','DELETE'] as const) app.route(method,'/api/leads/:publicId/timeline/:itemId',c=>{
+    hqRequire(c.actor,'LEAD.WRITE');hqRequire(c.actor,'ACTIVITY.WRITE');hqOnlyKeys(c.body,method==='PATCH'?['subject','note','dueDate','status','priority',...META]:[...META]);
+    return mutation(c,'LEAD.save',c.params.publicId+'/'+c.params.itemId,true,d=>{requireLeadWrite(c,d);},d=>{
+      const row=requireLeadWrite(c,d);app.requireAction(c.actor,'LEAD.save',row,c.body);hqAssert(row.status!=='CONVERTED',409,'LEAD_CONVERTED');
+      const items=(row.mock_timeline as Array<Record<string,unknown>>|undefined)??[];const item=items.find(v=>v.public_id===c.params.itemId&&v.deleted!==true);
+      hqAssert(item,404,'NOT_FOUND');hqAssert(Number.isSafeInteger(c.body.expectedVersion)&&item.version===c.body.expectedVersion,409,'VERSION_CONFLICT');
+      if(method==='DELETE')item.deleted=true;
+      else {if(c.body.subject!==undefined)item.subject=hqText(c.body.subject,'subject',200);if(c.body.note!==undefined){hqAssert(typeof c.body.note==='string'&&c.body.note.length<=4000,400,'FIELD_INVALID','note');item.note=c.body.note;}}
+      if(method==='PATCH'){if(c.body.dueDate!==undefined){hqAssert(typeof c.body.dueDate==='string'&&(!c.body.dueDate||/^\d{4}-\d{2}-\d{2}$/.test(c.body.dueDate)&&!Number.isNaN(Date.parse(c.body.dueDate))),400,'FIELD_INVALID','dueDate');item.dueDate=c.body.dueDate;}if(c.body.status!==undefined){hqAssert(['PLANNED','COMPLETED','CANCELED'].includes(String(c.body.status)),400,'FIELD_INVALID','status');item.status=c.body.status;}if(c.body.priority!==undefined){hqAssert(['LOW','NORMAL','HIGH'].includes(String(c.body.priority)),400,'FIELD_INVALID','priority');item.priority=c.body.priority;}}
+      item.version=Number(item.version)+1;return {item,mode:'MOCK'};
+    });
+  });
+  const additionalText = ['leadSource','interestProducts','companyCode','competitorRatio','systemNotes','hospitalType','website','postalCode','sidoCode','sigunguCode','dongName','legalDongCode','marketingNotes','marketingLastActivity'];
+  const additionalNumbers = ['staffCount','payDoctorCount','monthlyRevenue','monthlyImplants','specialistCount','marketingScore'];
+  const additionalBooleans = ['duplicateSuspected','mql','dentalLab','ctOwned','oralScanner','activator','printer3d','millingMachine','marketingBounced'];
+  app.route('GET','/api/leads/:publicId/additional',c=>{hqRequire(c.actor,'LEAD.READ');const row=existing(c.repository.read(),c,'leads',c.params.publicId);app.requireAction(c.actor,'LEAD.open',row);return {values:row.mock_additional??{},version:row.version,mode:'MOCK'};});
+  app.route('PATCH','/api/leads/:publicId/additional',c=>{
+    hqRequire(c.actor,'LEAD.WRITE');hqOnlyKeys(c.body,['values',...META]);
+    return mutation(c,'LEAD.save',c.params.publicId,true,d=>{requireLeadWrite(c,d);},d=>{
+      const row=requireLeadWrite(c,d);expected(row,c.body);app.requireAction(c.actor,'LEAD.save',row,c.body);hqAssert(row.status!=='CONVERTED',409,'LEAD_CONVERTED');
+      const values=hqObject(c.body.values);hqOnlyKeys(values,[...additionalText,...additionalNumbers,...additionalBooleans]);
+      for(const [key,value] of Object.entries(values)){
+        if(additionalText.includes(key)) hqAssert(typeof value==='string'&&value.length<=(key==='interestProducts'?255:1000),400,'FIELD_INVALID',key);
+        else if(additionalNumbers.includes(key)) hqAssert(value===null || typeof value==='number'&&Number.isFinite(value)&&value>=0,400,'FIELD_INVALID',key);
+        else hqAssert(typeof value==='boolean',400,'FIELD_INVALID',key);
+      }
+      const previous=(row.mock_additional as Record<string,unknown>)??{};
+      const additionalChanges=Object.fromEntries(Object.entries(values).filter(([key,value])=>!Object.is(previous[key]??null,value)).map(([key,value])=>[key,{before:previous[key]??null,after:value}]));
+      row.mock_additional={...previous,...values};row.version++;history(d,c.actor,row,'LEAD.additional',{fields:Object.keys(values),additional_changes:additionalChanges});return {values:row.mock_additional,version:row.version,mode:'MOCK'};
+    });
+  });
+  app.route('GET','/api/leads/:publicId/related',c=>{
+    hqRequire(c.actor,'LEAD.READ');const row=existing(c.repository.read(),c,'leads',c.params.publicId);app.requireAction(c.actor,'LEAD.open',row);
+    return {campaigns:row.mock_campaigns??[],coordinates:row.mock_coordinates??[],mode:'MOCK'};
+  });
+  app.route('POST','/api/leads/:publicId/related',c=>{
+    hqRequire(c.actor,'LEAD.WRITE');hqOnlyKeys(c.body,['kind','name','latitude','longitude','idempotencyKey']);
+    return mutation(c,'LEAD.save',c.params.publicId,true,d=>{requireLeadWrite(c,d);},d=>{
+      const row=requireLeadWrite(c,d);app.requireAction(c.actor,'LEAD.save',row,c.body);
+      hqAssert(row.status!=='CONVERTED',409,'LEAD_CONVERTED');
+      const kind=c.body.kind;hqAssert(kind==='campaign'||kind==='coordinate',400,'FIELD_INVALID','kind');
+      const name=hqText(c.body.name,'name',200);
+      if(kind==='coordinate') {hqAssert(typeof c.body.latitude==='number' && Number.isFinite(c.body.latitude) && Math.abs(c.body.latitude)<=90,400,'FIELD_INVALID','latitude');hqAssert(typeof c.body.longitude==='number' && Number.isFinite(c.body.longitude) && Math.abs(c.body.longitude)<=180,400,'FIELD_INVALID','longitude');}
+      const entry={public_id:newHqId(d),name,created_at:d.clock,created_by:c.actor.userId,...(kind==='coordinate'?{latitude:c.body.latitude,longitude:c.body.longitude}:{})};
+      const key=kind==='campaign'?'mock_campaigns':'mock_coordinates';row[key]=[...((row[key] as unknown[])??[]),entry];row.version++;history(d,c.actor,row,'LEAD.related',{kind,name});return {entry,mode:'MOCK'};
+    });
+  });
   app.route('POST','/api/leads',c=>{
     hqRequire(c.actor,'LEAD.WRITE');hqOnlyKeys(c.body,[...Object.keys(LEAD_FIELDS),'ownerUserId','idempotencyKey']);
     const response=mutation(c,'LEAD.create','NEW',true,()=>app.requireAction(c.actor,'LEAD.create',{},c.body),d=>{
       hqText(c.body.hospitalName,'hospitalName');const person=owner(c,c.body.ownerUserId,c.actor.userId);
-      const row:HqRow={public_id:newHqId(d),company_id:c.actor.companyId,owner_user_id:person.userId,organization_id:person.organizationId,version:1,status:'NEW',source_system:'CRM',manual_fields:[],history:[],map_excluded_yn:false,hira_sync_exclude_yn:false,created_at:d.clock};
+      const row:HqRow={public_id:newHqId(d),company_id:c.actor.companyId,owner_user_id:person.userId,owner_name:person.name,organization_id:person.organizationId,version:1,status:'NEW',source_system:'CRM',manual_fields:[],history:[],map_excluded_yn:false,hira_sync_exclude_yn:false,created_at:d.clock};
       fields(c,'lead',row,c.body,LEAD_FIELDS);applyValues(row,writeValues(c.body,LEAD_FIELDS,'lead'),d,c.actor,'LEAD.create');d.collections.leads.push(row);return row;
     }) as HqRow;return leadDto(c,response);
   });
@@ -175,7 +269,10 @@ export function installCustomerRoutes(app:HqApplication):void {
     hqRequire(c.actor,'LEAD.WRITE');hqOnlyKeys(c.body,[...Object.keys(LEAD_FIELDS),...META]);
     const response=mutation(c,'LEAD.save',c.params.publicId,true,d=>{requireLeadWrite(c,d);},d=>{
       const row=requireLeadWrite(c,d);expected(row,c.body);app.requireAction(c.actor,'LEAD.save',row,c.body);fields(c,'lead',row,c.body,LEAD_FIELDS);
-      applyValues(row,writeValues(c.body,LEAD_FIELDS,'lead'),d,c.actor,'LEAD.save');row.version++;return row;
+      const values=writeValues(c.body,LEAD_FIELDS,'lead');
+      if(Object.hasOwn(values,'contact_exclude_reason')&&canonicalHq(row.contact_exclude_reason??null)!==canonicalHq(values.contact_exclude_reason)&&row.status==='CONTACT_EXCLUDED')hqAssert(typeof values.contact_exclude_reason==='string'&&values.contact_exclude_reason.trim().length>0,400,'EXCLUSION_REASON_REQUIRED');
+      if(Object.keys(values).length===1&&Object.hasOwn(values,'contact_exclude_reason')&&canonicalHq(row.contact_exclude_reason??null)===canonicalHq(values.contact_exclude_reason))return row;
+      applyValues(row,values,d,c.actor,'LEAD.save');row.version++;return row;
     }) as HqRow;return leadDto(c,response);
   });
   app.route('POST','/api/leads/:publicId/status',c=>{
@@ -212,11 +309,21 @@ export function installCustomerRoutes(app:HqApplication):void {
   app.route('GET','/api/leads/:publicId/conversion-options',c=>{
     hqRequire(c.actor,'LEAD.READ');const d=c.repository.read(),lead=existing(d,c,'leads',c.params.publicId);app.requireAction(c.actor,'LEAD.open',lead);
     const accounts=relatedReadable(c,'ACCOUNT.READ','HQ_ACCOUNT')?d.collections.accounts.filter(row=>active(row)&&hqCanRead(c.actor,row)):[];const allowed=new Set(accounts.map(row=>row.public_id));
-    return {lead:leadDto(c,lead),accounts:accounts.map(row=>accountDto(c,d,row)),contacts:relatedReadable(c,'CONTACT.READ','HQ_ACCOUNT')?d.collections.contacts.filter(row=>active(row)&&hqCanRead(c.actor,row)&&allowed.has(String(row.account_public_id))).map(row=>contactDto(c,row)):[],opportunities:relatedReadable(c,'OPPORTUNITY.READ','HQ_OPPORTUNITY')?d.collections.opportunities.filter(row=>active(row)&&hqCanRead(c.actor,row)&&allowed.has(String(row.account_public_id))).map(row=>opportunityDto(c,d,row)):[],duplicates:duplicateAccounts(d,c.actor.companyId,lead.business_no).filter(row=>allowed.has(row.public_id)).map(row=>accountDto(c,d,row)),owners:owners(c),mode:'MOCK'};
+    return {lead:leadDto(c,lead),accounts:accounts.map(row=>accountDto(c,d,row)),contacts:relatedReadable(c,'CONTACT.READ','HQ_ACCOUNT')?d.collections.contacts.filter(row=>active(row)&&hqCanRead(c.actor,row)&&allowed.has(String(row.account_public_id))).map(row=>contactDto(c,row)):[],opportunities:relatedReadable(c,'OPPORTUNITY.READ','HQ_OPPORTUNITY')?d.collections.opportunities.filter(row=>active(row)&&hqCanRead(c.actor,row)&&allowed.has(String(row.account_public_id))).map(row=>opportunityDto(c,d,row)):[],duplicates:(readValue(c,lead,'lead','business_no',lead.business_no)===lead.business_no?duplicateAccounts(d,c.actor.companyId,lead.business_no):[]).filter(row=>allowed.has(row.public_id)&&readValue(c,row,'account','business_no',row.business_no)===row.business_no).map(row=>accountDto(c,d,row)),owners:owners(c),mode:'MOCK'};
   });
   app.route('POST','/api/leads/:publicId/convert',c=>{
     hqRequire(c.actor,'LEAD.CONVERT');hqOnlyKeys(c.body,['accountMode','existingAccountPublicId','contactMode','existingContactPublicId','contactName','opportunityMode','existingOpportunityPublicId','opportunityName','ownerUserId','simulateFailure',...META]);
-    return mutation(c,'LEAD.convert',c.params.publicId,true,d=>{requireLeadWrite(c,d);},d=>{
+    return mutation(c,'LEAD.convert',c.params.publicId,true,d=>{
+      requireLeadWrite(c,d);
+      const key=c.body.idempotencyKey??c.headers['idempotency-key'];
+      const receipt=d.collections.auditLogs.find(row=>row.action==='HQ_MUTATION_RECEIPT'&&row.company_id===c.actor.companyId&&row.owner_user_id===c.actor.userId&&(row.detail as Record<string,unknown>)?.key===key);
+      const response=(receipt?.detail as Record<string,unknown> | undefined)?.response as Record<string,unknown> | undefined;
+      if(response?.leadPublicId!==c.params.publicId)return;
+      hqRequire(c.actor,'ACCOUNT.READ');app.requireScreen(c.actor,'HQ_ACCOUNT');
+      const account=existing(d,c,'accounts',id(response.accountPublicId,'accountPublicId'));app.requireAction(c.actor,'ACC.open',account);
+      if(response.contactPublicId){hqRequire(c.actor,'CONTACT.READ');const contact=existing(d,c,'contacts',id(response.contactPublicId,'contactPublicId'));hqAssert(contact.account_public_id===account.public_id,403,'CONVERSION_RESULT_SCOPE_DENIED');}
+      if(response.opportunityPublicId){hqRequire(c.actor,'OPPORTUNITY.READ');app.requireScreen(c.actor,'HQ_OPPORTUNITY');const opportunity=existing(d,c,'opportunities',id(response.opportunityPublicId,'opportunityPublicId'));hqAssert(opportunity.account_public_id===account.public_id,403,'CONVERSION_RESULT_SCOPE_DENIED');}
+    },d=>{
       const lead=requireLeadWrite(c,d);expected(lead,c.body);app.requireAction(c.actor,'LEAD.convert',lead,c.body);app.requireTransition(c.actor,'LEAD.converted',lead,c.body);
       hqAssert(['NEW','EXISTING'].includes(String(c.body.accountMode)),400,'CONVERSION_ACCOUNT_MODE_INVALID');
       hqAssert(['NEW','EXISTING','SKIP'].includes(String(c.body.contactMode))&&['NEW','EXISTING','SKIP'].includes(String(c.body.opportunityMode)),400,'CONVERSION_MODE_INVALID');
@@ -268,15 +375,15 @@ export function installCustomerRoutes(app:HqApplication):void {
       app.requireAction(c.actor,hospitalOnly?'ACC.hospitalSave':create?'ACC.create':'ACC.save',row,c.body);fields(c,'account',row,c.body,ACCOUNT_FIELDS);
       const values=writeValues(c.body,ACCOUNT_FIELDS,'account');
       if(Object.hasOwn(values,'business_no')&&(create||normalizeBusiness(values.business_no)!==normalizeBusiness(row.business_no)))hqAssert(!duplicateAccounts(d,c.actor.companyId,values.business_no,[row.public_id]).length,409,'DUPLICATE_ACCOUNT');
-      applyValues(row,values,d,c.actor,create?'ACC.create':hospitalOnly?'ACC.hospitalSave':'ACC.save');if(create)d.collections.accounts.push(row);else row.version++;return row;
+      applyValues(row,values,d,c.actor,create?'ACC.create':hospitalOnly?'ACC.hospitalSave':'ACC.save');if(row.erp_status_conflict===true && values.account_status==='ACTIVE')row.erp_status_conflict=false;if(create)d.collections.accounts.push(row);else row.version++;return row;
     }) as HqRow;return accountDto(c,c.repository.read(),response);
   };
   app.replaceRoute('POST','/api/accounts',c=>saveAccount(c,true));
   app.replaceRoute('PATCH','/api/accounts/:publicId',c=>saveAccount(c,false));
   app.route('PATCH','/api/accounts/:publicId/hospital',c=>saveAccount(c,false,true));
-  app.replaceRoute('GET','/api/accounts',c=>{hqRequire(c.actor,'ACCOUNT.READ');app.requireAction(c.actor,'ACC.search');const d=c.repository.read(),search=(c.query.get('search')??'').toLocaleLowerCase();return d.collections.accounts.filter(row=>active(row)&&hqCanRead(c.actor,row)&&(!search||[row.account_name,row.business_name,row.business_no,row.phone].some(value=>String(value??'').toLocaleLowerCase().includes(search)))).map(row=>accountDto(c,d,row));});
+  app.replaceRoute('GET','/api/accounts',c=>{hqRequire(c.actor,'ACCOUNT.READ');app.requireAction(c.actor,'ACC.search');const d=c.repository.read(),search=(c.query.get('search')??'').toLocaleLowerCase();return d.collections.accounts.filter(row=>active(row)&&hqCanRead(c.actor,row)&&(!search||['account_name','business_name','business_no','phone'].some(db=>String(readValue(c,row,'account',db,row[db])??'').toLocaleLowerCase().includes(search)))).map(row=>accountDto(c,d,row));});
   app.replaceRoute('GET','/api/accounts/:publicId',c=>{hqRequire(c.actor,'ACCOUNT.READ');const d=c.repository.read(),row=existing(d,c,'accounts',c.params.publicId);app.requireAction(c.actor,'ACC.open',row);return accountDto(c,d,row);});
-  app.route('GET','/api/accounts/duplicates/:businessNo',c=>{hqRequire(c.actor,'ACCOUNT.READ');app.requireAction(c.actor,'ACC.search');const d=c.repository.read();return duplicateAccounts(d,c.actor.companyId,c.params.businessNo).filter(row=>hqCanRead(c.actor,row)).map(row=>accountDto(c,d,row));});
+  app.route('GET','/api/accounts/duplicates/:businessNo',c=>{hqRequire(c.actor,'ACCOUNT.READ');app.requireAction(c.actor,'ACC.search');const d=c.repository.read();return duplicateAccounts(d,c.actor.companyId,c.params.businessNo).filter(row=>hqCanRead(c.actor,row)&&readValue(c,row,'account','business_no',row.business_no)===row.business_no).map(row=>accountDto(c,d,row));});
   app.route('POST','/api/accounts/bulk-update',c=>{
     hqRequire(c.actor,'ACCOUNT.WRITE');hqOnlyKeys(c.body,['rows','idempotencyKey']);app.requireAction(c.actor,'ACC.bulkSave',{},c.body);
     const key=hqText(c.body.idempotencyKey,'idempotencyKey',140);hqAssert(Array.isArray(c.body.rows)&&c.body.rows.length>0&&c.body.rows.length<=100,400,'BULK_ROWS_INVALID');
@@ -330,14 +437,16 @@ export function installCustomerRoutes(app:HqApplication):void {
   const detail=(c:HqRouteContext,analyticsAction=false)=>{
     hqRequire(c.actor,'ACCOUNT.READ');if(analyticsAction)hqRequire(c.actor,'ACCOUNT360.READ');const d=c.repository.read(),account=existing(d,c,'accounts',c.params.publicId);app.requireAction(c.actor,'ACC.open',account);if(analyticsAction)app.requireAction(c.actor,'ACC360.open',account);
     const byAccount=(collection:'contacts'|'opportunities'|'contracts'|'orders'|'sales',permission:string,screen:string)=>relatedReadable(c,permission,screen)?d.collections[collection].filter(row=>active(row)&&row.account_public_id===account.public_id&&hqCanRead(c.actor,row)):[];
-    const contacts=byAccount('contacts','CONTACT.READ','HQ_ACCOUNT').map(row=>contactDto(c,row)),opportunities=byAccount('opportunities','OPPORTUNITY.READ','HQ_OPPORTUNITY').map(row=>opportunityDto(c,d,row)),contracts=byAccount('contracts','CONTRACT.READ','HQ_CONTRACT').map(row=>project(c,row,'contract')),orders=byAccount('orders','ORDER.READ','HQ_ORDER').map(row=>project(c,row,'order')),sales=byAccount('sales','SALES.READ','HQ_FULFILLMENT').map(row=>project(c,row,'sales'));
+    const contacts=byAccount('contacts','CONTACT.READ','HQ_ACCOUNT').map(row=>contactDto(c,row)),opportunities=byAccount('opportunities','OPPORTUNITY.READ','HQ_OPPORTUNITY').map(row=>opportunityDto(c,d,row)),contracts=byAccount('contracts','CONTRACT.READ','HQ_CONTRACT').map(row=>project(c,visibleContractFields(c,row),'contract')),orders=byAccount('orders','ORDER.READ','HQ_ORDER').map(row=>project(c,visibleOrderDelivery(c,row),'order')),sales=byAccount('sales','SALES.READ','HQ_FULFILLMENT').map(row=>project(c,row,'sales'));
     const contractIds=new Set(contracts.map(row=>row.public_id));const collections=d.collections.collections.filter(row=>contractIds.has(String(row.contract_public_id))&&hqCanRead(c.actor,row)).map(row=>project(c,row,'actual'));
     const activities=relatedReadable(c,'ACTIVITY.READ','HQ_ACTIVITY')?d.collections.activities.filter(row=>row.related_type==='ACCOUNT'&&row.related_public_id===account.public_id&&hqCanRead(c.actor,row)).map(row=>project(c,row,'activity')):[];
-    const services=activities.filter(row=>row.activity_type==='SERVICE'||row.category==='SERVICE');
+    // Salesforce customer-center cases are a different entity from visit/service activities.
+    const services:HqRow[]=[];
     const interfaces=d.collections.interfaceLogs.filter(row=>row.company_id===c.actor.companyId&&row.businessKey.entityType==='ACCOUNT'&&row.businessKey.entityId===account.public_id).map(row=>({requestId:row.requestId,interfaceCode:row.interfaceCode,status:row.status,scenario:row.scenario,attempt:row.attempt,retryOf:row.retryOf??null,requestedAt:row.requestedAt,respondedAt:row.respondedAt??null,events:row.events,result:row.result?{success:row.result.success,message:row.result.message??null}:null}));
-    const total=(rows:HqRow[],key:string):number|null=>rows.every(row=>typeof row[key]==='number'&&Number.isFinite(row[key]))?rows.reduce((sum,row)=>sum+Number(row[key]),0):null;
+    const total=(rows:HqRow[],key:string):number|null=>rows.every(row=>typeof row[key]==='number'&&Number.isFinite(row[key]))&&(!rows.length||rows.every(row=>typeof row.currency==='string'&&row.currency===rows[0].currency))?rows.reduce((sum,row)=>sum+Number(row[key]),0):null;
     const contractAmount=total(contracts,'contract_amount'),collectionAmount=total(collections,'amount');
-    const analytics={contactCount:contacts.length,opportunityCount:opportunities.length,contractCount:contracts.length,orderCount:orders.length,activityCount:activities.length,salesAmount:total(sales,'amount'),collectionAmount,outstandingAmount:contractAmount===null||collectionAmount===null?null:contractAmount-collectionAmount,orderAmount:total(orders.filter(row=>row.status!=='FAILED'),'order_amount'),erpApproved:account.erp_approved_yn===true,orderAllowed:orderAllowed(account)};
+    const matchingCurrencies=collections.every(receipt=>contracts.some(contract=>contract.public_id===receipt.contract_public_id&&typeof receipt.currency==='string'&&receipt.currency===contract.currency));
+    const analytics={contactCount:contacts.length,opportunityCount:opportunities.length,contractCount:contracts.length,orderCount:orders.length,activityCount:activities.length,salesAmount:total(sales,'amount'),collectionAmount:matchingCurrencies?collectionAmount:null,outstandingAmount:!matchingCurrencies||contractAmount===null||collectionAmount===null?null:contractAmount-collectionAmount,orderAmount:total(orders.filter(row=>row.status!=='FAILED'),'order_amount'),erpApproved:account.erp_approved_yn===true,orderAllowed:orderAllowed(account)};
     const visibleAccount:HqRow=accountDto(c,d,account);
     const timeline=[...(Array.isArray(visibleAccount.history)?visibleAccount.history:[]),...activities.map(row=>({public_id:row.public_id,action:'ACTIVITY',at:row.start_at??d.clock,subject:row.subject,status:row.status})),...interfaces.map(row=>({public_id:row.requestId,action:'ERP',at:row.requestedAt,status:row.status,interfaceCode:row.interfaceCode}))].sort((a,b)=>String(b.at).localeCompare(String(a.at)));
     return {account:visibleAccount,contacts,opportunities,contracts,orders,sales,collections,services,activities,timeline,analytics,hospital:Object.fromEntries(HOSPITAL_FIELDS.filter(key=>Object.hasOwn(visibleAccount,ACCOUNT_FIELDS[key])).map(key=>[ACCOUNT_FIELDS[key],visibleAccount[ACCOUNT_FIELDS[key]]??null])),interfaces,permissions:c.actor.permissions,mode:'MOCK'};
@@ -368,6 +477,7 @@ export function installCustomerRoutes(app:HqApplication):void {
     const ids=[primaryId,...duplicateIds],versions=hqObject(c.body.expectedVersions),sources=c.body.fieldSources===undefined?{}:hqObject(c.body.fieldSources);hqOnlyKeys(versions,ids);hqOnlyKeys(sources,Object.keys(ACCOUNT_FIELDS));
     const response=mutation(c,'ACC.merge',primaryId,true,d=>{ids.forEach(value=>hqFind(d,c.actor,'accounts',value));},d=>{
       app.requireAction(c.actor,'ACC.merge',{},c.body);const rows=ids.map(value=>existing(d,c,'accounts',value)),primary=rows[0];rows.forEach(row=>expected(row,{expectedVersion:versions[row.public_id]}));
+      hqAssert(!rows.some(row=>['mock_files','mock_shares','mock_cases','mock_destinations','mock_rentals'].some(key=>Array.isArray(row[key])&&(row[key] as Array<Record<string,unknown>>).some(item=>item.deleted!==true))),409,'MERGE_RELATED_DATA_POLICY_REQUIRED','첨부·공유·고객센터 데이터의 승계 정책을 먼저 확정해야 병합할 수 있습니다. 기존 데이터는 변경되지 않았습니다.');
       hqAssert(new Set(rows.map(row=>row.erp_customer_code).filter(Boolean)).size<=1,409,'MERGE_DIFFERENT_ERP_CODES');
       hqAssert(!d.collections.interfaceLogs.some(log=>log.company_id===c.actor.companyId&&duplicateIds.includes(log.businessKey.entityId)&&log.businessKey.entityType==='ACCOUNT'),409,'MERGE_INTERFACE_HISTORY_REQUIRES_REVIEW','A duplicate with ERP requests cannot be merged while its result history targets the original identity');
       hqAssert(!d.collections.interfaceLogs.some(log=>log.company_id===c.actor.companyId&&log.businessKey.entityId===primaryId&&log.businessKey.entityType==='ACCOUNT'&&['REQUESTING','FAILED','TIMED_OUT'].includes(log.status)&&!log.supersededBy),409,'MERGE_INTERFACE_PENDING','The primary account has an outstanding or retryable ERP request; complete it before merging');
@@ -377,7 +487,7 @@ export function installCustomerRoutes(app:HqApplication):void {
       applyValues(primary,values,d,c.actor,'ACC.merge.fields');
       if(!primary.erp_customer_code){const authoritative=rows.find(row=>row.erp_customer_code);if(authoritative)for(const key of ['erp_customer_code','erp_account_name','erp_approved_yn','erp_trade_code','erp_approval_code','integration_status'])if(authoritative[key]!==undefined)primary[key]=authoritative[key];}
       const movedCounts:Record<string,number>={};
-      for(const collection of ['contacts','opportunities','contracts','orders','sales'] as const){movedCounts[collection]=0;for(const row of d.collections[collection].filter(row=>row.company_id===c.actor.companyId&&duplicateIds.includes(String(row.account_public_id)))){hqAssert(hqCanRead(c.actor,row),403,'MERGE_RELATED_SCOPE_DENIED');row.account_public_id=primaryId;row.version++;movedCounts[collection]++;}}
+      for(const collection of ['contacts','opportunities','followUps','contracts','orders','sales'] as const){movedCounts[collection]=0;for(const row of d.collections[collection].filter(row=>row.company_id===c.actor.companyId&&duplicateIds.includes(String(row.account_public_id)))){hqAssert(hqCanRead(c.actor,row),403,'MERGE_RELATED_SCOPE_DENIED');row.account_public_id=primaryId;row.version++;movedCounts[collection]++;}}
       for(const row of d.collections.activities.filter(row=>row.company_id===c.actor.companyId&&row.related_type==='ACCOUNT'&&duplicateIds.includes(String(row.related_public_id)))){hqAssert(hqCanRead(c.actor,row),403,'MERGE_RELATED_SCOPE_DENIED');row.related_public_id=primaryId;row.related_name_snapshot=primary.account_name;row.version++;}
       for(const row of d.collections.leads.filter(row=>row.company_id===c.actor.companyId&&duplicateIds.includes(String(row.converted_account_public_id)))){hqAssert(hqCanRead(c.actor,row),403,'MERGE_RELATED_SCOPE_DENIED');row.converted_account_public_id=primaryId;if(row.conversion&&typeof row.conversion==='object')row.conversion={...(row.conversion as Record<string,unknown>),accountPublicId:primaryId};row.version++;history(d,c.actor,row,'ACC.merge.reference',{account_public_id:primaryId});}
       for(const row of rows.slice(1)){row.account_status='MERGED';row.deleted_yn=true;row.merged_into_public_id=primaryId;row.version++;history(d,c.actor,row,'ACC.merge.source',{primary_public_id:primaryId});}
@@ -394,3 +504,4 @@ export function installCustomerRoutes(app:HqApplication):void {
     });
   });
 }
+

@@ -1,0 +1,136 @@
+/* Tablet workspace: keep the mobile visual language while using the wider canvas. */
+@media (min-width: 600px) and (max-width: 1024px) {
+  .route-surface :is(.hq-sales-page, .hq-act-page, .h06-page) { gap: 16px; min-width: 0; }
+  .route-surface :is(.hq-sales-page, .hq-act-page) > header {
+    padding: 20px 22px; border-radius: 16px; background: #102b5d;
+    color: #fff; box-shadow: 0 7px 18px #102b5d20;
+  }
+  .route-surface :is(.hq-sales-page, .hq-act-page) > header :is(h1, .dio-workspace-heading) { color: #fff; }
+  .route-surface :is(.hq-sales-page, .hq-act-page) > header p { color: #d5e4fa; margin: 8px 0 0; line-height: 1.5; }
+  .route-surface .h06-page:not(.h06-embedded) > .dio-workspace-heading {
+    display: flex; align-items: center; gap: 12px; margin: 0; padding: 20px 22px;
+    border-radius: 16px; background: #102b5d; color: #fff; box-shadow: 0 7px 18px #102b5d20;
+  }
+  .route-surface :is(.hq-sales-page, .hq-act-page, .h06-page) .dio-workspace-heading { display: flex; align-items: center; gap: 12px; font-size: 22px; }
+  .route-surface :is(.hq-sales-page, .hq-act-page, .h06-page) .dio-workspace-icon { display: inline-grid; place-items: center; width: 42px; height: 42px; flex: none; border-radius: 12px; color: #fff; background: #28528e; }
+  .route-surface :is(.hq-sales-card, .hq-act-card, .h06-card, .hq-customer-panel) {
+    min-width: 0; padding: 20px; border: 1px solid #e1eaf6; border-radius: 16px;
+    background: #fff; box-shadow: 0 5px 18px #17365b0d;
+  }
+  .route-surface :is(.hq-sales-card, .hq-act-card, .h06-card) :is(h2, h3) { color: #173866; }
+  .route-surface :is(.hq-sales-page, .hq-act-page, .h06-page, .hq-customer-page) :is(input:not([type=checkbox]):not([type=radio]), select, textarea) {
+    box-sizing: border-box; min-width: 0; min-height: 46px; border: 1px solid #d4e1f2;
+    border-radius: 10px; background: #fff; color: #172e50; font-size: 16px;
+  }
+  .route-surface :is(.hq-sales-page, .hq-act-page, .h06-page, .hq-customer-page) :is(input, select, textarea):focus-visible { outline: 3px solid #a6cbff; outline-offset: 1px; }
+  .route-surface :is(.hq-sales-page, .hq-act-page, .h06-page, .hq-customer-page) button { min-height: 44px; font-size: 14px; }
+  .route-surface :is(.hq-sales-card, .hq-act-card, .h06-card) label { color: #405576; font-size: 14px; font-weight: 700; }
+  .route-surface :is(.hq-sales-fields, .hq-act-plan-fields) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .route-surface .h06-fields { gap: 14px; }
+  .route-surface .h06-order-page .h06-order-results-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 24px; padding: 16px 2px 4px; border-top: 1px solid #dce8f8; color: #173866; }
+  .route-surface :is(.hq-sales-summary, .hq-act-detail, .h06-summary) > div { background: #f4f8ff; border: 1px solid #e1ebfa; border-radius: 11px; }
+  .route-surface :is(.hq-sales-row, .hq-act-schedule-row, .h06-row) { margin: 8px 0; padding: 14px; border: 1px solid #dce8f8; border-left: 4px solid #4383ed; border-radius: 12px; background: #f9fbff; }
+  .route-surface :is(.hq-sales-card, .hq-act-card, .h06-card) button:hover:not(:disabled) { border-color: #0758d7; background: #eaf2ff; color: #104a9e; }
+  .route-surface :is(.hq-sales-page, .hq-act-page, .h06-page) :is([role=alert], [role=status]) { line-height: 1.5; overflow-wrap: anywhere; }
+  .route-surface .hq-sales-columns { grid-template-columns: minmax(220px, .8fr) minmax(0, 1.4fr); }
+  .route-surface .hq-contract-detail-actions { display: flex; gap: 10px; margin-top: 14px; }
+  .route-surface .hq-contract-detail-actions > button { flex: 1 1 0; min-width: 0; }
+  .route-surface .hq-contract-page .contract-detail-heading { display: flex; align-items: center !important; justify-content: space-between; gap: 12px; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid #e1eaf6; }
+  .route-surface .hq-contract-page .contract-detail-heading h2 { order: 0; margin: 0 !important; font-size: 20px; }
+  .route-surface .hq-contract-page .contract-detail-heading button { order: 1; min-width: 104px; border: 1px solid #cfe0f8; border-radius: 10px; background: #edf4ff; color: #1552a2; font-weight: 700; }
+  .route-surface .hq-contract-page > [role=tablist] { display: flex; gap: 8px; padding: 6px; border: 1px solid #d9e6f7; border-radius: 14px; background: #eaf1fb; }
+  .route-surface .hq-contract-page > [role=tablist] [role=tab] { flex: 1 1 0; min-width: 0; min-height: 48px; padding: 10px; border: 0; border-radius: 10px; background: transparent; color: #3b5272; font-size: 15px; font-weight: 700; }
+  .route-surface .hq-contract-page > [role=tablist] [role=tab][aria-selected=true] { background: #155bd0; color: #fff; box-shadow: 0 3px 9px #155bd033; }
+  .route-surface .hq-contract-page .contract-plan-table table { width: 100%; table-layout: auto; font-size: 14px; }
+  .route-surface .hq-contract-page .contract-plan-table :is(th, td) { padding: 14px 10px; font-size: 14px; line-height: 1.4; }
+  .route-surface .hq-contract-page .contract-plan-table th { color: #526985; background: #f4f8ff; font-weight: 700; }
+  .route-surface :is(.hq-opportunity-page, .h06-order-page) .tablet-detail-heading { display: flex; align-items: center !important; justify-content: space-between; gap: 12px; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid #e1eaf6; }
+  .route-surface :is(.hq-opportunity-page, .h06-order-page) .tablet-detail-heading h2 { order: 0; margin: 0 !important; font-size: 20px; }
+  .route-surface :is(.hq-opportunity-page, .h06-order-page) .tablet-detail-heading button { order: 1; min-width: 104px; border-color: #cfe0f8; border-radius: 10px; background: #edf4ff; color: #1552a2; }
+  .route-surface .hq-activity-primary:has(.activity-detail-heading) .activity-back-standalone { display: none; }
+  .route-surface .hq-activity-primary .activity-detail-heading { display: flex; align-items: center !important; justify-content: space-between; gap: 12px; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid #e1eaf6; }
+  .route-surface .hq-activity-primary .activity-detail-heading h2 { margin: 0 !important; font-size: 20px; }
+  .route-surface .hq-activity-primary .activity-detail-heading .activity-tablet-back { display: inline-flex; align-items: center; justify-content: center; min-width: 104px; min-height: 44px; border: 1px solid #cfe0f8; border-radius: 10px; background: #edf4ff; color: #1552a2; font-weight: 700; }
+  .route-surface .hq-lead-detail .lead-detail-top { display: flex; align-items: center !important; justify-content: space-between; gap: 12px; min-height: 62px; margin: 0 0 16px; padding: 10px 14px; border: 1px solid #e1eaf6; border-radius: 14px; background: #fff; }
+  .route-surface .hq-lead-detail .lead-detail-top .lead-mobile-title { display: inline-flex; order: 0; align-items: center; gap: 8px; color: #153a76; font-size: 18px; font-weight: 800; }
+  .route-surface .hq-lead-detail .lead-detail-top .lead-mobile-title span { margin: 0; color: #173866; font-size: 18px; }
+  .route-surface .hq-lead-detail .lead-detail-top .lead-detail-back { order: 1; display: inline-flex; align-items: center; justify-content: center; min-width: 104px; min-height: 44px; border: 1px solid #cfe0f8; border-radius: 10px; background: #edf4ff; color: #1552a2; font-weight: 700; }
+  .route-surface .hq-lead-detail .lead-detail-top :is(.hq-record-id, .lead-more-toggle, .lead-detail-back-icon) { display: none; }
+  .app-shell.account-route .mob-detail-top:has(.account-tablet-detail-title) { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 62px; margin: 12px 14px; padding: 10px 14px; border: 1px solid #e1eaf6; border-radius: 14px; background: #fff; }
+  .app-shell.account-route .mob-detail-top .account-tablet-detail-title { display: inline; order: 0; color: #173866; font-size: 18px; font-weight: 800; }
+  .app-shell.account-route .mob-detail-top:has(.account-tablet-detail-title) strong { display: none; }
+  .app-shell.account-route .mob-detail-top:has(.account-tablet-detail-title) button { order: 1; min-width: 104px; min-height: 44px; border: 1px solid #cfe0f8; border-radius: 10px; background: #edf4ff; color: #1552a2; font-size: 14px; font-weight: 700; }
+  .app-shell.account-route .account-tablet-window-header { align-items: center; gap: 12px; }
+  .app-shell.account-route .account-tablet-window-header .page-kicker { display: none; }
+  .app-shell.account-route .account-tablet-window-header .account-window-close-icon { display: none; }
+  .app-shell.account-route .account-tablet-window-header .account-window-back-label { display: inline; }
+  .app-shell.account-route .account-tablet-window-header .pc-window-actions button { width: auto; min-width: 104px; min-height: 44px; border: 1px solid #cfe0f8; border-radius: 10px; background: #edf4ff; color: #1552a2; font-size: 14px; font-weight: 700; }
+  .route-surface .hq-opportunity-page section[aria-label='기회 단계 안내'] { margin: 14px 0; padding: 16px; border: 1px solid #e1eaf6; border-radius: 12px; background: #f8fbff; }
+  .route-surface .hq-opportunity-page section[aria-label='기회 단계 안내'] > p { margin: 0 0 12px; }
+  .route-surface .hq-opportunity-page section[aria-label='기회 단계 안내'] > p:last-child { margin: 12px 0 0; }
+  .route-surface .hq-opportunity-page [aria-label='기회 단계 미리보기'] { display: flex; gap: 8px; }
+  .route-surface .hq-opportunity-page [aria-label='기회 단계 미리보기'] button { flex: 1; min-width: 0; border-radius: 10px; }
+  .route-surface .hq-opportunity-page [aria-label='기회 단계 미리보기'] button[aria-selected=true] { background: #155bd0; color: #fff; border-color: #155bd0; }
+  .route-surface .hq-lead-detail .lead-mobile-navigation { display: flex; flex-wrap: wrap; gap: 10px; width: 100%; }
+  .route-surface .hq-lead-detail .lead-mobile-navigation :is(a, button) { display: inline-flex; flex: 1 1 130px; align-items: center; justify-content: center; min-width: 0; min-height: 48px; text-align: center; }
+  .route-surface .hq-lead-detail .lead-stage-reason { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end !important; gap: 8px 12px; }
+  .route-surface .hq-lead-detail .lead-stage-reason > label { display: grid; gap: 6px; min-width: 0; }
+  .route-surface .hq-lead-detail .lead-stage-reason input { width: 100%; }
+  .route-surface .hq-lead-detail .lead-stage-reason > button { min-height: 46px; }
+  .route-surface .hq-lead-detail .lead-stage-reason > small { grid-column: 1 / -1; margin: 0; line-height: 1.5; }
+  .route-surface .hq-account-tools { display: flex; gap: 10px; padding: 12px; }
+  .route-surface .hq-account-tools > button { flex: 1 1 0; min-width: 0; min-height: 48px; padding: 10px 14px; border: 1px solid #cfe0f8; border-radius: 10px; background: #edf4ff; color: #1552a2; font-size: 14px; font-weight: 700; }
+  .route-surface .hq-activity-primary .hq-act-card > .hq-act-actions:has(> label) { display: grid; grid-template-columns: minmax(0, 2fr) minmax(150px, 1fr); gap: 14px; align-items: end; margin: 18px 0; }
+  .route-surface .hq-activity-primary .hq-act-card > .hq-act-actions:has(> label) label { min-width: 0; gap: 7px; }
+  .route-surface .hq-activity-primary .hq-act-card > .hq-act-actions:has(> label) :is(input, select) { width: 100%; }
+  .route-surface .hq-activity-primary [data-hq-screen='SCR-ACT-002'] .hq-act-detail { grid-template-columns: minmax(0, 1.4fr) minmax(65px, .65fr) minmax(0, 1.5fr) minmax(65px, .75fr) minmax(65px, .75fr); }
+  .route-surface .hq-report-page .hq-report-prepare { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 10px 14px; }
+  .route-surface .hq-report-page .hq-report-prepare h2 { grid-column: 1 / -1; }
+  .route-surface .hq-report-page .hq-report-prepare label { min-width: 0; }
+  .route-surface .hq-report-page .hq-report-prepare input { width: 100%; }
+  .route-surface .hq-report-page .hq-report-prepare button { min-width: 120px; }
+  .route-surface .hq-report-page .hq-report-queue > .hq-act-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 16px 0 12px; align-items: end; }
+  .route-surface .hq-report-page .hq-report-queue > .hq-act-actions label { min-width: 0; }
+  .route-surface .hq-report-page .hq-report-queue > .hq-act-actions :is(input, select) { width: 100%; }
+  .route-surface .hq-report-page .hq-report-queue > button { min-width: 140px; }
+  .route-surface .hq-report-page .hq-act-list-row { gap: 14px; padding: 14px; margin-top: 10px; border: 1px solid #e1eaf6; border-left: 4px solid #4383ed; border-radius: 12px; background: #f9fbff; }
+  .route-surface .h06-ledger-page > .h06-fields { display: flex; gap: 10px; margin: 0; }
+  .route-surface .h06-ledger-page > .h06-fields button { flex: 1 1 0; min-width: 0; }
+  .route-surface .h06-ledger-page .h06-card.h06-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; gap: 14px; }
+  .route-surface .h06-ledger-page .h06-card.h06-fields label { min-width: 0; }
+  .route-surface .h06-ledger-page .h06-card.h06-fields button { grid-column: 1 / -1; min-height: 46px; }
+  .route-surface .hq-pipeline-page .hq-sales-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .route-surface .hq-pipeline-page .hq-sales-stats article { min-width: 0; border-top: 3px solid #4383ed; }
+  .route-surface .hq-pipeline-page .pipeline-desktop-label { display: none; }
+  .route-surface .hq-pipeline-page .pipeline-mobile-label { display: inline; }
+  .route-surface .hq-admin-page table:has(th:nth-child(2):last-child) { display: table; table-layout: fixed; }
+  .route-surface .hq-admin-page table:has(th:nth-child(2):last-child) :is(th, td) { padding: 12px 14px; font-size: 14px; overflow-wrap: anywhere; }
+  .route-surface .hq-sales-scroll, .route-surface .h06-table-scroll { max-width: 100%; overflow-x: auto; }
+  .route-surface .hq-customer-modal { max-width: min(720px, calc(100vw - 32px)); }
+  .route-surface :is(.hq-account-workspace, .hq-account360-page, .hq-admin-page) { min-width: 0; color: #172e50; }
+  .route-surface :is(.hq-account-workspace, .hq-account360-page, .hq-admin-page) :is(input:not([type=checkbox]):not([type=radio]), select, textarea) {
+    box-sizing: border-box; min-width: 0; min-height: 46px; border: 1px solid #d4e1f2;
+    border-radius: 10px; background: #fff; color: #172e50; font-size: 16px;
+  }
+  .route-surface :is(.hq-account-workspace, .hq-account360-page, .hq-admin-page) button { min-height: 44px; font-size: 14px; }
+  .route-surface .hq-account-workspace .hq-customer-tabs { display: flex; gap: 6px; padding: 6px; overflow-x: auto; border: 1px solid #d9e6f7; border-radius: 14px; background: #eaf1fb; }
+  .route-surface .hq-account-workspace .hq-customer-tabs button { flex: 0 0 auto; padding: 10px 15px; border: 0; border-radius: 9px; color: #3b5272; font-weight: 700; white-space: nowrap; }
+  .route-surface .hq-account-workspace .hq-customer-tabs button[aria-selected=true] { background: #155bd0; color: #fff; box-shadow: 0 3px 9px #155bd033; }
+  .route-surface .hq-account-workspace .hq-customer-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .route-surface .hq-account-workspace .hq-customer-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .route-surface .hq-account-workspace .hq-metric-label svg { width: 22px; height: 22px; }
+  .route-surface .hq-lead-list .page-header, .route-surface .hq-account360-page > h2,
+  .route-surface .hq-admin-page > .dio-workspace-heading { padding: 20px 22px; border-radius: 16px; background: #102b5d; color: #fff; }
+  .route-surface .hq-lead-list .page-header :is(h2, p, .page-kicker), .route-surface .hq-admin-page > .dio-workspace-heading { color: #fff; }
+  .route-surface .hq-lead-list .lead-mobile-card { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 6px 10px; align-items: center; border: 1px solid #dce8f8; border-radius: 15px; box-shadow: 0 5px 18px #17365b0d; }
+  .route-surface .hq-lead-list .lead-card-icon { display: grid; place-items: center; grid-row: 1 / span 2; align-self: start; width: 42px; height: 42px; border-radius: 12px; background: #e6f1ff; color: #0867f2; }
+  .route-surface .hq-lead-list .lead-mobile-card-title { grid-column: 2; min-width: 0; }
+  .route-surface .hq-lead-list .lead-mobile-status { grid-column: 3; grid-row: 1; margin: 0; }
+  .route-surface .hq-lead-list .lead-mobile-card dl { grid-column: 2 / 4; margin: 0; }
+  .route-surface .hq-lead-list .lead-mobile-card-actions { grid-column: 1 / -1; gap: 8px; }
+  .route-surface .hq-lead-list .lead-mobile-card-actions :is(button, a) { display: inline-flex; align-items: center; justify-content: center; flex: 1; gap: 6px; min-height: 44px; border-radius: 10px; }
+  .route-surface .hq-lead-list .lead-mobile-card :is(dt svg, .lead-mobile-card-actions svg) { display: inline-block; }
+  .route-surface .hq-admin-page :is(form, section) { min-width: 0; padding: 20px; border: 1px solid #e1eaf6; border-radius: 16px; background: #fff; }
+  .route-surface .hq-admin-page .dio-workspace-icon { display: inline-grid; place-items: center; width: 42px; height: 42px; margin-right: 12px; border-radius: 12px; background: #28528e; color: #fff; }
+  .route-surface :is(.hq-admin-page, .hq-account360-page) :is([role=alert], [role=status]) { line-height: 1.5; overflow-wrap: anywhere; }
+}

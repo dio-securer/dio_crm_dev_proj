@@ -19,7 +19,7 @@ export interface HqRow extends Record<string, unknown> {
 }
 export const HQ_COLLECTION_NAMES = [
   'leads', 'accounts', 'contacts', 'activities', 'reports', 'directWorks',
-  'opportunities', 'contracts', 'plans', 'products', 'orders', 'deliveries',
+  'opportunities', 'followUps', 'contracts', 'plans', 'products', 'orders', 'deliveries',
   'collections', 'sales', 'returns', 'interfaceLogs', 'auditLogs', 'regions'
 ] as const;
 export type HqCollectionName = typeof HQ_COLLECTION_NAMES[number];

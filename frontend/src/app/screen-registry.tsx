@@ -35,8 +35,15 @@ import {
 import { DemoGlobalLeadPage, DemoGlobalAccountPage } from '../demo/LeadAccountDemoScreens';
 import { isGlobalExecutiveDemoMode } from '../demo/demo-mode';
 import type { ScreenKey } from './screen-profile';
+import { HqHomePage, HqAdminUsersPage, HqAdminPermissionsPage, HqAdminCodesPage, HqAdminInterfacesPage, HqAdminAuditPage } from '../hq-mock/HqH07Pages';
 
 const screenRegistry = new Map<ScreenKey, ComponentType>([
+  ['HQ_HOME', HqHomePage],
+  ['HQ_ADMIN_USERS', HqAdminUsersPage],
+  ['HQ_ADMIN_PERMISSIONS', HqAdminPermissionsPage],
+  ['HQ_ADMIN_CODES', HqAdminCodesPage],
+  ['HQ_ADMIN_INTERFACES', HqAdminInterfacesPage],
+  ['HQ_ADMIN_AUDIT', HqAdminAuditPage],
   ['HQ_LEAD', HqLeadPage],
   ['HQ_ACCOUNT', HqAccountPage],
   ['HQ_ACTIVITY', HqActivityPage],

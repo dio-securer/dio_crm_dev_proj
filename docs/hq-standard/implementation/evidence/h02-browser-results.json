@@ -1,7 +1,7 @@
 {
   "stage": "H02",
   "kind": "real-browser-http",
-  "startedAt": "2026-10-22T13:42:17.173Z",
+  "startedAt": "2026-11-04T12:27:38.357Z",
   "viewports": [
     {
       "width": 1440,
@@ -17,79 +17,79 @@
       "id": "H02-B01",
       "name": "Desktop explicit HQ boot and account rendering",
       "status": "PASS",
-      "durationMs": 401
+      "durationMs": 1254
     },
     {
       "id": "H02-B02",
       "name": "Mock bootstrap precedes login; transport uses only HQ credentials",
       "status": "PASS",
-      "durationMs": 2
+      "durationMs": 6
     },
     {
       "id": "H02-B03",
       "name": "Account search reads the HQ dataset",
       "status": "PASS",
-      "durationMs": 174
+      "durationMs": 586
     },
     {
       "id": "H02-B04",
       "name": "Existing account saves through the UI and HTTP API",
       "status": "PASS",
-      "durationMs": 289
+      "durationMs": 451
     },
     {
       "id": "H02-B05",
       "name": "Reload preserves saved data, HQ session and scenario",
       "status": "PASS",
-      "durationMs": 151
+      "durationMs": 531
     },
     {
       "id": "H02-B06",
       "name": "Sales persona has scoped data and cannot reset",
       "status": "PASS",
-      "durationMs": 64
+      "durationMs": 230
     },
     {
       "id": "H02-B07",
       "name": "Viewer reset is denied by UI and server",
       "status": "PASS",
-      "durationMs": 154
+      "durationMs": 395
     },
     {
       "id": "H02-B08",
       "name": "Administrator switch restores reset permission",
       "status": "PASS",
-      "durationMs": 58
+      "durationMs": 252
     },
     {
       "id": "H02-B09",
       "name": "Reset preview and cancellation preserve current data",
       "status": "PASS",
-      "durationMs": 205
+      "durationMs": 287
     },
     {
       "id": "H02-B10",
       "name": "Confirmed reset restores seed and advances generation",
       "status": "PASS",
-      "durationMs": 255
+      "durationMs": 457
     },
     {
       "id": "H02-B11",
       "name": "HQ reset preserves GLOBAL, normal-token and sandbox storage",
       "status": "PASS",
-      "durationMs": 3
+      "durationMs": 4
     },
     {
       "id": "H02-B12",
       "name": "API failure is visible without local sandbox fallback",
       "status": "PASS",
-      "durationMs": 204
+      "durationMs": 309
     },
     {
       "id": "H02-B13",
       "name": "Missing MOCK response marker cannot populate the screen",
       "status": "PASS",
-      "durationMs": 138
+      "durationMs": 246
     },
     {
       "id": "H02-B14",
@@ -102,25 +102,25 @@
         "viewport": 390,
         "scrollWidth": 390
       },
-      "durationMs": 284
+      "durationMs": 1774
     },
     {
       "id": "H02-B15",
       "name": "390px persona permission and reset dialog",
       "status": "PASS",
-      "durationMs": 238
+      "durationMs": 798
     },
     {
       "id": "H02-B16",
       "name": "Explicit GLOBAL selection remains available and preserves data",
       "status": "PASS",
-      "durationMs": 205
+      "durationMs": 339
     },
     {
       "id": "H02-B17",
       "name": "HQ off clears only the HQ session token",
       "status": "PASS",
-      "durationMs": 75
+      "durationMs": 263
     },
     {
       "id": "H02-B18",
@@ -145,7 +145,7 @@
     {
       "sequence": 1,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
+      "origin": "http://127.0.0.1:49486",
       "pathname": "/api/hq/bootstrap",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
@@ -154,7 +154,7 @@
     {
       "sequence": 3,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
+      "origin": "http://127.0.0.1:49486",
       "pathname": "/api/hq/bootstrap",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
@@ -163,7 +163,7 @@
     {
       "sequence": 5,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
+      "origin": "http://127.0.0.1:49486",
       "pathname": "/api/hq/session",
       "method": "POST",
       "mode": "HQ_HTTP_MOCK",
@@ -172,8 +172,8 @@
     {
       "sequence": 7,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/accounts",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/menu",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
@@ -181,17 +181,17 @@
     {
       "sequence": 8,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
+      "origin": "http://127.0.0.1:49486",
       "pathname": "/api/me/context",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
     },
     {
-      "sequence": 11,
+      "sequence": 10,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/hq/session",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/accounts",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
@@ -199,16 +199,16 @@
     {
       "sequence": 13,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/accounts",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/policy",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
     },
     {
-      "sequence": 15,
+      "sequence": 14,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
+      "origin": "http://127.0.0.1:49486",
       "pathname": "/api/accounts",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
@@ -217,8 +217,8 @@
     {
       "sequence": 17,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/accounts",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/session",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
@@ -226,7 +226,7 @@
     {
       "sequence": 19,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
+      "origin": "http://127.0.0.1:49486",
       "pathname": "/api/accounts",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
@@ -235,16 +235,16 @@
     {
       "sequence": 21,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/accounts/10000000-0000-4000-8000-000000000001",
-      "method": "PATCH",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/accounts",
+      "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
     },
     {
       "sequence": 23,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
+      "origin": "http://127.0.0.1:49486",
       "pathname": "/api/accounts",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
@@ -253,8 +253,8 @@
     {
       "sequence": 25,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/hq/bootstrap",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/accounts",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
@@ -262,8 +262,8 @@
     {
       "sequence": 27,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/hq/session",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/accounts/10000000-0000-4000-8000-000000000001/customer-detail",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
@@ -271,152 +271,152 @@
     {
       "sequence": 29,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
+      "origin": "http://127.0.0.1:49486",
       "pathname": "/api/accounts",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
     },
     {
-      "sequence": 30,
+      "sequence": 31,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/me/context",
-      "method": "GET",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/accounts/10000000-0000-4000-8000-000000000001",
+      "method": "PATCH",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
     },
     {
       "sequence": 33,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/hq/bootstrap",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/accounts",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
-      "authorization": "NONE"
+      "authorization": "HQ"
     },
     {
       "sequence": 35,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/hq/session",
-      "method": "POST",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/bootstrap",
+      "method": "GET",
       "mode": "HQ_HTTP_MOCK",
-      "authorization": "NONE"
+      "authorization": "HQ"
     },
     {
       "sequence": 37,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/accounts",
-      "method": "GET",
-      "mode": "HQ_HTTP_MOCK",
-      "authorization": "HQ"
-    },
-    {
-      "sequence": 38,
-      "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/me/context",
-      "method": "GET",
-      "mode": "HQ_HTTP_MOCK",
-      "authorization": "HQ"
-    },
-    {
-      "sequence": 41,
-      "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
+      "origin": "http://127.0.0.1:49486",
       "pathname": "/api/hq/session",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
     },
     {
-      "sequence": 43,
+      "sequence": 39,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/hq/bootstrap",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/menu",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
-      "authorization": "NONE"
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 40,
+      "viewport": "PC",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/me/context",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 42,
+      "viewport": "PC",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/accounts",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
     },
     {
       "sequence": 45,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/hq/session",
-      "method": "POST",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/policy",
+      "method": "GET",
       "mode": "HQ_HTTP_MOCK",
-      "authorization": "NONE"
+      "authorization": "HQ"
     },
     {
-      "sequence": 47,
+      "sequence": 46,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
+      "origin": "http://127.0.0.1:49486",
       "pathname": "/api/accounts",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
     },
     {
-      "sequence": 48,
+      "sequence": 49,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/me/context",
-      "method": "GET",
-      "mode": "HQ_HTTP_MOCK",
-      "authorization": "HQ"
-    },
-    {
-      "sequence": 51,
-      "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/hq/reset/preview",
-      "method": "POST",
-      "mode": "HQ_HTTP_MOCK",
-      "authorization": "HQ"
-    },
-    {
-      "sequence": 53,
-      "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
+      "origin": "http://127.0.0.1:49486",
       "pathname": "/api/hq/bootstrap",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "NONE"
     },
     {
-      "sequence": 55,
+      "sequence": 51,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
+      "origin": "http://127.0.0.1:49486",
       "pathname": "/api/hq/session",
       "method": "POST",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "NONE"
     },
     {
-      "sequence": 57,
+      "sequence": 53,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/accounts",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/menu",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
     },
     {
-      "sequence": 58,
+      "sequence": 54,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
+      "origin": "http://127.0.0.1:49486",
       "pathname": "/api/me/context",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
     },
     {
-      "sequence": 61,
+      "sequence": 56,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/hq/session",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/accounts",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 59,
+      "viewport": "PC",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/policy",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 60,
+      "viewport": "PC",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/accounts",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
@@ -424,7 +424,7 @@
     {
       "sequence": 63,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
+      "origin": "http://127.0.0.1:49486",
       "pathname": "/api/hq/session",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
@@ -433,44 +433,44 @@
     {
       "sequence": 65,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/hq/reset/preview",
-      "method": "POST",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/bootstrap",
+      "method": "GET",
       "mode": "HQ_HTTP_MOCK",
-      "authorization": "HQ"
+      "authorization": "NONE"
     },
     {
       "sequence": 67,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
+      "origin": "http://127.0.0.1:49486",
       "pathname": "/api/hq/session",
+      "method": "POST",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "NONE"
+    },
+    {
+      "sequence": 69,
+      "viewport": "PC",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/menu",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
     },
     {
-      "sequence": 69,
+      "sequence": 70,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/hq/reset/preview",
-      "method": "POST",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/me/context",
+      "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
     },
     {
-      "sequence": 71,
+      "sequence": 72,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/hq/reset",
-      "method": "POST",
-      "mode": "HQ_HTTP_MOCK",
-      "authorization": "HQ"
-    },
-    {
-      "sequence": 73,
-      "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/hq/session",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/accounts",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
@@ -478,8 +478,8 @@
     {
       "sequence": 75,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/accounts",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/policy",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
@@ -487,8 +487,8 @@
     {
       "sequence": 76,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/me/context",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/accounts",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
@@ -496,35 +496,35 @@
     {
       "sequence": 79,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/hq/session",
-      "method": "GET",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/reset/preview",
+      "method": "POST",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
     },
     {
       "sequence": 81,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
+      "origin": "http://127.0.0.1:49486",
       "pathname": "/api/hq/bootstrap",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
-      "authorization": "HQ"
+      "authorization": "NONE"
     },
     {
       "sequence": 83,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
+      "origin": "http://127.0.0.1:49486",
       "pathname": "/api/hq/session",
-      "method": "GET",
+      "method": "POST",
       "mode": "HQ_HTTP_MOCK",
-      "authorization": "HQ"
+      "authorization": "NONE"
     },
     {
       "sequence": 85,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/accounts",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/menu",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
@@ -532,17 +532,17 @@
     {
       "sequence": 86,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
+      "origin": "http://127.0.0.1:49486",
       "pathname": "/api/me/context",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
     },
     {
-      "sequence": 89,
+      "sequence": 88,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/hq/bootstrap",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/accounts",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
@@ -550,153 +550,441 @@
     {
       "sequence": 91,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/hq/session",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/policy",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
     },
     {
-      "sequence": 93,
+      "sequence": 92,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
+      "origin": "http://127.0.0.1:49486",
       "pathname": "/api/accounts",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
     },
     {
-      "sequence": 94,
+      "sequence": 95,
       "viewport": "PC",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/me/context",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/session",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
     },
     {
       "sequence": 97,
-      "viewport": "MOBILE_390",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/hq/bootstrap",
-      "method": "GET",
-      "mode": "HQ_HTTP_MOCK",
-      "authorization": "NONE"
-    },
-    {
-      "sequence": 99,
-      "viewport": "MOBILE_390",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/hq/bootstrap",
-      "method": "GET",
-      "mode": "HQ_HTTP_MOCK",
-      "authorization": "NONE"
-    },
-    {
-      "sequence": 101,
-      "viewport": "MOBILE_390",
-      "origin": "http://127.0.0.1:37353",
+      "viewport": "PC",
+      "origin": "http://127.0.0.1:49486",
       "pathname": "/api/hq/session",
-      "method": "POST",
-      "mode": "HQ_HTTP_MOCK",
-      "authorization": "NONE"
-    },
-    {
-      "sequence": 103,
-      "viewport": "MOBILE_390",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/accounts",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
     },
     {
-      "sequence": 104,
-      "viewport": "MOBILE_390",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/me/context",
+      "sequence": 99,
+      "viewport": "PC",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/reset/preview",
+      "method": "POST",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 101,
+      "viewport": "PC",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/session",
       "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 103,
+      "viewport": "PC",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/reset/preview",
+      "method": "POST",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 105,
+      "viewport": "PC",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/reset",
+      "method": "POST",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
     },
     {
       "sequence": 107,
-      "viewport": "MOBILE_390",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/hq/bootstrap",
+      "viewport": "PC",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/session",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
-      "authorization": "NONE"
+      "authorization": "HQ"
     },
     {
       "sequence": 109,
-      "viewport": "MOBILE_390",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/hq/session",
-      "method": "POST",
+      "viewport": "PC",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/menu",
+      "method": "GET",
       "mode": "HQ_HTTP_MOCK",
-      "authorization": "NONE"
+      "authorization": "HQ"
     },
     {
-      "sequence": 111,
-      "viewport": "MOBILE_390",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/accounts",
+      "sequence": 110,
+      "viewport": "PC",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/me/context",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
     },
     {
       "sequence": 112,
-      "viewport": "MOBILE_390",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/me/context",
-      "method": "GET",
-      "mode": "HQ_HTTP_MOCK",
-      "authorization": "HQ"
-    },
-    {
-      "sequence": 115,
-      "viewport": "MOBILE_390",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/hq/bootstrap",
-      "method": "GET",
-      "mode": "HQ_HTTP_MOCK",
-      "authorization": "NONE"
-    },
-    {
-      "sequence": 117,
-      "viewport": "MOBILE_390",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/hq/session",
-      "method": "POST",
-      "mode": "HQ_HTTP_MOCK",
-      "authorization": "NONE"
-    },
-    {
-      "sequence": 119,
-      "viewport": "MOBILE_390",
-      "origin": "http://127.0.0.1:37353",
+      "viewport": "PC",
+      "origin": "http://127.0.0.1:49486",
       "pathname": "/api/accounts",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
     },
     {
-      "sequence": 120,
-      "viewport": "MOBILE_390",
-      "origin": "http://127.0.0.1:37353",
-      "pathname": "/api/me/context",
+      "sequence": 115,
+      "viewport": "PC",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/policy",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 116,
+      "viewport": "PC",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/accounts",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 119,
+      "viewport": "PC",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/session",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 121,
+      "viewport": "PC",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/bootstrap",
       "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
     },
     {
       "sequence": 123,
+      "viewport": "PC",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/session",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 125,
+      "viewport": "PC",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/menu",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 126,
+      "viewport": "PC",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/me/context",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 128,
+      "viewport": "PC",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/accounts",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 131,
+      "viewport": "PC",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/bootstrap",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 133,
+      "viewport": "PC",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/session",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 135,
+      "viewport": "PC",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/menu",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 136,
+      "viewport": "PC",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/me/context",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 138,
+      "viewport": "PC",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/accounts",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 141,
       "viewport": "MOBILE_390",
-      "origin": "http://127.0.0.1:37353",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/bootstrap",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "NONE"
+    },
+    {
+      "sequence": 143,
+      "viewport": "MOBILE_390",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/bootstrap",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "NONE"
+    },
+    {
+      "sequence": 145,
+      "viewport": "MOBILE_390",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/session",
+      "method": "POST",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "NONE"
+    },
+    {
+      "sequence": 147,
+      "viewport": "MOBILE_390",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/menu",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 148,
+      "viewport": "MOBILE_390",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/me/context",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 150,
+      "viewport": "MOBILE_390",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/accounts",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 153,
+      "viewport": "MOBILE_390",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/policy",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 154,
+      "viewport": "MOBILE_390",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/accounts",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 157,
+      "viewport": "MOBILE_390",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/bootstrap",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "NONE"
+    },
+    {
+      "sequence": 159,
+      "viewport": "MOBILE_390",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/session",
+      "method": "POST",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "NONE"
+    },
+    {
+      "sequence": 161,
+      "viewport": "MOBILE_390",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/menu",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 162,
+      "viewport": "MOBILE_390",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/me/context",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 165,
+      "viewport": "MOBILE_390",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/accounts",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 167,
+      "viewport": "MOBILE_390",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/policy",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 168,
+      "viewport": "MOBILE_390",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/accounts",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 171,
+      "viewport": "MOBILE_390",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/bootstrap",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "NONE"
+    },
+    {
+      "sequence": 173,
+      "viewport": "MOBILE_390",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/session",
+      "method": "POST",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "NONE"
+    },
+    {
+      "sequence": 175,
+      "viewport": "MOBILE_390",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/menu",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 176,
+      "viewport": "MOBILE_390",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/me/context",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 178,
+      "viewport": "MOBILE_390",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/accounts",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 181,
+      "viewport": "MOBILE_390",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/hq/policy",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 182,
+      "viewport": "MOBILE_390",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/accounts",
+      "method": "GET",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 185,
+      "viewport": "MOBILE_390",
+      "origin": "http://127.0.0.1:49486",
       "pathname": "/api/hq/reset/preview",
       "method": "POST",
+      "mode": "HQ_HTTP_MOCK",
+      "authorization": "HQ"
+    },
+    {
+      "sequence": 187,
+      "viewport": "MOBILE_390",
+      "origin": "http://127.0.0.1:49486",
+      "pathname": "/api/accounts",
+      "method": "GET",
       "mode": "HQ_HTTP_MOCK",
       "authorization": "HQ"
     }
@@ -726,12 +1014,12 @@
     {
       "sequence": 9,
       "viewport": "PC",
-      "pathname": "/api/accounts",
+      "pathname": "/api/hq/menu",
       "status": 200,
       "mock": "true"
     },
     {
-      "sequence": 10,
+      "sequence": 11,
       "viewport": "PC",
       "pathname": "/api/me/context",
       "status": 200,
@@ -740,14 +1028,14 @@
     {
       "sequence": 12,
       "viewport": "PC",
-      "pathname": "/api/hq/session",
+      "pathname": "/api/accounts",
       "status": 200,
       "mock": "true"
     },
     {
-      "sequence": 14,
+      "sequence": 15,
       "viewport": "PC",
-      "pathname": "/api/accounts",
+      "pathname": "/api/hq/policy",
       "status": 200,
       "mock": "true"
     },
@@ -761,7 +1049,7 @@
     {
       "sequence": 18,
       "viewport": "PC",
-      "pathname": "/api/accounts",
+      "pathname": "/api/hq/session",
       "status": 200,
       "mock": "true"
     },
@@ -775,7 +1063,7 @@
     {
       "sequence": 22,
       "viewport": "PC",
-      "pathname": "/api/accounts/10000000-0000-4000-8000-000000000001",
+      "pathname": "/api/accounts",
       "status": 200,
       "mock": "true"
     },
@@ -789,19 +1077,19 @@
     {
       "sequence": 26,
       "viewport": "PC",
-      "pathname": "/api/hq/bootstrap",
+      "pathname": "/api/accounts",
       "status": 200,
       "mock": "true"
     },
     {
       "sequence": 28,
       "viewport": "PC",
-      "pathname": "/api/hq/session",
+      "pathname": "/api/accounts/10000000-0000-4000-8000-000000000001/customer-detail",
       "status": 200,
       "mock": "true"
     },
     {
-      "sequence": 31,
+      "sequence": 30,
       "viewport": "PC",
       "pathname": "/api/accounts",
       "status": 200,
@@ -810,61 +1098,61 @@
     {
       "sequence": 32,
       "viewport": "PC",
-      "pathname": "/api/me/context",
+      "pathname": "/api/accounts/10000000-0000-4000-8000-000000000001",
       "status": 200,
       "mock": "true"
     },
     {
       "sequence": 34,
       "viewport": "PC",
-      "pathname": "/api/hq/bootstrap",
+      "pathname": "/api/accounts",
       "status": 200,
       "mock": "true"
     },
     {
       "sequence": 36,
       "viewport": "PC",
+      "pathname": "/api/hq/bootstrap",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 38,
+      "viewport": "PC",
       "pathname": "/api/hq/session",
       "status": 200,
       "mock": "true"
     },
     {
-      "sequence": 39,
+      "sequence": 41,
       "viewport": "PC",
-      "pathname": "/api/accounts",
+      "pathname": "/api/hq/menu",
       "status": 200,
       "mock": "true"
     },
     {
-      "sequence": 40,
+      "sequence": 43,
       "viewport": "PC",
       "pathname": "/api/me/context",
       "status": 200,
       "mock": "true"
     },
     {
-      "sequence": 42,
-      "viewport": "PC",
-      "pathname": "/api/hq/session",
-      "status": 200,
-      "mock": "true"
-    },
-    {
       "sequence": 44,
       "viewport": "PC",
-      "pathname": "/api/hq/bootstrap",
+      "pathname": "/api/accounts",
       "status": 200,
       "mock": "true"
     },
     {
-      "sequence": 46,
+      "sequence": 47,
       "viewport": "PC",
-      "pathname": "/api/hq/session",
+      "pathname": "/api/hq/policy",
       "status": 200,
       "mock": "true"
     },
     {
-      "sequence": 49,
+      "sequence": 48,
       "viewport": "PC",
       "pathname": "/api/accounts",
       "status": 200,
@@ -873,49 +1161,49 @@
     {
       "sequence": 50,
       "viewport": "PC",
-      "pathname": "/api/me/context",
+      "pathname": "/api/hq/bootstrap",
       "status": 200,
       "mock": "true"
     },
     {
       "sequence": 52,
       "viewport": "PC",
-      "pathname": "/api/hq/reset/preview",
-      "status": 403,
-      "mock": "true"
-    },
-    {
-      "sequence": 54,
-      "viewport": "PC",
-      "pathname": "/api/hq/bootstrap",
-      "status": 200,
-      "mock": "true"
-    },
-    {
-      "sequence": 56,
-      "viewport": "PC",
       "pathname": "/api/hq/session",
       "status": 200,
       "mock": "true"
     },
     {
-      "sequence": 59,
+      "sequence": 55,
       "viewport": "PC",
-      "pathname": "/api/accounts",
+      "pathname": "/api/hq/menu",
       "status": 200,
       "mock": "true"
     },
     {
-      "sequence": 60,
+      "sequence": 57,
       "viewport": "PC",
       "pathname": "/api/me/context",
       "status": 200,
       "mock": "true"
     },
     {
+      "sequence": 58,
+      "viewport": "PC",
+      "pathname": "/api/accounts",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 61,
+      "viewport": "PC",
+      "pathname": "/api/hq/policy",
+      "status": 200,
+      "mock": "true"
+    },
+    {
       "sequence": 62,
       "viewport": "PC",
-      "pathname": "/api/hq/session",
+      "pathname": "/api/accounts",
       "status": 200,
       "mock": "true"
     },
@@ -929,7 +1217,7 @@
     {
       "sequence": 66,
       "viewport": "PC",
-      "pathname": "/api/hq/reset/preview",
+      "pathname": "/api/hq/bootstrap",
       "status": 200,
       "mock": "true"
     },
@@ -941,45 +1229,45 @@
       "mock": "true"
     },
     {
-      "sequence": 70,
+      "sequence": 71,
       "viewport": "PC",
-      "pathname": "/api/hq/reset/preview",
+      "pathname": "/api/hq/menu",
       "status": 200,
       "mock": "true"
     },
     {
-      "sequence": 72,
-      "viewport": "PC",
-      "pathname": "/api/hq/reset",
-      "status": 200,
-      "mock": "true"
-    },
-    {
-      "sequence": 74,
-      "viewport": "PC",
-      "pathname": "/api/hq/session",
-      "status": 200,
-      "mock": "true"
-    },
-    {
-      "sequence": 77,
-      "viewport": "PC",
-      "pathname": "/api/accounts",
-      "status": 200,
-      "mock": "true"
-    },
-    {
-      "sequence": 78,
+      "sequence": 73,
       "viewport": "PC",
       "pathname": "/api/me/context",
       "status": 200,
       "mock": "true"
     },
     {
+      "sequence": 74,
+      "viewport": "PC",
+      "pathname": "/api/accounts",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 77,
+      "viewport": "PC",
+      "pathname": "/api/hq/policy",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 78,
+      "viewport": "PC",
+      "pathname": "/api/accounts",
+      "status": 200,
+      "mock": "true"
+    },
+    {
       "sequence": 80,
       "viewport": "PC",
-      "pathname": "/api/hq/session",
-      "status": 200,
+      "pathname": "/api/hq/reset/preview",
+      "status": 403,
       "mock": "true"
     },
     {
@@ -999,12 +1287,12 @@
     {
       "sequence": 87,
       "viewport": "PC",
-      "pathname": "/api/accounts",
-      "status": 503,
+      "pathname": "/api/hq/menu",
+      "status": 200,
       "mock": "true"
     },
     {
-      "sequence": 88,
+      "sequence": 89,
       "viewport": "PC",
       "pathname": "/api/me/context",
       "status": 200,
@@ -1013,137 +1301,362 @@
     {
       "sequence": 90,
       "viewport": "PC",
-      "pathname": "/api/hq/bootstrap",
+      "pathname": "/api/accounts",
       "status": 200,
       "mock": "true"
     },
     {
-      "sequence": 92,
+      "sequence": 93,
+      "viewport": "PC",
+      "pathname": "/api/hq/policy",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 94,
+      "viewport": "PC",
+      "pathname": "/api/accounts",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 96,
       "viewport": "PC",
       "pathname": "/api/hq/session",
       "status": 200,
       "mock": "true"
     },
     {
-      "sequence": 95,
+      "sequence": 98,
+      "viewport": "PC",
+      "pathname": "/api/hq/session",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 100,
+      "viewport": "PC",
+      "pathname": "/api/hq/reset/preview",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 102,
+      "viewport": "PC",
+      "pathname": "/api/hq/session",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 104,
+      "viewport": "PC",
+      "pathname": "/api/hq/reset/preview",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 106,
+      "viewport": "PC",
+      "pathname": "/api/hq/reset",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 108,
+      "viewport": "PC",
+      "pathname": "/api/hq/session",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 111,
+      "viewport": "PC",
+      "pathname": "/api/hq/menu",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 113,
+      "viewport": "PC",
+      "pathname": "/api/me/context",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 114,
+      "viewport": "PC",
+      "pathname": "/api/accounts",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 117,
+      "viewport": "PC",
+      "pathname": "/api/hq/policy",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 118,
+      "viewport": "PC",
+      "pathname": "/api/accounts",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 120,
+      "viewport": "PC",
+      "pathname": "/api/hq/session",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 122,
+      "viewport": "PC",
+      "pathname": "/api/hq/bootstrap",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 124,
+      "viewport": "PC",
+      "pathname": "/api/hq/session",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 127,
+      "viewport": "PC",
+      "pathname": "/api/hq/menu",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 129,
+      "viewport": "PC",
+      "pathname": "/api/me/context",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 130,
+      "viewport": "PC",
+      "pathname": "/api/accounts",
+      "status": 503,
+      "mock": "true"
+    },
+    {
+      "sequence": 132,
+      "viewport": "PC",
+      "pathname": "/api/hq/bootstrap",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 134,
+      "viewport": "PC",
+      "pathname": "/api/hq/session",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 137,
+      "viewport": "PC",
+      "pathname": "/api/hq/menu",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 139,
+      "viewport": "PC",
+      "pathname": "/api/me/context",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 140,
       "viewport": "PC",
       "pathname": "/api/accounts",
       "status": 200,
       "mock": null
     },
     {
-      "sequence": 96,
-      "viewport": "PC",
-      "pathname": "/api/me/context",
-      "status": 200,
-      "mock": "true"
-    },
-    {
-      "sequence": 98,
+      "sequence": 142,
       "viewport": "MOBILE_390",
       "pathname": "/api/hq/bootstrap",
       "status": 200,
       "mock": "true"
     },
     {
-      "sequence": 100,
+      "sequence": 144,
       "viewport": "MOBILE_390",
       "pathname": "/api/hq/bootstrap",
       "status": 200,
       "mock": "true"
     },
     {
-      "sequence": 102,
+      "sequence": 146,
       "viewport": "MOBILE_390",
       "pathname": "/api/hq/session",
       "status": 200,
       "mock": "true"
     },
     {
-      "sequence": 105,
+      "sequence": 149,
       "viewport": "MOBILE_390",
-      "pathname": "/api/accounts",
+      "pathname": "/api/hq/menu",
       "status": 200,
       "mock": "true"
     },
     {
-      "sequence": 106,
+      "sequence": 151,
       "viewport": "MOBILE_390",
       "pathname": "/api/me/context",
       "status": 200,
       "mock": "true"
     },
     {
-      "sequence": 108,
+      "sequence": 152,
+      "viewport": "MOBILE_390",
+      "pathname": "/api/accounts",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 155,
+      "viewport": "MOBILE_390",
+      "pathname": "/api/hq/policy",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 156,
+      "viewport": "MOBILE_390",
+      "pathname": "/api/accounts",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 158,
       "viewport": "MOBILE_390",
       "pathname": "/api/hq/bootstrap",
       "status": 200,
       "mock": "true"
     },
     {
-      "sequence": 110,
+      "sequence": 160,
       "viewport": "MOBILE_390",
       "pathname": "/api/hq/session",
       "status": 200,
       "mock": "true"
     },
     {
-      "sequence": 113,
+      "sequence": 163,
       "viewport": "MOBILE_390",
-      "pathname": "/api/accounts",
+      "pathname": "/api/hq/menu",
       "status": 200,
       "mock": "true"
     },
     {
-      "sequence": 114,
+      "sequence": 164,
       "viewport": "MOBILE_390",
       "pathname": "/api/me/context",
       "status": 200,
       "mock": "true"
     },
     {
-      "sequence": 116,
+      "sequence": 166,
+      "viewport": "MOBILE_390",
+      "pathname": "/api/accounts",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 169,
+      "viewport": "MOBILE_390",
+      "pathname": "/api/hq/policy",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 170,
+      "viewport": "MOBILE_390",
+      "pathname": "/api/accounts",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 172,
       "viewport": "MOBILE_390",
       "pathname": "/api/hq/bootstrap",
       "status": 200,
       "mock": "true"
     },
     {
-      "sequence": 118,
+      "sequence": 174,
       "viewport": "MOBILE_390",
       "pathname": "/api/hq/session",
       "status": 200,
       "mock": "true"
     },
     {
-      "sequence": 121,
+      "sequence": 177,
       "viewport": "MOBILE_390",
-      "pathname": "/api/accounts",
+      "pathname": "/api/hq/menu",
       "status": 200,
       "mock": "true"
     },
     {
-      "sequence": 122,
+      "sequence": 179,
       "viewport": "MOBILE_390",
       "pathname": "/api/me/context",
       "status": 200,
       "mock": "true"
     },
     {
-      "sequence": 124,
+      "sequence": 180,
+      "viewport": "MOBILE_390",
+      "pathname": "/api/accounts",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 183,
+      "viewport": "MOBILE_390",
+      "pathname": "/api/hq/policy",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 184,
+      "viewport": "MOBILE_390",
+      "pathname": "/api/accounts",
+      "status": 200,
+      "mock": "true"
+    },
+    {
+      "sequence": 186,
       "viewport": "MOBILE_390",
       "pathname": "/api/hq/reset/preview",
       "status": 200,
       "mock": "true"
+    },
+    {
+      "sequence": 188,
+      "viewport": "MOBILE_390",
+      "pathname": "/api/accounts",
+      "status": 200,
+      "mock": "true"
     }
   ],
-  "browserVersion": "151.0.7922.34",
-  "finishedAt": "2026-10-22T13:42:20.854Z",
+  "browserVersion": "156.0.8078.76",
+  "finishedAt": "2026-11-04T12:27:59.799Z",
   "summary": {
     "total": 18,
     "passed": 18,
     "failed": 0,
     "notRun": 0
   },
-  "status": "PASS"
+  "status": "PASS",
+  "cleanupWarning": "System Chrome did not close within 10 seconds; test assertions completed."
 }

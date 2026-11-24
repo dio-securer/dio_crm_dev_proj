@@ -1,4 +1,4 @@
-import { HQ_COLLECTION_NAMES, HQ_SCHEMA_VERSION, cloneHq, hqAssert, HqMockError } from './model.js';
+import { HQ_COLLECTION_NAMES, HQ_SCHEMA_VERSION, canonicalHq, cloneHq, hqAssert, HqMockError } from './model.js';
 import type { HqDataset, HqBusinessCollection, HqRow } from './model.js';
 import { createHqSeed } from './seed.js';
 
@@ -13,7 +13,8 @@ function serializable(value: unknown, path: string, seen = new Set<object>()): v
   const next = new Set(seen); next.add(value as object);
   for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
     hqAssert(!['__proto__', 'constructor', 'prototype'].includes(key), 422, 'DATASET_KEY_INVALID', `${path}.${key}`);
-    if (moneyFields.has(key)) hqAssert(typeof child === 'number' && Number.isFinite(child) && child >= 0, 422, 'DATASET_MONEY_INVALID', `${path}.${key}`);
+    const signedOriginalPlan = key === 'amount' && /^dataset\.collections\.plans\.\d+$/.test(path) && (value as Record<string, unknown>).adjustment_type === 'ORIGINAL';
+    if (moneyFields.has(key)) hqAssert(typeof child === 'number' && Number.isFinite(child) && (child >= 0 || signedOriginalPlan), 422, 'DATASET_MONEY_INVALID', `${path}.${key}`);
     serializable(child, `${path}.${key}`, next);
   }
 }
@@ -57,6 +58,11 @@ export function validateHqDataset(value: unknown, expectedDatasetId?: string): a
   };
   for (const item of d.collections.contacts) ref(item, 'account_public_id', 'accounts');
   for (const item of d.collections.opportunities) ref(item, 'account_public_id', 'accounts');
+  for (const item of d.collections.followUps) {
+    ref(item, 'opportunity_public_id', 'opportunities'); ref(item, 'account_public_id', 'accounts');
+    const opportunity = d.collections.opportunities.find(row => row.public_id === item.opportunity_public_id)!;
+    hqAssert(opportunity.account_public_id === item.account_public_id, 422, 'DATASET_FOLLOWUP_ACCOUNT_MISMATCH');
+  }
   for (const item of d.collections.contracts) {
     ref(item, 'account_public_id', 'accounts'); ref(item, 'opportunity_public_id', 'opportunities');
     const opportunity = d.collections.opportunities.find(row => row.public_id === item.opportunity_public_id)!;
@@ -98,6 +104,27 @@ export interface HqRepositoryOptions {
   load?: () => HqDataset | undefined;
   save?: (dataset: HqDataset) => void;
 }
+
+// Older mock activities only stored start_at and their related record. Restore
+// the fields used by the calendar and check-in without overwriting saved values.
+function upgradeLegacyActivities(dataset: HqDataset): void {
+  for (const activity of dataset.collections.activities) {
+    const start = typeof activity.start_at === 'string' ? activity.start_at : '';
+    if (start && !Number.isNaN(Date.parse(start))) {
+      if (activity.planned_at == null) activity.planned_at = start;
+      if (activity.planned_date == null) {
+        activity.planned_date = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(start));
+      }
+    }
+    if (activity.target_latitude !== undefined || activity.target_longitude !== undefined) continue;
+    const targets = activity.related_type === 'LEAD' ? dataset.collections.leads : activity.related_type === 'ACCOUNT' ? dataset.collections.accounts : [];
+    const target = targets.find(row => row.company_id === activity.company_id && row.public_id === activity.related_public_id);
+    if (target) {
+      activity.target_latitude = target.latitude ?? null;
+      activity.target_longitude = target.longitude ?? null;
+    }
+  }
+}
 export class HqRepository {
   private current: HqDataset;
   private busy = false;
@@ -105,13 +132,16 @@ export class HqRepository {
   constructor(options: HqRepositoryOptions) {
     this.options = options;
     const loaded = options.load?.();
-    const initial = loaded ?? createHqSeed(options.datasetId);
+    const initial = cloneHq(loaded ?? createHqSeed(options.datasetId));
+    // Existing persisted HQ mock datasets predate the follow-up collection.
+    if (!Object.prototype.hasOwnProperty.call(initial.collections, 'followUps')) initial.collections.followUps = [];
+    upgradeLegacyActivities(initial);
     validateHqDataset(initial, options.datasetId);
     if (!loaded) options.save?.(cloneHq(initial));
     this.current = cloneHq(initial);
   }
   read(): HqDataset { return cloneHq(this.current); }
-  transact<T>(work: (draft: HqDataset) => T): T {
+  transact<T>(work: (draft: HqDataset) => T, skipUnchanged = false): T {
     hqAssert(!this.busy, 409, 'DATASET_TRANSACTION_REENTRANT');
     this.busy = true;
     try {
@@ -120,6 +150,7 @@ export class HqRepository {
       hqAssert(!(result && typeof (result as { then?: unknown }).then === 'function'), 500, 'DATASET_ASYNC_TRANSACTION_FORBIDDEN');
       hqAssert(draft.datasetId === this.current.datasetId && draft.schemaVersion === this.current.schemaVersion && draft.generation === this.current.generation, 409, 'DATASET_IDENTITY_IMMUTABLE');
       hqAssert(draft.sequence >= this.current.sequence && Date.parse(draft.clock) >= Date.parse(this.current.clock), 409, 'DATASET_CLOCK_OR_SEQUENCE_REVERSED');
+      if (skipUnchanged && canonicalHq(draft) === canonicalHq(this.current)) return cloneHq(result);
       draft.revision = this.current.revision + 1;
       validateHqDataset(draft, this.options.datasetId);
       // Persistence must succeed before exposing the new state. The persistence adapter must write atomically.
@@ -134,6 +165,7 @@ export class HqRepository {
     this.busy = true;
     try {
       const next = createHqSeed(this.options.datasetId, this.current.generation + 1);
+      upgradeLegacyActivities(next);
       next.revision = this.current.revision + 1;
       validateHqDataset(next, this.options.datasetId);
       this.options.save?.(cloneHq(next));

@@ -1,3 +1,5 @@
+import {ReportModeBoundary} from './customization/ConfiguredReport';
+import {analyticsReportSpec} from './customization/report-specs';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { AnalyticsDashboard } from '@dio-crm/contracts';
@@ -7,7 +9,8 @@ import { formatCurrency } from './formatting/currency';
 
 function Card({title,value,sub}:{title:string;value:string|number;sub?:string}) { return <div style={{background:'#fff',border:'1px solid #dfe4ea',borderRadius:10,padding:14}}><div style={{color:'#667085',fontSize:13}}>{title}</div><div style={{fontSize:24,fontWeight:700,marginTop:4}}>{value}</div>{sub&&<small>{sub}</small>}</div>; }
 
-export function AnalyticsDashboardPage() {
+export function AnalyticsDashboardPage() { return <ReportModeBoundary spec={analyticsReportSpec} legacy={<LegacyAnalyticsDashboardPage/>}/>; }
+function LegacyAnalyticsDashboardPage() {
   const { t } = useTranslation();
   const { globalization } = useGlobalization();
   const money=(value:number)=>formatCurrency(Number(value||0),globalization.locale,globalization.currencyCode);

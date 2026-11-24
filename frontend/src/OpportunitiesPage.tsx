@@ -1,3 +1,5 @@
+import {RecordModeBoundary} from './customization/ConfiguredRecords';
+import {opportunityRecordSpec} from './customization/record-specs';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { apiGet, apiPatch, apiPost } from './api';
@@ -16,7 +18,8 @@ type Catalog = { public_id: string; item_type: string; item_name: string; base_p
 
 const stages = ['NEEDS_ANALYSIS','PROPOSAL','NEGOTIATION','CLOSED_WON','CLOSED_LOST'];
 
-export function OpportunitiesPage() {
+export function OpportunitiesPage() { return <RecordModeBoundary spec={opportunityRecordSpec} legacy={<LegacyOpportunitiesPage/>}/>; }
+function LegacyOpportunitiesPage() {
   const { t } = useTranslation();
   const hq = useHqMock();
   const { globalization } = useGlobalization();

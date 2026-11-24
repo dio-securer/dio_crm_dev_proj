@@ -80,9 +80,10 @@ function validatePayload(code: HqInterfaceCode, payload: Record<string, unknown>
     shape(row, ['sido', 'sigungu', 'ownerUserId'], ['sido', 'sigungu', 'ownerUserId']); text(row.sido, 'sido'); text(row.sigungu, 'sigungu'); finite(row.ownerUserId, 'ownerUserId', 1); hqAssert(Number.isInteger(row.ownerUserId), 400, 'INTERFACE_OWNER_INVALID');
   }
   if (code === 'IF-ERP-006' && payload.products !== undefined) for (const row of rows(payload.products, 'products')) {
-    shape(row, ['productPublicId', 'erpItemCode', 'itemName', 'itemType', 'category', 'unitPrice', 'stockQty', 'orderAvailable'], ['erpItemCode', 'itemName', 'itemType', 'unitPrice', 'stockQty', 'orderAvailable']);
+    shape(row, ['productPublicId', 'erpItemCode', 'itemName', 'itemType', 'category', 'unitPrice', 'stockQty', 'orderAvailable', 'unit'], ['erpItemCode', 'itemName', 'itemType', 'unitPrice', 'stockQty', 'orderAvailable']);
     if (row.productPublicId !== undefined) uuid(row.productPublicId, 'productPublicId');
     text(row.erpItemCode, 'erpItemCode'); text(row.itemName, 'itemName'); if (row.category !== undefined) text(row.category, 'category');
+    if (row.unit !== undefined) text(row.unit, 'unit');
     hqAssert(['PACKAGE', 'PRODUCT'].includes(String(row.itemType)), 400, 'INTERFACE_PRODUCT_TYPE_INVALID'); finite(row.unitPrice, 'unitPrice'); finite(row.stockQty, 'stockQty', -9999999); hqAssert(typeof row.orderAvailable === 'boolean', 400, 'INTERFACE_BOOLEAN_INVALID');
   }
   if ((code === 'IF-ERP-004' && payload.products !== undefined) || (code === 'IF-ERP-007' && payload.items !== undefined)) {
@@ -106,16 +107,21 @@ function validatePayload(code: HqInterfaceCode, payload: Record<string, unknown>
   if (code === 'IF-ERP-008') {
     if (payload.status !== undefined) hqAssert(['ACCEPTED', 'PROCESSING', 'COMPLETED', 'FAILED'].includes(String(payload.status)), 400, 'INTERFACE_ORDER_STATUS_INVALID');
     if (payload.deliveries !== undefined) for (const row of rows(payload.deliveries, 'deliveries')) {
-      shape(row, ['erpDeliveryNo', 'deliveryStatus', 'shippedAt', 'deliveredAt'], ['erpDeliveryNo', 'deliveryStatus']); text(row.erpDeliveryNo, 'erpDeliveryNo');
+      shape(row, ['erpDeliveryNo', 'deliveryStatus', 'shippedAt', 'deliveredAt', 'orderLinePublicId', 'shippedQty', 'deliveredQty', 'unit'], ['erpDeliveryNo', 'deliveryStatus']); text(row.erpDeliveryNo, 'erpDeliveryNo');
       hqAssert(['PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'].includes(String(row.deliveryStatus)), 400, 'INTERFACE_DELIVERY_STATUS_INVALID');
       if (row.shippedAt !== undefined) date(row.shippedAt, 'shippedAt'); if (row.deliveredAt !== undefined) date(row.deliveredAt, 'deliveredAt');
+      if (row.orderLinePublicId !== undefined) uuid(row.orderLinePublicId, 'orderLinePublicId');
+      if (row.shippedQty !== undefined) finite(row.shippedQty, 'shippedQty', 0);
+      if (row.deliveredQty !== undefined) finite(row.deliveredQty, 'deliveredQty', 0);
+      if (row.unit !== undefined) text(row.unit, 'unit');
     }
   }
   if (code === 'IF-ERP-009' && payload.rows !== undefined) for (const row of rows(payload.rows, 'rows')) {
-    shape(row, ['erpCollectionNo', 'amount', 'collectedAt', 'version'], ['erpCollectionNo', 'amount', 'collectedAt']); text(row.erpCollectionNo, 'erpCollectionNo'); finite(row.amount, 'amount', 0.01); date(row.collectedAt, 'collectedAt'); if (row.version !== undefined) { finite(row.version, 'version', 1); hqAssert(Number.isInteger(row.version), 400, 'INTERFACE_VERSION_INVALID'); }
+    shape(row, ['erpCollectionNo', 'amount', 'collectedAt', 'version', 'currency'], ['erpCollectionNo', 'amount', 'collectedAt']); text(row.erpCollectionNo, 'erpCollectionNo'); finite(row.amount, 'amount', 0.01); date(row.collectedAt, 'collectedAt'); if (row.currency !== undefined) hqAssert(typeof row.currency === 'string' && /^[A-Z]{3}$/.test(row.currency), 400, 'INTERFACE_CURRENCY_INVALID'); if (row.version !== undefined) { finite(row.version, 'version', 1); hqAssert(Number.isInteger(row.version), 400, 'INTERFACE_VERSION_INVALID'); }
   }
   if (code === 'IF-ERP-010' && payload.rows !== undefined) for (const row of rows(payload.rows, 'rows')) {
-    shape(row, ['erpSalesNo', 'salesDate', 'amount', 'contractPublicId', 'orderPublicId', 'itemCode', 'itemName', 'quantity', 'version'], ['erpSalesNo', 'salesDate', 'amount']); text(row.erpSalesNo, 'erpSalesNo'); date(row.salesDate, 'salesDate'); finite(row.amount, 'amount');
+    shape(row, ['erpSalesNo', 'salesDate', 'amount', 'contractPublicId', 'orderPublicId', 'itemCode', 'itemName', 'quantity', 'version', 'currency'], ['erpSalesNo', 'salesDate', 'amount']); text(row.erpSalesNo, 'erpSalesNo'); date(row.salesDate, 'salesDate'); finite(row.amount, 'amount');
+    if (row.currency !== undefined) hqAssert(typeof row.currency === 'string' && /^[A-Z]{3}$/.test(row.currency), 400, 'INTERFACE_CURRENCY_INVALID');
     for (const k of ['contractPublicId', 'orderPublicId']) if (row[k] !== undefined) uuid(row[k], k);
     if (row.quantity !== undefined) finite(row.quantity, 'quantity', 0);
     for (const k of ['itemCode', 'itemName']) if (row[k] !== undefined) text(row[k], k);
@@ -157,15 +163,20 @@ function sourceSnapshot(d: HqDataset, actor: HqActor, code: HqInterfaceCode, ent
     const plans = d.collections.plans.filter(r => r.company_id === actor.companyId && r.contract_public_id === entity.public_id && r.is_current === true);
     const planRows = plans.map(r => ({ installmentNo: r.installment_no, amount: r.amount, plannedDate: r.planned_date, collectionMethod: r.collection_method }));
     if (code === 'IF-ERP-011') return { contractPublicId: entity.public_id, planVersion: Math.max(0, ...plans.map(r => Number(r.plan_version))), rows: planRows };
-    return { contractPublicId: entity.public_id, contractName: entity.contract_name, amount: entity.contract_amount, productAmount: entity.product_amount ?? 0, goodsAmount: entity.goods_amount ?? 0, products: cloneHq(entity.products ?? []), collectionPlans: planRows };
+    return { contractPublicId: entity.public_id, contractName: entity.contract_name, amount: entity.contract_amount, productAmount: entity.product_amount ?? 0, goodsAmount: entity.goods_amount ?? 0, products: (entity.products as Record<string, unknown>[] ?? []).map(item => Object.fromEntries(Object.entries(item).filter(([key]) => ['public_id', 'product_public_id', 'package_public_id', 'item_name', 'quantity', 'unit_price', 'proposed_unit_price', 'amount', 'note'].includes(key)))), collectionPlans: planRows };
   }
-  if (code === 'IF-ERP-007') return { orderPublicId: entity.public_id, contractPublicId: entity.contract_public_id, amount: entity.order_amount, items: cloneHq(entity.items ?? []), deliveryAddress: entity.delivery_address, expressYn: entity.express_yn ?? false, note: entity.note ?? '' };
+  if (code === 'IF-ERP-007') return { orderPublicId: entity.public_id, contractPublicId: entity.contract_public_id, amount: entity.order_amount,
+    items: (entity.items as Record<string, unknown>[] ?? []).map(item => Object.fromEntries(Object.entries(item).filter(([key]) => ['public_id', 'product_public_id', 'package_public_id', 'item_name', 'quantity', 'unit_price', 'proposed_unit_price', 'amount', 'note'].includes(key)))),
+    deliveryAddress: entity.delivery_address, expressYn: entity.express_yn ?? false, note: entity.note ?? '' };
   if (code === 'IF-ERP-012') { const a = get(d, actor.companyId, 'activities', entity.activity_public_id); return { directWorkPublicId: entity.public_id, activityPublicId: a.public_id, workType: entity.direct_work_type, reason: entity.reason, outAt: a.out_at ?? '' }; }
   return cloneHq(input);
 }
 function outboundEligible(d: HqDataset, a: HqActor, code: HqInterfaceCode, e: HqRow) {
   if (code === 'IF-ERP-002') hqAssert(e.erp_approved_yn !== true && e.integration_status !== 'REQUESTING', 409, 'ERP_ACCOUNT_ALREADY_PENDING_OR_APPROVED');
   if (code === 'IF-ERP-004') {
+    // The registered legacy ERP contract does not carry a currency field.
+    // Never silently submit a foreign-currency amount as the HQ KRW amount.
+    hqAssert(String(e.currency ?? 'KRW') === 'KRW', 422, 'ERP_CONTRACT_CURRENCY_UNSUPPORTED');
     hqAssert(['DRAFT', 'ERP_FAILED'].includes(String(e.status)), 409, 'ERP_CONTRACT_STATE_INVALID');
     hqAssert(get(d, a.companyId, 'accounts', e.account_public_id).erp_approved_yn === true, 409, 'ERP_ACCOUNT_APPROVAL_REQUIRED');
     const plans = d.collections.plans.filter(r => r.company_id === a.companyId && r.contract_public_id === e.public_id && r.is_current === true);
@@ -177,7 +188,14 @@ function outboundEligible(d: HqDataset, a: HqActor, code: HqInterfaceCode, e: Hq
     hqAssert(contract.status === 'ERP_APPROVED' && !contract.close_yn && get(d, a.companyId, 'accounts', e.account_public_id).erp_approved_yn === true, 409, 'ERP_ORDER_APPROVAL_REQUIRED');
     text(e.delivery_address, 'deliveryAddress'); const items = rows(e.items, 'items');
     let total = 0;
-    for (const item of items) { const product = get(d, a.companyId, 'products', item.product_public_id); finite(item.quantity, 'quantity', 1); hqAssert(Number.isInteger(item.quantity), 422, 'ORDER_QUANTITY_INVALID'); finite(item.unit_price, 'unitPrice'); hqAssert(product.order_available_yn === true && Number(product.stock_qty) >= item.quantity, 409, 'ORDER_PRODUCT_UNAVAILABLE'); total += item.quantity * item.unit_price; }
+    for (const item of items) {
+      const product = get(d, a.companyId, 'products', item.product_public_id);
+      finite(item.quantity, 'quantity', 1); hqAssert(Number.isInteger(item.quantity), 422, 'ORDER_QUANTITY_INVALID'); finite(item.unit_price, 'unitPrice');
+      hqAssert(Number(item.unit_price) === Number(product.unit_price), 409, 'ORDER_PRICE_CHANGED');
+      const ownQuantity = items.filter(line => line.product_public_id === product.public_id).reduce((sum, line) => sum + Number(line.quantity), 0);
+      hqAssert(product.order_available_yn === true && Number(product.stock_qty) >= ownQuantity, 409, 'ORDER_PRODUCT_UNAVAILABLE');
+      total += item.quantity * item.unit_price;
+    }
     hqAssert(Math.abs(total - Number(e.order_amount)) < 0.005, 422, 'ORDER_AMOUNT_MISMATCH');
     const reserved = d.collections.orders.filter(r => r.company_id === a.companyId && r.contract_public_id === contract.public_id && r.public_id !== e.public_id && ['REQUESTING', 'ACCEPTED', 'PROCESSING', 'COMPLETED'].includes(String(r.status))).reduce((s, r) => s + Number(r.order_amount), 0);
     hqAssert(total + reserved <= Number(contract.contract_amount) + 0.004, 409, 'ORDER_CONTRACT_BALANCE_EXCEEDED');
@@ -218,9 +236,13 @@ export function enqueueInterface(d: HqDataset, actor: HqActor, input: EnqueueInt
   d.collections.interfaceLogs.push(log);
   if (entity && config.direction === 'OUT') {
     entity.integration_status = 'REQUESTING'; entity.integration_request_id = requestId; entity.version += 1;
-    if (input.interfaceCode === 'IF-ERP-004') entity.status = 'ERP_REQUESTED';
+    if (input.interfaceCode === 'IF-ERP-004') {
+      entity.status = 'ERP_REQUESTED';
+      for (const plan of d.collections.plans.filter(p => p.company_id === actor.companyId && p.contract_public_id === entity.public_id && p.is_current === true)) { plan.erp_sync_status = 'REQUESTING'; plan.version += 1; }
+    }
     if (input.interfaceCode === 'IF-ERP-007') entity.status = 'REQUESTING';
     if (input.interfaceCode === 'IF-ERP-011') for (const p of d.collections.plans.filter(p => p.contract_public_id === entity.public_id && p.company_id === actor.companyId && p.is_current === true)) { p.erp_sync_status = 'REQUESTING'; p.version += 1; }
+    if (input.interfaceCode === 'IF-ERP-012') entity.erp_sync_status = 'REQUESTING';
   }
   auditHq(d, actor, 'INTERFACE_ENQUEUED', input.entityPublicId, { requestId, interfaceCode: input.interfaceCode });
   return log;
@@ -256,12 +278,27 @@ function applyBusiness(d: HqDataset, actor: HqActor, log: HqInterfaceLog, result
   const code = result.interfaceCode, p = result.payload, config = HQ_INTERFACE_REGISTRY[log.interfaceCode];
   const entity = config.collection ? get(d, actor.companyId, config.collection, log.businessKey.entityId) : undefined;
   const resultVersion = result.version ?? 1;
+  if (code === 'IF-ERP-008') {
+    const current = String(entity!.status);
+    const rank: Record<string, number> = { REQUESTING: 0, ACCEPTED: 1, PROCESSING: 2, COMPLETED: 3 };
+    hqAssert(Object.hasOwn(rank, current), 409, 'ERP_ORDER_RESULT_WITHOUT_REQUEST');
+    if (result.success) {
+      hqAssert(rank[String(p.status)] >= rank[current], 409, 'ERP_ORDER_STATUS_REGRESSION');
+      hqAssert(!entity!.erp_order_no || entity!.erp_order_no === p.erpOrderNo, 409, 'ERP_ORDER_IDENTITY_CONFLICT');
+    } else hqAssert(current === 'REQUESTING', 409, 'ERP_ORDER_RESULT_AFTER_ACCEPTANCE');
+  }
   if (!result.success) {
     if (entity) {
       entity.integration_status = 'FAILED'; entity.version += 1;
-      if (code === 'IF-ERP-005') entity.status = 'ERP_FAILED';
+      if (code === 'IF-ERP-005') {
+        entity.status = 'ERP_FAILED';
+        for (const plan of d.collections.plans.filter(p => p.company_id === actor.companyId && p.contract_public_id === entity.public_id && p.is_current === true)) { plan.erp_sync_status = 'FAILED'; plan.version += 1; }
+      }
       if (code === 'IF-ERP-008') entity.status = 'FAILED';
-      if (code === 'IF-ERP-013') entity.erp_status = 'FAILED';
+      if (code === 'IF-ERP-013') {
+        entity.erp_status = 'FAILED'; entity.erp_sync_status = 'FAILED';
+        entity.history = [...(Array.isArray(entity.history) ? entity.history : []), { at: d.clock, action: 'ERP_RESULT_FAILED', actorUserId: actor.userId, requestId: log.requestId, resultId: result.resultId }];
+      }
       if (code === 'IF-ERP-011') for (const plan of d.collections.plans.filter(row => row.company_id === actor.companyId && row.contract_public_id === entity.public_id && row.is_current)) { plan.erp_sync_status = 'FAILED'; plan.version += 1; }
     }
     return;
@@ -269,29 +306,42 @@ function applyBusiness(d: HqDataset, actor: HqActor, log: HqInterfaceLog, result
   if (code === 'IF-ERP-003') {
     hqAssert(p.approved !== false, 422, 'INTERFACE_APPROVAL_SUCCESS_MISMATCH');
     hqAssert(!entity!.erp_customer_code || entity!.erp_customer_code === p.erpCustomerCode, 409, 'ERP_ACCOUNT_IDENTITY_CONFLICT', 'An established ERP customer code cannot be replaced by a later result');
-    Object.assign(entity!, { erp_customer_code: p.erpCustomerCode, erp_account_name: typeof log.payload.accountName === 'string' ? log.payload.accountName : entity!.erp_account_name ?? null, erp_approved_yn: true, integration_status: 'SUCCESS', erp_approval_code: 'CM840500', erp_trade_code: 'BC5110', account_status: 'ACTIVE', updated_at: d.clock, version: entity!.version + 1 });
+    const statusEdited = Array.isArray(entity!.manual_fields) && entity!.manual_fields.includes('account_status');
+    Object.assign(entity!, { erp_customer_code: p.erpCustomerCode, erp_account_name: typeof log.payload.accountName === 'string' ? log.payload.accountName : entity!.erp_account_name ?? null, erp_approved_yn: true, integration_status: 'SUCCESS', erp_approval_code: 'CM840500', erp_trade_code: 'BC5110', ...(statusEdited ? { erp_status_conflict: entity!.account_status !== 'ACTIVE' } : { account_status: 'ACTIVE', erp_status_conflict: false }), updated_at: d.clock, version: entity!.version + 1 });
   } else if (code === 'IF-ERP-005') {
     hqAssert(p.approved !== false, 422, 'INTERFACE_APPROVAL_SUCCESS_MISMATCH');
     hqAssert(get(d, actor.companyId, 'accounts', entity!.account_public_id).erp_approved_yn === true, 409, 'ERP_ACCOUNT_APPROVAL_REQUIRED');
     Object.assign(entity!, { erp_contract_no: p.erpContractNo, status: 'ERP_APPROVED', erp_approval_status: 'APPROVED', integration_status: 'SUCCESS', version: entity!.version + 1 });
+    for (const plan of d.collections.plans.filter(row => row.company_id === actor.companyId && row.contract_public_id === entity!.public_id && row.is_current === true && row.adjustment_type === 'ORIGINAL')) { plan.erp_sync_status = 'SUCCESS'; plan.locked_yn = true; plan.version += 1; }
   } else if (code === 'IF-ERP-008') {
     hqAssert(p.status !== 'FAILED', 422, 'INTERFACE_ORDER_SUCCESS_MISMATCH');
     const contract = get(d, actor.companyId, 'contracts', entity!.contract_public_id);
     hqAssert(contract.status === 'ERP_APPROVED', 409, 'ERP_CONTRACT_APPROVAL_REQUIRED');
     Object.assign(entity!, { erp_order_no: p.erpOrderNo, status: p.status, integration_status: 'SUCCESS', version: entity!.version + 1 });
-    for (const row of (p.deliveries ?? []) as Record<string, unknown>[]) eventUpsert(d, actor, 'deliveries', 'erp_delivery_no', String(row.erpDeliveryNo), {
+    for (const row of (p.deliveries ?? []) as Record<string, unknown>[]) {
+      if (row.orderLinePublicId !== undefined) hqAssert((entity!.items as Record<string, unknown>[]).some(line => (line.public_id ?? line.product_public_id) === row.orderLinePublicId), 422, 'ORDER_LINE_NOT_FOUND');
+      hqAssert(!d.collections.deliveries.some(prior => prior.company_id === actor.companyId && prior.erp_delivery_no === row.erpDeliveryNo && prior.order_public_id !== entity!.public_id), 409, 'INTERFACE_EXTERNAL_KEY_CONFLICT');
+      const key = row.orderLinePublicId === undefined ? 'erp_delivery_no' : 'erp_delivery_line_key';
+      const externalId = row.orderLinePublicId === undefined ? String(row.erpDeliveryNo) : `${row.erpDeliveryNo}:${row.orderLinePublicId}`;
+      eventUpsert(d, actor, 'deliveries', key, externalId, {
+      ...(row.orderLinePublicId === undefined ? {} : { erp_delivery_no: row.erpDeliveryNo }),
       order_public_id: entity!.public_id, delivery_status: row.deliveryStatus,
+      ...(row.orderLinePublicId ? { order_line_public_id: row.orderLinePublicId } : {}),
+      ...(row.shippedQty !== undefined ? { shipped_qty: row.shippedQty } : {}),
+      ...(row.deliveredQty !== undefined ? { delivered_qty: row.deliveredQty } : {}),
+      ...(row.unit !== undefined ? { unit: row.unit } : {}),
       ...(row.shippedAt ? { shipped_at: row.shippedAt } : {}), ...(row.deliveredAt ? { delivered_at: row.deliveredAt } : {})
     }, resultVersion, entity!.owner_user_id);
+    }
   } else if (code === 'IF-ERP-009') {
     for (const row of p.rows as Record<string, unknown>[]) eventUpsert(d, actor, 'collections', 'erp_collection_no', String(row.erpCollectionNo), {
-      contract_public_id: entity!.public_id, amount: row.amount, collected_at: row.collectedAt
+      contract_public_id: entity!.public_id, amount: row.amount, collected_at: row.collectedAt, ...(row.currency !== undefined ? { currency: row.currency } : {})
     }, Number(row.version ?? resultVersion), entity!.owner_user_id);
   } else if (code === 'IF-ERP-010') {
     for (const row of p.rows as Record<string, unknown>[]) {
       if (row.contractPublicId) hqAssert(get(d, actor.companyId, 'contracts', row.contractPublicId).account_public_id === entity!.public_id, 422, 'INTERFACE_ACCOUNT_RELATION_MISMATCH');
       if (row.orderPublicId) { const order = get(d, actor.companyId, 'orders', row.orderPublicId); hqAssert(order.account_public_id === entity!.public_id && (!row.contractPublicId || order.contract_public_id === row.contractPublicId), 422, 'INTERFACE_ORDER_RELATION_MISMATCH'); }
-      eventUpsert(d, actor, 'sales', 'erp_sales_no', String(row.erpSalesNo), { account_public_id: entity!.public_id, sales_date: row.salesDate, amount: row.amount,
+      eventUpsert(d, actor, 'sales', 'erp_sales_no', String(row.erpSalesNo), { account_public_id: entity!.public_id, sales_date: row.salesDate, amount: row.amount, ...(row.currency !== undefined ? { currency: row.currency } : {}),
         ...(row.contractPublicId ? { contract_public_id: row.contractPublicId } : {}), ...(row.orderPublicId ? { order_public_id: row.orderPublicId } : {}),
         ...(row.itemCode ? { item_code: row.itemCode } : {}), ...(row.itemName ? { item_name: row.itemName } : {}), ...(row.quantity !== undefined ? { quantity: row.quantity } : {})
       }, Number(row.version ?? resultVersion), entity!.owner_user_id);
@@ -305,10 +355,26 @@ function applyBusiness(d: HqDataset, actor: HqActor, log: HqInterfaceLog, result
   } else if (code === 'IF-ERP-013') {
     hqAssert(p.approved === true, 422, 'INTERFACE_APPROVAL_SUCCESS_MISMATCH');
     hqAssert(entity!.status === 'DIVISION_APPROVED', 409, 'DIRECT_WORK_APPROVAL_REQUIRED');
-    Object.assign(entity!, { erp_reference_no: p.erpReferenceNo, erp_status: 'APPROVED', integration_status: 'SUCCESS', version: entity!.version + 1 });
+    Object.assign(entity!, { erp_reference_no: p.erpReferenceNo, erp_status: 'APPROVED', erp_sync_status: 'SUCCESS', integration_status: 'SUCCESS', version: entity!.version + 1 });
+    entity!.history = [...(Array.isArray(entity!.history) ? entity!.history : []), { at: d.clock, action: 'ERP_RESULT_APPROVED', actorUserId: actor.userId, requestId: log.requestId, resultId: result.resultId, erpReferenceNo: p.erpReferenceNo }];
   } else if (code === 'IF-ERP-014') {
+    hqAssert(entity!.status === 'COMPLETED', 409, 'ERP_RETURN_ORDER_NOT_COMPLETED');
+    const orderSales = d.collections.sales.filter(s => s.company_id === actor.companyId && s.order_public_id === entity!.public_id);
+    hqAssert(orderSales.length > 0, 409, 'ERP_RETURN_SALE_REQUIRED');
+    const incoming = p.rows as Record<string, unknown>[];
+    const incomingRefs = new Set(incoming.map(row => String(row.erpReferenceNo)));
+    hqAssert(incomingRefs.size === incoming.length, 400, 'ERP_RETURN_DUPLICATE_REFERENCE');
+    const prior = d.collections.returns.filter(row => row.company_id === actor.companyId && row.order_public_id === entity!.public_id && !incomingRefs.has(String(row.erp_reference_no)) && row.transaction_type === 'RETURN');
+    const soldQuantity = orderSales.every(row => Number.isFinite(Number(row.quantity)) && Number(row.quantity) > 0)
+      ? orderSales.reduce((sum, row) => sum + Number(row.quantity), 0)
+      : (entity!.items as Record<string, unknown>[] ?? []).reduce((sum, row) => sum + Number(row.quantity), 0);
+    const returnedQuantity = [...prior.map(row => Number(row.quantity)), ...incoming.filter(row => row.transactionType === 'RETURN').map(row => Number(row.quantity))].reduce((sum, value) => sum + value, 0);
+    hqAssert(returnedQuantity <= soldQuantity, 422, 'ERP_RETURN_QUANTITY_EXCEEDED');
+    const soldAmount = orderSales.reduce((sum, row) => sum + Number(row.amount), 0);
+    const returnedAmount = [...prior.map(row => Number(row.amount ?? 0)), ...incoming.filter(row => row.transactionType === 'RETURN').map(row => Number(row.amount ?? 0))].reduce((sum, value) => sum + value, 0);
+    hqAssert(returnedAmount <= soldAmount + 0.004, 422, 'ERP_RETURN_AMOUNT_EXCEEDED');
     for (const row of p.rows as Record<string, unknown>[]) {
-      if (row.erpSalesNo) hqAssert(d.collections.sales.some(s => s.company_id === actor.companyId && s.erp_sales_no === row.erpSalesNo && (!s.order_public_id || s.order_public_id === entity!.public_id)), 422, 'INTERFACE_SALES_REFERENCE_INVALID');
+      if (row.erpSalesNo) hqAssert(orderSales.some(s => s.erp_sales_no === row.erpSalesNo), 422, 'INTERFACE_SALES_REFERENCE_INVALID');
       eventUpsert(d, actor, 'returns', 'erp_reference_no', String(row.erpReferenceNo), { order_public_id: entity!.public_id, transaction_type: row.transactionType, status: row.status, quantity: row.quantity, processed_at: row.processedAt,
         ...(row.amount !== undefined ? { amount: row.amount } : {}), ...(row.itemCode ? { item_code: row.itemCode } : {}), ...(row.erpSalesNo ? { erp_sales_no: row.erpSalesNo } : {})
       }, Number(row.version ?? resultVersion), entity!.owner_user_id);
@@ -349,7 +415,7 @@ function applyBusiness(d: HqDataset, actor: HqActor, log: HqInterfaceLog, result
       if (!current) { current = { public_id: newHqId(d), company_id: actor.companyId, version: 1 }; d.collections.products.push(current); }
       if (!acceptCatalogRevision(d, current, log, result)) continue;
       Object.assign(current, { erp_item_code: product.erpItemCode, item_name: product.itemName, item_type: product.itemType, category: product.category ?? '', unit_price: product.unitPrice, base_price: product.unitPrice,
-        stock_qty: product.stockQty, order_available_yn: product.orderAvailable, source_system: 'ERP', erp_synced_at: d.clock, version: current.version + 1 });
+        stock_qty: product.stockQty, order_available_yn: product.orderAvailable, ...(product.unit !== undefined ? { unit: product.unit } : {}), source_system: 'ERP', erp_synced_at: d.clock, version: current.version + 1 });
     }
   }
 }
@@ -404,7 +470,7 @@ function defaultPayload(d: HqDataset, a: HqActor, log: HqInterfaceLog): Record<s
   if (code === 'IF-HIRA-001') return Object.keys(log.payload).length ? cloneHq(log.payload) : { hospitals: [{ encryptedProviderNo: `MOCK-HIRA-${suffix}`, hospitalName: 'ERP 연계 신규 치과', phone: '051-000-0000', address: '부산광역시 해운대구 센텀서로 66', sido: '부산광역시', sigungu: '해운대구', latitude: 35.171, longitude: 129.127 }] };
   if (code === 'IF-ERP-001') return Object.keys(log.payload).length ? cloneHq(log.payload) : { regions: d.collections.regions.filter(row => row.company_id === a.companyId).map(row => ({ sido: row.sido, sigungu: row.sigungu, ownerUserId: row.assigned_user_id })) };
   if (code === 'IF-ERP-006') return Object.keys(log.payload).length ? cloneHq(log.payload) : { products: d.collections.products.filter(row => row.company_id === a.companyId).map(row => ({ productPublicId: row.public_id, erpItemCode: row.erp_item_code, itemName: row.item_name, itemType: row.item_type, category: row.category ?? '', unitPrice: row.unit_price, stockQty: row.stock_qty, orderAvailable: row.order_available_yn })) };
-  if (code === 'IF-ERP-009') return log.payload.rows ? cloneHq(log.payload) : { contractPublicId: log.businessKey.entityId, rows: [{ erpCollectionNo: `MOCK-COL-${suffix}`, amount: Math.min(Number(entity!.contract_amount), 100000), collectedAt: d.clock }] };
+  if (code === 'IF-ERP-009') return log.payload.rows ? cloneHq(log.payload) : { contractPublicId: log.businessKey.entityId, rows: [{ erpCollectionNo: `MOCK-COL-${suffix}`, amount: Math.min(Number(entity!.contract_amount), 100000), collectedAt: d.clock, ...(typeof entity!.currency === 'string' ? { currency: entity!.currency } : {}) }] };
   if (code === 'IF-ERP-010') {
     if (log.payload.rows) return cloneHq(log.payload);
     const order = d.collections.orders.find(row => row.company_id === a.companyId && row.account_public_id === entity!.public_id && ['ACCEPTED', 'PROCESSING', 'COMPLETED'].includes(String(row.status)));

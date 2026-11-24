@@ -9,6 +9,7 @@ import { InstallPrompt } from './InstallPrompt';
 export type ShellNavItem = {
   to: string;
   labelKey: string;
+  label?: string;
   icon: string;
   end?: boolean;
   mobilePrimary?: boolean;
@@ -81,7 +82,7 @@ export function AppShell({ links, children }: Props) {
   const navList = (items: ShellNavItem[], mobile = false) => items.map(item => (
     <NavLink key={item.to} to={item.to} end={item.end} className={({isActive}) => `shell-nav-link${isActive ? ' active' : ''}${mobile ? ' mobile' : ''}`} onClick={() => setMobileMenu(false)}>
       <NavIcon name={item.icon} />
-      <span>{t(item.labelKey)}</span>
+      <span>{item.label ?? t(item.labelKey, { defaultValue: item.labelKey })}</span>
     </NavLink>
   ));
 
@@ -108,7 +109,7 @@ export function AppShell({ links, children }: Props) {
         <header className="topbar">
           <div className="topbar-title">
             <span className="eyebrow">{t('app.workspace')}</span>
-            <h1>{current ? t(current.labelKey) : t('app.name')}</h1>
+            <h1>{current ? current.label ?? t(current.labelKey) : t('app.name')}</h1>
           </div>
           <div className="topbar-actions">
             <OnlineState />

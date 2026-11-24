@@ -1,4 +1,4 @@
-import { HQ_SCHEMA_VERSION, HQ_COLLECTION_NAMES } from './model.js';
+﻿import { HQ_SCHEMA_VERSION, HQ_COLLECTION_NAMES } from './model.js';
 import type { HqActor, HqCollections, HqDataset, HqRow } from './model.js';
 import { advanceInterface, enqueueInterface } from './interfaces.js';
 
@@ -9,7 +9,7 @@ export const seedIDs = {
   lead: id(10), duplicateLead: id(11), otherOwnerLead: id(12), otherCompanyLead: id(13), noCoordinatesLead: id(14), contact: id(20),
   activity: id(30), pendingReport: id(31), directWork: id(32),
   approvedOpportunity: id(40), pendingOpportunity: id(41), approvedContract: id(50), pendingContract: id(51), unpaidPlan: id(60), pendingPlan: id(61),
-  product: id(70), zeroStockProduct: id(71), negativeStockProduct: id(72), unavailableProduct: id(73),
+  product: id(70), zeroStockProduct: id(71), negativeStockProduct: id(72), unavailableProduct: id(73), packageProduct: id(74),
   readyOrder: id(80), pendingOrder: id(81), region: id(90)
 } as const;
 const row = (public_id: string, values: Record<string, unknown>, company_id = 1, owner_user_id = 1): HqRow => ({ public_id, company_id, owner_user_id, organization_id: company_id === 1 ? 10 : 20, version: 1, ...values });
@@ -50,21 +50,22 @@ export function createHqSeed(datasetId: string, generation = 1): HqDataset {
     related_type: 'ACCOUNT', related_public_id: seedIDs.approvedAccount, related_name_snapshot: '본사 승인 치과',
     start_at: '2026-10-22T01:00:00.000Z', end_at: '2026-10-22T02:00:00.000Z', status: 'PLANNED', visit_purpose: '신제품 상담', consultation_content: '', in_at: null, out_at: null })];
   collections.reports = [row(seedIDs.pendingReport, { report_date: '2026-10-22', status: 'REQUESTED', branch_approver_user_id: 3, division_approver_user_id: 4, items: [], comments: [], history: [] })];
-  collections.directWorks = [row(seedIDs.directWork, { activity_public_id: seedIDs.activity, work_date: '2026-10-22', direct_work_type: 'DIRECT_WORK', reason: '거래처 조기 방문',
-    status: 'DRAFT', branch_approver_user_id: 3, division_approver_user_id: 4, integration_status: 'NOT_REQUESTED', erp_status: null, history: [] })];
+  collections.directWorks = [row(seedIDs.directWork, { activity_public_id: seedIDs.activity, work_date: '2026-10-22', work_type: 'DIRECT_WORK', direct_work_type: 'DIRECT_WORK', related_name_snapshot: '본사 승인 치과', reason: '거래처 조기 방문',
+    status: 'DRAFT', approval_round: 1, branch_approver_user_id: 3, division_approver_user_id: 4, integration_status: 'NOT_REQUESTED', erp_sync_status: 'NOT_REQUESTED', erp_status: null, history: [] })];
   collections.products = [
     row(seedIDs.product, { item_type: 'PRODUCT', item_name: '목업 임플란트', erp_item_code: 'MOCK-P001', category: 'IMPLANT', unit_price: 100000, base_price: 100000, stock_qty: 100, order_available_yn: true, source_system: 'ERP' }),
     row(seedIDs.zeroStockProduct, { item_type: 'PRODUCT', item_name: '재고 0 품목', erp_item_code: 'MOCK-P002', category: 'IMPLANT', unit_price: 50000, base_price: 50000, stock_qty: 0, order_available_yn: true, source_system: 'ERP' }),
     row(seedIDs.negativeStockProduct, { item_type: 'PRODUCT', item_name: '재고 음수 품목', erp_item_code: 'MOCK-P003', category: 'IMPLANT', unit_price: 50000, base_price: 50000, stock_qty: -2, order_available_yn: true, source_system: 'ERP' }),
-    row(seedIDs.unavailableProduct, { item_type: 'PACKAGE', item_name: '주문 불가 패키지', erp_item_code: 'MOCK-P004', category: 'PACKAGE', unit_price: 200000, base_price: 200000, stock_qty: 10, order_available_yn: false, source_system: 'ERP' })
+    row(seedIDs.unavailableProduct, { item_type: 'PACKAGE', item_name: '주문 불가 패키지', erp_item_code: 'MOCK-P004', category: 'PACKAGE', unit_price: 200000, base_price: 200000, stock_qty: 10, order_available_yn: false, source_system: 'ERP' }),
+    row(seedIDs.packageProduct, { item_type: 'PACKAGE', item_name: '주문 가능 패키지', erp_item_code: 'MOCK-P005', category: 'PACKAGE', unit_price: 200000, base_price: 200000, stock_qty: 10, order_available_yn: true, source_system: 'ERP' })
   ];
   const items = [{ product_public_id: seedIDs.product, package_public_id: seedIDs.product, item_name: '목업 임플란트', quantity: 10, unit_price: 100000, proposed_unit_price: 100000, amount: 1000000 }];
   collections.opportunities = [row(seedIDs.approvedOpportunity, { account_public_id: seedIDs.approvedAccount, opportunity_name: '승인 거래처 기회', stage: 'CLOSED_WON', record_type: 'EXISTING', amount: 1000000, expected_close_date: '2026-10-22', success_probability: 100, forecast_category: 'COMMIT', contract_created_yn: true, products: structuredClone(items) }),
     row(seedIDs.pendingOpportunity, { account_public_id: seedIDs.pendingAccount, opportunity_name: '미승인 거래처 기회', stage: 'NEGOTIATION', record_type: 'NEW', amount: 1000000, expected_close_date: '2026-10-30', success_probability: 70, forecast_category: 'PIPELINE', contract_created_yn: true, products: structuredClone(items) })];
-  collections.contracts = [row(seedIDs.approvedContract, { account_public_id: seedIDs.approvedAccount, opportunity_public_id: seedIDs.approvedOpportunity, contract_name: '본사 승인 계약', contract_date: '2026-10-22', contract_amount: 1000000, product_amount: 1000000, goods_amount: 0, status: 'ERP_APPROVED', erp_contract_no: 'MOCK-CON-001', erp_approval_status: 'APPROVED', integration_status: 'SUCCESS', close_yn: false, products: structuredClone(items) }),
-    row(seedIDs.pendingContract, { account_public_id: seedIDs.pendingAccount, opportunity_public_id: seedIDs.pendingOpportunity, contract_name: '대기 계약 검증용', contract_date: '2026-10-22', contract_amount: 1000000, product_amount: 1000000, goods_amount: 0, status: 'DRAFT', erp_contract_no: null, erp_approval_status: 'NOT_REQUESTED', integration_status: 'NOT_REQUESTED', close_yn: false, products: structuredClone(items), fixture_note: 'ERP 미승인 거래처 차단 검증용 독립 사례' })];
-  collections.plans = [row(seedIDs.unpaidPlan, { contract_public_id: seedIDs.approvedContract, plan_version: 1, installment_no: 1, collection_method: 'BANK_TRANSFER', amount: 1000000, planned_date: '2026-10-21', adjustment_type: 'ORIGINAL', is_current: true, erp_sync_status: 'SUCCESS', correction_required_yn: false }),
-    row(seedIDs.pendingPlan, { contract_public_id: seedIDs.pendingContract, plan_version: 1, installment_no: 1, collection_method: 'BANK_TRANSFER', amount: 1000000, planned_date: '2026-11-22', adjustment_type: 'ORIGINAL', is_current: true, erp_sync_status: 'NOT_REQUESTED', correction_required_yn: false })];
+  collections.contracts = [row(seedIDs.approvedContract, { currency: 'KRW', account_public_id: seedIDs.approvedAccount, opportunity_public_id: seedIDs.approvedOpportunity, contract_name: '본사 승인 계약', contract_date: '2026-10-22', contract_amount: 1000000, product_amount: 1000000, goods_amount: 0, status: 'ERP_APPROVED', erp_contract_no: 'MOCK-CON-001', erp_approval_status: 'APPROVED', integration_status: 'SUCCESS', close_yn: false, products: structuredClone(items) }),
+    row(seedIDs.pendingContract, { currency: 'KRW', account_public_id: seedIDs.pendingAccount, opportunity_public_id: seedIDs.pendingOpportunity, contract_name: '대기 계약 검증용', contract_date: '2026-10-22', contract_amount: 1000000, product_amount: 1000000, goods_amount: 0, status: 'DRAFT', erp_contract_no: null, erp_approval_status: 'NOT_REQUESTED', integration_status: 'NOT_REQUESTED', close_yn: false, products: structuredClone(items), fixture_note: 'ERP 미승인 거래처 차단 검증용 독립 사례' })];
+  collections.plans = [row(seedIDs.unpaidPlan, { currency: 'KRW', contract_public_id: seedIDs.approvedContract, plan_version: 1, installment_no: 1, collection_method: 'BANK_TRANSFER', amount: 1000000, planned_date: '2026-10-21', adjustment_type: 'ORIGINAL', is_current: true, locked_yn: true, erp_sync_status: 'SUCCESS', correction_required_yn: false }),
+    row(seedIDs.pendingPlan, { currency: 'KRW', contract_public_id: seedIDs.pendingContract, plan_version: 1, installment_no: 1, collection_method: 'BANK_TRANSFER', amount: 1000000, planned_date: '2026-11-22', adjustment_type: 'ORIGINAL', is_current: true, erp_sync_status: 'NOT_REQUESTED', correction_required_yn: false })];
   collections.orders = [row(seedIDs.readyOrder, { contract_public_id: seedIDs.approvedContract, account_public_id: seedIDs.approvedAccount, status: 'DRAFT', integration_status: 'NOT_REQUESTED', order_amount: 200000,
     items: [{ product_public_id: seedIDs.product, quantity: 2, unit_price: 100000, amount: 200000 }], delivery_address_type: 'ACCOUNT', delivery_address: '부산광역시 해운대구 센텀서로 66', express_yn: false, note: '', erp_order_no: null }),
     row(seedIDs.pendingOrder, { contract_public_id: seedIDs.pendingContract, account_public_id: seedIDs.pendingAccount, status: 'DRAFT', integration_status: 'NOT_REQUESTED', order_amount: 100000,

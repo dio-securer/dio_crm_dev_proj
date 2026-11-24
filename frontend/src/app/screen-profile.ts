@@ -17,6 +17,12 @@ export type ScreenSlot =
   | 'ops';
 
 export type ScreenKey =
+  | 'HQ_HOME'
+  | 'HQ_ADMIN_USERS'
+  | 'HQ_ADMIN_PERMISSIONS'
+  | 'HQ_ADMIN_CODES'
+  | 'HQ_ADMIN_INTERFACES'
+  | 'HQ_ADMIN_AUDIT'
   | 'HQ_LEAD'
   | 'HQ_ACCOUNT'
   | 'HQ_ACTIVITY'

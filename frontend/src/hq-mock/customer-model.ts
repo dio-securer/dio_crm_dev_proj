@@ -1,12 +1,12 @@
 export type CustomerRecord = { public_id: string; version: number; [key: string]: unknown };
 export type CustomerForm = Record<string, string | number | boolean | null>;
-export type CustomerField = { key: string; source: string; group: string; type?: 'text' | 'number' | 'email' | 'date' | 'checkbox' | 'textarea'; required?: boolean; integer?: boolean };
+export type CustomerField = { key: string; source: string; group: string; type?: 'text' | 'number' | 'email' | 'date' | 'checkbox' | 'triState' | 'textarea'; required?: boolean; integer?: boolean };
 export type CustomerOwner = { userId: number; name: string; organizationId?: number };
 export type ConversionOptions = { accounts: CustomerRecord[]; contacts: CustomerRecord[]; opportunities: CustomerRecord[]; duplicates: CustomerRecord[]; owners: CustomerOwner[] };
 export type ConversionResult = { leadPublicId: string; accountPublicId: string; contactPublicId: string | null; opportunityPublicId: string | null };
 export type CustomerDetail = {
   account: CustomerRecord; contacts: CustomerRecord[]; opportunities: CustomerRecord[]; contracts: CustomerRecord[];
-  orders: CustomerRecord[]; sales: CustomerRecord[]; services: CustomerRecord[]; timeline: CustomerRecord[];
+  orders: CustomerRecord[]; sales: CustomerRecord[]; activities?: CustomerRecord[]; services: CustomerRecord[]; timeline: CustomerRecord[];
   analytics: Record<string, number | boolean>; hospital: Record<string, unknown>; interfaces: CustomerRecord[]; permissions: string[];
 };
 
@@ -29,9 +29,23 @@ export const LEAD_FIELDS: CustomerField[] = [
   { key: 'exclusionDetail', source: 'exclusion_detail', group: 'exclusions', type: 'textarea' }
 ];
 export const HOSPITAL_FIELDS: CustomerField[] = [
+  { key: 'monthlyRevenue', source: 'monthly_revenue', group: 'hospital', type: 'number' },
+  { key: 'payDoctorCount', source: 'pay_doctor_count', group: 'hospital', type: 'number', integer: true },
+  { key: 'staffCount', source: 'staff_count', group: 'hospital', type: 'number', integer: true },
+  { key: 'chairCount', source: 'chair_count', group: 'hospital', type: 'number', integer: true },
+  { key: 'monthlyImplants', source: 'monthly_implants', group: 'hospital', type: 'number', integer: true },
+  { key: 'competitorShare', source: 'competitor_share', group: 'hospital', type: 'textarea' },
+  { key: 'hospitalNotes', source: 'hospital_notes', group: 'hospital', type: 'textarea' },
+
   { key: 'hospitalSize', source: 'hospital_size', group: 'hospital', type: 'number', integer: true },
   { key: 'mainSystem', source: 'main_system', group: 'hospital' },
   { key: 'subSystem', source: 'sub_system', group: 'hospital' },
+  { key: 'ctOwned', source: 'ct_owned_yn', group: 'hospital', type: 'triState' },
+  { key: 'oralScannerOwned', source: 'oral_scanner_owned_yn', group: 'hospital', type: 'triState' },
+  { key: 'printer3dOwned', source: 'printer_3d_owned_yn', group: 'hospital', type: 'triState' },
+  { key: 'millingMachineOwned', source: 'milling_machine_owned_yn', group: 'hospital', type: 'triState' },
+  { key: 'activatorOwned', source: 'activator_owned_yn', group: 'hospital', type: 'triState' },
+  { key: 'dentalLabOwned', source: 'dental_lab_owned_yn', group: 'hospital', type: 'triState' },
   { key: 'dioProductUsage', source: 'dio_product_usage', group: 'hospital', type: 'textarea' }
 ];
 export const CONTACT_FIELDS: CustomerField[] = [
@@ -49,11 +63,11 @@ export const LEDGER_FIELDS: CustomerField[] = [
   { key: 'accountGrade', source: 'account_grade', group: 'basic' }
 ];
 export function formFromRecord(fields: CustomerField[], row: Record<string, unknown> = {}): CustomerForm {
-  return Object.fromEntries(fields.map(field => [field.key, field.type === 'checkbox' ? Boolean(row[field.source]) : String(row[field.source] ?? '')]));
+  return Object.fromEntries(fields.map(field => { const value = row[field.source]; return [field.key, field.type === 'checkbox' ? Boolean(value) : field.type === 'triState' ? typeof value === 'boolean' ? value : null : String(value ?? '')]; })) as CustomerForm;
 }
 export function formPayload(fields: CustomerField[], form: CustomerForm): Record<string, unknown> {
   return Object.fromEntries(fields.map(field => [field.key,
-    field.type === 'checkbox' ? Boolean(form[field.key]) : field.type === 'number'
+    field.type === 'checkbox' ? Boolean(form[field.key]) : field.type === 'triState' ? form[field.key] ?? null : field.type === 'number'
       ? form[field.key] === '' || form[field.key] === null ? null : Number(form[field.key]) : String(form[field.key] ?? '').trim()
   ]));
 }
