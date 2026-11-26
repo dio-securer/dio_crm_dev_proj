@@ -6,7 +6,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { test } from 'node:test';
-import { GuardError, resolveBase } from '../../scripts/guard/lib/gitbase.mjs';
+import { GuardError, baseReader, resolveBase } from '../../scripts/guard/lib/gitbase.mjs';
 import { BOUND, NODE, makeSandbox, tempDir } from './sandbox.mjs';
 
 const SAMPLE = 'tests/sample.test.mjs';
@@ -25,6 +25,24 @@ test('a test file replaced by a link to the same text is a lost test file (throu
   assert.deepEqual(result().rules.find(rule => rule.id === 'P3').violations.map(item => item.declare),
     [{ rule: 'P3', file: SAMPLE, from: { tests: 2, groups: 1 }, to: null }]);
   box.reset();
+});
+
+test('the base side holds regular files only: a link that was committed is not a file there, and removing it loses no test', () => {
+  box.reset();
+  const LINK = 'tests/link.test.mjs';
+  fs.symlinkSync('sample.test.mjs', path.join(box.dir, LINK));
+  box.git('add', '-A');
+  box.commit('[F0-5] a link to a test file');
+  try {
+    const base = baseReader(box.dir, 'HEAD');
+    assert.deepEqual([base.has(LINK), base.has(SAMPLE), base.files.includes(LINK), base.files.includes(SAMPLE)], [false, true, false, true]);
+    assert.throws(() => base.read(LINK), GuardError);
+    assert.equal(base.read(SAMPLE), box.read(SAMPLE));
+    box.remove(LINK);
+    const run = protect('HEAD');
+    assert.equal(run.status, 0, run.output);
+    assert.deepEqual(result().rules.find(rule => rule.id === 'P3').violations, []);
+  } finally { box.reset(); }
 });
 
 test('two common ancestors (a criss-cross merge) are an error (exit 2): the guard does not pick one', () => {

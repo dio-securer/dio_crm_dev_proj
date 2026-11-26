@@ -149,11 +149,15 @@ export const g11 = {
   },
 };
 
+const IN_METADATA = ['.ts', '.mjs', '.css', '.scss'];
 export const g03 = {
   fail: {
     ...Object.fromEntries([...CODE_EXT, ...lib('files', 'STYLE_EXT')].map(ext => [`sizes/lines${ext}`, '/* x */\n'.repeat(301)])),
     ...Object.fromEntries(rule('g03-file-size', 'METADATA_EXT').map(ext => [`metadata/sizes/bytes${ext}`, `"a${'b'.repeat(15000)}"\n`])),
+    // Code and style files in metadata/ are measured as well (G01 reports them for being there at all).
+    ...Object.fromEntries(IN_METADATA.map(ext => [`metadata/sizes/lines${ext}`, '/* x */\n'.repeat(301)])),
   },
+  overlap: IN_METADATA.map(ext => `metadata/sizes/lines${ext}`),
   // The excluded folders are these exact paths: the same path below another folder is checked like everything else.
   lookalikes: Object.fromEntries(rule('g03-file-size', 'EXCLUDED_DIRS').map(([dir]) => [`any/${dir}big.js`, '// x\n'.repeat(301)])),
 };
