@@ -21,10 +21,16 @@ export function totalOf(flat) {
 }
 
 /** True when `now` is above `frozen` (in ANY measure). A missing frozen value means zero allowed. */
-const above = (now, frozen) => (isSet(now) ? frozen === undefined || keysOf(now, frozen).some(key => (now[key] ?? 0) > (frozen[key] ?? 0)) : now > (frozen ?? 0));
+const above = (now, frozen) => (isSet(now)
+  ? frozen === undefined || keysOf(now, frozen).some(key => (now[key] ?? 0) > (frozen[key] ?? 0))
+  : now > (frozen ?? 0));
 const below = (now, frozen) => now === undefined || (isSet(frozen) ? keysOf(now, frozen).some(key => (now[key] ?? 0) < frozen[key]) : now < frozen);
-const least = (now, frozen) => (isSet(frozen) ? Object.fromEntries(Object.keys(frozen).map(key => [key, Math.min(frozen[key], now[key] ?? 0)])) : Math.min(frozen, now));
-export const show = (value, sorted = false) => (isSet(value) ? (sorted ? keysOf(value) : Object.keys(value)).map(key => `${key} ${value[key]}`).join(', ') : String(value));
+const least = (now, frozen) => (isSet(frozen)
+  ? Object.fromEntries(Object.keys(frozen).map(key => [key, Math.min(frozen[key], now[key] ?? 0)]))
+  : Math.min(frozen, now));
+export const show = (value, sorted = false) => (isSet(value)
+  ? (sorted ? keysOf(value) : Object.keys(value)).map(key => `${key} ${value[key]}`).join(', ')
+  : String(value));
 
 /** Returns null when the file does not exist. Throws when it is malformed or internally inconsistent. */
 export function loadBaseline(root) {
@@ -39,7 +45,9 @@ export function loadBaseline(root) {
       const ok = isSet(value) ? Object.keys(value).length > 0 && Object.values(value).every(validNumber) : validNumber(value);
       if (!ok) throw new Error(`${BASELINE_FILE}: ${id} ${name} 의 값이 양의 정수가 아닙니다.`);
     }
-    if (show(entry.total, true) !== show(totalOf(flat), true)) throw new Error(`${BASELINE_FILE}: ${id} 의 total(${show(entry.total)})이 파일별 합(${show(totalOf(flat))})과 다릅니다.`);
+    if (show(entry.total, true) !== show(totalOf(flat), true)) {
+      throw new Error(`${BASELINE_FILE}: ${id} 의 total(${show(entry.total)})이 파일별 합(${show(totalOf(flat))})과 다릅니다.`);
+    }
     rules[id] = flat;
   }
   return rules;

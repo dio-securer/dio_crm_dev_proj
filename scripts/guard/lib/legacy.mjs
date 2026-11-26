@@ -100,5 +100,6 @@ export function loadLegacy(root) {
   if (!Array.isArray(doc.files) || !Array.isArray(doc.frozenOther)) throw new Error(`${LEGACY_FILE} 형식이 잘못되었습니다.`);
   const ruleOf = new Map(doc.files.flatMap(group => group.names.map(name => [`${group.dir}/${name}`, group.rule])));
   const frozenOther = expand(doc.frozenOther);
-  return { doc, ruleOf, files: new Set(ruleOf.keys()), frozenOther: new Set(frozenOther), rulesInSync: JSON.stringify(doc.rules) === JSON.stringify(LEGACY_RULES) };
+  const rulesInSync = JSON.stringify(doc.rules) === JSON.stringify(LEGACY_RULES);
+  return { doc, ruleOf, files: new Set(ruleOf.keys()), frozenOther: new Set(frozenOther), rulesInSync };
 }

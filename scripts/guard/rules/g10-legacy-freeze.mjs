@@ -1,5 +1,7 @@
 import { LEGACY_FILE, LEGACY_RULES, allowedTestCheck, frozenScope, loadLegacy } from '../lib/legacy.mjs';
 
+const FROZEN_GLOBS = LEGACY_RULES.flatMap(rule => rule.freeze).filter((glob, i, all) => all.indexOf(glob) === i);
+
 export default {
   id: 'G10',
   name: 'legacy-freeze',
@@ -7,7 +9,7 @@ export default {
   forbids: `legacy(이관 대상) 구역에 새 파일을 만드는 것. \`${LEGACY_FILE}\` 에 적힌 파일만 그 구역에 있을 수 있다. 기존 파일을 고치는 것은 된다.`,
   why: 'AI는 옆에 있는 기존 화면을 복사해 새 화면을 만든다. 그대로 두면 화면·객체별 코드가 계속 늘어 프레임워크로 옮길 양이 줄지 않는다.',
   fix: '새 화면·객체는 `metadata/` 설정과 `packages/engine` 으로 만든다. 회사 전용 동작은 `extensions/` 에 둔다.',
-  scope: `동결 구역: ${LEGACY_RULES.flatMap(rule => rule.freeze).filter((glob, i, all) => all.indexOf(glob) === i).map(glob => `\`${glob}\``).join(', ')}. 경로는 대소문자를 가리지 않고 맞춘다(\`Hq-Mock/\`, \`Lead-x.ts\` 도 걸린다).`,
+  scope: `동결 구역: ${FROZEN_GLOBS.map(glob => `\`${glob}\``).join(', ')}. 경로는 대소문자를 가리지 않고 맞춘다(\`Hq-Mock/\`, \`Lead-x.ts\` 도 걸린다).`,
   exclusions: [
     '목록에 있는 파일의 테스트(같은 폴더, 같은 이름에 `.spec`/`.test` 가 붙은 파일)는 새로 만들 수 있다',
     `\`${LEGACY_FILE}\` 의 frozenOther 에 적힌 기존 파일(동결 구역 안에 있지만 이관 대상은 아닌 파일, 예: App.tsx)`,
@@ -22,7 +24,8 @@ export default {
   check(ctx) {
     const legacy = loadLegacy(ctx.root);
     const findings = [];
-    if (!legacy.rulesInSync) findings.push({ file: LEGACY_FILE, line: 0, message: '파일 안의 규칙이 scripts/guard/lib/legacy.mjs 와 다릅니다. 사람이 확인한 뒤 목록을 다시 만들어야 합니다.' });
+    const stale = '파일 안의 규칙이 scripts/guard/lib/legacy.mjs 와 다릅니다. 사람이 확인한 뒤 목록을 다시 만들어야 합니다.';
+    if (!legacy.rulesInSync) findings.push({ file: LEGACY_FILE, line: 0, message: stale });
     const frozen = frozenScope();
     const known = new Set([...legacy.files, ...legacy.frozenOther]);
     const allowedTest = allowedTestCheck(known);

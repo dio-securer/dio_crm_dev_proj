@@ -1,6 +1,7 @@
 // docs/framework/guard-rules.md is generated from rule metadata so the document cannot drift.
 import fs from 'node:fs';
 import path from 'node:path';
+import { MAX_LINE, SELF_DIR } from './selfcheck.mjs';
 
 export const DOCS_FILE = 'docs/framework/guard-rules.md';
 const cell = text => String(text).replace(/\|/g, '\\|').replace(/\n/g, ' ');
@@ -39,11 +40,20 @@ export function renderDocs(rules) {
     '',
     '- 기준선은 파일별 "건수"다. 같은 파일에서 위반 하나를 고치고 다른 하나를 새로 넣으면 건수가 같아 통과한다(바꿔치기).',
     '- 기준선에는 거짓 양성도 들어 있다. 예: G06 의 `direction === "IN"`(입출고 방향이지 인도가 아니다), G05 의 색처럼 보이는 글자, G08 의 테스트와 무관한 skip 속성. 건수가 곧 실제 문제의 수는 아니다.',
-    '- 테스트 예외는 두 가지뿐이다: 이름이 `*.spec.*`·`*.test.*` 인 파일, 그리고 정해진 테스트 폴더 `backend/test/`, `tests/`. 폴더 이름만 test 로 짓는 것은 예외가 아니다. 예외 목록(테스트 폴더, G03 제외 폴더, G07 허용 계층)은 모두 코드에 경로 그대로 적혀 있고, 늘리려면 `scripts/guard/` 를 고쳐야 한다.',
-    '- G06·G07·G11 은 `frontend/`, `backend/`, `packages/`, `extensions/` 만 본다. 저장소 맨 위에 새 폴더를 만들어 코드를 두면 이 셋은 보지 않는다(G03·G05 는 저장소 전체를 본다). 작업 공간(pnpm-workspace.yaml)에 없는 폴더는 빌드에 들어가지 않는다.',
+    '- 테스트 예외는 두 가지뿐이다: 이름이 `*.spec.*`·`*.test.*` 인 파일, 그리고 정해진 테스트 폴더 `backend/test/`, `tests/`. 폴더 이름만 test 로 짓는 것은 예외가 아니다. '
+      + '예외 목록(테스트 폴더, G03 제외 폴더, G07 허용 계층)은 모두 코드에 경로 그대로 적혀 있고, 늘리려면 `scripts/guard/` 를 고쳐야 한다.',
+    '- G06·G07·G11 은 `frontend/`, `backend/`, `packages/`, `extensions/` 만 본다. 저장소 맨 위에 새 폴더를 만들어 코드를 두면 이 셋은 보지 않는다'
+      + '(G03·G05 는 저장소 전체를 본다). 작업 공간(pnpm-workspace.yaml)에 없는 폴더는 빌드에 들어가지 않는다.',
     '- 줄 끝 주석으로 규칙을 끄는 방법은 일부러 만들지 않았다.',
-    '- `guard-baseline.json`, `legacy-files.json`, `scripts/guard/` 를 고치면 무엇이든 통과시킬 수 있다. 두 JSON 을 지우고 다시 만드는 것도 같다. 이 셋은 보호 파일로 다뤄야 하며, 그 보호(기준 브랜치와 비교)는 CI 에서 한다(다음 단계 F0-3). 지금 가드 혼자서는 막지 못한다.',
-    '- 모든 규칙은 정규식으로 글자 모양을 본다. 문자열을 이어 붙이거나 이름을 바꿔 우회하려고 마음먹으면 피할 수 있다. 목적은 무심코 생기는 이탈을 막는 것이다.',
+    '- `guard-baseline.json`, `legacy-files.json`, `scripts/guard/` 를 고치면 무엇이든 통과시킬 수 있다. 두 JSON 을 지우고 다시 만드는 것도 같다. '
+      + '이 셋은 보호 파일로 다뤄야 하며, 그 보호(기준 브랜치와 비교)는 CI 에서 한다(다음 단계 F0-3). 지금 가드 혼자서는 막지 못한다.',
+    '- 코드 구조를 보는 규칙(G02·G06·G07·G08·G11, G04 의 새 구역 부분)은 TypeScript 구문 트리(AST)로 검사한다. '
+      + '그래서 괄호, `as`·`<T>`·`!`·`satisfies`, 따옴표 종류, 템플릿 문자열, 문자열 이어 붙이기, 대괄호 접근, 줄바꿈·공백처럼 뜻이 같은 다른 표기는 같은 것으로 본다. 주석과 일반 문자열 안의 글자는 세지 않는다.',
+    '- AST 는 구문만 본다(타입 검사·다른 파일 추적 없음). 다른 파일에서 가져온 값, 함수 인자, 실행 중에 만든 문자열은 따라가지 못한다. '
+      + '이름으로 판단하는 규칙은 이름을 바꾸면 피할 수 있다. 목적은 무심코 생기는 이탈과 흔한 우회 표기를 막는 것이다.',
+    '- 코드 파일이 구문 오류로 읽히지 않으면 그 파일을 보는 규칙은 통과가 아니라 오류(ERROR, 종료 코드 2)가 된다. TypeScript 패키지가 설치되지 않은 경우도 같다(`pnpm install` 필요).',
+    '- G01·G03·G05·G10 과 CSS 파일, G04 의 기존 화면 부분은 구문이 아니라 경로·크기·글자 모양을 본다(정규식).',
+    `- 가드 자신의 코드(\`${SELF_DIR}\`)는 한 줄이 ${MAX_LINE}자를 넘으면 가드 오류(종료 코드 2)가 된다.`,
     '',
     '## 규칙 한눈에 보기',
     '',

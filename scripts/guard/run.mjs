@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { BASELINE_FILE, compare, countsOf, loadBaseline, lowered, show, totalOf, writeBaseline } from './lib/baseline.mjs';
 import { DOCS_FILE, docsInSync, writeDocs } from './lib/docs.mjs';
 import { createContext, git } from './lib/files.mjs';
+import { MAX_LINE, SELF_DIR, selfCheck } from './lib/selfcheck.mjs';
 import { DEFAULT_RULES, RULES } from './rules/index.mjs';
 import g09 from './rules/g09-change-id.mjs';
 
@@ -53,7 +54,8 @@ function printRule(row) {
   for (const item of row.newViolations) {
     if (row.baseline !== 'none') console.log(`    ${item.file}: 기준선 ${show(item.baseline)} -> 현재 ${show(item.current)}`);
     for (const spot of item.locations.slice(0, MAX_LOCATIONS)) console.log(`      ${where(item.file, spot.line)}  ${spot.message}`);
-    if (item.locations.length > MAX_LOCATIONS) console.log(`      ... 외 ${item.locations.length - MAX_LOCATIONS}곳 (이 파일의 전체 위치는 ${RESULT_DIR}/guard-result.json)`);
+    const more = item.locations.length - MAX_LOCATIONS;
+    if (more > 0) console.log(`      ... 외 ${more}곳 (이 파일의 전체 위치는 ${RESULT_DIR}/guard-result.json)`);
   }
 }
 
@@ -77,12 +79,15 @@ function runCommits(range) {
   const status = findings.length ? 'FAIL' : 'PASS';
   console.log(`${g09.id} ${g09.name.padEnd(22)} ${status.padEnd(5)} 범위 ${range}  커밋 ${commits.length}개 / ID 없는 커밋 ${findings.length}개`);
   for (const finding of findings) console.log(`    ${finding.file}  ${finding.message}`);
-  writeResult('guard-commits-result.json', { status, range, rules: [{ id: g09.id, name: g09.name, status, checkedCommits: commits.length, newViolations: findings }] });
+  const rule = { id: g09.id, name: g09.name, status, checkedCommits: commits.length, newViolations: findings };
+  writeResult('guard-commits-result.json', { status, range, rules: [rule] });
   process.exit(findings.length ? 1 : 0);
 }
 
 function initBaseline(runs) {
-  if (fs.existsSync(path.join(root, BASELINE_FILE))) fail(2, `거부: ${BASELINE_FILE} 이 이미 있습니다. --init-baseline 은 처음 한 번만 쓸 수 있습니다. 줄어든 숫자는 --update-baseline 으로 반영하세요.`);
+  if (fs.existsSync(path.join(root, BASELINE_FILE))) {
+    fail(2, `거부: ${BASELINE_FILE} 이 이미 있습니다. --init-baseline 은 처음 한 번만 쓸 수 있습니다. 줄어든 숫자는 --update-baseline 으로 반영하세요.`);
+  }
   const broken = runs.filter(run => run.error);
   if (broken.length) fail(2, `기준선을 만들 수 없습니다. 규칙 오류: ${broken.map(run => `${run.rule.id} ${run.error}`).join(' / ')}`);
   const rules = {};
@@ -97,7 +102,9 @@ function main() {
   if (options.docs) { writeDocs(root, RULES); console.log(`[guard] ${DOCS_FILE} 을 다시 만들었습니다.`); return 0; }
   if (options.commits !== undefined) runCommits(options.commits);
 
-  const runs = runRules(createContext(root));
+  const ctx = createContext(root);
+  const runs = runRules(ctx);
+  const tooLong = selfCheck(ctx);
   let frozen = options['init-baseline'] ? initBaseline(runs) : loadBaseline(root);
   if (!frozen) fail(2, `${BASELINE_FILE} 이 없습니다. 처음이라면 --init-baseline 으로 만드세요.`);
 
@@ -124,14 +131,18 @@ function main() {
   rows.forEach(printRule);
   const docsOk = docsInSync(root, RULES);
   if (!docsOk) console.log(`DOCS ${DOCS_FILE} 이 규칙과 다릅니다. node scripts/guard/run.mjs --docs 를 실행하세요.`);
+  // Self-check: an unreadable guard is a guard malfunction (ERROR), not an ordinary violation.
+  if (tooLong.length) console.log(`SELF ${SELF_DIR} 에 ${MAX_LINE}자를 넘는 줄이 ${tooLong.length}개 있습니다 (가드 오류).`);
+  for (const spot of tooLong.slice(0, MAX_LOCATIONS)) console.log(`    ${where(spot.file, spot.line)}  ${spot.length}자`);
   const lowerable = rows.reduce((n, row) => n + row.lowerable.length, 0);
   if (lowerable) console.log(`[guard] 기준선을 내릴 수 있는 항목 ${lowerable}개. pnpm guard --update-baseline 으로 반영하세요.`);
 
-  const errored = rows.some(row => row.status === 'ERROR');
+  const errored = rows.some(row => row.status === 'ERROR') || tooLong.length > 0;
   const failed = rows.some(row => row.status === 'FAIL') || !docsOk || (options.strict && lowerable > 0);
   const status = errored ? 'ERROR' : failed ? 'FAIL' : 'PASS';
   writeResult('guard-result.json', {
     status, docsInSync: docsOk, baselineLowerable: lowerable,
+    selfCheck: { status: tooLong.length ? 'ERROR' : 'PASS', maxLineLength: MAX_LINE, tooLong },
     rules: rows.map(({ counts, lowerable: canLower, baseline, ...row }) => ({ ...row, baselineKind: baseline, lowerable: canLower })),
   });
   console.log(`[guard] ${status}  (결과: ${RESULT_DIR}/guard-result.json)`);
