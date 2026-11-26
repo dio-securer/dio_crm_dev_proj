@@ -11,6 +11,23 @@
     { "path": "/guard-raises.json", "what": "예외 선언 파일" },
     { "path": "/CLAUDE.md", "what": "AI 작업 규칙" },
     { "path": "/docs/framework/adr/", "what": "프레임워크 결정 기록(ADR)" },
-    { "path": "/packages/contracts/src/metadata/", "what": "메타데이터 스키마" }
+    { "path": "/packages/contracts/src/metadata/", "what": "메타데이터 스키마" },
+    { "path": "/scripts/crm/", "what": "프레임워크 명령(crm)과 증거 꾸러미를 만드는 코드" },
+    { "path": "/scripts/i18n/hardcode-check.mjs", "what": "G04 가 그대로 돌리는 한글 문구 검사 스크립트" },
+    { "path": "/docs/framework/glossary.md", "what": "용어집(업무 용어와 코드 이름)" },
+    { "path": "/package.json", "what": "저장소 맨 위 실행 명령과 의존성 목록" },
+    { "path": "/backend/package.json", "what": "백엔드 실행 명령과 의존성 목록" },
+    { "path": "/frontend/package.json", "what": "프런트엔드 실행 명령과 의존성 목록" },
+    { "path": "/packages/contracts/package.json", "what": "계약 패키지 실행 명령과 의존성 목록" },
+    { "path": "/pnpm-workspace.yaml", "what": "작업 공간 목록(어느 폴더를 빌드·테스트하는지)과 설치 스크립트 허용 목록" },
+    { "path": "/.npmrc", "what": "설치 도구 설정(지금은 없는 파일. 생기면 보호된다)" },
+    { "path": "/.pnpmfile.cjs", "what": "설치할 때 실행되는 코드(지금은 없는 파일. 생기면 보호된다)" },
+    { "path": "/backend/jest.config.cjs", "what": "백엔드 테스트 실행 설정(jest)" },
+    { "path": "/backend/jest.customization.config.cjs", "what": "백엔드 customization 테스트 실행 설정(jest)" },
+    { "path": "/frontend/vite.config.ts", "what": "프런트엔드 빌드·테스트 실행 설정(vite, vitest 가 함께 읽는다)" },
+    { "path": "/scripts/hq-standard/run-browser.mjs", "what": "HQ 브라우저 검사 파일을 찾아 돌리는 실행기" },
+    { "path": "/scripts/admin/run-all.cjs", "what": "관리자 검사 묶음을 차례로 돌리는 실행기" },
+    { "path": "/scripts/admin/run-web-test.cjs", "what": "관리자 브라우저 검사를 띄우는 실행기" },
+    { "path": "/scripts/admin-customization/run-stage-checks.mjs", "what": "customization 단계별 검사 목록을 돌리는 실행기" }
   ]
 }

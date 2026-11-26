@@ -4,12 +4,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { CODEOWNERS_FILE, codeownersInSync, writeCodeowners } from './lib/codeowners.mjs';
+import { CODEOWNERS_FILE, PROTECTED_FILE, codeownersInSync, loadProtected, writeCodeowners } from './lib/codeowners.mjs';
 import { BASELINE_FILE, compare, countsOf, loadBaseline, lowered, show, totalOf, writeBaseline } from './lib/baseline.mjs';
 import { DOCS_FILE, docsInSync, writeDocs } from './lib/docs.mjs';
 import { createContext, git } from './lib/files.mjs';
 import { runProtect } from './lib/protect.mjs';
-import { MAX_LINE, SELF_DIR, selfCheck } from './lib/selfcheck.mjs';
+import { MAX_LINE, SELF_DIRS, selfCheck, unprotectedManifests } from './lib/selfcheck.mjs';
 import { DEFAULT_RULES, RULES } from './rules/index.mjs';
 import g09 from './rules/g09-change-id.mjs';
 
@@ -145,17 +145,20 @@ function main() {
   if (!docsOk) console.log(`DOCS ${DOCS_FILE} 이 규칙과 다릅니다. node scripts/guard/run.mjs --docs 를 실행하세요.`);
   const ownersOk = codeownersInSync(root);
   if (!ownersOk) console.log(`OWNERS ${CODEOWNERS_FILE} 이 보호 경로 목록과 다릅니다. node scripts/guard/run.mjs --codeowners 를 실행하세요.`);
+  const loose = unprotectedManifests(ctx, loadProtected(root));
+  if (loose.length) console.log(`MANIFEST 보호 경로 목록(${PROTECTED_FILE})에 없는 package.json: ${loose.join(', ')}. 목록에 넣으세요.`);
   // Self-check: an unreadable guard is a guard malfunction (ERROR), not an ordinary violation.
-  if (tooLong.length) console.log(`SELF ${SELF_DIR} 에 ${MAX_LINE}자를 넘는 줄이 ${tooLong.length}개 있습니다 (가드 오류).`);
+  if (tooLong.length) console.log(`SELF ${SELF_DIRS.join(', ')} 에 ${MAX_LINE}자를 넘는 줄이 ${tooLong.length}개 있습니다 (가드 오류).`);
   for (const spot of tooLong.slice(0, MAX_LOCATIONS)) console.log(`    ${where(spot.file, spot.line)}  ${spot.length}자`);
   const lowerable = rows.reduce((n, row) => n + row.lowerable.length, 0);
   if (lowerable) console.log(`[guard] 기준선을 내릴 수 있는 항목 ${lowerable}개. pnpm guard --update-baseline 으로 반영하세요.`);
 
   const errored = rows.some(row => row.status === 'ERROR') || tooLong.length > 0;
-  const failed = rows.some(row => row.status === 'FAIL') || !docsOk || !ownersOk || (options.strict && lowerable > 0);
+  const synced = docsOk && ownersOk && loose.length === 0;
+  const failed = rows.some(row => row.status === 'FAIL') || !synced || (options.strict && lowerable > 0);
   const status = errored ? 'ERROR' : failed ? 'FAIL' : 'PASS';
   writeResult('guard-result.json', {
-    status, docsInSync: docsOk, codeownersInSync: ownersOk, baselineLowerable: lowerable,
+    status, docsInSync: docsOk, codeownersInSync: ownersOk, unprotectedManifests: loose, baselineLowerable: lowerable,
     selfCheck: { status: tooLong.length ? 'ERROR' : 'PASS', maxLineLength: MAX_LINE, tooLong },
     rules: rows.map(({ counts, lowerable: canLower, baseline, ...row }) => ({ ...row, baselineKind: baseline, lowerable: canLower })),
   });

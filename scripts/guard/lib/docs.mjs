@@ -1,7 +1,7 @@
 // docs/framework/guard-rules.md is generated from rule metadata so the document cannot drift.
 import fs from 'node:fs';
 import path from 'node:path';
-import { MAX_LINE, SELF_DIR } from './selfcheck.mjs';
+import { MAX_LINE, SELF_DIRS } from './selfcheck.mjs';
 
 export const DOCS_FILE = 'docs/framework/guard-rules.md';
 const cell = text => String(text).replace(/\|/g, '\\|').replace(/\n/g, ' ');
@@ -58,7 +58,7 @@ export function renderDocs(rules) {
       + '이름으로 판단하는 규칙은 이름을 바꾸면 피할 수 있다. 목적은 무심코 생기는 이탈과 흔한 우회 표기를 막는 것이다.',
     '- 코드 파일이 구문 오류로 읽히지 않으면 그 파일을 보는 규칙은 통과가 아니라 오류(ERROR, 종료 코드 2)가 된다. TypeScript 패키지가 설치되지 않은 경우도 같다(`pnpm install` 필요).',
     '- G01·G03·G05·G10 과 CSS 파일, G04 의 기존 화면 부분은 구문이 아니라 경로·크기·글자 모양을 본다(정규식).',
-    `- 가드 자신의 코드(\`${SELF_DIR}\`)는 한 줄이 ${MAX_LINE}자를 넘으면 가드 오류(종료 코드 2)가 된다.`,
+    `- 가드 자신의 코드와 테스트, 프레임워크 명령(${SELF_DIRS.map(dir => `\`${dir}\``).join(', ')})은 한 줄이 ${MAX_LINE}자를 넘으면 가드 오류(종료 코드 2)가 된다.`,
     '',
     '## 규칙 한눈에 보기',
     '',

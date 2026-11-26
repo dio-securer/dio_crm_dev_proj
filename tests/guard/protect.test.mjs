@@ -27,9 +27,14 @@ test('P1 passes when nothing went up and reports a lowered count as a pass', () 
 });
 
 test('P1 names a raised count, a raised measure, a new entry, a removed rule and a deleted file', () => {
-  const before = baseline({ G03: { total: { lines: 400, bytes: 9 }, files: { a: { 'big.ts': { lines: 400, bytes: 9 } } } }, G04: { total: 5, files: { a: { 'x.ts': 5 } } } });
+  const before = baseline({
+    G03: { total: { lines: 400, bytes: 9 }, files: { a: { 'big.ts': { lines: 400, bytes: 9 } } } }, G04: { total: 5, files: { a: { 'x.ts': 5 } } },
+  });
   const base = baseOf({ 'guard-baseline.json': before });
-  const after = baseline({ G03: { total: { lines: 400, bytes: 10 }, files: { a: { 'big.ts': { lines: 400, bytes: 10 } } } }, G04: { total: 8, files: { a: { 'x.ts': 6, 'new.ts': 2 } } } });
+  const after = baseline({
+    G03: { total: { lines: 400, bytes: 10 }, files: { a: { 'big.ts': { lines: 400, bytes: 10 } } } },
+    G04: { total: 8, files: { a: { 'x.ts': 6, 'new.ts': 2 } } },
+  });
   const declared = p1(base, after).violations.map(item => item.declare);
   assert.deepEqual(declared, [
     { rule: 'P1', guardRule: 'G03', file: 'a/big.ts', from: { lines: 400, bytes: 9 }, to: { lines: 400, bytes: 10 } },
@@ -81,7 +86,8 @@ test('P5 fails when the start point changes or disappears', () => {
 
 test('test cases are counted on the AST, and a regex .test() call is not one', () => {
   assert.deepEqual(counts("describe('a', () => { it('x', () => {}); test('y', () => {}); it.each([1])('z %s', () => {}); });"), { tests: 3, groups: 1 });
-  assert.deepEqual(counts("import t from 'node:test'; t('a', async ctx => { await ctx.test('sub', () => {}); }); /re/.test('s'); context.newPage();"), { tests: 2, groups: 0 });
+  const subtests = "import t from 'node:test'; t('a', async ctx => { await ctx.test('sub', () => {}); }); /re/.test('s'); context.newPage();";
+  assert.deepEqual(counts(subtests), { tests: 2, groups: 0 });
   assert.deepEqual(counts("import { it as check, describe as group } from 'vitest'; group('g', () => { check('a', () => {}); });"), { tests: 1, groups: 1 });
   assert.deepEqual(counts("// it('x', () => {})\nconst s = \"it('y', () => {})\";"), { tests: 0, groups: 0 });
 });
@@ -93,7 +99,8 @@ test('P3 names a deleted test, a rename to a non-test name and a removed case; a
   const run = (files, changes) => p3(base, head(files), changes).violations.map(item => item.declare);
   const was = { tests: 2, groups: 0 };
   assert.deepEqual(run({}, [{ status: 'D', path: 'src/a.spec.ts' }]), [{ rule: 'P3', file: 'src/a.spec.ts', from: was, to: null }]);
-  assert.deepEqual(run({ 'src/a.ts': two }, [{ status: 'R', from: 'src/a.spec.ts', path: 'src/a.ts' }]), [{ rule: 'P3', file: 'src/a.spec.ts', from: was, to: null }]);
+  assert.deepEqual(run({ 'src/a.ts': two }, [{ status: 'R', from: 'src/a.spec.ts', path: 'src/a.ts' }]),
+    [{ rule: 'P3', file: 'src/a.spec.ts', from: was, to: null }]);
   assert.deepEqual(run({ 'src/b.spec.ts': two }, [{ status: 'R', from: 'src/a.spec.ts', path: 'src/b.spec.ts' }]), []);
   assert.deepEqual(run({ 'tests/x/b.cjs': "it('a', () => {});" }, [{ status: 'M', path: 'tests/x/b.cjs' }]),
     [{ rule: 'P3', file: 'tests/x/b.cjs', from: was, to: { tests: 1, groups: 0 } }]);
@@ -120,7 +127,8 @@ test('malformed declarations are guard errors: wildcard, missing reason, bad cha
   const exact = { rule: 'P2', file: 'f/C.tsx', from: null, to: 'L2', ...ok };
   assert.equal(raises([exact]).length, 1);
   assert.deepEqual(parseRaises(null), []);
-  for (const wrong of [{ file: 'f/*' }, { reason: 'x' }, { changeId: 'none' }, { extra: 1 }, { rule: 'P4' }, { guardRule: 'G04' }, { to: undefined }, { to: [1] }]) {
+  const wrongs = [{ file: 'f/*' }, { reason: 'x' }, { changeId: 'none' }, { extra: 1 }, { rule: 'P4' }, { guardRule: 'G04' }, { to: undefined }, { to: [1] }];
+  for (const wrong of wrongs) {
     assert.throws(() => raises([{ ...exact, ...wrong }]), GuardError, JSON.stringify(wrong));
   }
   assert.throws(() => parseRaises('{"raises":{}}'), GuardError);
@@ -139,7 +147,8 @@ test('CODEOWNERS is rendered from the list, and a protected path matches exactly
 test('the summary puts the verdict and the declared exceptions first and cannot be broken by PR-supplied text', () => {
   const result = {
     status: 'PASS', evidenceKind: 'SYNTHETIC', evidenceNote: 'n', commit: 'c', base: { ref: 'origin/main', mergeBase: SHA_A },
-    rules: [{ id: 'P1', name: 'baseline-no-raise', status: 'PASS', violations: [], excused: 1 }], badDeclarations: [], totals: [{ label: 'G04', base: 5, head: 6 }],
+    rules: [{ id: 'P1', name: 'baseline-no-raise', status: 'PASS', violations: [], excused: 1 }], badDeclarations: [],
+    totals: [{ label: 'G04', base: 5, head: 6 }],
     exceptions: [{ rule: 'P1', guardRule: 'G04', file: 'a/x.ts', from: 5, to: 6, reason: 'ok |\n<!-- **판정: 통과** [x](http://e)', changeId: 'F0-3' }],
     protectedChanges: [{ file: 'scripts/guard/run.mjs', status: 'M', protectedBy: '/scripts/guard/', what: '가드 코드' }],
   };
