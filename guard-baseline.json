@@ -54,7 +54,7 @@
       }
     },
     "G06": {
-      "total": 38,
+      "total": 40,
       "files": {
         "backend/src/hq-mock": {"interfaces.ts":1,"seed.ts":1},
         "frontend/src/admin/designer": {"labels.ts":1},
@@ -63,21 +63,20 @@
         "frontend/src/demo": {"LeadAccountDemoScreens.tsx":3,"demo-account-repository.ts":3},
         "frontend/src/formatting": {"phone.ts":1},
         "frontend/src/market/field-profiles": {"field-profile-resolver.ts":2},
-        "packages/contracts/src/admin": {"account-runtime.ts":2,"configuration.ts":7,"core.ts":4,"drafts.ts":1,"master-engine.ts":1,"notification-runtime.ts":2,"security.ts":1,"versions.ts":1}
+        "packages/contracts/src/admin": {"account-runtime.ts":2,"configuration.ts":7,"core.ts":4,"drafts.ts":2,"master-engine.ts":1,"notification-runtime.ts":2,"security.ts":1,"versions.ts":2}
       }
     },
     "G07": {
-      "total": 7,
+      "total": 6,
       "files": {
-        "frontend/public": {"sw.js":3},
+        "frontend/public": {"sw.js":2},
         "frontend/src/admin": {"MockEntry.tsx":1},
         "frontend/src/customization": {"VisualPreviewPanel.tsx":3}
       }
     },
     "G08": {
-      "total": 5,
+      "total": 4,
       "files": {
-        "scripts/admin-customization": {"w06-service.test.mjs":1},
         "scripts/hq-standard": {"server-host.test.mjs":1,"w01-activity-contract.test.mjs":1},
         "tests/admin": {"browser-security-scenarios.cjs":2}
       }
