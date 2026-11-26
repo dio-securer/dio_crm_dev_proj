@@ -4,7 +4,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
@@ -13,11 +12,13 @@ import { STATUS, runCommand, statusOf } from '../../scripts/crm/lib/run.mjs';
 import { FIELD_TYPES, planAddField, planNewObject } from '../../scripts/crm/lib/scaffold.mjs';
 import { DEFAULT_STEPS, PINNED_SCRIPTS, resolveBase, scriptProblems } from '../../scripts/crm/lib/steps.mjs';
 import { EVIDENCE_KIND, VERDICT, exitCodeOf, runVerify, verdictOf } from '../../scripts/crm/lib/verify.mjs';
+import { tempDir } from './sandbox.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const NODE = process.execPath;
 const cli = (...args) => spawnSync(NODE, ['scripts/crm/cli.mjs', ...args], { cwd: root, encoding: 'utf8' });
-const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'crm-test-'));
+// Deleted when the test process ends (sandbox.mjs).
+const tmp = () => tempDir('crm-test-');
 const exits = code => ({ argv: [NODE, '-e', `process.exit(${code})`] });
 const step = (id, prepare, more = {}) => ({ id, title: id, prepare, ...more });
 

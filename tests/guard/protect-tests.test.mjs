@@ -73,6 +73,13 @@ test('a test inside a function that the file never uses is not counted', () => {
   assert.equal(tests("o.w(); const p = { w: 1 }; function w() { it('a', () => {}); }"), 0);
 });
 
+test('the shapes that docs/framework/ci-gates.md lists as not recognised are still counted (change the document with this test)', () => {
+  const shapes = ["if (1 > 2) it('a', () => {});", "const off = false; if (off) it('a', () => {});", "function s() { return; it('a', () => {}); } s();",
+    "for (const x of []) it('a', () => {});", "[].forEach(() => it('a', () => {}));", "class A { m() { it('a', () => {}); } }",
+    "const o = { m() { it('a', () => {}); } };", "if (process.env.X) it('a', () => {});", "function f() { it('a', () => {}); } void f;"];
+  for (const shape of shapes) assert.equal(tests(shape), 1, shape);
+});
+
 test('P3 fails when a live test is turned into dead code', () => {
   const file = 'src/a.spec.ts';
   const live = "it('a', () => {}); it('b', () => {});";
