@@ -2,7 +2,7 @@
 
 ## 상태
 
-채택 (2026-11-26, F0-4).
+채택 (2026-11-26, F0-4). 허용 결정 문서가 어디에 있는지 적은 문장은 F0-5 에서 고쳤다.
 
 ## 맥락
 
@@ -10,8 +10,9 @@
 
 - 금지: `docs/admin-platform/README.md` 의 "범위 결정과 적용 원칙".
   "임의 SQL·JavaScript·외부 URL 실행은 제공하지 않는다." `docs/admin-platform/08_UI_Improvement_Design.md` 도 "SQL/JS 편집"을 제외 범위에 적었다.
-- 허용하는 쪽으로 만든 것: customization 작업. 근거가 된 결정 문서(2026-10-30 무렵)는 이 저장소의 `docs/` 에 없다.
-  저장소에 남아 있는 것은 그 결정을 따른 코드다.
+- 허용: customization 작업.
+  허용 결정 문서(customization 62번, 2026-10-30)는 저장소에 없고 소유자 PC에만 있다. 저장소에 올라오면 경로를 여기에 적는다.
+  저장소에서 확인할 수 있는 것은 아래 코드다.
   - `packages/contracts/src/logic-events.ts`: "future administrator-authored logic" 을 위한 이벤트 등록부. 모든 이벤트가 `runtimeStatus: 'not-implemented'` 다.
   - `backend/src/customization/logic-draft.ts`, `frontend/src/customization/LogicDraftEditor.tsx`: 관리자가 쓴 코드 글자를 "작업본"으로 저장하는 서버와 화면.
   - `backend/src/customization/logic-execution-contract.ts`: 실행 요청·결과의 형식만 정한 계약. 주석에 "not a sandbox or an enabled execution route" 라고 적혀 있다.

@@ -1,5 +1,5 @@
 // `crm verify`: runs every step, keeps going after a failure, and writes the evidence bundle
-// `.guard/evidence/<shortsha>/evidence.json` + `summary.md` + one log per step.
+// `.guard/evidence/<shortsha>/evidence.json` + `summary.md` + one log per step. Bundles of other commits are deleted.
 //
 // Honesty rules, all enforced here:
 // - evidenceKind is the constant SYNTHETIC. This command never touches a real database, so it has no code path that
@@ -46,6 +46,17 @@ function runStep(step, index, context) {
   return { ...base, command, status, exitCode: ran.exitCode, signal: ran.signal, durationMs: ran.durationMs, logPath, note: why };
 }
 
+/**
+ * Delete the evidence bundles of other commits, so the folder holds only the bundle of the commit being verified and an
+ * old PASS cannot be read as this commit's result. Returns the names that were removed.
+ */
+export function pruneEvidence(evidenceRoot, keep) {
+  if (!fs.existsSync(evidenceRoot)) return [];
+  const others = fs.readdirSync(evidenceRoot).filter(name => name !== keep).sort();
+  for (const name of others) fs.rmSync(path.join(evidenceRoot, name), { recursive: true, force: true });
+  return others;
+}
+
 export function verdictOf(steps, { injected, headMoved }) {
   if (injected) return VERDICT.TEST_ONLY;
   if (steps.some(step => step.status === STATUS.FAIL)) return VERDICT.FAIL;
@@ -58,7 +69,8 @@ export function verdictOf(steps, { injected, headMoved }) {
 export const exitCodeOf = verdict => (verdict === VERDICT.PASS ? 0 : verdict === VERDICT.FAIL ? 1 : 2);
 
 /**
- * Run the verification. `steps` and `outDir` exist for the tests only: see the header. Returns the evidence object.
+ * Run the verification. `steps` and `outDir` exist for the tests only: see the header.
+ * Returns { evidence, dir, removed }: the evidence object, its folder, and the bundles of other commits that were deleted.
  * `onStep(step)` is called after each step so the caller can print progress.
  */
 export function runVerify({ root, base = null, steps = DEFAULT_STEPS, outDir = null, onStep = () => {} }) {
@@ -71,7 +83,9 @@ export function runVerify({ root, base = null, steps = DEFAULT_STEPS, outDir = n
     throw new Error('시험용 단계 목록은 저장소 밖의 outDir 에만 쓸 수 있습니다.');
   }
   const dir = injected ? path.resolve(outDir) : inRepo;
-  // Start from an empty folder: an old PASS must not survive a run that stops half way.
+  // Start from an empty folder: an old PASS must not survive a run that stops half way. Bundles of other commits go too
+  // (only for the real run: a test's outDir is outside the repository and its neighbours are not ours to delete).
+  const removed = injected ? [] : pruneEvidence(path.join(root, EVIDENCE_DIR), shortCommit);
   fs.rmSync(dir, { recursive: true, force: true });
   fs.mkdirSync(dir, { recursive: true });
   const logBase = injected ? '.' : `${EVIDENCE_DIR}/${shortCommit}`;
@@ -109,5 +123,5 @@ export function runVerify({ root, base = null, steps = DEFAULT_STEPS, outDir = n
   };
   fs.writeFileSync(path.join(dir, 'evidence.json'), `${JSON.stringify(evidence, null, 2)}\n`);
   fs.writeFileSync(path.join(dir, 'summary.md'), renderSummary(evidence));
-  return { evidence, dir };
+  return { evidence, dir, removed };
 }

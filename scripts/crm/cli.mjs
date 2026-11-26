@@ -2,6 +2,7 @@
 // Framework command line: `pnpm crm <command>`. Korean text for people, stable JSON for machines (`--json`).
 // Exit codes: 0 ok, 1 a check failed, 2 usage error or a check could not run, 3 command not implemented yet.
 // Nothing here reads an environment variable, and no option changes which steps `verify` runs.
+// Every path is taken from where this file is, never from the current folder, so `node <repo>/scripts/crm/cli.mjs` works anywhere.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -28,7 +29,8 @@ const COMMANDS = [
 function help() {
   const width = Math.max(...COMMANDS.map(([name]) => name.length));
   return ['사용법: pnpm crm <명령> [--json]', '', ...COMMANDS.map(([name, what]) => `  ${name.padEnd(width)}  ${what}`), '',
-    '종료 코드: 0 통과, 1 검사 실패, 2 사용법 오류 또는 검사를 돌리지 못함, 3 아직 구현하지 않은 명령.'].join('\n');
+    '종료 코드: 0 통과, 1 검사 실패, 2 사용법 오류 또는 검사를 돌리지 못함, 3 아직 구현하지 않은 명령.',
+    'pnpm 명령은 저장소 맨 위 폴더에서 돌린다. 하위 폴더에서는 node <저장소 경로>/scripts/crm/cli.mjs <명령> 으로 부른다.'].join('\n');
 }
 
 const print = value => console.log(typeof value === 'string' ? value : JSON.stringify(value, null, 2));
@@ -71,13 +73,14 @@ function check(flags) {
 function verify(flags) {
   if (flags.base === '') return usage('--base 에는 기준 ref 가 필요합니다. 예: --base origin/main', flags.json);
   if (!flags.json) console.log('[crm] verify 를 시작합니다. 몇 분 걸립니다.');
-  const { evidence, dir } = runVerify({ root, base: flags.base ?? null, onStep: step => { if (!flags.json) console.log(stepLine(step)); } });
+  const { evidence, dir, removed } = runVerify({ root, base: flags.base ?? null, onStep: step => { if (!flags.json) console.log(stepLine(step)); } });
   const where = path.relative(root, dir).split(path.sep).join('/');
   if (flags.json) print(evidence);
   else {
     console.log(`\n[crm] 판정: ${evidence.verdict}  (증거 종류 ${evidence.evidenceKind}${evidence.dirty ? ', 커밋하지 않은 변경 포함' : ''})`);
     console.log(`[crm] ${notPassedLine(evidence)}`);
     console.log(`[crm] 증거 꾸러미: ${where}/evidence.json, ${where}/summary.md`);
+    if (removed.length) console.log(`[crm] 다른 커밋의 증거 꾸러미 ${removed.length}개를 지웠습니다: ${removed.join(', ')}`);
   }
   return evidence.exitCode;
 }

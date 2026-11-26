@@ -29,6 +29,8 @@ DIO CRM 이다. 영업 사원이 리드, 거래처, 영업기회, 계약, 주문
 5. `pnpm crm verify` 를 돌리고, 그 결과로 보고한다.
 
 `pnpm crm new-object` 와 `pnpm crm add-field` 는 아직 인자만 검사한다(F1에서 구현). 파일을 만들지 않는다.
+`pnpm` 명령은 저장소 맨 위 폴더에서 돌린다(하위 폴더에서는 `pnpm crm` 을 찾지 못한다).
+하위 폴더에 있다면 `node <저장소 경로>/scripts/crm/cli.mjs verify` 처럼 node 로 직접 부른다. 결과는 같다.
 
 ## 꼭 지킬 규칙
 
@@ -63,6 +65,7 @@ DIO CRM 이다. 영업 사원이 리드, 거래처, 영업기회, 계약, 주문
 완료는 `pnpm crm verify`의 증거 꾸러미로만 말한다 — 합성/실증을 구분해 적는다.
 
 - 증거 꾸러미는 `.guard/evidence/<커밋 앞 12자>/` 의 `evidence.json` 과 `summary.md` 다. 단계마다 기록 파일이 하나씩 있다.
+  `verify` 는 시작할 때 다른 커밋의 꾸러미를 지운다. 폴더에는 지금 커밋의 꾸러미만 남는다.
 - `pnpm crm verify` 가 만드는 증거는 언제나 합성(SYNTHETIC)이다. 가짜 데이터로 돌린 검사라는 뜻이다.
 - 실제 DB 나 운영 환경에서 확인하지 않은 것을 "실증"이라고 쓰지 않는다. 확인하지 않은 것은 "확인하지 않음"이라고 쓴다.
 - 판정이 통과(PASS)가 아니면 완료가 아니다. 실패한 단계를 숨기거나 "원래 실패하던 것"이라며 빼지 않는다. 그대로 적는다.
@@ -77,9 +80,10 @@ DIO CRM 이다. 영업 사원이 리드, 거래처, 영업기회, 계약, 주문
 <!-- guard:protected:start (node scripts/guard/run.mjs --docs 가 만든다. 직접 고치지 않는다) -->
 `/.github/`, `/scripts/guard/`, `/tests/guard/`, `/guard-baseline.json`, `/legacy-files.json`, `/guard-raises.json`,
 `/CLAUDE.md`, `/docs/framework/adr/`, `/packages/contracts/src/metadata/` (아직 없음), `/scripts/crm/`,
-`/scripts/i18n/hardcode-check.mjs`, `/docs/framework/glossary.md`, `/package.json`, `/backend/package.json`,
-`/frontend/package.json`, `/packages/contracts/package.json`, `/pnpm-workspace.yaml`, `/.npmrc` (아직 없음),
-`/.pnpmfile.cjs` (아직 없음), `/backend/jest.config.cjs`, `/backend/jest.customization.config.cjs`,
+`/scripts/i18n/hardcode-check.mjs`, `/docs/framework/glossary.md`, `/docs/framework/README.md`,
+`/docs/framework/ci-gates.md`, `/docs/framework/guard-rules.md`, `/package.json`, `/backend/package.json`,
+`/frontend/package.json`, `/packages/contracts/package.json`, `/pnpm-workspace.yaml`, `/pnpm-lock.yaml`,
+`/.npmrc` (아직 없음), `/.pnpmfile.cjs` (아직 없음), `/backend/jest.config.cjs`, `/backend/jest.customization.config.cjs`,
 `/frontend/vite.config.ts`, `/scripts/hq-standard/run-browser.mjs`, `/scripts/admin/run-all.cjs`,
 `/scripts/admin/run-web-test.cjs`, `/scripts/admin-customization/run-stage-checks.mjs`
 <!-- guard:protected:end (node scripts/guard/run.mjs --docs 가 만든다. 직접 고치지 않는다) -->

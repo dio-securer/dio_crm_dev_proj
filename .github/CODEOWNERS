@@ -14,11 +14,15 @@
 /scripts/crm/                                     @dio-securer
 /scripts/i18n/hardcode-check.mjs                  @dio-securer
 /docs/framework/glossary.md                       @dio-securer
+/docs/framework/README.md                         @dio-securer
+/docs/framework/ci-gates.md                       @dio-securer
+/docs/framework/guard-rules.md                    @dio-securer
 /package.json                                     @dio-securer
 /backend/package.json                             @dio-securer
 /frontend/package.json                            @dio-securer
 /packages/contracts/package.json                  @dio-securer
 /pnpm-workspace.yaml                              @dio-securer
+/pnpm-lock.yaml                                   @dio-securer
 /.npmrc                                           @dio-securer
 /.pnpmfile.cjs                                    @dio-securer
 /backend/jest.config.cjs                          @dio-securer
