@@ -1,9 +1,9 @@
 import { excerpt, hasExt, scan } from '../lib/files.mjs';
 
 export const TOKEN_SOURCES = ['frontend/src/styles/tokens.css'];
-const EXT = ['.ts', '.tsx', '.js', '.jsx', '.css', '.scss'];
+export const EXT = ['.ts', '.tsx', '.js', '.jsx', '.css', '.scss'];
 // #rgb #rgba #rrggbb #rrggbbaa in any letter case, or a colour function call.
-const RAW = /(?<![\w&$.])#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})(?![\w-])|\b(?:rgba?|hsla?|hwb|oklab|oklch)\s*\(/gi;
+export const RAW = /(?<![\w&$.])#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})(?![\w-])|\b(?:rgba?|hsla?|hwb|oklab|oklch)\s*\(/gi;
 
 export default {
   id: 'G05',

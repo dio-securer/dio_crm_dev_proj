@@ -20,6 +20,8 @@ const MAX_LOCATIONS = 8;
 const FLAGS = ['--update-baseline', '--init-baseline', '--docs', '--codeowners', '--strict'];
 const VALUE_FLAGS = { '--commits': '<base>..<head>', '--protect': '<base-ref>' };
 const USAGE = [...FLAGS, ...Object.entries(VALUE_FLAGS).map(pair => pair.join(' '))];
+// Only these rules may have entries in the baseline. An entry for a rule without a baseline is a guard error.
+const BASELINE_KINDS = Object.fromEntries(DEFAULT_RULES.filter(rule => rule.baseline !== 'none').map(rule => [rule.id, rule.baseline]));
 
 function parseArgs(argv) {
   const options = {};
@@ -123,7 +125,7 @@ function main() {
   const ctx = createContext(root);
   const runs = runRules(ctx);
   const tooLong = selfCheck(ctx);
-  let frozen = options['init-baseline'] ? initBaseline(runs) : loadBaseline(root);
+  let frozen = options['init-baseline'] ? initBaseline(runs) : loadBaseline(root, BASELINE_KINDS);
   if (!frozen) fail(2, `${BASELINE_FILE} 이 없습니다. 처음이라면 --init-baseline 으로 만드세요.`);
 
   const rows = runs.map(({ rule, findings, error }) => {

@@ -2,7 +2,7 @@ import { CODE_EXT, TEST_ROOTS, hasExt, isTestFile } from '../lib/files.mjs';
 import { importsOf, packageName } from '../lib/imports.mjs';
 import { GLOBAL_OBJECTS, ioCallsOf } from '../lib/io.mjs';
 
-const SCOPE = ['frontend/', 'backend/', 'packages/', 'extensions/'];
+export const SCOPE = ['frontend/', 'backend/', 'packages/', 'extensions/'];
 // The only places allowed to talk to a database or the network directly.
 export const ALLOWED = [
   ['backend/src/database/', 'DB 연결과 트랜잭션(mssql)을 가진 유일한 곳'],
@@ -10,10 +10,12 @@ export const ALLOWED = [
   ['frontend/src/api.ts', '프런트 공용 API 클라이언트'],
   ['frontend/src/admin/client/', '관리자 화면 API 클라이언트'],
 ];
-const DB = ['mssql', 'tedious', 'typeorm', '@nestjs/typeorm', 'knex', 'prisma', '@prisma/client', 'pg', 'pg-promise', 'postgres', 'mysql',
+export const DB = ['mssql', 'tedious', 'typeorm', '@nestjs/typeorm', 'knex', 'prisma', '@prisma/client', 'pg', 'pg-promise', 'postgres', 'mysql',
   'mysql2', 'mariadb', 'sqlite3', 'better-sqlite3', 'oracledb', 'sequelize', '@nestjs/sequelize', 'mongoose', '@nestjs/mongoose', 'mongodb',
   'redis', 'ioredis', 'drizzle-orm', 'kysely', '@mikro-orm/core', 'odbc'];
-const NET = ['axios', '@nestjs/axios', 'node-fetch', 'cross-fetch', 'isomorphic-fetch', 'undici', 'got', 'ky', 'superagent', 'request',
+// Every package of these scopes is a driver or ORM: `@prisma/adapter-pg`, `@mikro-orm/postgresql`.
+export const DB_SCOPES = ['@prisma/', '@mikro-orm/'];
+export const NET = ['axios', '@nestjs/axios', 'node-fetch', 'cross-fetch', 'isomorphic-fetch', 'undici', 'got', 'ky', 'superagent', 'request',
   'needle', 'http', 'https', 'http2', 'net', 'tls', 'dgram', 'ws', 'socket.io-client', 'graphql-request', 'soap'];
 
 export const inScope = file => hasExt(file, CODE_EXT)
@@ -63,7 +65,7 @@ export default {
       for (const item of importsOf(ctx, file)) {
         if (item.dynamic) { found.push({ file, line: item.line, message: '경로를 실행 중에 만드는 import()/require() (대상을 확인할 수 없음)' }); continue; }
         const name = packageName(item.specifier);
-        if (DB.includes(name) || name.startsWith('@prisma/') || name.startsWith('@mikro-orm/')) {
+        if (DB.includes(name) || DB_SCOPES.some(scope => name.startsWith(scope))) {
           found.push({ file, line: item.line, message: `DB 드라이버/ORM import "${item.raw}"` });
         } else if (NET.includes(name)) found.push({ file, line: item.line, message: `네트워크 모듈 import "${item.raw}"` });
       }

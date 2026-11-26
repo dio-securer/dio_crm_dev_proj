@@ -28,8 +28,8 @@ export const hasExt = (file, list) => list.includes(extOf(file));
  * a folder merely named test/ tests/ __tests__/ e2e/ somewhere else is NOT a test root.
  */
 export const TEST_ROOTS = ['backend/test/', 'tests/'];
-const TEST_NAME = /\.(spec|test)\.[cm]?[jt]sx?$/i;
-const TESTISH_DIR = /(^|\/)(__tests__|tests?|e2e|specs?|__mocks__)\//i;
+export const TEST_NAME = /\.(spec|test)\.[cm]?[jt]sx?$/i;
+export const TESTISH_DIR = /(^|\/)(__tests__|tests?|e2e|specs?|__mocks__)\//i;
 
 /** Test file by its name alone (`*.spec.*` / `*.test.*`). */
 export const isTestName = file => TEST_NAME.test(file);
@@ -42,7 +42,7 @@ export const isTestFile = file => isTestName(file) || TEST_ROOTS.some(root => fi
  * The families are the ones that exist today; every file in them asserts something and fails the run when it is wrong.
  */
 export const ACCEPTANCE_FAMILIES = ['-browser', '-http', '-verification', '-walkthrough', '-check', '-smoke', '-ui'];
-const ACCEPTANCE_NAME = new RegExp(`^scripts/(?:.*/)?(?:[^/]*(?:${ACCEPTANCE_FAMILIES.join('|')})|check)\\.[cm]?js$`, 'i');
+export const ACCEPTANCE_NAME = new RegExp(`^scripts/(?:.*/)?(?:[^/]*(?:${ACCEPTANCE_FAMILIES.join('|')})|check)\\.[cm]?js$`, 'i');
 export const isAcceptanceScript = file => ACCEPTANCE_NAME.test(file);
 
 /** Wider net for rules that CHECK tests (G08): also any folder that merely looks like a test folder. */

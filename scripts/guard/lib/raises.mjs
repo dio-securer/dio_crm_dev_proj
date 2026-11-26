@@ -6,9 +6,9 @@ import { GuardError } from './gitbase.mjs';
 
 export const RAISES_FILE = 'guard-raises.json';
 export const RAISE_RULES = ['P1', 'P2', 'P3', 'P5'];
-const KEYS = ['rule', 'guardRule', 'file', 'from', 'to', 'reason', 'changeId'];
-const MIN_REASON = 10;
-const ID_ONLY = new RegExp(`^${CHANGE_ID.source.replace(/^\\\[/, '').replace(/\\\]$/, '')}$`);
+export const KEYS = ['rule', 'guardRule', 'file', 'from', 'to', 'reason', 'changeId'];
+export const MIN_REASON = 10;
+export const ID_ONLY = new RegExp(`^${CHANGE_ID.source.replace(/^\\\[/, '').replace(/\\\]$/, '')}$`);
 
 /** JSON with sorted keys, so two equal values always give the same text. */
 export function canonical(value) {

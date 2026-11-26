@@ -1,7 +1,7 @@
 import { branchingOf } from '../lib/branching.mjs';
 import { CODE_EXT, TEST_ROOTS, hasExt, isTestFile } from '../lib/files.mjs';
 
-const SCOPE = ['frontend/src/', 'backend/src/', 'packages/'];
+export const SCOPE = ['frontend/src/', 'backend/src/', 'packages/'];
 // Files that are skipped. Explicit file paths only, never a whole directory: a new file is always checked.
 // Empty on purpose: the files that define markets do not branch, and the few that do are in the baseline.
 export const EXCLUDED_FILES = [];

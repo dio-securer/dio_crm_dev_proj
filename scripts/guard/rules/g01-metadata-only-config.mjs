@@ -1,6 +1,8 @@
 import { extOf } from '../lib/files.mjs';
 
-const ALLOWED = ['.json', '.yaml', '.yml', '.md'];
+export const ALLOWED = ['.json', '.yaml', '.yml', '.md'];
+// File names (not extensions) that may also sit under metadata/.
+export const ALLOWED_NAMES = ['.gitkeep'];
 
 export default {
   id: 'G01',
@@ -17,7 +19,7 @@ export default {
     for (const file of ctx.files) {
       if (!file.startsWith('metadata/')) continue;
       const base = file.slice(file.lastIndexOf('/') + 1);
-      if (base === '.gitkeep') continue;
+      if (ALLOWED_NAMES.includes(base)) continue;
       const ext = extOf(file);
       if (!ALLOWED.includes(ext)) {
         findings.push({ file, line: 0, message: `허용되지 않는 파일 형식 "${ext || base}" (허용: ${ALLOWED.join(' ')})` });

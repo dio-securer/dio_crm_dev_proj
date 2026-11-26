@@ -1,11 +1,11 @@
 import { CODE_EXT, TEST_ROOTS, hasExt, isTestFile } from '../lib/files.mjs';
 import { collapse, importsOf, resolveRelative } from '../lib/imports.mjs';
 
-const SCOPE = ['frontend/', 'backend/', 'packages/', 'extensions/'];
+export const SCOPE = ['frontend/', 'backend/', 'packages/', 'extensions/'];
 // Workspace package name -> folder, so `@dio-crm/api/test/x` is seen as `backend/test/x`.
-const PACKAGE_DIRS = [['@dio-crm/api', 'backend'], ['@dio-crm/web', 'frontend'], ['@dio-crm/contracts', 'packages/contracts']];
+export const PACKAGE_DIRS = [['@dio-crm/api', 'backend'], ['@dio-crm/web', 'frontend'], ['@dio-crm/contracts', 'packages/contracts']];
 // `x.spec`, `x.spec.ts`, `x.test.js`, and glob forms such as `*.spec.*` or `*.test.{ts,tsx}`.
-const TEST_TARGET = /\.(spec|test)(\.[^/]*)?$/i;
+export const TEST_TARGET = /\.(spec|test)(\.[^/]*)?$/i;
 
 export const inScope = file => hasExt(file, CODE_EXT) && SCOPE.some(prefix => file.startsWith(prefix)) && !isTestFile(file);
 

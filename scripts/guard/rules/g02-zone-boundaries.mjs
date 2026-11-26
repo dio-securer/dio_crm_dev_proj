@@ -2,15 +2,15 @@ import { CODE_EXT, hasExt, isTestName } from '../lib/files.mjs';
 import { collapse, importsOf, packageName, resolveRelative } from '../lib/imports.mjs';
 import { loadLegacy } from '../lib/legacy.mjs';
 
-const EXT_ALLOWED = ['@dio-crm/contracts', '@dio-crm/engine'];
+export const EXT_ALLOWED = ['@dio-crm/contracts', '@dio-crm/engine'];
 // Exact specifiers, nothing else. The second list applies only to `*.spec.*` / `*.test.*` files.
 export const EXT_EXACT = ['react', 'react/jsx-runtime'];
 export const EXT_TEST_EXACT = ['vitest', 'node:test', 'node:assert', 'node:assert/strict'];
-const ENGINE_FORBIDDEN_PACKAGES = ['@dio-crm/api', '@dio-crm/web'];
-const ENGINE_FORBIDDEN_PREFIX = ['frontend/', 'backend/', 'extensions/', '@dio-crm/extension'];
-const CONTRACTS = '@dio-crm/contracts/';
-const SOURCE_SUFFIX = ['', '.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '/index.ts', '/index.tsx', '/index.js'];
-const SOURCE_EXT = /(\.d)?\.[cm]?[jt]sx?$/i;
+export const ENGINE_FORBIDDEN_PACKAGES = ['@dio-crm/api', '@dio-crm/web'];
+export const ENGINE_FORBIDDEN_PREFIX = ['frontend/', 'backend/', 'extensions/', '@dio-crm/extension'];
+export const CONTRACTS = '@dio-crm/contracts/';
+export const SOURCE_SUFFIX = ['', '.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '/index.ts', '/index.tsx', '/index.js'];
+export const SOURCE_EXT = /(\.d)?\.[cm]?[jt]sx?$/i;
 // A bare specifier is compared as written, so it must not contain `.`, `..` or empty path parts, or a URL scheme.
 const isPlain = spec => !spec.split('/').some(part => part === '' || part === '.' || part === '..') && !/^[a-z][\w+.-]*:/i.test(spec.replace(/^node:/, ''));
 

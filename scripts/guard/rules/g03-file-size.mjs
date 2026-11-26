@@ -2,7 +2,7 @@ import { CODE_EXT, STYLE_EXT, countLines, hasExt } from '../lib/files.mjs';
 
 export const MAX_LINES = 300;
 export const MAX_BYTES = 15000;
-const METADATA_EXT = ['.json', '.yaml', '.yml'];
+export const METADATA_EXT = ['.json', '.yaml', '.yml'];
 // The ONLY directories that are skipped. Explicit, concrete paths that exist today: a folder that is
 // merely named fixtures/, generated/ or dist/ somewhere else is checked like any other folder.
 export const EXCLUDED_DIRS = [

@@ -9,7 +9,8 @@ const NOTE = '기존 위반을 묶어 둔 기준선. 숫자는 줄어들 수만 
 // A frozen value is a count (number) or, for `max` rules, a set of measures such as { lines, bytes }.
 export const isSet = value => value !== null && typeof value === 'object';
 const keysOf = (a, b) => [...new Set([...Object.keys(a ?? {}), ...Object.keys(b ?? {})])].sort(byCodeUnit);
-const validNumber = value => Number.isInteger(value) && value > 0;
+// A positive whole number that JSON can hold exactly: no fraction, no negative, no 1e999 (Infinity), no 1e300.
+const validNumber = value => Number.isSafeInteger(value) && value > 0;
 
 /** Sum of a rule's values: a number, or one sum per measure. */
 export function totalOf(flat) {
@@ -32,15 +33,21 @@ export const show = (value, sorted = false) => (isSet(value)
   ? (sorted ? keysOf(value) : Object.keys(value)).map(key => `${key} ${value[key]}`).join(', ')
   : String(value));
 
-/** Parse baseline text into { ruleId: { file: value } }. Throws when it is malformed or internally inconsistent. */
-export function parseBaseline(text) {
+/**
+ * Parse baseline text into { ruleId: { file: value } }. Throws when it is malformed or internally inconsistent.
+ * `kinds` ({ ruleId: 'count' | 'max' }) names the rules that may have frozen values at all: an entry for any other rule
+ * (a rule without a baseline, an unknown rule) or a value of the wrong kind (a set where a count belongs) is refused.
+ */
+export function parseBaseline(text, kinds = null) {
   const doc = JSON.parse(text);
   if (!doc || typeof doc.rules !== 'object' || doc.rules === null) throw new Error(`${BASELINE_FILE} 형식이 잘못되었습니다.`);
   const rules = {};
   for (const [id, entry] of Object.entries(doc.rules)) {
     if (!/^G\d{2}$/.test(id) || !entry || typeof entry !== 'object') throw new Error(`${BASELINE_FILE}: 규칙 항목이 잘못되었습니다: ${id}`);
+    if (kinds && !Object.hasOwn(kinds, id)) throw new Error(`${BASELINE_FILE}: ${id} 는 기준선을 쓰지 않는 규칙입니다. 이 규칙은 한 건도 허용하지 않습니다. 항목을 지우세요.`);
     const flat = flattenDirs(entry.files);
     for (const [name, value] of Object.entries(flat)) {
+      if (kinds && isSet(value) !== (kinds[id] === 'max')) throw new Error(`${BASELINE_FILE}: ${id} ${name} 의 값이 이 규칙의 종류(${kinds[id]})와 맞지 않습니다.`);
       if (name === '__proto__' || (isSet(value) && Object.hasOwn(value, '__proto__'))) throw new Error(`${BASELINE_FILE}: ${id} 에 쓸 수 없는 이름(__proto__)이 있습니다.`);
       const ok = isSet(value) ? Object.keys(value).length > 0 && Object.values(value).every(validNumber) : validNumber(value);
       if (!ok) throw new Error(`${BASELINE_FILE}: ${id} ${name} 의 값이 양의 정수가 아닙니다.`);
@@ -54,9 +61,9 @@ export function parseBaseline(text) {
 }
 
 /** Returns null when the file does not exist. Throws when it is malformed or internally inconsistent. */
-export function loadBaseline(root) {
+export function loadBaseline(root, kinds = null) {
   const file = path.join(root, BASELINE_FILE);
-  return fs.existsSync(file) ? parseBaseline(fs.readFileSync(file, 'utf8')) : null;
+  return fs.existsSync(file) ? parseBaseline(fs.readFileSync(file, 'utf8'), kinds) : null;
 }
 
 export function writeBaseline(root, rules) {

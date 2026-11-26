@@ -10,7 +10,8 @@ export const START_FILE = 'scripts/guard/commit-id-start.json';
 /** Returns the full hash of the last exempt commit. Throws when the file is malformed. */
 export function parseStart(text) {
   const doc = JSON.parse(text);
-  if (!/^[0-9a-f]{40}$/.test(doc?.lastExemptCommit ?? '')) throw new Error(`${START_FILE}: lastExemptCommit 은 40자 커밋 해시여야 합니다.`);
+  const sha = doc?.lastExemptCommit;
+  if (typeof sha !== 'string' || !/^[0-9a-f]{40}$/.test(sha)) throw new Error(`${START_FILE}: lastExemptCommit 은 40자 커밋 해시여야 합니다.`);
   return doc.lastExemptCommit;
 }
 

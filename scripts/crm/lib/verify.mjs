@@ -46,12 +46,42 @@ function runStep(step, index, context) {
   return { ...base, command, status, exitCode: ran.exitCode, signal: ran.signal, durationMs: ran.durationMs, logPath, note: why };
 }
 
+/** lstat that answers null for a path that does not exist. A symbolic link is reported as a link, never followed. */
+function kindOf(file) {
+  try { return fs.lstatSync(file); } catch (error) { if (error.code === 'ENOENT') return null; throw error; }
+}
+
+/**
+ * The evidence folder is emptied before every run, so it must be a real folder inside the repository. When `.guard`,
+ * `.guard/evidence` or an entry of it is a symbolic link, the clean-up would delete (and the run would write) somewhere else.
+ * Returns one sentence saying what is wrong, or null. The caller deletes nothing unless this is null.
+ */
+export function evidenceProblem(root, evidenceRoot) {
+  const parts = path.relative(root, evidenceRoot).split(path.sep);
+  if (parts[0] === '' || parts[0] === '..' || path.isAbsolute(parts[0])) return `증거 폴더(${evidenceRoot})가 저장소 밖입니다.`;
+  let at = root;
+  for (const part of parts) {
+    at = path.join(at, part);
+    const stat = kindOf(at);
+    if (stat === null) return null;
+    if (stat.isSymbolicLink()) return `${path.relative(root, at)} 이 심볼릭 링크입니다. 링크를 따라가서 지우지 않습니다.`;
+    if (!stat.isDirectory()) return `${path.relative(root, at)} 이 폴더가 아닙니다.`;
+  }
+  if (path.relative(fs.realpathSync(root), fs.realpathSync(evidenceRoot)).split(path.sep)[0] === '..') return `증거 폴더(${evidenceRoot})가 저장소 밖을 가리킵니다.`;
+  const links = fs.readdirSync(evidenceRoot).filter(name => kindOf(path.join(evidenceRoot, name))?.isSymbolicLink()).sort();
+  return links.length ? `증거 폴더 안에 심볼릭 링크가 있습니다: ${links.join(', ')}. 링크를 따라가서 지우지 않습니다.` : null;
+}
+
 /**
  * Delete the evidence bundles of other commits, so the folder holds only the bundle of the commit being verified and an
  * old PASS cannot be read as this commit's result. Returns the names that were removed.
+ * Refuses (throws, nothing deleted) when the folder or an entry of it is a symbolic link.
  */
 export function pruneEvidence(evidenceRoot, keep) {
-  if (!fs.existsSync(evidenceRoot)) return [];
+  const stat = kindOf(evidenceRoot);
+  if (stat === null) return [];
+  const problem = evidenceProblem(path.dirname(evidenceRoot), evidenceRoot);
+  if (problem) throw new Error(`증거 꾸러미를 지우지 않았습니다. ${problem}`);
   const others = fs.readdirSync(evidenceRoot).filter(name => name !== keep).sort();
   for (const name of others) fs.rmSync(path.join(evidenceRoot, name), { recursive: true, force: true });
   return others;
@@ -83,6 +113,9 @@ export function runVerify({ root, base = null, steps = DEFAULT_STEPS, outDir = n
     throw new Error('시험용 단계 목록은 저장소 밖의 outDir 에만 쓸 수 있습니다.');
   }
   const dir = injected ? path.resolve(outDir) : inRepo;
+  // Checked before anything is deleted or written: see evidenceProblem.
+  const problem = injected ? null : evidenceProblem(root, path.join(root, EVIDENCE_DIR));
+  if (problem) throw new Error(`증거 꾸러미를 만들지 않았습니다. ${problem}`);
   // Start from an empty folder: an old PASS must not survive a run that stops half way. Bundles of other commits go too
   // (only for the real run: a test's outDir is outside the repository and its neighbours are not ours to delete).
   const removed = injected ? [] : pruneEvidence(path.join(root, EVIDENCE_DIR), shortCommit);

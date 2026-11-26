@@ -1,9 +1,9 @@
 // G06 shape detection on the TypeScript AST: which expressions branch on a company/country/market value.
 import { excerpt } from './files.mjs';
-import { K, constsOf, keyName, lineOf, memberName, staticString, textOf, unwrap, walk } from './ts.mjs';
+import { K, constsOf, keyName, kindSet, lineOf, memberName, staticString, textOf, unwrap, walk } from './ts.mjs';
 
 // ISO 3166-1 alpha-2 plus the group codes this project uses.
-const ISO = [
+export const ISO = [
   'AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ',
   'CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR',
   'GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT',
@@ -13,25 +13,27 @@ const ISO = [
   'TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW',
   'UK EU HQ GLOBAL APAC EMEA LATAM',
 ].join(' ').split(' ');
-const CODES = new Set(ISO);
-const LOCALE = /^[a-z]{2,3}[-_][A-Z]{2}$/;
-const CODE_IN_REGEX = new RegExp(`(?<![A-Za-z\\\\])(?:${ISO.join('|')})(?![A-Za-z])`);
-export const isCode = text => CODES.has(text) || LOCALE.test(text);
+const codes = new Set(ISO);
+export const LOCALE = /^[a-z]{2,3}[-_][A-Z]{2}$/;
+const codeInRegex = new RegExp(`(?<![A-Za-z\\\\])(?:${ISO.join('|')})(?![A-Za-z])`);
+export const isCode = text => codes.has(text) || LOCALE.test(text);
 
 // A key word counts only at the start of a name part: `companyCode`, `actorCompany`, `MARKET_X`; not `accompany`, `marketing`.
-const KEY = new RegExp('(?:(?<![A-Za-z])(?:company|country|market|tenant|nation)'
+export const KEY = new RegExp('(?:(?<![A-Za-z])(?:company|country|market|tenant|nation)'
   + '|Company|Country|Market|Tenant|Nation|COMPANY|COUNTRY|MARKET|TENANT|NATION)(?!ing)');
 // Members and methods that still give "the same value": `country.code`, `market.trim().toUpperCase()`.
-const SAME_VALUE = new Set(['code', 'id', 'key', 'name', 'value', 'toUpperCase', 'toLowerCase', 'toLocaleUpperCase', 'toLocaleLowerCase',
+export const SAME_VALUE = new Set(['code', 'id', 'key', 'name', 'value', 'toUpperCase', 'toLowerCase', 'toLocaleUpperCase', 'toLocaleLowerCase',
   'trim', 'trimStart', 'trimEnd', 'toString', 'valueOf', 'normalize', 'slice', 'substring', 'substr', 'charAt', 'at', 'replace', 'replaceAll',
   'padStart', 'padEnd', 'concat', 'charCodeAt', 'codePointAt']);
-const EQUALITY = () => new Set([K.EqualsEqualsEqualsToken, K.ExclamationEqualsEqualsToken, K.EqualsEqualsToken, K.ExclamationEqualsToken]);
-const EITHER = () => new Set([K.QuestionQuestionToken, K.BarBarToken, K.AmpersandAmpersandToken, K.PlusToken]);
+export const EQUALITY = ['EqualsEqualsEqualsToken', 'ExclamationEqualsEqualsToken', 'EqualsEqualsToken', 'ExclamationEqualsToken'];
+export const EITHER = ['QuestionQuestionToken', 'BarBarToken', 'AmpersandAmpersandToken', 'PlusToken'];
+const equality = kindSet(EQUALITY);
+const either = kindSet(EITHER);
 // Calls that ask "is this value one of / like that": `list.includes(x)`, `set.has(x)`, `map.get(x)`, `re.test(x)`, `Object.is(a, b)`.
-const TESTS = new Set(['includes', 'indexOf', 'lastIndexOf', 'has', 'get', 'startsWith', 'endsWith', 'localeCompare', 'test', 'match', 'matchAll',
+export const TESTS = new Set(['includes', 'indexOf', 'lastIndexOf', 'has', 'get', 'startsWith', 'endsWith', 'localeCompare', 'test', 'match', 'matchAll',
   'search', 'is']);
 // Loops that are a membership test when the callback compares its item: `['KR', 'US'].some(code => code === x)`.
-const LOOPS = new Set(['some', 'every', 'find', 'findIndex', 'findLast', 'findLastIndex', 'filter']);
+export const LOOPS = new Set(['some', 'every', 'find', 'findIndex', 'findLast', 'findLastIndex', 'filter']);
 const LOOKUP = '회사/국가/시장 값으로 객체 조회';
 const LIST = '회사/국가/시장 값을 리터럴 목록과 비교';
 const isAccess = n => n.kind === K.PropertyAccessExpression || n.kind === K.ElementAccessExpression;
@@ -41,7 +43,6 @@ const isCall = n => n.kind === K.CallExpression || n.kind === K.NewExpression;
 function shapes(sf) {
   const consts = constsOf(sf);
   const aliases = new Set();
-  const either = EITHER();
   const text = node => staticString(node, consts);
 
   /** True when the expression is (derived from) a company/country/market value. `loose` also looks through call arguments. */
@@ -69,7 +70,7 @@ function shapes(sf) {
   /** A constant that stands for a code by its name: `KR`, `Market.KR`, `Market['KR']`. */
   const isCodeConst = node => {
     const n = unwrap(node);
-    return n.kind === K.Identifier ? CODES.has(n.text) : isAccess(n) && CODES.has(memberName(n, consts) ?? '');
+    return n.kind === K.Identifier ? codes.has(n.text) : isAccess(n) && codes.has(memberName(n, consts) ?? '');
   };
   const isNumber = node => {
     const n = unwrap(node);
@@ -86,7 +87,7 @@ function shapes(sf) {
     if (n.kind === K.ArrayLiteralExpression) return n.elements.some(item => holds(item, test));
     return isCall(n) && (n.arguments ?? []).some(arg => holds(arg, test));
   };
-  const hasCode = node => holds(node, n => isCodeLiteral(n) || (isRegex(n) && CODE_IN_REGEX.test(n.text)));
+  const hasCode = node => holds(node, n => isCodeLiteral(n) || (isRegex(n) && codeInRegex.test(n.text)));
   const hasLiteral = node => holds(node, n => isLiteral(n) || isRegex(n));
 
   walk(sf, node => {
@@ -100,7 +101,7 @@ function shapes(sf) {
 }
 
 /** True when a callback compares its own first parameter with something: `item => item === x`. */
-function comparesItem(callback, equality) {
+function comparesItem(callback) {
   const fn = callback ? unwrap(callback) : null;
   const item = fn && (fn.kind === K.ArrowFunction || fn.kind === K.FunctionExpression) ? fn.parameters[0]?.name : null;
   if (!item || item.kind !== K.Identifier) return false;
@@ -115,7 +116,6 @@ function comparesItem(callback, equality) {
 /** Returns [{ line, message }] in source order, at most one per node. */
 export function branchingOf(sf) {
   const s = shapes(sf);
-  const equality = EQUALITY();
   const found = [];
   const add = (node, label) => found.push({ line: lineOf(sf, node), message: `${label}: ${excerpt(textOf(sf, node), 50)}` });
   const pair = (a, b) => (s.isCodeLiteral(a) || s.isCodeLiteral(b) ? '코드 리터럴 비교'
@@ -138,7 +138,7 @@ export function branchingOf(sf) {
     } else if (node.kind === K.CallExpression) {
       const callee = unwrap(node.expression);
       const name = isAccess(callee) ? memberName(callee, s.consts) : null;
-      if (name !== null && LOOPS.has(name) && s.hasCode(callee.expression) && comparesItem(node.arguments[0], equality)) add(node, LIST);
+      if (name !== null && LOOPS.has(name) && s.hasCode(callee.expression) && comparesItem(node.arguments[0])) add(node, LIST);
       if (name === null || !TESTS.has(name)) return;
       const operands = [callee.expression, ...node.arguments];
       if (operands.some(s.hasCode)) add(node, '코드 리터럴 포함 검사');

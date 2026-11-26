@@ -3,16 +3,17 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { CODE_EXT, excerpt, hasExt } from '../lib/files.mjs';
-import { K, lineOf, textOf, walk } from '../lib/ts.mjs';
+import { kindSet, lineOf, textOf, walk } from '../lib/ts.mjs';
 
-const SCRIPT = 'scripts/i18n/hardcode-check.mjs';
-const LINE = /^ - (.+?):(\d+): (.*)$/;
+export const SCRIPT = 'scripts/i18n/hardcode-check.mjs';
+export const LINE = /^ - (.+?):(\d+): (.*)$/;
 // New zones are checked by the guard itself (the legacy script only looks at frontend/src/**/*.tsx).
-const ZONE = /^(extensions|packages\/engine[^/]*)\//;
-const HANGUL = /[\u1100-\u11FF\u3130-\u318F\uA960-\uA97F\uAC00-\uD7FF]/;
+export const ZONE = /^(extensions|packages\/engine[^/]*)\//;
+export const HANGUL = /[\u1100-\u11FF\u3130-\u318F\uA960-\uA97F\uAC00-\uD7FF]/;
 
-const LEAVES = () => new Set([K.StringLiteral, K.NoSubstitutionTemplateLiteral, K.TemplateHead, K.TemplateMiddle, K.TemplateTail, K.JsxText,
-  K.Identifier, K.PrivateIdentifier, K.RegularExpressionLiteral]);
+export const LEAVES = ['StringLiteral', 'NoSubstitutionTemplateLiteral', 'TemplateHead', 'TemplateMiddle', 'TemplateTail', 'JsxText',
+  'Identifier', 'PrivateIdentifier', 'RegularExpressionLiteral'];
+const leaves = kindSet(LEAVES);
 const decode = text => text.replace(/&#(x[0-9a-f]+|\d+);/gi, (_, code) => {
   const point = Number(code[0].toLowerCase() === 'x' ? `0${code}` : code);
   return point <= 0x10FFFF ? String.fromCodePoint(point) : '';
@@ -24,7 +25,6 @@ const decode = text => text.replace(/&#(x[0-9a-f]+|\d+);/gi, (_, code) => {
  * Escapes are decoded first, so `'\uD55C'` and `&#xD55C;` count like the letters they stand for.
  */
 export function hangulLines(sf) {
-  const leaves = LEAVES();
   const lines = new Map();
   walk(sf, node => {
     if (!leaves.has(node.kind)) return;

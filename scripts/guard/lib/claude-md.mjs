@@ -7,7 +7,7 @@ import { loadProtected } from './codeowners.mjs';
 
 export const CLAUDE_FILE = 'CLAUDE.md';
 export const MAX_LINES = 120;
-const WRAP = 120;
+export const WRAP = 120;
 const mark = (name, edge) => `<!-- guard:${name}:${edge} (node scripts/guard/run.mjs --docs 가 만든다. 직접 고치지 않는다) -->`;
 const cell = text => String(text).replace(/\|/g, '\\|').replace(/\n/g, ' ');
 /** The first statement of a rule text: up to the first `. ` or `: `, or the whole text. */

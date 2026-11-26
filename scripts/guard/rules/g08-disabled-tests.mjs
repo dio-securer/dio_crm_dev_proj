@@ -1,11 +1,15 @@
 import { CODE_EXT, excerpt, hasExt, looksLikeTest } from '../lib/files.mjs';
-import { K, constsOf, keyName, lineOf, memberName, staticString, textOf, unwrap, walk } from '../lib/ts.mjs';
+import { K, constsOf, keyName, kindSet, lineOf, memberName, staticString, textOf, unwrap, walk } from '../lib/ts.mjs';
 
-const RUNNERS = new Set(['it', 'test', 'describe', 'suite', 'context', 'specify', 'bench']);
-const MODES = new Set(['skip', 'only', 'todo', 'skipIf', 'runIf', 'fixme']);
-const OFF_NAMES = new Set(['xit', 'xtest', 'xdescribe', 'xcontext', 'xspecify', 'fit', 'fdescribe']);
-const OPTION_KEYS = new Set(['skip', 'todo', 'only']);
-const GLOBALS = new Set(['globalThis', 'global', 'window', 'self']);
+export const RUNNERS = new Set(['it', 'test', 'describe', 'suite', 'context', 'specify', 'bench']);
+export const MODES = new Set(['skip', 'only', 'todo', 'skipIf', 'runIf', 'fixme']);
+export const OFF_NAMES = new Set(['xit', 'xtest', 'xdescribe', 'xcontext', 'xspecify', 'fit', 'fdescribe']);
+export const OPTION_KEYS = new Set(['skip', 'todo', 'only']);
+export const GLOBALS = new Set(['globalThis', 'global', 'window', 'self']);
+// Operators that set an option: `o.skip = x`, `||=`, `??=`, `&&=`. And calls that set one by name.
+export const ASSIGN = ['EqualsToken', 'BarBarEqualsToken', 'QuestionQuestionEqualsToken', 'AmpersandAmpersandEqualsToken'];
+export const SETTERS = ['defineProperty', 'set'];
+const assign = kindSet(ASSIGN);
 
 export const inScope = file => hasExt(file, CODE_EXT) && (looksLikeTest(file) || file.startsWith('scripts/'));
 
@@ -23,7 +27,6 @@ function isOff(node, consts) {
 /** Returns [{ line, message }] in source order, at most one per node. */
 export function disabledOf(sf) {
   const consts = constsOf(sf);
-  const assign = new Set([K.EqualsToken, K.BarBarEqualsToken, K.QuestionQuestionEqualsToken, K.AmpersandAmpersandEqualsToken]);
   const seen = new Set();
   const found = [];
   const add = (node, what) => {
@@ -72,7 +75,7 @@ export function disabledOf(sf) {
       const name = isAccess(callee) ? memberName(callee, consts) : null;
       if (name !== null && MODES.has(name)) add(callee, name);
       // `Object.defineProperty(options, 'skip', { value: true })`, `Reflect.set(options, 'only', true)`.
-      const sets = name === 'defineProperty' || name === 'set';
+      const sets = SETTERS.includes(name);
       if (sets && (node.arguments ?? []).some(arg => OPTION_KEYS.has(staticString(arg, consts) ?? ''))) add(node, '옵션을 이름으로 설정');
     } else if (node.kind === K.Identifier && OFF_NAMES.has(node.text)) {
       // `xit(...)`, `(xit)(...)`, `const t = fit`: any use of the name as a value. A declaration or a member name is not a use.

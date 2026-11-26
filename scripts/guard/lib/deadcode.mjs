@@ -4,7 +4,7 @@
 //      `false ? … : …`, `while (false) …`, `for (; false; ) …`;
 //   2. the body of a function declared in the file (`function f() {}`, `const f = () => {}`) whose name is never used
 //      in live code of the same file. `export` alone is not a use: nothing in this file runs it.
-import { K, ts, unwrap } from './ts.mjs';
+import { K, kindSet, ts, unwrap } from './ts.mjs';
 
 /** true / false when the expression is a constant, null when it is not known. */
 function truth(node) {
@@ -44,9 +44,10 @@ function constantDead(node) {
 
 const isFunction = node => node.kind === K.ArrowFunction || node.kind === K.FunctionExpression;
 // Parents whose `.name` is a declaration or a member name, not a use of a variable of that name.
-const NAMES_ONLY = () => new Set([K.FunctionDeclaration, K.VariableDeclaration, K.PropertyAccessExpression, K.PropertyAssignment,
-  K.MethodDeclaration, K.PropertyDeclaration, K.PropertySignature, K.MethodSignature, K.GetAccessor, K.SetAccessor, K.EnumMember,
-  K.Parameter, K.ClassDeclaration, K.FunctionExpression, K.ImportSpecifier, K.ImportClause, K.NamespaceImport]);
+export const NAMES_ONLY = ['FunctionDeclaration', 'VariableDeclaration', 'PropertyAccessExpression', 'PropertyAssignment',
+  'MethodDeclaration', 'PropertyDeclaration', 'PropertySignature', 'MethodSignature', 'GetAccessor', 'SetAccessor', 'EnumMember',
+  'Parameter', 'ClassDeclaration', 'FunctionExpression', 'ImportSpecifier', 'ImportClause', 'NamespaceImport'];
+const namesOnly = kindSet(NAMES_ONLY);
 
 /** The name a function is declared under, with the node that holds its code, or null. */
 function declared(node) {
@@ -60,7 +61,6 @@ function declared(node) {
 
 /** Returns the Set of nodes whose whole subtree can never run. */
 export function deadNodesOf(sf) {
-  const namesOnly = NAMES_ONLY();
   const dead = new Set();
   const functions = new Map(); // name -> [code node]
   const uses = []; // { name, inside: [function names], unreachable }

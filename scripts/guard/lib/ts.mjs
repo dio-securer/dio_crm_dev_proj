@@ -19,6 +19,14 @@ function load() {
 export const ts = load();
 export const K = ts?.SyntaxKind ?? {};
 
+/** A Set of syntax kinds from their names. A name the parser does not know is an error, never a silently shorter list. */
+export function kindSet(names) {
+  return new Set(names.map(name => {
+    if (ts && K[name] === undefined) throw new Error(`guard: unknown syntax kind "${name}"`);
+    return K[name];
+  }));
+}
+
 /** Parse one file. A syntax error is thrown, never ignored: an unreadable file must not pass silently. */
 export function parse(file, text) {
   if (!ts) throw new Error(`typescript 패키지를 찾을 수 없습니다(${TS_HOSTS.join(', ')}). pnpm install 을 먼저 실행하세요.`);
@@ -44,19 +52,21 @@ export function walk(node, visit, parent = null) {
  * Strip syntax that does not change the value: `(x)`, `x as T`, `<T>x`, `x!`, `x satisfies T`, `await x`,
  * and the comma operator `(0, x)`. Every rule compares unwrapped nodes, so these spellings are equal.
  */
+export const UNWRAP_KINDS = ['ParenthesizedExpression', 'AsExpression', 'TypeAssertionExpression', 'NonNullExpression', 'SatisfiesExpression',
+  'AwaitExpression', 'PartiallyEmittedExpression'];
+const unwrapKinds = kindSet(UNWRAP_KINDS);
+
 export function unwrap(node) {
   let n = node;
   for (;;) {
-    if (n.kind === K.ParenthesizedExpression || n.kind === K.AsExpression || n.kind === K.TypeAssertionExpression
-      || n.kind === K.NonNullExpression || n.kind === K.SatisfiesExpression || n.kind === K.AwaitExpression
-      || n.kind === K.PartiallyEmittedExpression) n = n.expression;
+    if (unwrapKinds.has(n.kind)) n = n.expression;
     else if (n.kind === K.BinaryExpression && n.operatorToken.kind === K.CommaToken) n = n.right;
     else return n;
   }
 }
 
 const isAccess = n => n.kind === K.PropertyAccessExpression || n.kind === K.ElementAccessExpression;
-const STRING_METHODS = ['toUpperCase', 'toLowerCase', 'trim', 'trimStart', 'trimEnd', 'toString', 'valueOf', 'normalize'];
+export const STRING_METHODS = ['toUpperCase', 'toLowerCase', 'trim', 'trimStart', 'trimEnd', 'toString', 'valueOf', 'normalize'];
 
 /**
  * The string an expression is known to hold, or null. Understands quotes of any kind, templates,

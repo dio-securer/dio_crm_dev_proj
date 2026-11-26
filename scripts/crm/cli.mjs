@@ -73,7 +73,14 @@ function check(flags) {
 function verify(flags) {
   if (flags.base === '') return usage('--base 에는 기준 ref 가 필요합니다. 예: --base origin/main', flags.json);
   if (!flags.json) console.log('[crm] verify 를 시작합니다. 몇 분 걸립니다.');
-  const { evidence, dir, removed } = runVerify({ root, base: flags.base ?? null, onStep: step => { if (!flags.json) console.log(stepLine(step)); } });
+  let ran;
+  try { ran = runVerify({ root, base: flags.base ?? null, onStep: step => { if (!flags.json) console.log(stepLine(step)); } }); } catch (error) {
+    // Nothing ran and nothing was written (for example the evidence folder is a symbolic link): an error, never a pass.
+    const message = String(error.message ?? error);
+    if (flags.json) print({ ok: false, exitCode: USAGE_EXIT, verdict: 'ERROR', error: message }); else console.error(`[crm] 판정: ERROR  ${message}`);
+    return USAGE_EXIT;
+  }
+  const { evidence, dir, removed } = ran;
   const where = path.relative(root, dir).split(path.sep).join('/');
   if (flags.json) print(evidence);
   else {

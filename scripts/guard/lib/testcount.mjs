@@ -6,11 +6,12 @@
 import { deadNodesOf } from './deadcode.mjs';
 import { K, keyName, memberName, ts, unwrap, walk } from './ts.mjs';
 
-const KIND = new Map([['it', 'tests'], ['test', 'tests'], ['specify', 'tests'], ['bench', 'tests'], ['check', 'tests'],
+export const KIND = new Map([['it', 'tests'], ['test', 'tests'], ['specify', 'tests'], ['bench', 'tests'], ['check', 'tests'],
   ['describe', 'groups'], ['suite', 'groups'], ['context', 'groups']]);
 // Members that may sit between a test function and its call: `it.each(rows)(...)`, `test.concurrent(...)`.
-const MODIFIERS = new Set(['each', 'for', 'concurrent', 'sequential', 'serial', 'parallel', 'fails', 'skipIf', 'runIf', 'skip', 'only', 'todo', 'fixme']);
-const NODE_TEST = new Set(['node:test', 'test']);
+export const MODIFIERS = new Set(['each', 'for', 'concurrent', 'sequential', 'serial', 'parallel',
+  'fails', 'skipIf', 'runIf', 'skip', 'only', 'todo', 'fixme']);
+export const NODE_TEST = new Set(['node:test', 'test']);
 
 const isAccess = n => n.kind === K.PropertyAccessExpression || n.kind === K.ElementAccessExpression;
 const isFunction = node => { const n = unwrap(node); return n.kind === K.ArrowFunction || n.kind === K.FunctionExpression; };

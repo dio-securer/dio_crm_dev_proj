@@ -2,9 +2,9 @@
 // Order matters: verdict first, then what needs a human look, then the details.
 import { show } from './baseline.mjs';
 
-const MAX_FILES = 30;
+export const MAX_FILES = 30;
 // Long lists are cut so the summary stays under GitHub's size limit; the heading always carries the full count.
-const MAX_ROWS = 100;
+export const MAX_ROWS = 100;
 const more = (list, unit) => (list.length > MAX_ROWS ? [`- ... 외 ${list.length - MAX_ROWS}${unit} (전체는 .guard/protect-result.json)`] : []);
 const WHAT = {
   P1: '기존 위반 허용 숫자(기준선)를 올림',
@@ -24,7 +24,9 @@ const CHANGE = { A: '추가', M: '수정', D: '삭제', R: '이름 바꿈', C: '
 
 // Reasons, file names and error texts come from the PR itself. They are flattened to one line and stripped of anything
 // that could hide or restyle the rest of the summary (an HTML comment, a tag, a link, a table bar, a code fence).
-const ENTITY = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '|': '&#124;', '[': '&#91;', ']': '&#93;', '`': '&#96;', '*': '&#42;', _: '&#95;', '~': '&#126;' };
+export const ENTITY = {
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', '|': '&#124;', '[': '&#91;', ']': '&#93;', '`': '&#96;', '*': '&#42;', _: '&#95;', '~': '&#126;',
+};
 const plain = text => String(text).replace(/\s+/g, ' ').trim().replace(/[&<>|[\]`*_~]/g, ch => ENTITY[ch]);
 const code = text => `\`${String(text).replace(/\s+/g, ' ').replace(/`/g, "'").replace(/\|/g, '/')}\``;
 const value = v => (v === null || v === undefined ? '없음' : typeof v === 'string' && /^[0-9a-f]{40}$/.test(v) ? v.slice(0, 12) : show(v));
