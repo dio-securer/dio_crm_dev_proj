@@ -37,6 +37,14 @@ export const isTestName = file => TEST_NAME.test(file);
 /** Test file for EXEMPTION purposes: by name suffix, or inside one of the explicit TEST_ROOTS. */
 export const isTestFile = file => isTestName(file) || TEST_ROOTS.some(root => file.startsWith(root));
 
+/**
+ * Acceptance scripts: checks under scripts/ that are run directly (not through it/test) and named by family.
+ * The families are the ones that exist today; every file in them asserts something and fails the run when it is wrong.
+ */
+export const ACCEPTANCE_FAMILIES = ['-browser', '-http', '-verification', '-walkthrough', '-check', '-smoke', '-ui'];
+const ACCEPTANCE_NAME = new RegExp(`^scripts/(?:.*/)?(?:[^/]*(?:${ACCEPTANCE_FAMILIES.join('|')})|check)\\.[cm]?js$`, 'i');
+export const isAcceptanceScript = file => ACCEPTANCE_NAME.test(file);
+
 /** Wider net for rules that CHECK tests (G08): also any folder that merely looks like a test folder. */
 export const looksLikeTest = file => isTestFile(file) || TESTISH_DIR.test(file);
 

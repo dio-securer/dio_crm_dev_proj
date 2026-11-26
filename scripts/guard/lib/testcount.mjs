@@ -1,9 +1,12 @@
 // Counts test cases on the TypeScript AST, for the protect check P3 (no test may quietly disappear).
 // Two measures per file: `tests` (it / test / specify / bench, including node:test subtests such as `t.test`)
 // and `groups` (describe / suite / context). Either one going down is a loss.
-import { K, keyName, memberName, unwrap, walk } from './ts.mjs';
+// Acceptance scripts (scripts/**/*-browser.mjs and the like) do not use it/test: each `check(...)` call is one case there,
+// so `check` counts as a test function everywhere. Code that can never run (lib/deadcode.mjs) is not counted.
+import { deadNodesOf } from './deadcode.mjs';
+import { K, keyName, memberName, ts, unwrap, walk } from './ts.mjs';
 
-const KIND = new Map([['it', 'tests'], ['test', 'tests'], ['specify', 'tests'], ['bench', 'tests'],
+const KIND = new Map([['it', 'tests'], ['test', 'tests'], ['specify', 'tests'], ['bench', 'tests'], ['check', 'tests'],
   ['describe', 'groups'], ['suite', 'groups'], ['context', 'groups']]);
 // Members that may sit between a test function and its call: `it.each(rows)(...)`, `test.concurrent(...)`.
 const MODIFIERS = new Set(['each', 'for', 'concurrent', 'sequential', 'serial', 'parallel', 'fails', 'skipIf', 'runIf', 'skip', 'only', 'todo', 'fixme']);
@@ -32,12 +35,19 @@ function aliasesOf(sf) {
   return alias;
 }
 
+/** Depth-first walk in source order that does not enter a dead subtree. */
+function walkLive(node, visit, dead) {
+  if (dead.has(node)) return;
+  visit(node);
+  ts.forEachChild(node, child => walkLive(child, visit, dead));
+}
+
 /** Returns { tests, groups } for one parsed file. */
 export function testCountsOf(sf) {
   const alias = aliasesOf(sf);
   const counts = { tests: 0, groups: 0 };
   const inner = new Set();
-  walk(sf, node => {
+  walkLive(sf, node => {
     if (node.kind !== K.CallExpression || inner.has(node)) return;
     // Walk the callee from the call inwards: `describe.each(rows)('name', fn)` -> each(...) -> describe.
     const passed = [];
@@ -61,6 +71,6 @@ export function testCountsOf(sf) {
     if (kind === null) return;
     counts[kind] += 1;
     for (const call of passed) inner.add(call);
-  });
+  }, deadNodesOf(sf));
   return counts;
 }

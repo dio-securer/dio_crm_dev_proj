@@ -1,12 +1,13 @@
 // Protect check P3: no test may quietly disappear. Compared with the base commit, a test file may not be
 // deleted or renamed to a non-test name, and its number of test cases may not go down.
-import { CODE_EXT, hasExt, isTestFile, looksLikeTest } from './files.mjs';
+// Acceptance scripts (scripts/**/*-browser.mjs, *-http.mjs, … see ACCEPTANCE_FAMILIES) are test files too: their cases are `check(...)` calls.
+import { CODE_EXT, hasExt, isAcceptanceScript, isTestFile, looksLikeTest } from './files.mjs';
 import { GuardError } from './gitbase.mjs';
 import { testCountsOf } from './testcount.mjs';
 import { parse } from './ts.mjs';
 
-/** Always a test file: named `*.spec.*` / `*.test.*`, or inside a test root (backend/test/, tests/). */
-const isTest = isTestFile;
+/** Always a test file: named `*.spec.*` / `*.test.*`, inside a test root (backend/test/, tests/), or an acceptance script. */
+const isTest = file => isTestFile(file) || isAcceptanceScript(file);
 /** May hold tests (the same wide net as G08): protected when it holds at least one test at the base. */
 const mayHoldTests = file => hasExt(file, CODE_EXT) && (looksLikeTest(file) || file.startsWith('scripts/'));
 
