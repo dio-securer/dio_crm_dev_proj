@@ -1,4 +1,4 @@
-import { CODE_EXT, excerpt, hasExt, isTestFile, scan } from '../lib/files.mjs';
+import { CODE_EXT, TEST_ROOTS, excerpt, hasExt, isTestFile, scan } from '../lib/files.mjs';
 import { extractImports, packageName } from '../lib/imports.mjs';
 
 const SCOPE = ['frontend/', 'backend/', 'packages/', 'extensions/'];
@@ -28,14 +28,15 @@ export default {
   scope: '`frontend/`, `backend/`, `packages/`, `extensions/` 의 코드 파일 중 테스트가 아닌 것. import 한 건, 호출 한 건을 각각 1건으로 센다.',
   exclusions: [
     ...ALLOWED.map(([prefix, reason]) => `\`${prefix}\` (${reason})`),
-    '테스트 파일(`*.spec.*`, `*.test.*`, `test/`·`tests/`·`__tests__/`·`e2e/` 폴더): 테스트는 띄운 서버를 직접 호출해야 한다',
+    `테스트 파일: 이름이 \`*.spec.*\`·\`*.test.*\` 인 파일과, 정해진 테스트 폴더 ${TEST_ROOTS.map(root => `\`${root}\``).join(', ')} 뿐이다(테스트는 띄운 서버를 직접 호출해야 한다). 다른 곳의 \`test/\`·\`__tests__/\`·\`e2e/\` 폴더는 제외되지 않는다`,
     '`scripts/`, `tests/` 는 검사·실행 도구라 대상 밖이다',
     '허용 목록은 지금 실제로 IO 를 가진 곳만 넣었다. 엔진의 데이터 접근 계층이 생기면 사람이 이 목록에 추가해야 한다.',
   ],
   limits: [
     '`fetch` 라는 이름이면 직접 만든 함수여도 센다(막는 쪽으로 틀림). 반대로 `const f = globalThis["fe"+"tch"]` 같은 우회는 잡지 못한다.',
-    '허용 계층이 내준 연결 객체로 SQL 문자열을 직접 실행하는 것(`domain.query("INSERT …")`)은 import 가 아니라서 잡지 못한다. 기존 코드에 이런 곳이 많다.',
-    '파일 읽기/쓰기(fs)는 대상이 아니다. 테스트 파일 이름(`*.spec.ts`)을 붙이면 검사를 피할 수 있다.',
+    '날 SQL 은 보지 않는다. `DatabaseService.query("INSERT …")` 처럼 허용 계층이 내준 객체로 SQL 문자열을 직접 실행하는 것은 import 도 네트워크 호출도 아니라서 잡지 못한다. 기존 서비스 코드 대부분이 이렇게 되어 있고, 새 코드가 그렇게 해도 통과한다.',
+    '파일 읽기/쓰기(fs), 자식 프로세스 실행은 대상이 아니다.',
+    '테스트 이름(`*.spec.ts`)을 붙인 파일은 검사하지 않는다. 그런 파일을 일반 코드가 import 하면 G11 이 막지만, import 없이 실행되는 경로(자동 탐색·빌드 설정)는 막지 못한다.',
     '정규식 검사라 주석·문자열 안의 같은 모양도 센다.',
   ],
   check(ctx) {

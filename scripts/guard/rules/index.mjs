@@ -8,6 +8,7 @@ import g07 from './g07-direct-io.mjs';
 import g08 from './g08-disabled-tests.mjs';
 import g09 from './g09-change-id.mjs';
 import g10 from './g10-legacy-freeze.mjs';
+import g11 from './g11-no-test-imports.mjs';
 
-export const RULES = [g01, g02, g03, g04, g05, g06, g07, g08, g09, g10];
+export const RULES = [g01, g02, g03, g04, g05, g06, g07, g08, g09, g10, g11];
 export const DEFAULT_RULES = RULES.filter(rule => rule.defaultRun !== false);
