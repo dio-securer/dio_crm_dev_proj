@@ -1,7 +1,10 @@
 // A throwaway copy of the guard for the trial tests: a small synthetic repository in the OS temp folder that holds a
 // copy of scripts/guard and scripts/crm (the code under test), so the real runner and its exit codes are exercised
-// without touching this working tree. Every folder made here is removed when the test process ends.
-import { execFileSync, spawnSync } from 'node:child_process';
+// without touching this working tree.
+// Everything a test process makes lives under ONE folder (HOME below), and the temp-folder variables of the process
+// point at it, so child processes (the guard, git, crm) put their temp files there too. HOME is removed when the
+// process ends, also on SIGINT / SIGTERM / SIGHUP, and by a small watcher process when the test process is killed outright.
+import { execFileSync, spawn, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import os from 'node:os';
@@ -19,14 +22,23 @@ export const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 export const NODE = process.execPath;
 const GUARD = 'scripts/guard/run.mjs';
 const START = 'scripts/guard/commit-id-start.json';
-const made = [];
-process.on('exit', () => { for (const dir of made) fs.rmSync(dir, { recursive: true, force: true }); });
+export const TEMP_PREFIX = 'guard-trial-';
+const HOME = fs.mkdtempSync(path.join(os.tmpdir(), TEMP_PREFIX));
+for (const name of ['TMPDIR', 'TMP', 'TEMP']) process.env[name] = HOME;
+const cleanUp = () => { try { fs.rmSync(HOME, { recursive: true, force: true, maxRetries: 2 }); } catch { /* the watcher tries again */ } };
+process.on('exit', cleanUp);
+for (const [signal, code] of [['SIGINT', 130], ['SIGTERM', 143], ['SIGHUP', 129]]) process.on(signal, () => { cleanUp(); process.exit(code); });
+// The watcher: waits until this process is gone, then removes HOME (again after a moment: a guard run that was still
+// going may have written once more). It covers the ends no handler can see, such as SIGKILL.
+const WATCHER = `const fs = require('node:fs'); const [pid, dir] = process.argv.slice(1);
+const gone = () => { try { process.kill(Number(pid), 0); return false; } catch (error) { return error.code !== 'EPERM'; } };
+const sweep = () => { try { fs.rmSync(dir, { recursive: true, force: true }); } catch {} };
+const timer = setInterval(() => { if (!gone()) return; clearInterval(timer); sweep(); setTimeout(sweep, 1000); setTimeout(sweep, 4000); }, 250);`;
+spawn(process.execPath, ['-e', WATCHER, String(process.pid), HOME], { cwd: os.homedir(), detached: true, stdio: 'ignore' }).unref();
 
-/** A new empty folder in the OS temp folder. It is deleted when this process ends. */
-export function tempDir(prefix = 'guard-trial-') {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), prefix));
-  made.push(dir);
-  return dir;
+/** A new empty folder under this process's temp folder. It is deleted when this process ends, however it ends. */
+export function tempDir(prefix = TEMP_PREFIX) {
+  return fs.mkdtempSync(path.join(HOME, prefix));
 }
 
 export function writeFiles(dir, files) {
@@ -46,6 +58,9 @@ export const BASE_FILES = {
   'frontend/src/styles/tokens.css': `:root { --brand: ${HEX}0af; }\n`,
   'frontend/src/hq-mock/Old.tsx': 'export const Old = () => <div />;\n',
   'packages/contracts/src/lead-grid.ts': 'export const columns = [];\n',
+  // More legacy contract files, one per source suffix that an import may leave out (trials/members.mjs).
+  ...Object.fromEntries(['lead-view.tsx', 'lead-tool.js', 'lead-part.jsx', 'lead-mod.mjs', 'lead-old.cjs']
+    .map(name => [`packages/contracts/src/${name}`, 'export const a = 1;\n'])),
   'backend/src/modules/order/order.service.ts': 'export const total = (a: number, b: number) => a + b;\n',
   'tests/guard/base.test.mjs': "import { it } from 'node:test';\nit('guard', () => {});\n",
   'tests/sample.test.mjs': "describe('g', () => { it('a', () => {}); it('b', () => {}); });\n",

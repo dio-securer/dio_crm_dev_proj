@@ -1,0 +1,1794 @@
+{
+ "note": "Pinned coverage of the guard. Made by: node tests/guard/pins.mjs --write. See tests/guard/pins.mjs.",
+ "modules": {
+  "scripts/guard/lib/baseline.mjs": {
+   "values": {
+    "BASELINE_FILE": "guard-baseline.json"
+   },
+   "notPinned": [
+    "NOTE"
+   ],
+   "patterns": [
+    "/^G\\d{2}$/"
+   ],
+   "numbers": {
+    "2": 1,
+    "4": 1
+   }
+  },
+  "scripts/guard/lib/branching.mjs": {
+   "values": {
+    "EITHER": [
+     "QuestionQuestionToken",
+     "BarBarToken",
+     "AmpersandAmpersandToken",
+     "PlusToken"
+    ],
+    "EQUALITY": [
+     "EqualsEqualsEqualsToken",
+     "ExclamationEqualsEqualsToken",
+     "EqualsEqualsToken",
+     "ExclamationEqualsToken"
+    ],
+    "ISO": [
+     "AD",
+     "AE",
+     "AF",
+     "AG",
+     "AI",
+     "AL",
+     "AM",
+     "AO",
+     "AQ",
+     "AR",
+     "AS",
+     "AT",
+     "AU",
+     "AW",
+     "AX",
+     "AZ",
+     "BA",
+     "BB",
+     "BD",
+     "BE",
+     "BF",
+     "BG",
+     "BH",
+     "BI",
+     "BJ",
+     "BL",
+     "BM",
+     "BN",
+     "BO",
+     "BQ",
+     "BR",
+     "BS",
+     "BT",
+     "BV",
+     "BW",
+     "BY",
+     "BZ",
+     "CA",
+     "CC",
+     "CD",
+     "CF",
+     "CG",
+     "CH",
+     "CI",
+     "CK",
+     "CL",
+     "CM",
+     "CN",
+     "CO",
+     "CR",
+     "CU",
+     "CV",
+     "CW",
+     "CX",
+     "CY",
+     "CZ",
+     "DE",
+     "DJ",
+     "DK",
+     "DM",
+     "DO",
+     "DZ",
+     "EC",
+     "EE",
+     "EG",
+     "EH",
+     "ER",
+     "ES",
+     "ET",
+     "FI",
+     "FJ",
+     "FK",
+     "FM",
+     "FO",
+     "FR",
+     "GA",
+     "GB",
+     "GD",
+     "GE",
+     "GF",
+     "GG",
+     "GH",
+     "GI",
+     "GL",
+     "GM",
+     "GN",
+     "GP",
+     "GQ",
+     "GR",
+     "GS",
+     "GT",
+     "GU",
+     "GW",
+     "GY",
+     "HK",
+     "HM",
+     "HN",
+     "HR",
+     "HT",
+     "HU",
+     "ID",
+     "IE",
+     "IL",
+     "IM",
+     "IN",
+     "IO",
+     "IQ",
+     "IR",
+     "IS",
+     "IT",
+     "JE",
+     "JM",
+     "JO",
+     "JP",
+     "KE",
+     "KG",
+     "KH",
+     "KI",
+     "KM",
+     "KN",
+     "KP",
+     "KR",
+     "KW",
+     "KY",
+     "KZ",
+     "LA",
+     "LB",
+     "LC",
+     "LI",
+     "LK",
+     "LR",
+     "LS",
+     "LT",
+     "LU",
+     "LV",
+     "LY",
+     "MA",
+     "MC",
+     "MD",
+     "ME",
+     "MF",
+     "MG",
+     "MH",
+     "MK",
+     "ML",
+     "MM",
+     "MN",
+     "MO",
+     "MP",
+     "MQ",
+     "MR",
+     "MS",
+     "MT",
+     "MU",
+     "MV",
+     "MW",
+     "MX",
+     "MY",
+     "MZ",
+     "NA",
+     "NC",
+     "NE",
+     "NF",
+     "NG",
+     "NI",
+     "NL",
+     "NO",
+     "NP",
+     "NR",
+     "NU",
+     "NZ",
+     "OM",
+     "PA",
+     "PE",
+     "PF",
+     "PG",
+     "PH",
+     "PK",
+     "PL",
+     "PM",
+     "PN",
+     "PR",
+     "PS",
+     "PT",
+     "PW",
+     "PY",
+     "QA",
+     "RE",
+     "RO",
+     "RS",
+     "RU",
+     "RW",
+     "SA",
+     "SB",
+     "SC",
+     "SD",
+     "SE",
+     "SG",
+     "SH",
+     "SI",
+     "SJ",
+     "SK",
+     "SL",
+     "SM",
+     "SN",
+     "SO",
+     "SR",
+     "SS",
+     "ST",
+     "SV",
+     "SX",
+     "SY",
+     "SZ",
+     "TC",
+     "TD",
+     "TF",
+     "TG",
+     "TH",
+     "TJ",
+     "TK",
+     "TL",
+     "TM",
+     "TN",
+     "TO",
+     "TR",
+     "TT",
+     "TV",
+     "TW",
+     "TZ",
+     "UA",
+     "UG",
+     "UM",
+     "US",
+     "UY",
+     "UZ",
+     "VA",
+     "VC",
+     "VE",
+     "VG",
+     "VI",
+     "VN",
+     "VU",
+     "WF",
+     "WS",
+     "YE",
+     "YT",
+     "ZA",
+     "ZM",
+     "ZW",
+     "UK",
+     "EU",
+     "HQ",
+     "GLOBAL",
+     "APAC",
+     "EMEA",
+     "LATAM"
+    ],
+    "KEY": {
+     "$regex": {
+      "$text": [
+       "(?:(?<![A-Za-z])(?:company|country|market|tenant|n",
+       "ation)|Company|Country|Market|Tenant|Nation|COMPAN",
+       "Y|COUNTRY|MARKET|TENANT|NATION)(?!ing)"
+      ]
+     },
+     "flags": ""
+    },
+    "LOCALE": {
+     "$regex": "^[a-z]{2,3}[-_][A-Z]{2}$",
+     "flags": ""
+    },
+    "LOOPS": {
+     "$set": [
+      "some",
+      "every",
+      "find",
+      "findIndex",
+      "findLast",
+      "findLastIndex",
+      "filter"
+     ]
+    },
+    "SAME_VALUE": {
+     "$set": [
+      "code",
+      "id",
+      "key",
+      "name",
+      "value",
+      "toUpperCase",
+      "toLowerCase",
+      "toLocaleUpperCase",
+      "toLocaleLowerCase",
+      "trim",
+      "trimStart",
+      "trimEnd",
+      "toString",
+      "valueOf",
+      "normalize",
+      "slice",
+      "substring",
+      "substr",
+      "charAt",
+      "at",
+      "replace",
+      "replaceAll",
+      "padStart",
+      "padEnd",
+      "concat",
+      "charCodeAt",
+      "codePointAt"
+     ]
+    },
+    "TESTS": {
+     "$set": [
+      "includes",
+      "indexOf",
+      "lastIndexOf",
+      "has",
+      "get",
+      "startsWith",
+      "endsWith",
+      "localeCompare",
+      "test",
+      "match",
+      "matchAll",
+      "search",
+      "is"
+     ]
+    }
+   },
+   "notPinned": [
+    "LIST",
+    "LOOKUP",
+    "codeInRegex",
+    "codes",
+    "either",
+    "equality"
+   ],
+   "patterns": [
+    "/^[a-z]{2,3}[-_][A-Z]{2}$/"
+   ],
+   "numbers": {
+    "50": 1
+   }
+  },
+  "scripts/guard/lib/claude-md.mjs": {
+   "values": {
+    "CLAUDE_FILE": "CLAUDE.md",
+    "MAX_LINES": 120,
+    "WRAP": 120
+   },
+   "notPinned": [],
+   "patterns": [
+    "/\\|/g",
+    "/\\n/g",
+    "/(\\. |: )/",
+    "/\\.$/"
+   ],
+   "numbers": {
+    "2": 1,
+    "120": 2
+   }
+  },
+  "scripts/guard/lib/codeowners.mjs": {
+   "values": {
+    "CODEOWNERS_FILE": ".github/CODEOWNERS",
+    "PROTECTED_FILE": "scripts/guard/protected-paths.json"
+   },
+   "notPinned": [],
+   "patterns": [
+    "/^@[\\w-]+(\\/[\\w-]+)?$/",
+    "/^\\/[\\w.@/-]+$/"
+   ],
+   "numbers": {}
+  },
+  "scripts/guard/lib/deadcode.mjs": {
+   "values": {
+    "NAMES_ONLY": [
+     "FunctionDeclaration",
+     "VariableDeclaration",
+     "PropertyAccessExpression",
+     "PropertyAssignment",
+     "MethodDeclaration",
+     "PropertyDeclaration",
+     "PropertySignature",
+     "MethodSignature",
+     "GetAccessor",
+     "SetAccessor",
+     "EnumMember",
+     "Parameter",
+     "ClassDeclaration",
+     "FunctionExpression",
+     "ImportSpecifier",
+     "ImportClause",
+     "NamespaceImport"
+    ]
+   },
+   "notPinned": [
+    "namesOnly"
+   ],
+   "patterns": [],
+   "numbers": {}
+  },
+  "scripts/guard/lib/docs.mjs": {
+   "values": {
+    "DOCS_FILE": "docs/framework/guard-rules.md"
+   },
+   "notPinned": [
+    "BASELINE_LABEL"
+   ],
+   "patterns": [
+    "/\\|/g",
+    "/\\n/g"
+   ],
+   "numbers": {}
+  },
+  "scripts/guard/lib/files.mjs": {
+   "values": {
+    "ACCEPTANCE_FAMILIES": [
+     "-browser",
+     "-http",
+     "-verification",
+     "-walkthrough",
+     "-check",
+     "-smoke",
+     "-ui"
+    ],
+    "ACCEPTANCE_NAME": {
+     "$regex": {
+      "$text": [
+       "^scripts\\/(?:.*\\/)?(?:[^/]*(?:-browser|-http|-veri",
+       "fication|-walkthrough|-check|-smoke|-ui)|check)\\.[",
+       "cm]?js$"
+      ]
+     },
+     "flags": "i"
+    },
+    "CODE_EXT": [
+     ".ts",
+     ".tsx",
+     ".js",
+     ".jsx",
+     ".mjs",
+     ".cjs",
+     ".mts",
+     ".cts"
+    ],
+    "STYLE_EXT": [
+     ".css",
+     ".scss"
+    ],
+    "TESTISH_DIR": {
+     "$regex": "(^|\\/)(__tests__|tests?|e2e|specs?|__mocks__)\\/",
+     "flags": "i"
+    },
+    "TEST_NAME": {
+     "$regex": "\\.(spec|test)\\.[cm]?[jt]sx?$",
+     "flags": "i"
+    },
+    "TEST_ROOTS": [
+     "backend/test/",
+     "tests/"
+    ]
+   },
+   "notPinned": [],
+   "patterns": [
+    "/\\.(spec|test)\\.[cm]?[jt]sx?$/i",
+    "/(^|\\/)(__tests__|tests?|e2e|specs?|__mocks__)\\//i",
+    "/[.+^$()|[\\]\\\\]/g",
+    "/\\s+/g"
+   ],
+   "numbers": {
+    "2": 2,
+    "10": 3,
+    "80": 1,
+    "256": 1,
+    "1024": 2
+   }
+  },
+  "scripts/guard/lib/gitbase.mjs": {
+   "values": {},
+   "notPinned": [],
+   "patterns": [
+    "/^[\\w./@^~{}-]+$/",
+    "/^[0-9a-f]{40,64}$/"
+   ],
+   "numbers": {
+    "2": 2
+   }
+  },
+  "scripts/guard/lib/imports.mjs": {
+   "values": {},
+   "notPinned": [],
+   "patterns": [
+    "/^glob/",
+    "/[?#].*$/s",
+    "/^\\.{0,2}\\//",
+    "/^node:/i"
+   ],
+   "numbers": {
+    "2": 2
+   }
+  },
+  "scripts/guard/lib/io.mjs": {
+   "values": {
+    "COMPUTED_ON": {
+     "$set": [
+      "window",
+      "globalThis",
+      "global"
+     ]
+    },
+    "DEFINES_MEMBER": [
+     "PropertyAssignment",
+     "MethodDeclaration",
+     "PropertySignature",
+     "MethodSignature",
+     "PropertyDeclaration",
+     "GetAccessor",
+     "SetAccessor",
+     "EnumMember",
+     "JsxAttribute",
+     "TypeReference",
+     "QualifiedName"
+    ],
+    "GLOBAL_OBJECTS": [
+     "window",
+     "globalThis",
+     "self",
+     "global",
+     "top",
+     "parent",
+     "frames",
+     "opener",
+     "document"
+    ],
+    "HTTP_CALLS": {
+     "$set": [
+      "request",
+      "get"
+     ]
+    },
+    "HTTP_OBJECTS": {
+     "$set": [
+      "http",
+      "https",
+      "http2"
+     ]
+    },
+    "IO_NAMES": {
+     "$set": [
+      "fetch",
+      "XMLHttpRequest",
+      "sendBeacon",
+      "WebSocket",
+      "EventSource",
+      "axios"
+     ]
+    },
+    "TEXT_RUNNERS": {
+     "eval": "eval",
+     "make": "Function"
+    }
+   },
+   "notPinned": [
+    "RUNS_TEXT",
+    "definesMember"
+   ],
+   "patterns": [],
+   "numbers": {
+    "2": 1,
+    "30": 1
+   }
+  },
+  "scripts/guard/lib/legacy.mjs": {
+   "values": {
+    "LEGACY_FILE": "legacy-files.json",
+    "LEGACY_RULES": [
+     {
+      "id": "L1",
+      "name": "frontend-top-level-pages",
+      "description": "화면별 페이지 컴포넌트(frontend/src 바로 아래 *Page.tsx). frontend/src 바로 아래에는 새 파일을 만들 수 없다.",
+      "include": [
+       "frontend/src/*Page.tsx"
+      ],
+      "freeze": [
+       "frontend/src/*"
+      ]
+     },
+     {
+      "id": "L2",
+      "name": "frontend-hq-mock",
+      "description": "HQ 목업 화면 전체(화면·객체별 코드와 전용 CSS).",
+      "include": [
+       "frontend/src/hq-mock/**"
+      ],
+      "freeze": [
+       "frontend/src/hq-mock/**"
+      ]
+     },
+     {
+      "id": "L3",
+      "name": "frontend-screen-templates",
+      "description": "데모 화면과 시장 템플릿 화면 컴포넌트.",
+      "include": [
+       "frontend/src/demo/**",
+       "frontend/src/market/templates/**"
+      ],
+      "freeze": [
+       "frontend/src/demo/**",
+       "frontend/src/market/templates/**"
+      ]
+     },
+     {
+      "id": "L4",
+      "name": "lead-specific-customization",
+      "description": "리드 전용 커스터마이징 계약·게이트웨이·화면 파일(객체 하나만을 위한 코드).",
+      "include": [
+       "packages/contracts/src/lead-*",
+       "backend/src/customization/*lead-*",
+       "frontend/src/customization/*Lead*",
+       "frontend/src/customization/lead-*"
+      ],
+      "freeze": [
+       "packages/contracts/src/lead-*",
+       "backend/src/customization/*lead-*",
+       "frontend/src/customization/*Lead*",
+       "frontend/src/customization/lead-*"
+      ]
+     },
+     {
+      "id": "L5",
+      "name": "big-css",
+      "description": "100줄 이상인 CSS(토큰 파일 제외). frontend/src/styles 에는 새 파일을 만들 수 없다.",
+      "include": [
+       "frontend/src/**/*.css"
+      ],
+      "exclude": [
+       "frontend/src/styles/tokens.css"
+      ],
+      "minLines": 100,
+      "freeze": [
+       "frontend/src/styles/*"
+      ]
+     },
+     {
+      "id": "L6",
+      "name": "backend-hq-mock",
+      "description": "HQ 목업 백엔드(객체별 라우트·모델). 명세에 직접 적히지 않았으나 프런트 hq-mock 과 한 쌍이라 포함했다.",
+      "include": [
+       "backend/src/hq-mock/**"
+      ],
+      "freeze": [
+       "backend/src/hq-mock/**"
+      ]
+     },
+     {
+      "id": "L7",
+      "name": "backend-object-modules",
+      "description": {
+       "$text": [
+        "객체별 백엔드 모듈(activity·analytics·contract·customer·op",
+        "portunity·order). 명세에 직접 적히지 않았으나 객체별 코드라 포함했다."
+       ]
+      },
+      "include": [
+       "backend/src/modules/{activity,analytics,contract,customer,opportunity,order}/**"
+      ],
+      "freeze": [
+       "backend/src/modules/{activity,analytics,contract,customer,opportunity,order}/**"
+      ]
+     },
+     {
+      "id": "L8",
+      "name": "configured-screens",
+      "description": "객체별 \"Configured\" 화면 컴포넌트(ConfiguredRecords·ConfiguredLedger 등). 화면 하나를 위한 코드라 이관 대상이다.",
+      "include": [
+       "frontend/src/customization/Configured*.tsx"
+      ],
+      "freeze": [
+       "frontend/src/customization/Configured*.tsx"
+      ]
+     }
+    ]
+   },
+   "notPinned": [],
+   "patterns": [
+    "/\\.(spec|test)(\\.[cm]?[jt]sx?)$/i",
+    "/\\.[^./]+$/"
+   ],
+   "numbers": {
+    "100": 1
+   }
+  },
+  "scripts/guard/lib/protect-data.mjs": {
+   "values": {},
+   "notPinned": [],
+   "patterns": [],
+   "numbers": {
+    "12": 2
+   }
+  },
+  "scripts/guard/lib/protect-tests.mjs": {
+   "values": {},
+   "notPinned": [],
+   "patterns": [],
+   "numbers": {}
+  },
+  "scripts/guard/lib/protect.mjs": {
+   "values": {
+    "PROTECT_RESULT": "protect-result.json",
+    "SUMMARY_FILE": "summary.md"
+   },
+   "notPinned": [],
+   "patterns": [],
+   "numbers": {
+    "2": 2,
+    "7": 1,
+    "22": 1
+   }
+  },
+  "scripts/guard/lib/raises.mjs": {
+   "values": {
+    "ID_ONLY": {
+     "$regex": "^(?:REQ-\\d+|F\\d+-\\d+)$",
+     "flags": ""
+    },
+    "KEYS": [
+     "rule",
+     "guardRule",
+     "file",
+     "from",
+     "to",
+     "reason",
+     "changeId"
+    ],
+    "MIN_REASON": 10,
+    "RAISES_FILE": "guard-raises.json",
+    "RAISE_RULES": [
+     "P1",
+     "P2",
+     "P3",
+     "P5"
+    ]
+   },
+   "notPinned": [],
+   "patterns": [
+    "/^\\\\\\[/",
+    "/\\\\\\]$/",
+    "/^G\\d{2}$/",
+    "/[*?[\\]{}]/"
+   ],
+   "numbers": {
+    "10": 1
+   }
+  },
+  "scripts/guard/lib/selfcheck.mjs": {
+   "values": {
+    "MAX_LINE": 160,
+    "SELF_DIRS": [
+     "scripts/guard/",
+     "tests/guard/",
+     "scripts/crm/"
+    ]
+   },
+   "notPinned": [],
+   "patterns": [
+    "/\\r$/"
+   ],
+   "numbers": {
+    "160": 1
+   }
+  },
+  "scripts/guard/lib/summary.mjs": {
+   "values": {
+    "ENTITY": {
+     "&": "&amp;",
+     "<": "&lt;",
+     ">": "&gt;",
+     "|": "&#124;",
+     "[": "&#91;",
+     "]": "&#93;",
+     "`": "&#96;",
+     "*": "&#42;",
+     "_": "&#95;",
+     "~": "&#126;"
+    },
+    "MAX_FILES": 30,
+    "MAX_ROWS": 100
+   },
+   "notPinned": [
+    "CHANGE",
+    "STATUS",
+    "TITLE",
+    "WHAT"
+   ],
+   "patterns": [
+    "/\\s+/g",
+    "/[&<>|[\\]`*_~]/g",
+    "/\\s+/g",
+    "/`/g",
+    "/\\|/g",
+    "/^[0-9a-f]{40}$/"
+   ],
+   "numbers": {
+    "12": 2,
+    "30": 1,
+    "100": 1
+   }
+  },
+  "scripts/guard/lib/testcount.mjs": {
+   "values": {
+    "KIND": {
+     "$map": [
+      [
+       "it",
+       "tests"
+      ],
+      [
+       "test",
+       "tests"
+      ],
+      [
+       "specify",
+       "tests"
+      ],
+      [
+       "bench",
+       "tests"
+      ],
+      [
+       "check",
+       "tests"
+      ],
+      [
+       "describe",
+       "groups"
+      ],
+      [
+       "suite",
+       "groups"
+      ],
+      [
+       "context",
+       "groups"
+      ]
+     ]
+    },
+    "MODIFIERS": {
+     "$set": [
+      "each",
+      "for",
+      "concurrent",
+      "sequential",
+      "serial",
+      "parallel",
+      "fails",
+      "skipIf",
+      "runIf",
+      "skip",
+      "only",
+      "todo",
+      "fixme"
+     ]
+    },
+    "NODE_TEST": {
+     "$set": [
+      "node:test",
+      "test"
+     ]
+    }
+   },
+   "notPinned": [],
+   "patterns": [],
+   "numbers": {
+    "2": 1
+   }
+  },
+  "scripts/guard/lib/ts.mjs": {
+   "values": {
+    "STRING_METHODS": [
+     "toUpperCase",
+     "toLowerCase",
+     "trim",
+     "trimStart",
+     "trimEnd",
+     "toString",
+     "valueOf",
+     "normalize"
+    ],
+    "TS_HOSTS": [
+     "packages/contracts",
+     "backend",
+     "frontend"
+    ],
+    "UNWRAP_KINDS": [
+     "ParenthesizedExpression",
+     "AsExpression",
+     "TypeAssertionExpression",
+     "NonNullExpression",
+     "SatisfiesExpression",
+     "AwaitExpression",
+     "PartiallyEmittedExpression"
+    ]
+   },
+   "notPinned": [
+    "K",
+    "ROOT",
+    "tables",
+    "ts",
+    "unwrapKinds"
+   ],
+   "patterns": [],
+   "numbers": {
+    "2": 2
+   }
+  },
+  "scripts/guard/rules/g01-metadata-only-config.mjs": {
+   "values": {
+    "ALLOWED": [
+     ".json",
+     ".yaml",
+     ".yml",
+     ".md"
+    ],
+    "ALLOWED_NAMES": [
+     ".gitkeep"
+    ],
+    "default": {
+     "id": "G01",
+     "name": "metadata-only-config",
+     "baseline": "none"
+    }
+   },
+   "notPinned": [],
+   "patterns": [],
+   "numbers": {
+    "60": 1
+   }
+  },
+  "scripts/guard/rules/g02-zone-boundaries.mjs": {
+   "values": {
+    "CONTRACTS": "@dio-crm/contracts/",
+    "ENGINE_FORBIDDEN_PACKAGES": [
+     "@dio-crm/api",
+     "@dio-crm/web"
+    ],
+    "ENGINE_FORBIDDEN_PREFIX": [
+     "frontend/",
+     "backend/",
+     "extensions/",
+     "@dio-crm/extension"
+    ],
+    "EXT_ALLOWED": [
+     "@dio-crm/contracts",
+     "@dio-crm/engine"
+    ],
+    "EXT_EXACT": [
+     "react",
+     "react/jsx-runtime"
+    ],
+    "EXT_TEST_EXACT": [
+     "vitest",
+     "node:test",
+     "node:assert",
+     "node:assert/strict"
+    ],
+    "SOURCE_EXT": {
+     "$regex": "(\\.d)?\\.[cm]?[jt]sx?$",
+     "flags": "i"
+    },
+    "SOURCE_SUFFIX": [
+     "",
+     ".ts",
+     ".tsx",
+     ".js",
+     ".jsx",
+     ".mjs",
+     ".cjs",
+     "/index.ts",
+     "/index.tsx",
+     "/index.js"
+    ],
+    "default": {
+     "id": "G02",
+     "name": "zone-boundaries",
+     "baseline": "none"
+    }
+   },
+   "notPinned": [],
+   "patterns": [
+    "/(\\.d)?\\.[cm]?[jt]sx?$/i",
+    "/^[a-z][\\w+.-]*:/i",
+    "/^node:/",
+    "/^extensions\\/([^/]+)\\//",
+    "/^packages\\/(engine[^/]*)\\//",
+    "/^(src|dist)\\//i"
+   ],
+   "numbers": {}
+  },
+  "scripts/guard/rules/g03-file-size.mjs": {
+   "values": {
+    "EXCLUDED_DIRS": [
+     [
+      "docs/admin-platform/implementation/evidence/",
+      "증빙 자료"
+     ],
+     [
+      "docs/admin-platform/implementation/ui-improvement/evidence/",
+      "증빙 자료"
+     ],
+     [
+      "docs/hq-standard/implementation/evidence/",
+      "증빙 자료"
+     ],
+     [
+      "docs/admin-platform/implementation/fixtures/",
+      "테스트 자료"
+     ]
+    ],
+    "MAX_BYTES": 15000,
+    "MAX_LINES": 300,
+    "METADATA_EXT": [
+     ".json",
+     ".yaml",
+     ".yml"
+    ],
+    "default": {
+     "id": "G03",
+     "name": "file-size",
+     "baseline": "max"
+    }
+   },
+   "notPinned": [],
+   "patterns": [],
+   "numbers": {
+    "300": 1,
+    "15000": 1
+   }
+  },
+  "scripts/guard/rules/g04-hardcoded-ui-text.mjs": {
+   "values": {
+    "HANGUL": {
+     "$regex": "[\\u1100-\\u11FF\\u3130-\\u318F\\uA960-\\uA97F\\uAC00-\\uD7FF]",
+     "flags": ""
+    },
+    "LEAVES": [
+     "StringLiteral",
+     "NoSubstitutionTemplateLiteral",
+     "TemplateHead",
+     "TemplateMiddle",
+     "TemplateTail",
+     "JsxText",
+     "Identifier",
+     "PrivateIdentifier",
+     "RegularExpressionLiteral"
+    ],
+    "LINE": {
+     "$regex": "^ - (.+?):(\\d+): (.*)$",
+     "flags": ""
+    },
+    "SCRIPT": "scripts/i18n/hardcode-check.mjs",
+    "ZONE": {
+     "$regex": "^(extensions|packages\\/engine[^/]*)\\/",
+     "flags": ""
+    },
+    "default": {
+     "id": "G04",
+     "name": "hardcoded-ui-text",
+     "baseline": "count"
+    }
+   },
+   "notPinned": [
+    "leaves"
+   ],
+   "patterns": [
+    "/^ - (.+?):(\\d+): (.*)$/",
+    "/^(extensions|packages\\/engine[^/]*)\\//",
+    "/[\\u1100-\\u11FF\\u3130-\\u318F\\uA960-\\uA97F\\uAC00-\\uD7FF]/",
+    "/&#(x[0-9a-f]+|\\d+);/gi",
+    "/\\r?\\n/"
+   ],
+   "numbers": {
+    "2": 1,
+    "3": 1,
+    "50": 1,
+    "60": 1,
+    "120": 1,
+    "200": 1,
+    "1114111": 1
+   }
+  },
+  "scripts/guard/rules/g05-raw-style.mjs": {
+   "values": {
+    "EXT": [
+     ".ts",
+     ".tsx",
+     ".js",
+     ".jsx",
+     ".css",
+     ".scss"
+    ],
+    "RAW": {
+     "$regex": {
+      "$text": [
+       "(?<![\\w&$.])#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9",
+       "a-fA-F]{3,4})(?![\\w-])|\\b(?:rgba?|hsla?|hwb|oklab|",
+       "oklch)\\s*\\("
+      ]
+     },
+     "flags": "gi"
+    },
+    "TOKEN_SOURCES": [
+     "frontend/src/styles/tokens.css"
+    ],
+    "default": {
+     "id": "G05",
+     "name": "raw-style",
+     "baseline": "count"
+    }
+   },
+   "notPinned": [],
+   "patterns": [
+    {
+     "$text": [
+      "/(?<![\\w&$.])#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-",
+      "9a-fA-F]{3,4})(?![\\w-])|\\b(?:rgba?|hsla?|hwb|oklab",
+      "|oklch)\\s*\\(/gi"
+     ]
+    }
+   ],
+   "numbers": {
+    "20": 1
+   }
+  },
+  "scripts/guard/rules/g06-company-branching.mjs": {
+   "values": {
+    "EXCLUDED_FILES": [],
+    "SCOPE": [
+     "frontend/src/",
+     "backend/src/",
+     "packages/"
+    ],
+    "default": {
+     "id": "G06",
+     "name": "company-branching",
+     "baseline": "count"
+    }
+   },
+   "notPinned": [
+    "roots"
+   ],
+   "patterns": [],
+   "numbers": {}
+  },
+  "scripts/guard/rules/g07-direct-io.mjs": {
+   "values": {
+    "ALLOWED": [
+     [
+      "backend/src/database/",
+      "DB 연결과 트랜잭션(mssql)을 가진 유일한 곳"
+     ],
+     [
+      "backend/src/integration/",
+      "외부 시스템 연동 어댑터"
+     ],
+     [
+      "frontend/src/api.ts",
+      "프런트 공용 API 클라이언트"
+     ],
+     [
+      "frontend/src/admin/client/",
+      "관리자 화면 API 클라이언트"
+     ]
+    ],
+    "DB": [
+     "mssql",
+     "tedious",
+     "typeorm",
+     "@nestjs/typeorm",
+     "knex",
+     "prisma",
+     "@prisma/client",
+     "pg",
+     "pg-promise",
+     "postgres",
+     "mysql",
+     "mysql2",
+     "mariadb",
+     "sqlite3",
+     "better-sqlite3",
+     "oracledb",
+     "sequelize",
+     "@nestjs/sequelize",
+     "mongoose",
+     "@nestjs/mongoose",
+     "mongodb",
+     "redis",
+     "ioredis",
+     "drizzle-orm",
+     "kysely",
+     "@mikro-orm/core",
+     "odbc"
+    ],
+    "DB_SCOPES": [
+     "@prisma/",
+     "@mikro-orm/"
+    ],
+    "NET": [
+     "axios",
+     "@nestjs/axios",
+     "node-fetch",
+     "cross-fetch",
+     "isomorphic-fetch",
+     "undici",
+     "got",
+     "ky",
+     "superagent",
+     "request",
+     "needle",
+     "http",
+     "https",
+     "http2",
+     "net",
+     "tls",
+     "dgram",
+     "ws",
+     "socket.io-client",
+     "graphql-request",
+     "soap"
+    ],
+    "SCOPE": [
+     "frontend/",
+     "backend/",
+     "packages/",
+     "extensions/"
+    ],
+    "default": {
+     "id": "G07",
+     "name": "direct-io",
+     "baseline": "count"
+    }
+   },
+   "notPinned": [
+    "roots"
+   ],
+   "patterns": [],
+   "numbers": {}
+  },
+  "scripts/guard/rules/g08-disabled-tests.mjs": {
+   "values": {
+    "ASSIGN": [
+     "EqualsToken",
+     "BarBarEqualsToken",
+     "QuestionQuestionEqualsToken",
+     "AmpersandAmpersandEqualsToken"
+    ],
+    "GLOBALS": {
+     "$set": [
+      "globalThis",
+      "global",
+      "window",
+      "self"
+     ]
+    },
+    "MODES": {
+     "$set": [
+      "skip",
+      "only",
+      "todo",
+      "skipIf",
+      "runIf",
+      "fixme"
+     ]
+    },
+    "OFF_NAMES": {
+     "$set": [
+      "xit",
+      "xtest",
+      "xdescribe",
+      "xcontext",
+      "xspecify",
+      "fit",
+      "fdescribe"
+     ]
+    },
+    "OPTION_KEYS": {
+     "$set": [
+      "skip",
+      "todo",
+      "only"
+     ]
+    },
+    "RUNNERS": {
+     "$set": [
+      "it",
+      "test",
+      "describe",
+      "suite",
+      "context",
+      "specify",
+      "bench"
+     ]
+    },
+    "SETTERS": [
+     "defineProperty",
+     "set"
+    ],
+    "default": {
+     "id": "G08",
+     "name": "disabled-tests",
+     "baseline": "count"
+    }
+   },
+   "notPinned": [
+    "assign"
+   ],
+   "patterns": [],
+   "numbers": {
+    "2": 1,
+    "40": 1
+   }
+  },
+  "scripts/guard/rules/g09-change-id.mjs": {
+   "values": {
+    "CHANGE_ID": {
+     "$regex": "\\[(?:REQ-\\d+|F\\d+-\\d+)\\]",
+     "flags": ""
+    },
+    "START_FILE": "scripts/guard/commit-id-start.json",
+    "default": {
+     "id": "G09",
+     "name": "change-id",
+     "baseline": "none",
+     "defaultRun": false
+    }
+   },
+   "notPinned": [],
+   "patterns": [
+    "/\\[(?:REQ-\\d+|F\\d+-\\d+)\\]/",
+    "/^[0-9a-f]{40}$/",
+    "/^[\\w./~^@{}-]+\\.\\.\\.?[\\w./~^@{}-]+$/"
+   ],
+   "numbers": {
+    "12": 1
+   }
+  },
+  "scripts/guard/rules/g10-legacy-freeze.mjs": {
+   "values": {
+    "default": {
+     "id": "G10",
+     "name": "legacy-freeze",
+     "baseline": "none"
+    }
+   },
+   "notPinned": [
+    "FROZEN_GLOBS"
+   ],
+   "patterns": [],
+   "numbers": {}
+  },
+  "scripts/guard/rules/g11-no-test-imports.mjs": {
+   "values": {
+    "PACKAGE_DIRS": [
+     [
+      "@dio-crm/api",
+      "backend"
+     ],
+     [
+      "@dio-crm/web",
+      "frontend"
+     ],
+     [
+      "@dio-crm/contracts",
+      "packages/contracts"
+     ]
+    ],
+    "SCOPE": [
+     "frontend/",
+     "backend/",
+     "packages/",
+     "extensions/"
+    ],
+    "TEST_TARGET": {
+     "$regex": "\\.(spec|test)(\\.[^/]*)?$",
+     "flags": "i"
+    },
+    "default": {
+     "id": "G11",
+     "name": "no-test-imports",
+     "baseline": "none"
+    }
+   },
+   "notPinned": [
+    "roots"
+   ],
+   "patterns": [
+    "/\\.(spec|test)(\\.[^/]*)?$/i"
+   ],
+   "numbers": {}
+  },
+  "scripts/guard/rules/index.mjs": {
+   "values": {
+    "DEFAULT_RULES": [
+     {
+      "id": "G01",
+      "name": "metadata-only-config",
+      "baseline": "none"
+     },
+     {
+      "id": "G02",
+      "name": "zone-boundaries",
+      "baseline": "none"
+     },
+     {
+      "id": "G03",
+      "name": "file-size",
+      "baseline": "max"
+     },
+     {
+      "id": "G04",
+      "name": "hardcoded-ui-text",
+      "baseline": "count"
+     },
+     {
+      "id": "G05",
+      "name": "raw-style",
+      "baseline": "count"
+     },
+     {
+      "id": "G06",
+      "name": "company-branching",
+      "baseline": "count"
+     },
+     {
+      "id": "G07",
+      "name": "direct-io",
+      "baseline": "count"
+     },
+     {
+      "id": "G08",
+      "name": "disabled-tests",
+      "baseline": "count"
+     },
+     {
+      "id": "G10",
+      "name": "legacy-freeze",
+      "baseline": "none"
+     },
+     {
+      "id": "G11",
+      "name": "no-test-imports",
+      "baseline": "none"
+     }
+    ],
+    "RULES": [
+     {
+      "id": "G01",
+      "name": "metadata-only-config",
+      "baseline": "none"
+     },
+     {
+      "id": "G02",
+      "name": "zone-boundaries",
+      "baseline": "none"
+     },
+     {
+      "id": "G03",
+      "name": "file-size",
+      "baseline": "max"
+     },
+     {
+      "id": "G04",
+      "name": "hardcoded-ui-text",
+      "baseline": "count"
+     },
+     {
+      "id": "G05",
+      "name": "raw-style",
+      "baseline": "count"
+     },
+     {
+      "id": "G06",
+      "name": "company-branching",
+      "baseline": "count"
+     },
+     {
+      "id": "G07",
+      "name": "direct-io",
+      "baseline": "count"
+     },
+     {
+      "id": "G08",
+      "name": "disabled-tests",
+      "baseline": "count"
+     },
+     {
+      "id": "G09",
+      "name": "change-id",
+      "baseline": "none",
+      "defaultRun": false
+     },
+     {
+      "id": "G10",
+      "name": "legacy-freeze",
+      "baseline": "none"
+     },
+     {
+      "id": "G11",
+      "name": "no-test-imports",
+      "baseline": "none"
+     }
+    ]
+   },
+   "notPinned": [],
+   "patterns": [],
+   "numbers": {}
+  },
+  "scripts/crm/lib/run.mjs": {
+   "values": {
+    "STATUS": {
+     "PASS": "PASS",
+     "FAIL": "FAIL",
+     "ERROR": "ERROR",
+     "NOT_RUN": "NOT_RUN"
+    },
+    "STEP_TIMEOUT_MS": 1800000
+   },
+   "notPinned": [],
+   "patterns": [],
+   "numbers": {
+    "16": 1,
+    "30": 1,
+    "60": 1,
+    "64": 1,
+    "1000": 1,
+    "1024": 4
+   }
+  },
+  "scripts/crm/lib/steps.mjs": {
+   "values": {
+    "DEFAULT_BASE": "origin/main",
+    "DEFAULT_STEPS": [
+     {
+      "id": "guard",
+      "title": "가드 규칙 (--strict)",
+      "errorCodes": [
+       2
+      ],
+      "prepare": "(function)"
+     },
+     {
+      "id": "protect",
+      "title": "보호 검사 (기준 브랜치와 비교)",
+      "errorCodes": [
+       2
+      ],
+      "prepare": "(function)"
+     },
+     {
+      "id": "guard-tests",
+      "title": "가드 자신의 테스트",
+      "prepare": "(function)"
+     },
+     {
+      "id": "build",
+      "title": "빌드 (pnpm build)",
+      "pinned": [
+       [
+        "package.json",
+        "build"
+       ],
+       [
+        "backend/package.json",
+        "build"
+       ],
+       [
+        "frontend/package.json",
+        "build"
+       ],
+       [
+        "packages/contracts/package.json",
+        "build"
+       ]
+      ],
+      "prepare": "(function)"
+     },
+     {
+      "id": "test",
+      "title": "단위 테스트 (pnpm test)",
+      "pinned": [
+       [
+        "package.json",
+        "test"
+       ],
+       [
+        "backend/package.json",
+        "test"
+       ],
+       [
+        "frontend/package.json",
+        "test"
+       ]
+      ],
+      "prepare": "(function)"
+     },
+     {
+      "id": "hq-check",
+      "title": "HQ 표준 계약 테스트 (pnpm hq:check)",
+      "pinned": [
+       [
+        "package.json",
+        "hq:check"
+       ]
+      ],
+      "prepare": "(function)"
+     }
+    ],
+    "PINNED_SCRIPTS": {
+     "package.json": {
+      "build": "pnpm -r build",
+      "test": "pnpm -r test --if-present",
+      "hq:check": "node --experimental-strip-types --test scripts/hq-standard/*.test.mjs"
+     },
+     "backend/package.json": {
+      "build": "nest build",
+      "test": "jest --runInBand"
+     },
+     "frontend/package.json": {
+      "build": "tsc --noEmit && vite build",
+      "test": "vitest run"
+     },
+     "packages/contracts/package.json": {
+      "build": "tsc -p tsconfig.json"
+     }
+    }
+   },
+   "notPinned": [
+    "GUARD",
+    "GUARD_ERROR_CODES",
+    "GUARD_TESTS_DIR"
+   ],
+   "patterns": [],
+   "numbers": {
+    "2": 1
+   }
+  },
+  "scripts/crm/lib/verify.mjs": {
+   "values": {
+    "EVIDENCE_DIR": ".guard/evidence",
+    "EVIDENCE_KIND": "SYNTHETIC",
+    "EVIDENCE_NOTE": "합성 증거: 개발 기기에서 가짜 데이터로 돌린 검사입니다. 실제 DB·운영 서버·실제 사용자 데이터는 쓰지 않았습니다.",
+    "VERDICT": {
+     "PASS": "PASS",
+     "FAIL": "FAIL",
+     "ERROR": "ERROR",
+     "INCOMPLETE": "INCOMPLETE",
+     "TEST_ONLY": "TEST_ONLY"
+    }
+   },
+   "notPinned": [
+    "MAX_DIRTY"
+   ],
+   "patterns": [],
+   "numbers": {
+    "2": 3,
+    "3": 1,
+    "12": 1,
+    "20": 1
+   }
+  }
+ },
+ "programs": {
+  "scripts/guard/run.mjs": {
+   "notPinned": [
+    "BASELINE_KINDS",
+    "FLAGS",
+    "MAX_LOCATIONS",
+    "RESULT_DIR",
+    "USAGE",
+    "VALUE_FLAGS",
+    "root"
+   ],
+   "patterns": [],
+   "numbers": {
+    "2": 13,
+    "5": 2,
+    "8": 1,
+    "12": 1,
+    "22": 2
+   }
+  },
+  "scripts/guard/legacy-scan.mjs": {
+   "notPinned": [
+    "before",
+    "check",
+    "computed",
+    "count",
+    "exists",
+    "root",
+    "target",
+    "text",
+    "unknown"
+   ],
+   "patterns": [],
+   "numbers": {
+    "2": 3
+   }
+  },
+  "scripts/crm/cli.mjs": {
+   "notPinned": [
+    "COMMANDS",
+    "GUARD",
+    "GUARD_RESULT",
+    "USAGE_EXIT",
+    "root"
+   ],
+   "patterns": [],
+   "numbers": {
+    "2": 4
+   }
+  }
+ },
+ "data": {
+  "protectedOwner": "@dio-securer",
+  "protectedPaths": [
+   "/.github/",
+   "/scripts/guard/",
+   "/tests/guard/",
+   "/guard-baseline.json",
+   "/legacy-files.json",
+   "/guard-raises.json",
+   "/CLAUDE.md",
+   "/docs/framework/adr/",
+   "/packages/contracts/src/metadata/",
+   "/scripts/crm/",
+   "/scripts/i18n/hardcode-check.mjs",
+   "/docs/framework/glossary.md",
+   "/docs/framework/README.md",
+   "/docs/framework/ci-gates.md",
+   "/docs/framework/guard-rules.md",
+   "/package.json",
+   "/backend/package.json",
+   "/frontend/package.json",
+   "/packages/contracts/package.json",
+   "/pnpm-workspace.yaml",
+   "/pnpm-lock.yaml",
+   "/.npmrc",
+   "/.pnpmfile.cjs",
+   "/backend/jest.config.cjs",
+   "/backend/jest.customization.config.cjs",
+   "/frontend/vite.config.ts",
+   "/scripts/hq-standard/run-browser.mjs",
+   "/scripts/admin/run-all.cjs",
+   "/scripts/admin/run-web-test.cjs",
+   "/scripts/admin-customization/run-stage-checks.mjs"
+  ],
+  "commitIdStart": "cd950ce14c88d53eedfaad4b681c722b388b435d"
+ }
+}
