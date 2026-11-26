@@ -67,6 +67,9 @@ export const g02 = {
     ...at('packages/engine/src', {
       'climb-out.ts': from('../../../../packages/engine/src/x'),
       'url-scheme.ts': from('file:///x'),
+      'data-scheme.ts': from('data:text/javascript,export default 1'),
+      'npm-scheme.ts': from('npm:zod'),
+      'legacy-upper.ts': from('@DIO-CRM/Contracts/Lead-Grid'),
       'empty-part.ts': from('zod//x'),
       'parent-part.ts': from('zod/../x'),
       'sibling-engine.ts': from('../../engine-core/src/x'),
@@ -158,7 +161,7 @@ export const g09 = {
   fail: ['[REQ12] no dash', '[REQ-12 no closing bracket', '[F1-2 no closing bracket', '[WIP] not an id', '[REQ-12a] letters after the number',
     '[F1-2-3] three numbers', 'REQ-12] no opening bracket', '[ REQ-12 ] spaces inside', '[BUG-12] another word', '[F-2] no first number',
     '[REQ--12] two dashes', '[FIX] [F1] [REQ] halves', '[F1_2] underscore', '[REQ-x] no digits', '{REQ-12} braces', '[F1.2] dot', '[Req-12] mixed case',
-    '[REQ-12\\] escaped bracket'],
+    '[REQ-12\\] escaped bracket', 'fixup! no id', "Merge branch 'main' into feature", 'WIP', 'chore: bump', 'Revert "add a filter"'],
   pass: ['[F0-5] this unit', 'fix [REQ-1]', '[F1-2][REQ-3] two ids', '[REQ-000123] leading zeros',
     'x[F12-345]y no spaces around', '[WIP] [REQ-9] other tag first'],
 };

@@ -73,6 +73,8 @@ export const g06 = {
 
 const NAME = 'fetch';
 const call = f(`${NAME}(String(x))`);
+const HERE = ['frontend/src', 'frontend/src/hq-mock', 'frontend/src/admin', 'backend/src', 'backend/src/modules/order', 'backend/src/modules',
+  'backend/src/customization', 'packages/contracts/src', 'packages/engine/src', 'extensions/acme'];
 export const g07 = {
   fail: {
     ...at('backend/src/svc', {
@@ -106,8 +108,10 @@ export const g07 = {
       'type-of.ts': `export const has = typeof ${NAME} === 'function';\n`,
     }),
     ...notTests('io', call),
+    // The folders that hold code today are not infrastructure folders either (G10 reports the new file in a frozen one as well).
+    ...Object.fromEntries(HERE.map(dir => [`${dir}/io-here.ts`, call])),
   },
-  overlap: ['backend/src/svc/computed-import.ts', 'backend/src/svc/type-computed.ts'],
+  overlap: ['backend/src/svc/computed-import.ts', 'backend/src/svc/type-computed.ts', ...HERE.map(dir => `${dir}/io-here.ts`)],
   pass: at('backend/src/svc', {
     'g07-own-http.ts': "export const f = (client: any) => client.request({}) ?? client.get('x');\n",
     'g07-own-key.ts': 'export const f = (parent: any, top: any, key: string) => parent[key] ?? top[key];\n',
