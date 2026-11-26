@@ -6,7 +6,25 @@ import { byCodeUnit, flattenDirs, groupByDir, stableJson } from './files.mjs';
 export const BASELINE_FILE = 'guard-baseline.json';
 const NOTE = '기존 위반을 묶어 둔 기준선. 숫자는 줄어들 수만 있다(--update-baseline). 숫자를 올리거나 파일을 추가하려면 사람이 직접 고쳐야 한다(보호 파일).';
 
-const sum = flat => Object.values(flat).reduce((a, b) => a + b, 0);
+// A frozen value is a count (number) or, for `max` rules, a set of measures such as { lines, bytes }.
+const isSet = value => value !== null && typeof value === 'object';
+const keysOf = (a, b) => [...new Set([...Object.keys(a ?? {}), ...Object.keys(b ?? {})])].sort(byCodeUnit);
+const validNumber = value => Number.isInteger(value) && value > 0;
+
+/** Sum of a rule's values: a number, or one sum per measure. */
+export function totalOf(flat) {
+  const values = Object.values(flat);
+  if (!values.some(isSet)) return values.reduce((a, b) => a + b, 0);
+  const total = {};
+  for (const value of values) for (const key of Object.keys(value)) total[key] = (total[key] ?? 0) + value[key];
+  return total;
+}
+
+/** True when `now` is above `frozen` (in ANY measure). A missing frozen value means zero allowed. */
+const above = (now, frozen) => (isSet(now) ? frozen === undefined || keysOf(now, frozen).some(key => (now[key] ?? 0) > (frozen[key] ?? 0)) : now > (frozen ?? 0));
+const below = (now, frozen) => now === undefined || (isSet(frozen) ? keysOf(now, frozen).some(key => (now[key] ?? 0) < frozen[key]) : now < frozen);
+const least = (now, frozen) => (isSet(frozen) ? Object.fromEntries(Object.keys(frozen).map(key => [key, Math.min(frozen[key], now[key] ?? 0)])) : Math.min(frozen, now));
+export const show = (value, sorted = false) => (isSet(value) ? (sorted ? keysOf(value) : Object.keys(value)).map(key => `${key} ${value[key]}`).join(', ') : String(value));
 
 /** Returns null when the file does not exist. Throws when it is malformed or internally inconsistent. */
 export function loadBaseline(root) {
@@ -18,31 +36,32 @@ export function loadBaseline(root) {
   for (const [id, entry] of Object.entries(doc.rules)) {
     const flat = flattenDirs(entry.files);
     for (const [name, value] of Object.entries(flat)) {
-      if (!Number.isInteger(value) || value <= 0) throw new Error(`${BASELINE_FILE}: ${id} ${name} 의 값이 양의 정수가 아닙니다.`);
+      const ok = isSet(value) ? Object.keys(value).length > 0 && Object.values(value).every(validNumber) : validNumber(value);
+      if (!ok) throw new Error(`${BASELINE_FILE}: ${id} ${name} 의 값이 양의 정수가 아닙니다.`);
     }
-    if (entry.total !== sum(flat)) throw new Error(`${BASELINE_FILE}: ${id} 의 total(${entry.total})이 파일별 합(${sum(flat)})과 다릅니다.`);
+    if (show(entry.total, true) !== show(totalOf(flat), true)) throw new Error(`${BASELINE_FILE}: ${id} 의 total(${show(entry.total)})이 파일별 합(${show(totalOf(flat))})과 다릅니다.`);
     rules[id] = flat;
   }
   return rules;
 }
 
 export function writeBaseline(root, rules) {
-  const doc = { schemaVersion: 1, note: NOTE, rules: {} };
-  for (const id of Object.keys(rules).sort(byCodeUnit)) doc.rules[id] = { total: sum(rules[id]), files: groupByDir(rules[id]) };
+  const doc = { schemaVersion: 2, note: NOTE, rules: {} };
+  for (const id of Object.keys(rules).sort(byCodeUnit)) doc.rules[id] = { total: totalOf(rules[id]), files: groupByDir(rules[id]) };
   fs.writeFileSync(path.join(root, BASELINE_FILE), `${stableJson(doc, 4)}\n`);
 }
 
-/** Per-file value of a rule run: number of findings, or the measured value for `max` rules. */
+/** Per-file value of a rule run: number of findings, or the measured values for `max` rules. */
 export function countsOf(rule, findings) {
   const counts = {};
   for (const finding of findings) {
-    if (rule.baseline === 'max') counts[finding.file] = Math.max(counts[finding.file] ?? 0, finding.value);
+    if (rule.baseline === 'max') counts[finding.file] = finding.value;
     else counts[finding.file] = (counts[finding.file] ?? 0) + 1;
   }
   return counts;
 }
 
-/** Compare one rule's findings with its frozen counts. Anything above the frozen count is a new violation. */
+/** Compare one rule's findings with its frozen values. Anything above the frozen value is a new violation. */
 export function compare(rule, findings, frozen = {}) {
   const counts = countsOf(rule, findings);
   const byFile = new Map();
@@ -52,20 +71,20 @@ export function compare(rule, findings, frozen = {}) {
   }
   const newViolations = [];
   for (const file of Object.keys(counts).sort(byCodeUnit)) {
-    const allowed = frozen[file] ?? 0;
-    if (counts[file] > allowed) newViolations.push({ file, baseline: allowed, current: counts[file], locations: byFile.get(file) });
+    if (above(counts[file], frozen[file])) newViolations.push({ file, baseline: frozen[file] ?? 0, current: counts[file], locations: byFile.get(file) });
   }
-  const lowerable = Object.keys(frozen).filter(file => (counts[file] ?? 0) < frozen[file]).sort(byCodeUnit)
+  const lowerable = Object.keys(frozen).filter(file => below(counts[file], frozen[file])).sort(byCodeUnit)
     .map(file => ({ file, baseline: frozen[file], current: counts[file] ?? 0 }));
-  return { counts, baselineTotal: sum(frozen), currentTotal: sum(counts), newViolations, lowerable };
+  return { counts, baselineTotal: totalOf(frozen), currentTotal: totalOf(counts), newViolations, lowerable };
 }
 
-/** Lower-only update: min(frozen, current) per file, entries that reached zero are dropped, nothing is added. */
+/** Lower-only update: the smaller of frozen and current per file (per measure); fixed files are dropped; nothing is added or raised. */
 export function lowered(frozen, counts) {
   const next = {};
   for (const [file, value] of Object.entries(frozen)) {
-    const now = Math.min(value, counts[file] ?? 0);
-    if (now > 0) next[file] = now;
+    if (counts[file] === undefined) continue;
+    const now = least(counts[file], value);
+    if (isSet(now) || now > 0) next[file] = now;
   }
   return next;
 }

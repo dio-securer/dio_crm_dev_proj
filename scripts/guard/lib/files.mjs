@@ -22,13 +22,25 @@ export function extOf(file) {
 
 export const hasExt = (file, list) => list.includes(extOf(file));
 
-/** Test/spec file by name or by directory segment. */
-export function isTestFile(file) {
-  return /\.(spec|test)\.[cm]?[jt]sx?$/i.test(file) || /(^|\/)(__tests__|tests?|e2e)\//i.test(file);
-}
+/**
+ * The test roots that exist in the repo today. This list EXEMPTS code from G06/G07, so it is explicit:
+ * a folder merely named test/ tests/ __tests__/ e2e/ somewhere else is NOT a test root.
+ */
+export const TEST_ROOTS = ['backend/test/', 'tests/'];
+const TEST_NAME = /\.(spec|test)\.[cm]?[jt]sx?$/i;
+const TESTISH_DIR = /(^|\/)(__tests__|tests?|e2e|specs?|__mocks__)\//i;
+
+/** Test file by its name alone (`*.spec.*` / `*.test.*`). */
+export const isTestName = file => TEST_NAME.test(file);
+
+/** Test file for EXEMPTION purposes: by name suffix, or inside one of the explicit TEST_ROOTS. */
+export const isTestFile = file => isTestName(file) || TEST_ROOTS.some(root => file.startsWith(root));
+
+/** Wider net for rules that CHECK tests (G08): also any folder that merely looks like a test folder. */
+export const looksLikeTest = file => isTestFile(file) || TESTISH_DIR.test(file);
 
 /** Glob -> RegExp. Supports **, *, ?, {a,b}. Paths always use '/'. */
-export function globToRegExp(glob) {
+export function globToRegExp(glob, flags = '') {
   let out = '';
   for (let i = 0; i < glob.length; i += 1) {
     const ch = glob[i];
@@ -42,11 +54,11 @@ export function globToRegExp(glob) {
     else if (ch === ',') out += '|';
     else out += ch.replace(/[.+^$()|[\]\\]/g, '\\$&');
   }
-  return new RegExp(`^${out}$`);
+  return new RegExp(`^${out}$`, flags);
 }
 
-export function matcher(globs) {
-  const list = globs.map(globToRegExp);
+export function matcher(globs, flags = '') {
+  const list = globs.map(glob => globToRegExp(glob, flags));
   return file => list.some(re => re.test(file));
 }
 
@@ -88,7 +100,8 @@ export function createContext(root) {
     if (!cache.has(file)) cache.set(file, fs.readFileSync(path.join(root, file), 'utf8'));
     return cache.get(file);
   };
-  return { root, files, fileSet: new Set(files), read };
+  const size = file => fs.statSync(path.join(root, file)).size;
+  return { root, files, fileSet: new Set(files), read, size };
 }
 
 /** Short one-line excerpt for reports. */

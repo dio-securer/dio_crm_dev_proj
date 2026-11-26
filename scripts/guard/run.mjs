@@ -4,7 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { BASELINE_FILE, compare, countsOf, loadBaseline, lowered, writeBaseline } from './lib/baseline.mjs';
+import { BASELINE_FILE, compare, countsOf, loadBaseline, lowered, show, totalOf, writeBaseline } from './lib/baseline.mjs';
 import { DOCS_FILE, docsInSync, writeDocs } from './lib/docs.mjs';
 import { createContext, git } from './lib/files.mjs';
 import { DEFAULT_RULES, RULES } from './rules/index.mjs';
@@ -47,11 +47,11 @@ function writeResult(name, body) {
 const where = (file, line) => (line > 0 ? `${file}:${line}` : file);
 
 function printRule(row) {
-  const total = row.baseline === 'none' ? `현재 ${row.currentTotal}` : `기준선 ${row.baselineTotal} / 현재 ${row.currentTotal}`;
+  const total = row.baseline === 'none' ? `현재 ${show(row.currentTotal)}` : `기준선 ${show(row.baselineTotal)} / 현재 ${show(row.currentTotal)}`;
   console.log(`${row.id} ${row.name.padEnd(22)} ${row.status.padEnd(5)} ${total}${row.newViolations.length ? `  새 위반 파일 ${row.newViolations.length}` : ''}`);
   if (row.error) console.log(`    오류: ${row.error}`);
   for (const item of row.newViolations) {
-    if (row.baseline !== 'none') console.log(`    ${item.file}: 기준선 ${item.baseline} -> 현재 ${item.current}`);
+    if (row.baseline !== 'none') console.log(`    ${item.file}: 기준선 ${show(item.baseline)} -> 현재 ${show(item.current)}`);
     for (const spot of item.locations.slice(0, MAX_LOCATIONS)) console.log(`      ${where(item.file, spot.line)}  ${spot.message}`);
     if (item.locations.length > MAX_LOCATIONS) console.log(`      ... 외 ${item.locations.length - MAX_LOCATIONS}곳 (이 파일의 전체 위치는 ${RESULT_DIR}/guard-result.json)`);
   }
@@ -73,10 +73,10 @@ function runCommits(range) {
   let outcome;
   try { outcome = g09.checkRange(root, range); } catch (error) { fail(2, `G09 를 돌릴 수 없습니다: ${error.message.split('\n')[0]}`); }
   const { commits, findings } = outcome;
+  if (commits.length === 0) fail(2, `G09: 범위 ${range} 안에 검사할 커밋이 없습니다. 빈 범위는 통과가 아니라 오류입니다(범위를 잘못 준 것일 수 있습니다).`);
   const status = findings.length ? 'FAIL' : 'PASS';
   console.log(`${g09.id} ${g09.name.padEnd(22)} ${status.padEnd(5)} 범위 ${range}  커밋 ${commits.length}개 / ID 없는 커밋 ${findings.length}개`);
   for (const finding of findings) console.log(`    ${finding.file}  ${finding.message}`);
-  if (commits.length === 0) console.log('    주의: 범위 안에 검사할 커밋이 없습니다.');
   writeResult('guard-commits-result.json', { status, range, rules: [{ id: g09.id, name: g09.name, status, checkedCommits: commits.length, newViolations: findings }] });
   process.exit(findings.length ? 1 : 0);
 }
@@ -118,7 +118,7 @@ function main() {
     if (changed) writeBaseline(root, next);
     console.log(`[guard] 기준선 갱신: ${changed}개 항목을 내렸습니다. (올리거나 추가하는 일은 하지 않습니다)`);
     frozen = next;
-    for (const row of rows) if (row.baseline !== 'none' && row.status !== 'ERROR') { row.baselineTotal = Object.values(next[row.id]).reduce((a, b) => a + b, 0); row.lowerable = []; }
+    for (const row of rows) if (row.baseline !== 'none' && row.status !== 'ERROR') { row.baselineTotal = totalOf(next[row.id]); row.lowerable = []; }
   }
 
   rows.forEach(printRule);
