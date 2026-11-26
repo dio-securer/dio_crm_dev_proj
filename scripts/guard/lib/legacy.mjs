@@ -1,7 +1,9 @@
 // Legacy (migration-target) file rules. Single source for legacy-scan.mjs, G02 and G10.
 import fs from 'node:fs';
 import path from 'node:path';
-import { byCodeUnit, countLines, matcher } from './files.mjs';
+import { byCodeUnit, countLines, isTestName, matcher } from './files.mjs';
+
+export { isTestName };
 
 export const LEGACY_FILE = 'legacy-files.json';
 
@@ -27,10 +29,14 @@ export const LEGACY_RULES = [
   { id: 'L7', name: 'backend-object-modules', description: '객체별 백엔드 모듈(activity·analytics·contract·customer·opportunity·order). 명세에 직접 적히지 않았으나 객체별 코드라 포함했다.',
     include: ['backend/src/modules/{activity,analytics,contract,customer,opportunity,order}/**'],
     freeze: ['backend/src/modules/{activity,analytics,contract,customer,opportunity,order}/**'] },
+  { id: 'L8', name: 'configured-screens', description: '객체별 "Configured" 화면 컴포넌트(ConfiguredRecords·ConfiguredLedger 등). 화면 하나를 위한 코드라 이관 대상이다.',
+    include: ['frontend/src/customization/Configured*.tsx'], freeze: ['frontend/src/customization/Configured*.tsx'] },
 ];
 
-const TEST_NAME = /\.(spec|test)\.[cm]?[jt]sx?$/i;
-export const isTestName = file => TEST_NAME.test(file);
+/** Legacy paths are matched without regard to letter case, so `Hq-Mock/` or `Lead-x.ts` cannot dodge a rule. */
+export const legacyMatcher = globs => matcher(globs, 'i');
+export const frozenScope = () => legacyMatcher(LEGACY_RULES.flatMap(rule => rule.freeze));
+
 const stem = file => file.replace(/\.(spec|test)(\.[cm]?[jt]sx?)$/i, '$2').replace(/\.[^./]+$/, '');
 
 /** A new test is allowed in a frozen scope only next to an already listed file of the same name. */
@@ -43,15 +49,15 @@ export function allowedTestCheck(known) {
 export function computeLegacy(ctx) {
   const files = {};
   for (const rule of LEGACY_RULES) {
-    const include = matcher(rule.include);
-    const exclude = matcher(rule.exclude ?? []);
+    const include = legacyMatcher(rule.include);
+    const exclude = legacyMatcher(rule.exclude ?? []);
     for (const file of ctx.files) {
       if (files[file] || isTestName(file) || !include(file) || exclude(file)) continue;
       if (rule.minLines && countLines(ctx.read(file)) < rule.minLines) continue;
       files[file] = rule.id;
     }
   }
-  const frozen = matcher(LEGACY_RULES.flatMap(rule => rule.freeze));
+  const frozen = frozenScope();
   const frozenOther = ctx.files.filter(file => frozen(file) && !files[file]);
   return { files, frozenOther };
 }

@@ -3,7 +3,7 @@
   "generatedBy": "node scripts/guard/legacy-scan.mjs",
   "note": "이관 대상(legacy) 파일 목록. 줄어들 수만 있다. 파일을 추가하려면 사람이 직접 고쳐야 한다(보호 파일).",
   "totals": {
-    "files": 164,
+    "files": 168,
     "frozenOther": 74
   },
   "rules": [
@@ -13,7 +13,8 @@
     {"id":"L4","name":"lead-specific-customization","description":"리드 전용 커스터마이징 계약·게이트웨이·화면 파일(객체 하나만을 위한 코드).","include":["packages/contracts/src/lead-*","backend/src/customization/*lead-*","frontend/src/customization/*Lead*","frontend/src/customization/lead-*"],"freeze":["packages/contracts/src/lead-*","backend/src/customization/*lead-*","frontend/src/customization/*Lead*","frontend/src/customization/lead-*"]},
     {"id":"L5","name":"big-css","description":"100줄 이상인 CSS(토큰 파일 제외). frontend/src/styles 에는 새 파일을 만들 수 없다.","include":["frontend/src/**/*.css"],"exclude":["frontend/src/styles/tokens.css"],"minLines":100,"freeze":["frontend/src/styles/*"]},
     {"id":"L6","name":"backend-hq-mock","description":"HQ 목업 백엔드(객체별 라우트·모델). 명세에 직접 적히지 않았으나 프런트 hq-mock 과 한 쌍이라 포함했다.","include":["backend/src/hq-mock/**"],"freeze":["backend/src/hq-mock/**"]},
-    {"id":"L7","name":"backend-object-modules","description":"객체별 백엔드 모듈(activity·analytics·contract·customer·opportunity·order). 명세에 직접 적히지 않았으나 객체별 코드라 포함했다.","include":["backend/src/modules/{activity,analytics,contract,customer,opportunity,order}/**"],"freeze":["backend/src/modules/{activity,analytics,contract,customer,opportunity,order}/**"]}
+    {"id":"L7","name":"backend-object-modules","description":"객체별 백엔드 모듈(activity·analytics·contract·customer·opportunity·order). 명세에 직접 적히지 않았으나 객체별 코드라 포함했다.","include":["backend/src/modules/{activity,analytics,contract,customer,opportunity,order}/**"],"freeze":["backend/src/modules/{activity,analytics,contract,customer,opportunity,order}/**"]},
+    {"id":"L8","name":"configured-screens","description":"객체별 \"Configured\" 화면 컴포넌트(ConfiguredRecords·ConfiguredLedger 등). 화면 하나를 위한 코드라 이관 대상이다.","include":["frontend/src/customization/Configured*.tsx"],"freeze":["frontend/src/customization/Configured*.tsx"]}
   ],
   "files": [
     {"rule":"L1","dir":"frontend/src","names":["Account360Page.tsx","AccountsPage.tsx","ActivitiesPage.tsx","ActivityReportsPage.tsx","AnalyticsDashboardPage.tsx","ContractsPage.tsx","DirectWorkPage.tsx","FulfillmentPage.tsx","LeadsPage.tsx","LedgerStatementsPage.tsx","OpportunitiesPage.tsx","OpsStatusPage.tsx","OrdersPage.tsx","PipelinePage.tsx"]},
@@ -32,7 +33,8 @@
     {"rule":"L7","dir":"backend/src/modules/contract","names":["contract.controller.ts","contract.rules.ts","contract.service.ts"]},
     {"rule":"L7","dir":"backend/src/modules/customer","names":["customer.controller.ts","customer.rules.ts","customer.service.ts"]},
     {"rule":"L7","dir":"backend/src/modules/opportunity","names":["opportunity.controller.ts","opportunity.rules.ts","opportunity.service.ts"]},
-    {"rule":"L7","dir":"backend/src/modules/order","names":["order.controller.ts","order.rules.ts","order.service.ts"]}
+    {"rule":"L7","dir":"backend/src/modules/order","names":["order.controller.ts","order.rules.ts","order.service.ts"]},
+    {"rule":"L8","dir":"frontend/src/customization","names":["ConfiguredActivities.tsx","ConfiguredLedger.tsx","ConfiguredRecords.tsx","ConfiguredReport.tsx"]}
   ],
   "frozenOther": [
     {"dir":"backend/src/customization","names":["lead-activities-http.spec.ts","lead-activities.spec.ts","lead-exclusion-audit.spec.ts","lead-exclusion-extension-worker-b.spec.ts","lead-exclusion-worker-b.spec.ts","lead-extension-product.spec.ts","lead-extension-routes.spec.ts","lead-extension-worker-b-product.spec.ts","lead-extension-worker-b.spec.ts","lead-gateway.spec.ts","lead-hira-extension-worker-b.spec.ts","lead-hira-gateway-worker-b.spec.ts","lead-history-worker-b.spec.ts","lead-history.spec.ts","lead-lifecycle.spec.ts","lead-list-policy.spec.ts","lead-list.spec.ts","lead-timeline-contract.spec.ts"]},
