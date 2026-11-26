@@ -1,0 +1,19 @@
+✔ A10 HTTP publication schedule/cancel contract, permissions and immutable release (392.82119ms)
+✔ A10 HTTP SECURITY publish activates MFA and blocks existing token/refresh (226.614952ms)
+✔ A11 T58-INTEGRATION HTTP template preview/apply stays draft and publication switches runtime (195.58106ms)
+✔ A10 T33/T81 schedule cancellation, version conflict and fake clock apply (341.438937ms)
+✔ A10 T81 inactive company cannot execute scheduled release (63.863726ms)
+✔ A10 T43-INTEGRATION actual SECURITY release strengthens MFA and session limits (136.23786ms)
+✔ A10 T58-INTEGRATION template preview/apply remains draft then release changes runtime (66.414543ms)
+✔ A10 policy rollback and template reverse rollback restore settings only (304.015684ms)
+✔ A10 tightened absolute max lifetime survives refresh origin (76.627426ms)
+✔ A10 template validation pins target parent and inherited REQUIRED cannot be weakened (130.830604ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1255.337034
+$ node --test tests/admin/operations.cjs tests/admin/operations-http.cjs

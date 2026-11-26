@@ -1,0 +1,3 @@
+$ node scripts/admin/run-designer-ui.cjs
+PASS U02 BROWSER_MOCK: 10 stable-key row edits, group roundtrip, detail, 390px save access
+PASS U02 API_MOCK: 10 stable-key row edits, group roundtrip, detail, 390px save access

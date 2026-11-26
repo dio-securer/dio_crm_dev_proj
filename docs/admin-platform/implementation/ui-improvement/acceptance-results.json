@@ -1,0 +1,853 @@
+{
+  "executedAt": "2026-10-22T00:54:20.010Z",
+  "results": [
+    {
+      "tcId": "UI01",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "10행 직접 편집·그룹 전환",
+      "expected": "입력 유지, stable key 대상만 변경",
+      "actual": "Ten distinct unlocked rows edited; stable keys retained after group roundtrip.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u02-grid-BROWSER_MOCK.png"
+      ],
+      "blocker": null
+    },
+    {
+      "tcId": "UI02",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "필터 후 전체 선택",
+      "expected": "필터 결과만 선택; 필터 변경 시 선택 해제",
+      "actual": "Filtered selection reset, ten-row keep/true bulk, invariant rollback, one-step undo/redo, extension definition/placement create and deactivate.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u03-bulk-BROWSER_MOCK.png"
+      ],
+      "blocker": null
+    },
+    {
+      "tcId": "UI03",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "다중 행 일괄 변경",
+      "expected": "유지 속성 불변; 선택 행만 변경",
+      "actual": "Filtered selection reset, ten-row keep/true bulk, invariant rollback, one-step undo/redo, extension definition/placement create and deactivate.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u03-bulk-BROWSER_MOCK.png"
+      ],
+      "blocker": null
+    },
+    {
+      "tcId": "UI04",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "불변 필수 행 포함 일괄 숨김",
+      "expected": "전체 로컬 변경 취소, 오류 행 안내",
+      "actual": "Filtered selection reset, ten-row keep/true bulk, invariant rollback, one-step undo/redo, extension definition/placement create and deactivate.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u03-bulk-BROWSER_MOCK.png"
+      ],
+      "blocker": null
+    },
+    {
+      "tcId": "UI05",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "순서 드래그/키보드",
+      "expected": "같은 최종 순서; 필터 중 드래그 차단",
+      "actual": "Native drag and keyboard button yield identical key order; filtered drag disabled.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI06",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "일괄 실행 취소/다시 실행",
+      "expected": "1회로 일괄 동작 복원, 저장 이력과 구분",
+      "actual": "Atomic bulk/group undo and redo; after SCREEN save/FIELD failure, failed FIELD undo/redo remains available while saved SCREEN stays fixed (model assertion).",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI07",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "기본값 false/0/빈값/미지정",
+      "expected": "저장·재조회 후 의미 유지",
+      "actual": "Persisted false, decimal string 0, empty text, then removed default and reloaded.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI08",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "확장 필드 생성/비활성화",
+      "expected": "정의·배치 일치, 참조 오류 안내",
+      "actual": "Filtered selection reset, ten-row keep/true bulk, invariant rollback, one-step undo/redo, extension definition/placement create and deactivate.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u03-bulk-BROWSER_MOCK.png"
+      ],
+      "blocker": null
+    },
+    {
+      "tcId": "UI09",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "필드 포함 그룹 삭제·이동",
+      "expected": "대상 그룹 필수, orphan 0개",
+      "actual": "Nonempty removal rejected without destination; atomic move to extensions and removal persisted.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI10",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "초안 저장 후 실제 업무 화면 조회",
+      "expected": "게시 전 실제 설정 불변",
+      "actual": "Active effective FIELD snapshot unchanged after changed draft persisted.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI11",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "SCREEN 성공/FIELD 저장 실패",
+      "expected": "부분 성공 표시, 실패 입력 유지, 게시 차단",
+      "actual": "SCREEN success, FIELD failure and same-key failed-only retry; reason-required validation/publish succeeded.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u04-partial-BROWSER_MOCK.png",
+        "docs/admin-platform/implementation/ui-improvement/evidence/u04-review-BROWSER_MOCK.png"
+      ],
+      "blocker": null
+    },
+    {
+      "tcId": "UI12",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "UI11 재시도",
+      "expected": "성공 영역 중복 저장 없이 실패만 저장",
+      "actual": "SCREEN success, FIELD failure and same-key failed-only retry; reason-required validation/publish succeeded.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u04-partial-BROWSER_MOCK.png",
+        "docs/admin-platform/implementation/ui-improvement/evidence/u04-review-BROWSER_MOCK.png"
+      ],
+      "blocker": null
+    },
+    {
+      "tcId": "UI13",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "응답 유실 후 동일 요청 재전송",
+      "expected": "idempotency로 중복 변경 방지",
+      "actual": "Lost successful response replayed same key; revision increased exactly once.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI14",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "두 탭 동일 초안 동시 수정",
+      "expected": "409, 입력 보존, 3방향 비교 후 명시 재적용",
+      "actual": "Two real tabs conflicted; input 601 retained, three-way choice reapplied and saved.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u06-conflict-BROWSER_MOCK.png"
+      ],
+      "blocker": null
+    },
+    {
+      "tcId": "UI15",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "422 필드 오류와 필터",
+      "expected": "요약→숨겨진 오류 행 표시→해당 셀 포커스",
+      "actual": "Injected 422 hidden row path; error action clears filters and focuses exact maxLength cell.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI16",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "검증 후 편집/부모·버전 변경/만료",
+      "expected": "기존 validation으로 게시 불가",
+      "actual": "Editing invalidates validation; 10min expiry and changed parent snapshot block publish before mutation.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI17",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "게시 확인·사유·버전",
+      "expected": "대상 명확, 성공 시 새 release와 실제 반영",
+      "actual": "SCREEN success, FIELD failure and same-key failed-only retry; reason-required validation/publish succeeded.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u04-partial-BROWSER_MOCK.png",
+        "docs/admin-platform/implementation/ui-improvement/evidence/u04-review-BROWSER_MOCK.png"
+      ],
+      "blocker": null
+    },
+    {
+      "tcId": "UI18",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "다른 탭에서 생성된 관련 초안",
+      "expected": "검증 대상 포함 여부 표시, 숨겨진 게시 없음",
+      "actual": "External related ACTION draft detected as stale; explicit refresh shows it in validation target list.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI19",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "저장/폐기/취소 법인 전환",
+      "expected": "선택대로 동작, 저장 실패 시 이동 차단",
+      "actual": "Company cancel/discard/save behave correctly; failed expired-session save blocks switch and preserves 803.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI20",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "늦은 법인 A 응답이 B 전환 후 도착",
+      "expected": "B 상태에 A 데이터 미혼입",
+      "actual": "Platform loads real B scope while A response is delayed; disposed A response cannot alter B fields or company.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI21",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "읽기 전용 권한/세션 만료/직접 API",
+      "expected": "편집·게시 거부, 권한 우회 없음",
+      "actual": "SALES direct denial, expired-session preservation, real readonly role controls/direct 403, and real config editor with role.read denied can edit/save/validate and reach publish review.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI22",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "작업본/게시본 미리보기",
+      "expected": "각 snapshot 구분, 편집 결과 시각 반영",
+      "actual": "Working/published snapshot distinction; invalid state removes preview and displays error.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u05-preview-BROWSER_MOCK.png"
+      ],
+      "blocker": null
+    },
+    {
+      "tcId": "UI23",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "조건·역할·마스킹 미리보기",
+      "expected": "같은 엔진 결과, 원문 노출·업무 mutation 0건",
+      "actual": "Shared role/mask evaluator emits only mask token; conditional sample interaction issues zero account mutations.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI24",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "부정합 작업본 미리보기",
+      "expected": "오류 안내, 이전 화면을 최신으로 오인하지 않음",
+      "actual": "Working/published snapshot distinction; invalid state removes preview and displays error.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u05-preview-BROWSER_MOCK.png"
+      ],
+      "blocker": null
+    },
+    {
+      "tcId": "UI25",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "동일 설정 게시 후 실제 거래처 확인",
+      "expected": "표시·필수·읽기 전용·순서 결과 일치",
+      "actual": "Published supported-capacity fixture: actual SALES form visibility, required, readonly and key order equal shared preview projection.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u06-runtime-BROWSER_MOCK.png"
+      ],
+      "blocker": null
+    },
+    {
+      "tcId": "UI26",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "390/1024/1440px 및 키보드",
+      "expected": "핵심 조작 접근, 상세창 포커스 복귀",
+      "actual": "Keyboard Escape/Enter, modal focus return, missing key warning, Korean/English, 390/1024/1440 no overflow.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI27",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "ko/en 및 미등록 번역 키",
+      "expected": "UI locale 적용, 키 경고, 번역 자동 생성 없음",
+      "actual": "Keyboard Escape/Enter, modal focus return, missing key warning, Korean/English, 390/1024/1440 no overflow.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI28",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "기존 A05/A10 상속·게시·복원 회귀",
+      "expected": "기존 동작 유지, 관련 자동 검증 PASS",
+      "actual": "Existing account/configuration/operations regression commands passed; browser runtime compatibility also checked by UI25.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u06-regression-account.log",
+        "docs/admin-platform/implementation/ui-improvement/evidence/u06-regression-configuration.log",
+        "docs/admin-platform/implementation/ui-improvement/evidence/u06-regression-operations.log"
+      ],
+      "blocker": null
+    },
+    {
+      "tcId": "UI29",
+      "mode": "BROWSER_MOCK",
+      "status": "BLOCKED",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "100개 필드 fixture 편집",
+      "expected": "입력 누락 0, 단일 셀 편집→preview p95≤300ms",
+      "actual": "76 supported rows, 5 warmups/30 paints, p95 149.8ms. 100 valid rows cannot be constructed under existing registry and max 50 extensions.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u06-performance-BROWSER_MOCK.json"
+      ],
+      "blocker": "Existing FIELD schema extensionDefinitions.max(50) and fixed base registry prevent a valid 100-field fixture; engine unchanged."
+    },
+    {
+      "tcId": "UI30",
+      "mode": "BROWSER_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "저장 후 새로고침",
+      "expected": "브라우저 저장 유지; API 실행 중 유지/재시작 seed 복원",
+      "actual": "Page reload/relogin retains draft value 802 in same browser storage / running API process.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI01",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "10행 직접 편집·그룹 전환",
+      "expected": "입력 유지, stable key 대상만 변경",
+      "actual": "Ten distinct unlocked rows edited; stable keys retained after group roundtrip.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u02-grid-API_MOCK.png"
+      ],
+      "blocker": null
+    },
+    {
+      "tcId": "UI02",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "필터 후 전체 선택",
+      "expected": "필터 결과만 선택; 필터 변경 시 선택 해제",
+      "actual": "Filtered selection reset, ten-row keep/true bulk, invariant rollback, one-step undo/redo, extension definition/placement create and deactivate.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u03-bulk-API_MOCK.png"
+      ],
+      "blocker": null
+    },
+    {
+      "tcId": "UI03",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "다중 행 일괄 변경",
+      "expected": "유지 속성 불변; 선택 행만 변경",
+      "actual": "Filtered selection reset, ten-row keep/true bulk, invariant rollback, one-step undo/redo, extension definition/placement create and deactivate.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u03-bulk-API_MOCK.png"
+      ],
+      "blocker": null
+    },
+    {
+      "tcId": "UI04",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "불변 필수 행 포함 일괄 숨김",
+      "expected": "전체 로컬 변경 취소, 오류 행 안내",
+      "actual": "Filtered selection reset, ten-row keep/true bulk, invariant rollback, one-step undo/redo, extension definition/placement create and deactivate.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u03-bulk-API_MOCK.png"
+      ],
+      "blocker": null
+    },
+    {
+      "tcId": "UI05",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "순서 드래그/키보드",
+      "expected": "같은 최종 순서; 필터 중 드래그 차단",
+      "actual": "Native drag and keyboard button yield identical key order; filtered drag disabled.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI06",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "일괄 실행 취소/다시 실행",
+      "expected": "1회로 일괄 동작 복원, 저장 이력과 구분",
+      "actual": "Atomic bulk/group undo and redo; after SCREEN save/FIELD failure, failed FIELD undo/redo remains available while saved SCREEN stays fixed (model assertion).",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI07",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "기본값 false/0/빈값/미지정",
+      "expected": "저장·재조회 후 의미 유지",
+      "actual": "Persisted false, decimal string 0, empty text, then removed default and reloaded.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI08",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "확장 필드 생성/비활성화",
+      "expected": "정의·배치 일치, 참조 오류 안내",
+      "actual": "Filtered selection reset, ten-row keep/true bulk, invariant rollback, one-step undo/redo, extension definition/placement create and deactivate.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u03-bulk-API_MOCK.png"
+      ],
+      "blocker": null
+    },
+    {
+      "tcId": "UI09",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "필드 포함 그룹 삭제·이동",
+      "expected": "대상 그룹 필수, orphan 0개",
+      "actual": "Nonempty removal rejected without destination; atomic move to extensions and removal persisted.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI10",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "초안 저장 후 실제 업무 화면 조회",
+      "expected": "게시 전 실제 설정 불변",
+      "actual": "Active effective FIELD snapshot unchanged after changed draft persisted.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI11",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "SCREEN 성공/FIELD 저장 실패",
+      "expected": "부분 성공 표시, 실패 입력 유지, 게시 차단",
+      "actual": "SCREEN success, FIELD failure and same-key failed-only retry; reason-required validation/publish succeeded.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u04-partial-API_MOCK.png",
+        "docs/admin-platform/implementation/ui-improvement/evidence/u04-review-API_MOCK.png"
+      ],
+      "blocker": null
+    },
+    {
+      "tcId": "UI12",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "UI11 재시도",
+      "expected": "성공 영역 중복 저장 없이 실패만 저장",
+      "actual": "SCREEN success, FIELD failure and same-key failed-only retry; reason-required validation/publish succeeded.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u04-partial-API_MOCK.png",
+        "docs/admin-platform/implementation/ui-improvement/evidence/u04-review-API_MOCK.png"
+      ],
+      "blocker": null
+    },
+    {
+      "tcId": "UI13",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "응답 유실 후 동일 요청 재전송",
+      "expected": "idempotency로 중복 변경 방지",
+      "actual": "Lost successful response replayed same key; revision increased exactly once.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI14",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "두 탭 동일 초안 동시 수정",
+      "expected": "409, 입력 보존, 3방향 비교 후 명시 재적용",
+      "actual": "Two real tabs conflicted; input 601 retained, three-way choice reapplied and saved.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u06-conflict-API_MOCK.png"
+      ],
+      "blocker": null
+    },
+    {
+      "tcId": "UI15",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "422 필드 오류와 필터",
+      "expected": "요약→숨겨진 오류 행 표시→해당 셀 포커스",
+      "actual": "Injected 422 hidden row path; error action clears filters and focuses exact maxLength cell.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI16",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "검증 후 편집/부모·버전 변경/만료",
+      "expected": "기존 validation으로 게시 불가",
+      "actual": "Editing invalidates validation; 10min expiry and changed parent snapshot block publish before mutation.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI17",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "게시 확인·사유·버전",
+      "expected": "대상 명확, 성공 시 새 release와 실제 반영",
+      "actual": "SCREEN success, FIELD failure and same-key failed-only retry; reason-required validation/publish succeeded.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u04-partial-API_MOCK.png",
+        "docs/admin-platform/implementation/ui-improvement/evidence/u04-review-API_MOCK.png"
+      ],
+      "blocker": null
+    },
+    {
+      "tcId": "UI18",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "다른 탭에서 생성된 관련 초안",
+      "expected": "검증 대상 포함 여부 표시, 숨겨진 게시 없음",
+      "actual": "External related ACTION draft detected as stale; explicit refresh shows it in validation target list.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI19",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "저장/폐기/취소 법인 전환",
+      "expected": "선택대로 동작, 저장 실패 시 이동 차단",
+      "actual": "Company cancel/discard/save behave correctly; failed expired-session save blocks switch and preserves 803.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI20",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "늦은 법인 A 응답이 B 전환 후 도착",
+      "expected": "B 상태에 A 데이터 미혼입",
+      "actual": "Platform loads real B scope while A response is delayed; disposed A response cannot alter B fields or company.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI21",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "읽기 전용 권한/세션 만료/직접 API",
+      "expected": "편집·게시 거부, 권한 우회 없음",
+      "actual": "SALES direct denial, expired-session preservation, real readonly role controls/direct 403, and real config editor with role.read denied can edit/save/validate and reach publish review.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI22",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "작업본/게시본 미리보기",
+      "expected": "각 snapshot 구분, 편집 결과 시각 반영",
+      "actual": "Working/published snapshot distinction; invalid state removes preview and displays error.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u05-preview-API_MOCK.png"
+      ],
+      "blocker": null
+    },
+    {
+      "tcId": "UI23",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "조건·역할·마스킹 미리보기",
+      "expected": "같은 엔진 결과, 원문 노출·업무 mutation 0건",
+      "actual": "Shared role/mask evaluator emits only mask token; conditional sample interaction issues zero account mutations.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI24",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "부정합 작업본 미리보기",
+      "expected": "오류 안내, 이전 화면을 최신으로 오인하지 않음",
+      "actual": "Working/published snapshot distinction; invalid state removes preview and displays error.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u05-preview-API_MOCK.png"
+      ],
+      "blocker": null
+    },
+    {
+      "tcId": "UI25",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "동일 설정 게시 후 실제 거래처 확인",
+      "expected": "표시·필수·읽기 전용·순서 결과 일치",
+      "actual": "Published supported-capacity fixture: actual SALES form visibility, required, readonly and key order equal shared preview projection.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u06-runtime-API_MOCK.png"
+      ],
+      "blocker": null
+    },
+    {
+      "tcId": "UI26",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "390/1024/1440px 및 키보드",
+      "expected": "핵심 조작 접근, 상세창 포커스 복귀",
+      "actual": "Keyboard Escape/Enter, modal focus return, missing key warning, Korean/English, 390/1024/1440 no overflow.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI27",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "ko/en 및 미등록 번역 키",
+      "expected": "UI locale 적용, 키 경고, 번역 자동 생성 없음",
+      "actual": "Keyboard Escape/Enter, modal focus return, missing key warning, Korean/English, 390/1024/1440 no overflow.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [],
+      "blocker": null
+    },
+    {
+      "tcId": "UI28",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "기존 A05/A10 상속·게시·복원 회귀",
+      "expected": "기존 동작 유지, 관련 자동 검증 PASS",
+      "actual": "Existing account/configuration/operations regression commands passed; browser runtime compatibility also checked by UI25.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u06-regression-account.log",
+        "docs/admin-platform/implementation/ui-improvement/evidence/u06-regression-configuration.log",
+        "docs/admin-platform/implementation/ui-improvement/evidence/u06-regression-operations.log"
+      ],
+      "blocker": null
+    },
+    {
+      "tcId": "UI29",
+      "mode": "API_MOCK",
+      "status": "BLOCKED",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "100개 필드 fixture 편집",
+      "expected": "입력 누락 0, 단일 셀 편집→preview p95≤300ms",
+      "actual": "76 supported rows, 5 warmups/30 paints, p95 150.0ms. 100 valid rows cannot be constructed under existing registry and max 50 extensions.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u06-performance-API_MOCK.json"
+      ],
+      "blocker": "Existing FIELD schema extensionDefinitions.max(50) and fixed base registry prevent a valid 100-field fixture; engine unchanged."
+    },
+    {
+      "tcId": "UI30",
+      "mode": "API_MOCK",
+      "status": "PASS",
+      "sourceCommit": "1c01e437c18cf40fdbc52702230b9bf6bd9e4829",
+      "datasetId": "ADMIN_DEMO_V1",
+      "input": "저장 후 새로고침",
+      "expected": "브라우저 저장 유지; API 실행 중 유지/재시작 seed 복원",
+      "actual": "Saved draft 802 survived page reload while API ran; fresh API process restored original seed with no drafts/releases.",
+      "command": "CHROMIUM_PATH=/path/to/chromium pnpm test:admin:designer-ui",
+      "evidencePaths": [
+        "docs/admin-platform/implementation/ui-improvement/evidence/u06-restart.log"
+      ],
+      "blocker": null
+    }
+  ]
+}

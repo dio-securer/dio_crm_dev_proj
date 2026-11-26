@@ -1,0 +1,4 @@
+$ node scripts/admin/run-configuration-ui.cjs
+T56 COMMON→TEMPLATE→COUNTRY→COMPANY immutable chain PASS
+PASS BROWSER_MOCK: save, validate, publish, RESET, rollback, user release, cross-tab CAS (browser), egress=0
+PASS API_MOCK: save, validate, publish, RESET, rollback, user release, cross-tab CAS (browser), egress=0

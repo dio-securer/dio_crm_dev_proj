@@ -1,0 +1,43 @@
+✔ false/0/empty stable keys, tombstones, RESET, locks and unsafe properties (6.880227ms)
+✔ draft isolation, validation modification, concurrent publish, idempotency and rollback preserve security/sequence (647.006831ms)
+✔ T56 immutable parent chain and explicit rebase through all levels; US_B unchanged (1143.177376ms)
+✔ stale rebase TTL and edit reject without partial changes; unauthorized access (125.494042ms)
+✔ unknown parent and locked tax field fail validation (31.228194ms)
+✔ rollback restores immutable company profile and A02 edit remains usable (239.413003ms)
+✔ new company is pinned at creation and scope conflict/expired preview are atomic (77.935475ms)
+✔ A10 HTTP publication schedule/cancel contract, permissions and immutable release (617.268975ms)
+✔ A10 HTTP SECURITY publish activates MFA and blocks existing token/refresh (354.259243ms)
+✔ A10 T33/T81 schedule cancellation, version conflict and fake clock apply (657.384511ms)
+✔ A10 T81 inactive company cannot execute scheduled release (115.177002ms)
+✔ A10 T43-INTEGRATION actual SECURITY release strengthens MFA and session limits (172.387758ms)
+✔ A10 T58-INTEGRATION template preview/apply remains draft then release changes runtime (139.561158ms)
+✔ A10 policy rollback and template reverse rollback restore settings only (438.104193ms)
+✔ A10 tightened absolute max lifetime survives refresh origin (120.638656ms)
+✔ A10 template validation pins target parent and inherited REQUIRED cannot be weakened (222.064834ms)
+✔ T39 REQUIRED enroll, pending business403, atomic concurrent verify and receipt replay (378.42779ms)
+✔ T40 OFF/OPTIONAL/enrolled and inherited REQUIRED branches (94.716243ms)
+✔ T41 five failures persist lock; expiration uses injected clock; max/idle sessions (100.624851ms)
+✔ T43-UNIT company switch retains old context until MFA and refresh cannot bypass strengthening (66.41877ms)
+✔ T62/T63 global reset request isolates companies, approval revokes all sessions/challenges once (92.801103ms)
+✔ T63 stale and expired reset request reject without revocation (56.189797ms)
+✔ T69 SELF/ORG/SUBTREE/COMPANY scope filters total, detail, PATCH and company isolation (95.403009ms)
+✔ T66/T07 field DENY and LAST4 hide raw values, query side channels and injected writes (63.58709ms)
+✔ role assignment invalidates old access/refresh, DENY beats grant and unknown/global grant rejected (71.25949ms)
+✔ T70 FIELD-only delegation rejects SECURITY, privilege escalation and expired access (67.192202ms)
+✔ admin1 manages configuration but has no implicit business access (32.356698ms)
+✔ T69 ORG versus SUBTREE versus COMPANY uses descendant, sibling and unrelated owners for reads/writes (279.908494ms)
+✔ custom role cannot assign stronger data/field authority or expand explicit org with empty roots (31.006151ms)
+✔ config.read/edit custom grants and denies are enforced independently of base SALES role (49.81494ms)
+✔ MFA wrong-code and skip idempotency preserve attempt/session count, session self-revoke works (70.468814ms)
+✔ policy role overrides enforce MFA; freshness and max lifetime survive refresh (195.495116ms)
+✔ security draft validates positive limits and DEMO provider, does not activate policy (34.039801ms)
+✔ authorized repository rechecks session inside write transaction after earlier authorization (18.636293ms)
+✔ company administrator may assign business permissions but cannot mint higher administrative authority (30.241088ms)
+ℹ tests 35
+ℹ suites 0
+ℹ pass 35
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2456.921306

@@ -1,0 +1,4 @@
+BROWSER A07 boundary 40 checks PASS
+PASS BROWSER_MOCK: approval typed policy/route publish, document submit, assignee inbox, reject/edit/resubmit, approve, deputy create/revoke; egress=0
+PASS API_MOCK: approval typed policy/route publish, document submit, assignee inbox, reject/edit/resubmit, approve, deputy create/revoke; egress=0
+$ node scripts/admin/run-approval-ui.cjs

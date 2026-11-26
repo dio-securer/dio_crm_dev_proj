@@ -1,0 +1,8 @@
+$ node scripts/admin/run-security-ui.cjs
+PASS BROWSER_MOCK shared security boundaries {
+  mfa: 'OFF/OPTIONAL/REQUIRED/enroll/skip/lock/expiry/race/switch/reset',
+  permissions: 'SELF/ORG/SUBTREE/COMPANY/field-deny/LAST4/query/write/multi-role',
+  delegation: 'FIELD/SECURITY/expiry'
+}
+PASS BROWSER_MOCK: required MFA, wrong code, verify, role/data/field form save, revoked-session relogin, persisted role; egress=0
+PASS API_MOCK: required MFA, wrong code, verify, role/data/field form save, revoked-session relogin, persisted role; egress=0

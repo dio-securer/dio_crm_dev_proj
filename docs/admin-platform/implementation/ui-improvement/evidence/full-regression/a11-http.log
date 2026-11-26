@@ -1,0 +1,532 @@
+TAP version 13
+# Subtest: T46 drafts isolated; published field/list/action affects only US_A; stale release409
+ok 1 - T46 drafts isolated; published field/list/action affects only US_A; stale release409
+  ---
+  duration_ms: 876.334357
+  type: 'test'
+  ...
+# Subtest: T47 create/update five extension types, required rule, nullable and omitted PATCH preservation
+ok 2 - T47 create/update five extension types, required rule, nullable and omitted PATCH preservation
+  ---
+  duration_ms: 88.172093
+  type: 'test'
+  ...
+# Subtest: T71 feature OFF blocks direct API; menu hiding does not grant or revoke permission
+ok 3 - T71 feature OFF blocks direct API; menu hiding does not grant or revoke permission
+  ---
+  duration_ms: 626.28998
+  type: 'test'
+  ...
+# Subtest: T75 shared view unreadable field rejected during validation
+ok 4 - T75 shared view unreadable field rejected during validation
+  ---
+  duration_ms: 82.202103
+  type: 'test'
+  ...
+# Subtest: T75 published view columns filtered and unreadable sort denied; metadata excludes secrets
+ok 5 - T75 published view columns filtered and unreadable sort denied; metadata excludes secrets
+  ---
+  duration_ms: 39.039
+  type: 'test'
+  ...
+# Subtest: T67 duplicate masked write422; readOnly mask cannot be replaced; raw value retained
+ok 6 - T67 duplicate masked write422; readOnly mask cannot be replaced; raw value retained
+  ---
+  duration_ms: 48.11681
+  type: 'test'
+  ...
+# Subtest: extension type change with existing data blocked; inactive keeps stored value and rejects writes
+ok 7 - extension type change with existing data blocked; inactive keeps stored value and rejects writes
+  ---
+  duration_ms: 337.127324
+  type: 'test'
+  ...
+# Subtest: registered text-only mask and extension privilege ceiling
+ok 8 - registered text-only mask and extension privilege ceiling
+  ---
+  duration_ms: 37.274254
+  type: 'test'
+  ...
+# Subtest: LIST_VIEW context filter validates and executes against current company and role
+ok 9 - LIST_VIEW context filter validates and executes against current company and role
+  ---
+  duration_ms: 229.642804
+  type: 'test'
+  ...
+# Subtest: create-only roles expose createWrite separately; blank name cannot create
+ok 10 - create-only roles expose createWrite separately; blank name cannot create
+  ---
+  duration_ms: 43.802041
+  type: 'test'
+  ...
+# Subtest: registry, dependency and rule failures return HTTP422 before publication
+ok 11 - registry, dependency and rule failures return HTTP422 before publication
+  ---
+  duration_ms: 513.368192
+  type: 'test'
+  ...
+# Subtest: field registry exposes only registered metadata to role readers and isolates companies
+ok 12 - field registry exposes only registered metadata to role readers and isolates companies
+  ---
+  duration_ms: 38.601283
+  type: 'test'
+  ...
+# Subtest: HTTP requires valid typed mock authentication
+ok 13 - HTTP requires valid typed mock authentication
+  ---
+  duration_ms: 161.081949
+  type: 'test'
+  ...
+# Subtest: duplicate login requires a company; credentials failure returns 401
+ok 14 - duplicate login requires a company; credentials failure returns 401
+  ---
+  duration_ms: 19.27888
+  type: 'test'
+  ...
+# Subtest: strict payload, company isolation and idempotent create over HTTP
+ok 15 - strict payload, company isolation and idempotent create over HTTP
+  ---
+  duration_ms: 119.151686
+  type: 'test'
+  ...
+# Subtest: non-admin cannot change configurations; revoked session cannot be replayed
+ok 16 - non-admin cannot change configurations; revoked session cannot be replayed
+  ---
+  duration_ms: 33.166089
+  type: 'test'
+  ...
+# Subtest: production mock bootstrap fails before binding providers
+ok 17 - production mock bootstrap fails before binding providers
+  ---
+  duration_ms: 0.720754
+  type: 'test'
+  ...
+# Subtest: unimplemented API fails explicitly rather than falling through to SQL
+ok 18 - unimplemented API fails explicitly rather than falling through to SQL
+  ---
+  duration_ms: 3.383609
+  type: 'test'
+  ...
+# Subtest: restarting API resets seed, draft data and sessions
+ok 19 - restarting API resets seed, draft data and sessions
+  ---
+  duration_ms: 28.590736
+  type: 'test'
+  ...
+# Subtest: GET preserves business data while recording session activity
+ok 20 - GET preserves business data while recording session activity
+  ---
+  duration_ms: 12.753179
+  type: 'test'
+  ...
+# Subtest: refresh token is consumed exactly once under concurrent requests
+ok 21 - refresh token is consumed exactly once under concurrent requests
+  ---
+  duration_ms: 20.819827
+  type: 'test'
+  ...
+# Subtest: A07 T12/T13 submit snapshot, exactly once decision, locked document and cross-company isolation
+ok 22 - A07 T12/T13 submit snapshot, exactly once decision, locked document and cross-company isolation
+  ---
+  duration_ms: 988.978806
+  type: 'test'
+  ...
+# Subtest: A07 T14/T52 ANY simultaneous approve/reject has one winner and cancels siblings
+ok 23 - A07 T14/T52 ANY simultaneous approve/reject has one winner and cancels siblings
+  ---
+  duration_ms: 557.06994
+  type: 'test'
+  ...
+# Subtest: A07 T78 ALL waits for both; reject/edit/resubmit preserves old history
+ok 24 - A07 T78 ALL waits for both; reject/edit/resubmit preserves old history
+  ---
+  duration_ms: 547.738009
+  type: 'test'
+  ...
+# Subtest: A07 T77 missing policy/self/empty/conflict submission is atomic
+ok 25 - A07 T77 missing policy/self/empty/conflict submission is atomic
+  ---
+  duration_ms: 357.468304
+  type: 'test'
+  ...
+# Subtest: A07 T15 inactive assignee blocked; reassign preserves superseded task
+ok 26 - A07 T15 inactive assignee blocked; reassign preserves superseded task
+  ---
+  duration_ms: 388.026085
+  type: 'test'
+  ...
+# Subtest: A07 T64/T65 deputy overlap/chain/self, principal-deputy race and revoke
+ok 27 - A07 T64/T65 deputy overlap/chain/self, principal-deputy race and revoke
+  ---
+  duration_ms: 501.714607
+  type: 'test'
+  ...
+# Subtest: A07 T76 invalid workflow definition rejected; policy/domain permission enforced
+ok 28 - A07 T76 invalid workflow definition rejected; policy/domain permission enforced
+  ---
+  duration_ms: 302.265691
+  type: 'test'
+  ...
+# Subtest: A07 T31 frozen calendar/route after publish, withdraw cancels and stale decision rejected
+ok 29 - A07 T31 frozen calendar/route after publish, withdraw cancels and stale decision rejected
+  ---
+  duration_ms: 523.510389
+  type: 'test'
+  ...
+# Subtest: A07 split policy authority cannot delete route override; preserve route and edit policy succeeds
+ok 30 - A07 split policy authority cannot delete route override; preserve route and edit policy succeeds
+  ---
+  duration_ms: 306.087827
+  type: 'test'
+  ...
+# Subtest: A07 numeric policy, ALL completion and status/assignee/deputy paging filters
+ok 31 - A07 numeric policy, ALL completion and status/assignee/deputy paging filters
+  ---
+  duration_ms: 656.071329
+  type: 'test'
+  ...
+# Subtest: A07 explicit deterministic demo fixture prepares DRAFT and IN_PROGRESS atomically without replacing existing data
+ok 32 - A07 explicit deterministic demo fixture prepares DRAFT and IN_PROGRESS atomically without replacing existing data
+  ---
+  duration_ms: 308.243831
+  type: 'test'
+  ...
+# Subtest: A11 T64/T65 HTTP deputy start/end boundaries, self-document and inactive principal
+ok 33 - A11 T64/T65 HTTP deputy start/end boundaries, self-document and inactive principal
+  ---
+  duration_ms: 549.178155
+  type: 'test'
+  ...
+# Subtest: HTTP platform-owned target draft is editable by company admin; validate/publish/runtime/rollback and permissions
+ok 34 - HTTP platform-owned target draft is editable by company admin; validate/publish/runtime/rollback and permissions
+  ---
+  duration_ms: 996.82066
+  type: 'test'
+  ...
+# Subtest: A09 T18/T20/T80 registry, preview pure, MOCK-only and required mapping
+ok 35 - A09 T18/T20/T80 registry, preview pure, MOCK-only and required mapping
+  ---
+  duration_ms: 325.49393
+  type: 'test'
+  ...
+# Subtest: A09 T19/T21/T22 success/rejection separate from transport, duplicate once, retries keep request identity
+ok 36 - A09 T19/T21/T22 success/rejection separate from transport, duplicate once, retries keep request identity
+  ---
+  duration_ms: 168.644494
+  type: 'test'
+  ...
+# Subtest: A09 T23/T53/T54 timeout late success, stale superseded, terminal immutable, event hash and company boundary
+ok 37 - A09 T23/T53/T54 timeout late success, stale superseded, terminal immutable, event hash and company boundary
+  ---
+  duration_ms: 118.288211
+  type: 'test'
+  ...
+# Subtest: A09 T24/T54 collection/delivery correction replaces total exactly, same version collision, out of order ignored
+ok 38 - A09 T24/T54 collection/delivery correction replaces total exactly, same version collision, out of order ignored
+  ---
+  duration_ms: 190.546575
+  type: 'test'
+  ...
+# Subtest: A09 DELAYED fake clock and notification once; idempotency conflicts
+ok 39 - A09 DELAYED fake clock and notification once; idempotency conflicts
+  ---
+  duration_ms: 64.407475
+  type: 'test'
+  ...
+# Subtest: A09 account runtime ERP action applies once and masks operator responses; correction hashes date
+ok 40 - A09 account runtime ERP action applies once and masks operator responses; correction hashes date
+  ---
+  duration_ms: 134.744351
+  type: 'test'
+  ...
+# Subtest: A09 timeout retry never rebinds an edited business revision
+ok 41 - A09 timeout retry never rebinds an edited business revision
+  ---
+  duration_ms: 38.346918
+  type: 'test'
+  ...
+# Subtest: A11 T22/T53 concurrent timeout retry and late response apply business once
+ok 42 - A11 T22/T53 concurrent timeout retry and late response apply business once
+  ---
+  duration_ms: 47.949904
+  type: 'test'
+  ...
+# Subtest: LEGACY login/refresh/logout retain numeric IDs using SQL stub only
+ok 43 - LEGACY login/refresh/logout retain numeric IDs using SQL stub only
+  ---
+  duration_ms: 26.192344
+  type: 'test'
+  ...
+# Subtest: T60 LEGACY HTTP login/refresh/logout preserves numeric claims with SQL stub
+ok 44 - T60 LEGACY HTTP login/refresh/logout preserves numeric claims with SQL stub
+  ---
+  duration_ms: 174.006922
+  type: 'test'
+  ...
+# Subtest: T74 drafts/publish company term isolation and immutable user context
+ok 45 - T74 drafts/publish company term isolation and immutable user context
+  ---
+  duration_ms: 672.221813
+  type: 'test'
+  ...
+# Subtest: T73 global code merge, custom code storage, referenced REMOVE_ITEM422 and inactive historical display
+ok 46 - T73 global code merge, custom code storage, referenced REMOVE_ITEM422 and inactive historical display
+  ---
+  duration_ms: 788.4566
+  type: 'test'
+  ...
+# Subtest: T30 HTTP allocation permission, company isolation, concurrent uniqueness and preview nonconsumption
+ok 47 - T30 HTTP allocation permission, company isolation, concurrent uniqueness and preview nonconsumption
+  ---
+  duration_ms: 55.615653
+  type: 'test'
+  ...
+# Subtest: T31 calculation snapshot survives calendar publish and config rollback does not rewind sequence
+ok 48 - T31 calculation snapshot survives calendar publish and config rollback does not rewind sequence
+  ---
+  duration_ms: 418.438091
+  type: 'test'
+  ...
+# Subtest: A08 T13/T32 two channels once per approver, unauthorized recipient excluded, read ownership and replay immutable
+ok 49 - A08 T13/T32 two channels once per approver, unauthorized recipient excluded, read ownership and replay immutable
+  ---
+  duration_ms: 1313.561439
+  type: 'test'
+  ...
+# Subtest: A08 T32 locale/render snapshot survives changed preference and templates; company isolation
+ok 50 - A08 T32 locale/render snapshot survives changed preference and templates; company isolation
+  ---
+  duration_ms: 1269.637158
+  type: 'test'
+  ...
+# Subtest: A08 T79 template placeholders and config management permissions enforced
+ok 51 - A08 T79 template placeholders and config management permissions enforced
+  ---
+  duration_ms: 568.792477
+  type: 'test'
+  ...
+# Subtest: A08 overdue fake clock uses frozen dueAt and emits once, completion no further overdue
+ok 52 - A08 overdue fake clock uses frozen dueAt and emits once, completion no further overdue
+  ---
+  duration_ms: 673.411354
+  type: 'test'
+  ...
+# Subtest: A08 revoked approval permission hides historical notification and excludes new recipient
+ok 53 - A08 revoked approval permission hides historical notification and excludes new recipient
+  ---
+  duration_ms: 599.94654
+  type: 'test'
+  ...
+# Subtest: A08 unsaved template preview is validated/nonmutating; pagination and unread reach all inbox rows
+ok 54 - A08 unsaved template preview is validated/nonmutating; pagination and unread reach all inbox rows
+  ---
+  duration_ms: 705.910711
+  type: 'test'
+  ...
+# Subtest: A10 HTTP publication schedule/cancel contract, permissions and immutable release
+ok 55 - A10 HTTP publication schedule/cancel contract, permissions and immutable release
+  ---
+  duration_ms: 579.353217
+  type: 'test'
+  ...
+# Subtest: A10 HTTP SECURITY publish activates MFA and blocks existing token/refresh
+ok 56 - A10 HTTP SECURITY publish activates MFA and blocks existing token/refresh
+  ---
+  duration_ms: 321.680021
+  type: 'test'
+  ...
+# Subtest: A11 T58-INTEGRATION HTTP template preview/apply stays draft and publication switches runtime
+ok 57 - A11 T58-INTEGRATION HTTP template preview/apply stays draft and publication switches runtime
+  ---
+  duration_ms: 259.076856
+  type: 'test'
+  ...
+# Subtest: T68 organization tree rejects cycle and cross-company parent atomically
+ok 58 - T68 organization tree rejects cycle and cross-company parent atomically
+  ---
+  duration_ms: 171.561123
+  type: 'test'
+  ...
+# Subtest: T38 shared membership switch rejects unassigned company and old token
+ok 59 - T38 shared membership switch rejects unassigned company and old token
+  ---
+  duration_ms: 27.777033
+  type: 'test'
+  ...
+# Subtest: identity and membership suspension invalidate existing sessions and protect last admins
+ok 60 - identity and membership suspension invalidate existing sessions and protect last admins
+  ---
+  duration_ms: 48.609073
+  type: 'test'
+  ...
+# Subtest: T29/T82 transfer detects concurrent edits, preserves tasks, replays completed job
+ok 61 - T29/T82 transfer detects concurrent edits, preserves tasks, replays completed job
+  ---
+  duration_ms: 45.918763
+  type: 'test'
+  ...
+# Subtest: T58-UNIT company create prepares draft; code and template are immutable in PATCH
+ok 62 - T58-UNIT company create prepares draft; code and template are immutable in PATCH
+  ---
+  duration_ms: 66.261455
+  type: 'test'
+  ...
+# Subtest: T49 company and user reactivation never resurrects revoked tokens
+ok 63 - T49 company and user reactivation never resurrects revoked tokens
+  ---
+  duration_ms: 160.906343
+  type: 'test'
+  ...
+# Subtest: T49/T58 company profile is a draft and live work blocks deactivation
+ok 64 - T49/T58 company profile is a draft and live work blocks deactivation
+  ---
+  duration_ms: 67.776724
+  type: 'test'
+  ...
+# Subtest: T58 template preview rejects stale revision and apply creates only a draft
+ok 65 - T58 template preview rejects stale revision and apply creates only a draft
+  ---
+  duration_ms: 52.011904
+  type: 'test'
+  ...
+# Subtest: a single stopped membership does not prevent login to another active company
+ok 66 - a single stopped membership does not prevent login to another active company
+  ---
+  duration_ms: 79.584405
+  type: 'test'
+  ...
+# Subtest: a SALES membership cannot replace the last reachable platform administrator
+ok 67 - a SALES membership cannot replace the last reachable platform administrator
+  ---
+  duration_ms: 65.61866
+  type: 'test'
+  ...
+# Subtest: A11 T55/T59 HTTP reset preview, stale/expired/actor/permission checks and session revocation
+ok 68 - A11 T55/T59 HTTP reset preview, stale/expired/actor/permission checks and session revocation
+  ---
+  duration_ms: 373.379633
+  type: 'test'
+  ...
+# Subtest: T39 REQUIRED enroll, pending business403, atomic concurrent verify and receipt replay
+ok 69 - T39 REQUIRED enroll, pending business403, atomic concurrent verify and receipt replay
+  ---
+  duration_ms: 235.521213
+  type: 'test'
+  ...
+# Subtest: T40 OFF/OPTIONAL/enrolled and inherited REQUIRED branches
+ok 70 - T40 OFF/OPTIONAL/enrolled and inherited REQUIRED branches
+  ---
+  duration_ms: 82.735841
+  type: 'test'
+  ...
+# Subtest: T41 five failures persist lock; expiration uses injected clock; max/idle sessions
+ok 71 - T41 five failures persist lock; expiration uses injected clock; max/idle sessions
+  ---
+  duration_ms: 72.019901
+  type: 'test'
+  ...
+# Subtest: T43-UNIT company switch retains old context until MFA and refresh cannot bypass strengthening
+ok 72 - T43-UNIT company switch retains old context until MFA and refresh cannot bypass strengthening
+  ---
+  duration_ms: 55.559215
+  type: 'test'
+  ...
+# Subtest: T62/T63 global reset request isolates companies, approval revokes all sessions/challenges once
+ok 73 - T62/T63 global reset request isolates companies, approval revokes all sessions/challenges once
+  ---
+  duration_ms: 73.491054
+  type: 'test'
+  ...
+# Subtest: T63 stale and expired reset request reject without revocation
+ok 74 - T63 stale and expired reset request reject without revocation
+  ---
+  duration_ms: 37.827031
+  type: 'test'
+  ...
+# Subtest: T69 SELF/ORG/SUBTREE/COMPANY scope filters total, detail, PATCH and company isolation
+ok 75 - T69 SELF/ORG/SUBTREE/COMPANY scope filters total, detail, PATCH and company isolation
+  ---
+  duration_ms: 74.657307
+  type: 'test'
+  ...
+# Subtest: T66/T07 field DENY and LAST4 hide raw values, query side channels and injected writes
+ok 76 - T66/T07 field DENY and LAST4 hide raw values, query side channels and injected writes
+  ---
+  duration_ms: 51.857321
+  type: 'test'
+  ...
+# Subtest: role assignment invalidates old access/refresh, DENY beats grant and unknown/global grant rejected
+ok 77 - role assignment invalidates old access/refresh, DENY beats grant and unknown/global grant rejected
+  ---
+  duration_ms: 48.1026
+  type: 'test'
+  ...
+# Subtest: T70 FIELD-only delegation rejects SECURITY, privilege escalation and expired access
+ok 78 - T70 FIELD-only delegation rejects SECURITY, privilege escalation and expired access
+  ---
+  duration_ms: 50.490843
+  type: 'test'
+  ...
+# Subtest: admin1 manages configuration but has no implicit business access
+ok 79 - admin1 manages configuration but has no implicit business access
+  ---
+  duration_ms: 23.457613
+  type: 'test'
+  ...
+# Subtest: T69 ORG versus SUBTREE versus COMPANY uses descendant, sibling and unrelated owners for reads/writes
+ok 80 - T69 ORG versus SUBTREE versus COMPANY uses descendant, sibling and unrelated owners for reads/writes
+  ---
+  duration_ms: 152.900011
+  type: 'test'
+  ...
+# Subtest: custom role cannot assign stronger data/field authority or expand explicit org with empty roots
+ok 81 - custom role cannot assign stronger data/field authority or expand explicit org with empty roots
+  ---
+  duration_ms: 20.372535
+  type: 'test'
+  ...
+# Subtest: config.read/edit custom grants and denies are enforced independently of base SALES role
+ok 82 - config.read/edit custom grants and denies are enforced independently of base SALES role
+  ---
+  duration_ms: 30.040527
+  type: 'test'
+  ...
+# Subtest: MFA wrong-code and skip idempotency preserve attempt/session count, session self-revoke works
+ok 83 - MFA wrong-code and skip idempotency preserve attempt/session count, session self-revoke works
+  ---
+  duration_ms: 50.869337
+  type: 'test'
+  ...
+# Subtest: policy role overrides enforce MFA; freshness and max lifetime survive refresh
+ok 84 - policy role overrides enforce MFA; freshness and max lifetime survive refresh
+  ---
+  duration_ms: 128.301102
+  type: 'test'
+  ...
+# Subtest: security draft validates positive limits and DEMO provider, does not activate policy
+ok 85 - security draft validates positive limits and DEMO provider, does not activate policy
+  ---
+  duration_ms: 25.248369
+  type: 'test'
+  ...
+# Subtest: authorized repository rechecks session inside write transaction after earlier authorization
+ok 86 - authorized repository rechecks session inside write transaction after earlier authorization
+  ---
+  duration_ms: 17.275269
+  type: 'test'
+  ...
+# Subtest: company administrator may assign business permissions but cannot mint higher administrative authority
+ok 87 - company administrator may assign business permissions but cannot mint higher administrative authority
+  ---
+  duration_ms: 22.694246
+  type: 'test'
+  ...
+1..87
+# tests 87
+# suites 0
+# pass 87
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 6407.010011

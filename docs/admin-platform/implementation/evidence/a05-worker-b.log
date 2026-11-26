@@ -1,0 +1,25 @@
+✔ T71 feature dependencies and registry are validated (16.088202ms)
+✔ T72 registered screens, duplicate routes, cycles and section references (10.756537ms)
+✔ T48 opposing effects and cross-rule hidden required rejected regardless of condition (7.521707ms)
+✔ base readOnly cannot be weakened by DISPLAY/SAVE rules (4.341548ms)
+✔ condition AST has strict null, empty arrays, decimal and context semantics (0.715533ms)
+✔ extension five types reject precision/date/code/null/type/length errors (1.14158ms)
+✔ action allowlist rejects arbitrary operation (3.14636ms)
+✔ HQ TEMPLATE no-op validation and publish retain exact profile layout (114.724482ms)
+✔ business name invariant cannot be removed or weakened by a rule (4.968641ms)
+✔ T46 drafts isolated; published field/list/action affects only US_A; stale release409 (550.147059ms)
+✔ T47 create/update five extension types, required rule, nullable and omitted PATCH preservation (62.906789ms)
+✔ T71 feature OFF blocks direct API; menu hiding does not grant or revoke permission (353.566314ms)
+✔ T75 shared view unreadable field rejected during validation (85.907857ms)
+✔ T75 published view columns filtered and unreadable sort denied; metadata excludes secrets (41.170708ms)
+✔ T67 duplicate masked write422; readOnly mask cannot be replaced; raw value retained (31.142302ms)
+✔ extension type change with existing data blocked; inactive keeps stored value and rejects writes (227.017749ms)
+✔ registered text-only mask and extension privilege ceiling (35.605188ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1737.971535

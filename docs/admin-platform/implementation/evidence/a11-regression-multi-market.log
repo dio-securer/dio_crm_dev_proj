@@ -1,0 +1,4 @@
+[regression:multi-market] PASS — 85 source-level architecture/responsive checks passed.
+INFO Viewport source matrix covered: Desktop 1440+ default, Laptop <=1100, Tablet <=920/coarse pointer, Android/iOS <=430 + safe-area rules.
+INFO This gate does not claim physical-device or deployed-runtime validation; those remain DEV/UAT Pilot Gate activities.
+$ node scripts/regression/multi-market-ui-check.mjs

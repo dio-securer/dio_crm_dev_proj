@@ -1,0 +1,7 @@
+2026-10-21 worker B review transcript summary (not a synthesized test runner output)
+A06 code APPROVED. Four blockers fixed: enum value, domain permissions, termKey placeholder remap, extra translation editor.
+Independent latest dist unit/HTTP: 11/11 PASS.
+Additional direct checks: placeholder termKey remap PASS; config.read/edit-only role rejected for all four domain drafts and calendar calculation (FORBIDDEN).
+git diff --check PASS.
+Final list x_priority translation change APPROVED: company label lookup, inactive historical values, masking priority and React escape preserved; stored value unchanged.
+UI was run by worker A, not independently rerun by B.

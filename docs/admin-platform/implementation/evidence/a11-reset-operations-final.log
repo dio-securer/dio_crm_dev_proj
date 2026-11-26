@@ -1,0 +1,20 @@
+$ node scripts/admin/run-operations-ui.cjs
+PASS BROWSER_MOCK shared operations scenarios [
+  'cancel apply0',
+  'fake clock',
+  'active version conflict',
+  'release preserved',
+  'inactive schedule blocked',
+  'rollback new release/business preserved'
+]
+PASS BROWSER_MOCK reset UI preview/counts/reason/reset/logout
+PASS browser reset boundaries [
+  'T55/T59 stale',
+  'TTL boundary',
+  'latest reset',
+  'sessions cleared',
+  'other/original preserved'
+]
+PASS BROWSER_MOCK: schedule/cancel, mobile dirty save/discard/cancel/failure, SECURITY publish and DEMO MFA; egress=0
+PASS API_MOCK reset UI preview/counts/reason/reset/logout
+PASS API_MOCK: schedule/cancel, mobile dirty save/discard/cancel/failure, SECURITY publish and DEMO MFA; egress=0

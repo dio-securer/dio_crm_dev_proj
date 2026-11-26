@@ -27,12 +27,13 @@ const previewBuild = {
 
 export default defineConfig({
   plugins: [react(), previewBuild],
-  server: { port: 5173 },
+  server: { port: 5173, proxy: process.env.VITE_CRM_EXECUTION_MODE === 'API_MOCK' ? { '/api': { target: process.env.CRM_MOCK_API_URL || 'http://127.0.0.1:3001', changeOrigin: true } } : undefined },
   resolve: {
     alias: [
       {find:'@dio-crm/contracts/logic-events',replacement:path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../packages/contracts/src/logic-events.ts')},
       {find:'@dio-crm/contracts/lead-grid-columns',replacement:path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../packages/contracts/src/lead-grid-columns.ts')},
       {find:'@dio-crm/contracts/crm-customization',replacement:path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../packages/contracts/src/crm-customization.ts')},
+      { find: '@dio-crm/contracts/admin', replacement: path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../packages/contracts/src/admin/index.ts') },
       {find:'@dio-crm/contracts',replacement:path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../packages/contracts/src/index.ts')}
     ]
   }

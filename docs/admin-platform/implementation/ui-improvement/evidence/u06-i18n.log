@@ -1,0 +1,4 @@
+$ node scripts/i18n/check.mjs
+[i18n] translation key parity PASS (346 keys, ko-KR, en-US)
+$ node scripts/i18n/hardcode-check.mjs
+[i18n] hard-coded Korean TSX text check PASS

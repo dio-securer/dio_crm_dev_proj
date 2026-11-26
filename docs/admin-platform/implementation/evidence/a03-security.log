@@ -1,0 +1,27 @@
+✔ T39 REQUIRED enroll, pending business403, atomic concurrent verify and receipt replay (191.129623ms)
+✔ T40 OFF/OPTIONAL/enrolled and inherited REQUIRED branches (63.968405ms)
+✔ T41 five failures persist lock; expiration uses injected clock; max/idle sessions (55.798382ms)
+✔ T43-UNIT company switch retains old context until MFA and refresh cannot bypass strengthening (39.108882ms)
+✔ T62/T63 global reset request isolates companies, approval revokes all sessions/challenges once (87.06295ms)
+✔ T63 stale and expired reset request reject without revocation (34.666503ms)
+✔ T69 SELF/ORG/SUBTREE/COMPANY scope filters total, detail, PATCH and company isolation (62.970737ms)
+✔ T66/T07 field DENY and LAST4 hide raw values, query side channels and injected writes (45.758517ms)
+✔ role assignment invalidates old access/refresh, DENY beats grant and unknown/global grant rejected (48.880702ms)
+✔ T70 FIELD-only delegation rejects SECURITY, privilege escalation and expired access (41.096437ms)
+✔ admin1 manages configuration but has no implicit business access (16.018001ms)
+✔ T69 ORG versus SUBTREE versus COMPANY uses descendant, sibling and unrelated owners for reads/writes (120.449762ms)
+✔ custom role cannot assign stronger data/field authority or expand explicit org with empty roots (16.660066ms)
+✔ config.read/edit custom grants and denies are enforced independently of base SALES role (27.292594ms)
+✔ MFA wrong-code and skip idempotency preserve attempt/session count, session self-revoke works (43.493414ms)
+✔ policy role overrides enforce MFA; freshness and max lifetime survive refresh (137.394066ms)
+✔ security draft validates positive limits and DEMO provider, does not activate policy (29.384992ms)
+✔ authorized repository rechecks session inside write transaction after earlier authorization (13.10214ms)
+✔ company administrator may assign business permissions but cannot mint higher administrative authority (20.88832ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1380.488712
