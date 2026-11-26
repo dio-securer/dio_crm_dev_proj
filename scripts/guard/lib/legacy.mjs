@@ -92,14 +92,19 @@ export function toDocument({ files, frozenOther }) {
 
 const expand = groups => (groups ?? []).flatMap(group => group.names.map(name => `${group.dir}/${name}`));
 
-/** Load legacy-files.json. Throws when missing or malformed: the guard must fail closed. */
-export function loadLegacy(root) {
-  const file = path.join(root, LEGACY_FILE);
-  if (!fs.existsSync(file)) throw new Error(`${LEGACY_FILE} 이 없습니다. node scripts/guard/legacy-scan.mjs 로 만드세요.`);
-  const doc = JSON.parse(fs.readFileSync(file, 'utf8'));
-  if (!Array.isArray(doc.files) || !Array.isArray(doc.frozenOther)) throw new Error(`${LEGACY_FILE} 형식이 잘못되었습니다.`);
+/** Parse legacy-files.json text. Throws when malformed. */
+export function parseLegacy(text) {
+  const doc = JSON.parse(text);
+  if (!doc || !Array.isArray(doc.files) || !Array.isArray(doc.frozenOther)) throw new Error(`${LEGACY_FILE} 형식이 잘못되었습니다.`);
   const ruleOf = new Map(doc.files.flatMap(group => group.names.map(name => [`${group.dir}/${name}`, group.rule])));
   const frozenOther = expand(doc.frozenOther);
   const rulesInSync = JSON.stringify(doc.rules) === JSON.stringify(LEGACY_RULES);
   return { doc, ruleOf, files: new Set(ruleOf.keys()), frozenOther: new Set(frozenOther), rulesInSync };
+}
+
+/** Load legacy-files.json. Throws when missing or malformed: the guard must fail closed. */
+export function loadLegacy(root) {
+  const file = path.join(root, LEGACY_FILE);
+  if (!fs.existsSync(file)) throw new Error(`${LEGACY_FILE} 이 없습니다. node scripts/guard/legacy-scan.mjs 로 만드세요.`);
+  return parseLegacy(fs.readFileSync(file, 'utf8'));
 }

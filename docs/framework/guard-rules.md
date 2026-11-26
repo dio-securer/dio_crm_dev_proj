@@ -14,7 +14,9 @@
 | `pnpm guard --init-baseline` | 기준선을 처음 만든다. 이미 있으면 거부한다. |
 | `pnpm guard --strict` | 기준선을 더 내릴 수 있는데 안 내린 경우도 실패로 본다. |
 | `node scripts/guard/run.mjs --commits <base>..<head>` | G09(변경 ID)만 돌린다. 범위 안에 커밋이 하나도 없으면 통과가 아니라 오류(종료 코드 2)다. |
+| `node scripts/guard/run.mjs --protect <기준 ref>` | 보호 검사(P1~P5). 기준 브랜치와 비교해 기준선·legacy 목록·테스트·변경 ID 시작점이 약해졌는지 본다. 결과는 `.guard/protect-result.json` 과 `.guard/summary.md`. 자세한 내용은 `docs/framework/ci-gates.md`. |
 | `node scripts/guard/run.mjs --docs` | 이 문서를 다시 만든다. |
+| `node scripts/guard/run.mjs --codeowners` | `.github/CODEOWNERS` 를 보호 경로 목록(`scripts/guard/protected-paths.json`)에서 다시 만든다. 파일이 목록과 다르면 `pnpm guard` 가 실패한다. |
 | `node scripts/guard/legacy-scan.mjs` | `legacy-files.json` 을 만들거나 줄인다. |
 
 종료 코드: 0 통과, 1 위반 있음, 2 사용법 오류 또는 가드 자체 오류(규칙이 돌지 못하면 통과가 아니라 실패다).
@@ -28,7 +30,7 @@
 - 테스트 예외는 두 가지뿐이다: 이름이 `*.spec.*`·`*.test.*` 인 파일, 그리고 정해진 테스트 폴더 `backend/test/`, `tests/`. 폴더 이름만 test 로 짓는 것은 예외가 아니다. 예외 목록(테스트 폴더, G03 제외 폴더, G07 허용 계층)은 모두 코드에 경로 그대로 적혀 있고, 늘리려면 `scripts/guard/` 를 고쳐야 한다.
 - G06·G07·G11 은 `frontend/`, `backend/`, `packages/`, `extensions/` 만 본다. 저장소 맨 위에 새 폴더를 만들어 코드를 두면 이 셋은 보지 않는다(G03·G05 는 저장소 전체를 본다). 작업 공간(pnpm-workspace.yaml)에 없는 폴더는 빌드에 들어가지 않는다.
 - 줄 끝 주석으로 규칙을 끄는 방법은 일부러 만들지 않았다.
-- `guard-baseline.json`, `legacy-files.json`, `scripts/guard/` 를 고치면 무엇이든 통과시킬 수 있다. 두 JSON 을 지우고 다시 만드는 것도 같다. 이 셋은 보호 파일로 다뤄야 하며, 그 보호(기준 브랜치와 비교)는 CI 에서 한다(다음 단계 F0-3). 지금 가드 혼자서는 막지 못한다.
+- `guard-baseline.json`, `legacy-files.json`, `scripts/guard/` 를 고치면 무엇이든 통과시킬 수 있다. 두 JSON 을 지우고 다시 만드는 것도 같다. 그래서 이 셋은 보호 파일이다. `pnpm guard` 혼자서는 막지 못하고, CI 의 보호 검사(`--protect`)가 기준 브랜치와 비교해 막는다: 숫자를 올리거나 항목을 추가하면 실패하고, `scripts/guard/` 를 고치면 요약 맨 위에 "보호 파일 변경"으로 나온다(`docs/framework/ci-gates.md`).
 - 코드 구조를 보는 규칙(G02·G06·G07·G08·G11, G04 의 새 구역 부분)은 TypeScript 구문 트리(AST)로 검사한다. 그래서 괄호, `as`·`<T>`·`!`·`satisfies`, 따옴표 종류, 템플릿 문자열, 문자열 이어 붙이기, 대괄호 접근, 줄바꿈·공백처럼 뜻이 같은 다른 표기는 같은 것으로 본다. 주석과 일반 문자열 안의 글자는 세지 않는다.
 - AST 는 구문만 본다(타입 검사·다른 파일 추적 없음). 다른 파일에서 가져온 값, 함수 인자, 실행 중에 만든 문자열은 따라가지 못한다. 이름으로 판단하는 규칙은 이름을 바꾸면 피할 수 있다. 목적은 무심코 생기는 이탈과 흔한 우회 표기를 막는 것이다.
 - 코드 파일이 구문 오류로 읽히지 않으면 그 파일을 보는 규칙은 통과가 아니라 오류(ERROR, 종료 코드 2)가 된다. TypeScript 패키지가 설치되지 않은 경우도 같다(`pnpm install` 필요).
@@ -169,9 +171,10 @@
 - 기준선: 기준선 없음. 한 건이라도 있으면 실패한다.
 - 예외(검사하지 않는 것):
   - 병합 커밋(부모가 둘 이상)
+  - 규칙 도입 전 커밋: `scripts/guard/commit-id-start.json` 의 lastExemptCommit 과 그 조상. 그 밖의 커밋은 모두 검사한다(시작점의 후손이 아닌 곁가지 커밋도 검사한다).
 - 알려진 한계:
   - ID 형식만 본다. 그 요청이 실제로 있는지, 변경 내용이 요청과 맞는지는 확인하지 않는다.
-  - 과거 커밋은 ID 가 없으므로 범위를 이 규칙 도입 이후로 잡아야 한다.
+  - 시작점 파일은 지금 작업 트리의 것을 읽는다. 시작점을 뒤로 옮겨 커밋을 빼는 것은 이 규칙이 아니라 보호 검사(`--protect` 의 P5)가 막는다.
 
 ### G10 legacy-freeze
 

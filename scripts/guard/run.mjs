@@ -4,9 +4,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { CODEOWNERS_FILE, codeownersInSync, writeCodeowners } from './lib/codeowners.mjs';
 import { BASELINE_FILE, compare, countsOf, loadBaseline, lowered, show, totalOf, writeBaseline } from './lib/baseline.mjs';
 import { DOCS_FILE, docsInSync, writeDocs } from './lib/docs.mjs';
 import { createContext, git } from './lib/files.mjs';
+import { runProtect } from './lib/protect.mjs';
 import { MAX_LINE, SELF_DIR, selfCheck } from './lib/selfcheck.mjs';
 import { DEFAULT_RULES, RULES } from './rules/index.mjs';
 import g09 from './rules/g09-change-id.mjs';
@@ -14,18 +16,25 @@ import g09 from './rules/g09-change-id.mjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const RESULT_DIR = '.guard';
 const MAX_LOCATIONS = 8;
-const FLAGS = ['--update-baseline', '--init-baseline', '--docs', '--strict', '--commits'];
+const FLAGS = ['--update-baseline', '--init-baseline', '--docs', '--codeowners', '--strict'];
+const VALUE_FLAGS = { '--commits': '<base>..<head>', '--protect': '<base-ref>' };
+const USAGE = [...FLAGS, ...Object.entries(VALUE_FLAGS).map(pair => pair.join(' '))];
 
 function parseArgs(argv) {
   const options = {};
   for (let i = 0; i < argv.length; i += 1) {
-    const arg = argv[i];
-    if (arg.startsWith('--commits=')) options.commits = arg.slice('--commits='.length);
-    else if (arg === '--commits') { options.commits = argv[i + 1] ?? ''; i += 1; } else if (FLAGS.includes(arg)) options[arg.slice(2)] = true;
-    else fail(2, `알 수 없는 옵션: ${arg}\n사용법: node scripts/guard/run.mjs [${FLAGS.join(' | ')} <base>..<head>]`);
+    const cut = argv[i].startsWith('--') ? argv[i].indexOf('=') : -1;
+    const [name, inline] = cut > 0 ? [argv[i].slice(0, cut), argv[i].slice(cut + 1)] : [argv[i]];
+    if (Object.hasOwn(VALUE_FLAGS, name)) {
+      options[name.slice(2)] = inline ?? argv[i + 1] ?? '';
+      if (inline === undefined) i += 1;
+    } else if (FLAGS.includes(argv[i])) options[name.slice(2)] = true;
+    else fail(2, `알 수 없는 옵션: ${argv[i]}\n사용법: node scripts/guard/run.mjs [${USAGE.join(' | ')}]`);
   }
-  const modes = ['update-baseline', 'init-baseline', 'docs', 'commits'].filter(key => options[key] !== undefined);
-  if (modes.length > 1) fail(2, `함께 쓸 수 없는 옵션: ${modes.map(key => `--${key}`).join(', ')}`);
+  const modes = ['update-baseline', 'init-baseline', 'docs', 'codeowners', 'commits', 'protect'].filter(key => options[key] !== undefined);
+  if (modes.length > 1 || (options.strict && (options.commits !== undefined || options.protect !== undefined))) {
+    fail(2, `함께 쓸 수 없는 옵션: ${[...modes, ...(options.strict ? ['strict'] : [])].map(key => `--${key}`).join(', ')}`);
+  }
   return options;
 }
 
@@ -74,12 +83,13 @@ function runRules(ctx) {
 function runCommits(range) {
   let outcome;
   try { outcome = g09.checkRange(root, range); } catch (error) { fail(2, `G09 를 돌릴 수 없습니다: ${error.message.split('\n')[0]}`); }
-  const { commits, findings } = outcome;
-  if (commits.length === 0) fail(2, `G09: 범위 ${range} 안에 검사할 커밋이 없습니다. 빈 범위는 통과가 아니라 오류입니다(범위를 잘못 준 것일 수 있습니다).`);
+  const { commits, findings, exempt, start } = outcome;
+  if (commits.length + exempt === 0) fail(2, `G09: 범위 ${range} 안에 검사할 커밋이 없습니다. 빈 범위는 통과가 아니라 오류입니다(범위를 잘못 준 것일 수 있습니다).`);
   const status = findings.length ? 'FAIL' : 'PASS';
-  console.log(`${g09.id} ${g09.name.padEnd(22)} ${status.padEnd(5)} 범위 ${range}  커밋 ${commits.length}개 / ID 없는 커밋 ${findings.length}개`);
+  const skipped = `규칙 도입 전이라 뺀 커밋 ${exempt}개(시작점 ${start.slice(0, 12)} 과 그 조상)`;
+  console.log(`${g09.id} ${g09.name.padEnd(22)} ${status.padEnd(5)} 범위 ${range}  검사한 커밋 ${commits.length}개 / ID 없는 커밋 ${findings.length}개 / ${skipped}`);
   for (const finding of findings) console.log(`    ${finding.file}  ${finding.message}`);
-  const rule = { id: g09.id, name: g09.name, status, checkedCommits: commits.length, newViolations: findings };
+  const rule = { id: g09.id, name: g09.name, status, checkedCommits: commits.length, exemptCommits: exempt, lastExemptCommit: start, newViolations: findings };
   writeResult('guard-commits-result.json', { status, range, rules: [rule] });
   process.exit(findings.length ? 1 : 0);
 }
@@ -100,7 +110,9 @@ function initBaseline(runs) {
 function main() {
   const options = parseArgs(process.argv.slice(2));
   if (options.docs) { writeDocs(root, RULES); console.log(`[guard] ${DOCS_FILE} 을 다시 만들었습니다.`); return 0; }
+  if (options.codeowners) { writeCodeowners(root); console.log(`[guard] ${CODEOWNERS_FILE} 을 다시 만들었습니다.`); return 0; }
   if (options.commits !== undefined) runCommits(options.commits);
+  if (options.protect !== undefined) return runProtect(root, options.protect, meta, RESULT_DIR);
 
   const ctx = createContext(root);
   const runs = runRules(ctx);
@@ -131,6 +143,8 @@ function main() {
   rows.forEach(printRule);
   const docsOk = docsInSync(root, RULES);
   if (!docsOk) console.log(`DOCS ${DOCS_FILE} 이 규칙과 다릅니다. node scripts/guard/run.mjs --docs 를 실행하세요.`);
+  const ownersOk = codeownersInSync(root);
+  if (!ownersOk) console.log(`OWNERS ${CODEOWNERS_FILE} 이 보호 경로 목록과 다릅니다. node scripts/guard/run.mjs --codeowners 를 실행하세요.`);
   // Self-check: an unreadable guard is a guard malfunction (ERROR), not an ordinary violation.
   if (tooLong.length) console.log(`SELF ${SELF_DIR} 에 ${MAX_LINE}자를 넘는 줄이 ${tooLong.length}개 있습니다 (가드 오류).`);
   for (const spot of tooLong.slice(0, MAX_LOCATIONS)) console.log(`    ${where(spot.file, spot.line)}  ${spot.length}자`);
@@ -138,10 +152,10 @@ function main() {
   if (lowerable) console.log(`[guard] 기준선을 내릴 수 있는 항목 ${lowerable}개. pnpm guard --update-baseline 으로 반영하세요.`);
 
   const errored = rows.some(row => row.status === 'ERROR') || tooLong.length > 0;
-  const failed = rows.some(row => row.status === 'FAIL') || !docsOk || (options.strict && lowerable > 0);
+  const failed = rows.some(row => row.status === 'FAIL') || !docsOk || !ownersOk || (options.strict && lowerable > 0);
   const status = errored ? 'ERROR' : failed ? 'FAIL' : 'PASS';
   writeResult('guard-result.json', {
-    status, docsInSync: docsOk, baselineLowerable: lowerable,
+    status, docsInSync: docsOk, codeownersInSync: ownersOk, baselineLowerable: lowerable,
     selfCheck: { status: tooLong.length ? 'ERROR' : 'PASS', maxLineLength: MAX_LINE, tooLong },
     rules: rows.map(({ counts, lowerable: canLower, baseline, ...row }) => ({ ...row, baselineKind: baseline, lowerable: canLower })),
   });

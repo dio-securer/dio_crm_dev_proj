@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "note": "보호 경로의 단 하나뿐인 목록. .github/CODEOWNERS 는 여기서 만들고(--codeowners), 보호 검사(--protect)의 P4 도 이 목록을 쓴다.",
+  "owner": "@dio-securer",
+  "paths": [
+    { "path": "/.github/", "what": "CI 설정과 승인자 목록(CODEOWNERS)" },
+    { "path": "/scripts/guard/", "what": "가드 코드" },
+    { "path": "/tests/guard/", "what": "가드의 테스트" },
+    { "path": "/guard-baseline.json", "what": "기존 위반을 묶어 둔 기준선" },
+    { "path": "/legacy-files.json", "what": "이관 대상(legacy) 파일 목록" },
+    { "path": "/guard-raises.json", "what": "예외 선언 파일" },
+    { "path": "/CLAUDE.md", "what": "AI 작업 규칙" },
+    { "path": "/docs/framework/adr/", "what": "프레임워크 결정 기록(ADR)" },
+    { "path": "/packages/contracts/src/metadata/", "what": "메타데이터 스키마" }
+  ]
+}

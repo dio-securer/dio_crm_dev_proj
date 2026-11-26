@@ -29,7 +29,11 @@ export function renderDocs(rules) {
     '| `pnpm guard --init-baseline` | 기준선을 처음 만든다. 이미 있으면 거부한다. |',
     '| `pnpm guard --strict` | 기준선을 더 내릴 수 있는데 안 내린 경우도 실패로 본다. |',
     '| `node scripts/guard/run.mjs --commits <base>..<head>` | G09(변경 ID)만 돌린다. 범위 안에 커밋이 하나도 없으면 통과가 아니라 오류(종료 코드 2)다. |',
+    '| `node scripts/guard/run.mjs --protect <기준 ref>` | 보호 검사(P1~P5). 기준 브랜치와 비교해 기준선·legacy 목록·테스트·변경 ID 시작점이 약해졌는지 본다. '
+      + '결과는 `.guard/protect-result.json` 과 `.guard/summary.md`. 자세한 내용은 `docs/framework/ci-gates.md`. |',
     '| `node scripts/guard/run.mjs --docs` | 이 문서를 다시 만든다. |',
+    '| `node scripts/guard/run.mjs --codeowners` | `.github/CODEOWNERS` 를 보호 경로 목록(`scripts/guard/protected-paths.json`)에서 다시 만든다. '
+      + '파일이 목록과 다르면 `pnpm guard` 가 실패한다. |',
     '| `node scripts/guard/legacy-scan.mjs` | `legacy-files.json` 을 만들거나 줄인다. |',
     '',
     '종료 코드: 0 통과, 1 위반 있음, 2 사용법 오류 또는 가드 자체 오류(규칙이 돌지 못하면 통과가 아니라 실패다).',
@@ -46,7 +50,8 @@ export function renderDocs(rules) {
       + '(G03·G05 는 저장소 전체를 본다). 작업 공간(pnpm-workspace.yaml)에 없는 폴더는 빌드에 들어가지 않는다.',
     '- 줄 끝 주석으로 규칙을 끄는 방법은 일부러 만들지 않았다.',
     '- `guard-baseline.json`, `legacy-files.json`, `scripts/guard/` 를 고치면 무엇이든 통과시킬 수 있다. 두 JSON 을 지우고 다시 만드는 것도 같다. '
-      + '이 셋은 보호 파일로 다뤄야 하며, 그 보호(기준 브랜치와 비교)는 CI 에서 한다(다음 단계 F0-3). 지금 가드 혼자서는 막지 못한다.',
+      + '그래서 이 셋은 보호 파일이다. `pnpm guard` 혼자서는 막지 못하고, CI 의 보호 검사(`--protect`)가 기준 브랜치와 비교해 막는다: '
+      + '숫자를 올리거나 항목을 추가하면 실패하고, `scripts/guard/` 를 고치면 요약 맨 위에 "보호 파일 변경"으로 나온다(`docs/framework/ci-gates.md`).',
     '- 코드 구조를 보는 규칙(G02·G06·G07·G08·G11, G04 의 새 구역 부분)은 TypeScript 구문 트리(AST)로 검사한다. '
       + '그래서 괄호, `as`·`<T>`·`!`·`satisfies`, 따옴표 종류, 템플릿 문자열, 문자열 이어 붙이기, 대괄호 접근, 줄바꿈·공백처럼 뜻이 같은 다른 표기는 같은 것으로 본다. 주석과 일반 문자열 안의 글자는 세지 않는다.',
     '- AST 는 구문만 본다(타입 검사·다른 파일 추적 없음). 다른 파일에서 가져온 값, 함수 인자, 실행 중에 만든 문자열은 따라가지 못한다. '

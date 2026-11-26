@@ -7,7 +7,7 @@ export const BASELINE_FILE = 'guard-baseline.json';
 const NOTE = '기존 위반을 묶어 둔 기준선. 숫자는 줄어들 수만 있다(--update-baseline). 숫자를 올리거나 파일을 추가하려면 사람이 직접 고쳐야 한다(보호 파일).';
 
 // A frozen value is a count (number) or, for `max` rules, a set of measures such as { lines, bytes }.
-const isSet = value => value !== null && typeof value === 'object';
+export const isSet = value => value !== null && typeof value === 'object';
 const keysOf = (a, b) => [...new Set([...Object.keys(a ?? {}), ...Object.keys(b ?? {})])].sort(byCodeUnit);
 const validNumber = value => Number.isInteger(value) && value > 0;
 
@@ -32,12 +32,10 @@ export const show = (value, sorted = false) => (isSet(value)
   ? (sorted ? keysOf(value) : Object.keys(value)).map(key => `${key} ${value[key]}`).join(', ')
   : String(value));
 
-/** Returns null when the file does not exist. Throws when it is malformed or internally inconsistent. */
-export function loadBaseline(root) {
-  const file = path.join(root, BASELINE_FILE);
-  if (!fs.existsSync(file)) return null;
-  const doc = JSON.parse(fs.readFileSync(file, 'utf8'));
-  if (!doc || typeof doc.rules !== 'object') throw new Error(`${BASELINE_FILE} 형식이 잘못되었습니다.`);
+/** Parse baseline text into { ruleId: { file: value } }. Throws when it is malformed or internally inconsistent. */
+export function parseBaseline(text) {
+  const doc = JSON.parse(text);
+  if (!doc || typeof doc.rules !== 'object' || doc.rules === null) throw new Error(`${BASELINE_FILE} 형식이 잘못되었습니다.`);
   const rules = {};
   for (const [id, entry] of Object.entries(doc.rules)) {
     const flat = flattenDirs(entry.files);
@@ -51,6 +49,12 @@ export function loadBaseline(root) {
     rules[id] = flat;
   }
   return rules;
+}
+
+/** Returns null when the file does not exist. Throws when it is malformed or internally inconsistent. */
+export function loadBaseline(root) {
+  const file = path.join(root, BASELINE_FILE);
+  return fs.existsSync(file) ? parseBaseline(fs.readFileSync(file, 'utf8')) : null;
 }
 
 export function writeBaseline(root, rules) {

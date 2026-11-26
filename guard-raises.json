@@ -1,0 +1,5 @@
+{
+  "schemaVersion": 1,
+  "note": "예외 선언. 기준선을 올리거나, legacy 목록에 파일을 넣거나, 테스트를 지우거나 줄이는 변경은 여기에 정확히 선언해야 보호 검사(--protect)를 통과한다. 선언은 PR 요약 맨 위에 나오고 사람이 확인한다. 병합된 뒤에는 지운다. 쓰는 법: docs/framework/ci-gates.md",
+  "raises": []
+}
