@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "generatedBy": "node scripts/guard/legacy-scan.mjs",
+  "note": "이관 대상(legacy) 파일 목록. 줄어들 수만 있다. 파일을 추가하려면 사람이 직접 고쳐야 한다(보호 파일).",
+  "totals": {
+    "files": 164,
+    "frozenOther": 74
+  },
+  "rules": [
+    {"id":"L1","name":"frontend-top-level-pages","description":"화면별 페이지 컴포넌트(frontend/src 바로 아래 *Page.tsx). frontend/src 바로 아래에는 새 파일을 만들 수 없다.","include":["frontend/src/*Page.tsx"],"freeze":["frontend/src/*"]},
+    {"id":"L2","name":"frontend-hq-mock","description":"HQ 목업 화면 전체(화면·객체별 코드와 전용 CSS).","include":["frontend/src/hq-mock/**"],"freeze":["frontend/src/hq-mock/**"]},
+    {"id":"L3","name":"frontend-screen-templates","description":"데모 화면과 시장 템플릿 화면 컴포넌트.","include":["frontend/src/demo/**","frontend/src/market/templates/**"],"freeze":["frontend/src/demo/**","frontend/src/market/templates/**"]},
+    {"id":"L4","name":"lead-specific-customization","description":"리드 전용 커스터마이징 계약·게이트웨이·화면 파일(객체 하나만을 위한 코드).","include":["packages/contracts/src/lead-*","backend/src/customization/*lead-*","frontend/src/customization/*Lead*","frontend/src/customization/lead-*"],"freeze":["packages/contracts/src/lead-*","backend/src/customization/*lead-*","frontend/src/customization/*Lead*","frontend/src/customization/lead-*"]},
+    {"id":"L5","name":"big-css","description":"100줄 이상인 CSS(토큰 파일 제외). frontend/src/styles 에는 새 파일을 만들 수 없다.","include":["frontend/src/**/*.css"],"exclude":["frontend/src/styles/tokens.css"],"minLines":100,"freeze":["frontend/src/styles/*"]},
+    {"id":"L6","name":"backend-hq-mock","description":"HQ 목업 백엔드(객체별 라우트·모델). 명세에 직접 적히지 않았으나 프런트 hq-mock 과 한 쌍이라 포함했다.","include":["backend/src/hq-mock/**"],"freeze":["backend/src/hq-mock/**"]},
+    {"id":"L7","name":"backend-object-modules","description":"객체별 백엔드 모듈(activity·analytics·contract·customer·opportunity·order). 명세에 직접 적히지 않았으나 객체별 코드라 포함했다.","include":["backend/src/modules/{activity,analytics,contract,customer,opportunity,order}/**"],"freeze":["backend/src/modules/{activity,analytics,contract,customer,opportunity,order}/**"]}
+  ],
+  "files": [
+    {"rule":"L1","dir":"frontend/src","names":["Account360Page.tsx","AccountsPage.tsx","ActivitiesPage.tsx","ActivityReportsPage.tsx","AnalyticsDashboardPage.tsx","ContractsPage.tsx","DirectWorkPage.tsx","FulfillmentPage.tsx","LeadsPage.tsx","LedgerStatementsPage.tsx","OpportunitiesPage.tsx","OpsStatusPage.tsx","OrdersPage.tsx","PipelinePage.tsx"]},
+    {"rule":"L2","dir":"frontend/src/hq-mock","names":["AccountActionConfirm.tsx","AccountLogisticsPanel.tsx","AccountRelatedPanel.tsx","AccountServicePanel.tsx","AccountSharingPanel.tsx","ContractCollectionMethod.tsx","ContractFiles.tsx","ContractObservedFields.tsx","ContractPlanCards.tsx","HqAccountDetail.tsx","HqAccountTools.tsx","HqActivityPages.tsx","HqCollectionPlanList.tsx","HqCollectionPlansPage.tsx","HqContractOrders.tsx","HqDashboardWorkspace.tsx","HqFulfillmentLines.tsx","HqGlobalSearch.tsx","HqH06Pages.tsx","HqH07Pages.tsx","HqLeadsPage.tsx","HqMockControls.tsx","HqMockProvider.tsx","HqOpportunityActivities.tsx","HqOpportunityContactRoles.tsx","HqOpportunityContractProducts.tsx","HqOpportunityFollowUps.tsx","HqOpportunityHistory.tsx","HqOpportunityNotes.tsx","HqOpportunityProductPicker.tsx","HqOpportunityQuotes.tsx","HqSalesPages.tsx","LeadConversionSummary.tsx","LeadMobileCards.tsx","OpportunityInfoFields.tsx","QuotePrintView.tsx","WorkspaceHeading.tsx","account-editor-guard.ts","account-related.css","collection-plan-filters.ts","collection-plans.css","config-anchor.ts","contract-feedback.ts","contract-methods.ts","contract-opportunity-defaults.ts","customer-model.ts","customer-shared.tsx","customer.css","hq-activity.css","hq-h06.css","hq-mock.css","hq-sales.css","lead-activity-filter.ts","lead-history-display.ts","lead-salesforce.css","mode.ts","opportunity-navigation-guard.ts","opportunity-retry.ts","opportunity-timeline.ts","order-delivery-draft.ts","order-feedback.ts","product-usage.ts","report-filters.ts"]},
+    {"rule":"L3","dir":"frontend/src/demo","names":["GlobalExecutiveDemoScreens.tsx","LeadAccountDemoScreens.tsx","demo-account-repository.ts","demo-data.ts","demo-mode.ts"]},
+    {"rule":"L3","dir":"frontend/src/market/templates","names":["GLOBAL.ts","HQ.ts"]},
+    {"rule":"L3","dir":"frontend/src/market/templates/global","names":["GlobalAccountPage.tsx","GlobalActivityPage.tsx","GlobalActivityReportPage.tsx","GlobalLeadPage.tsx","GlobalScreens.tsx","global-screen-manifest.ts"]},
+    {"rule":"L3","dir":"frontend/src/market/templates/hq","names":["HqScreens.tsx","hq-screen-manifest.ts"]},
+    {"rule":"L4","dir":"backend/src/customization","names":["lead-activities.ts","lead-commands.ts","lead-exclusion-audit.ts","lead-extension-contract.ts","lead-extension-request.ts","lead-gateway.ts","lead-history.ts","lead-lifecycle-http.ts","lead-read-capabilities.ts","lead-timeline-contract.ts","sql-lead-extension-adapter.ts","sql-lead-extension-product.ts","sql-lead-extension-trust.ts"]},
+    {"rule":"L4","dir":"frontend/src/customization","names":["ConfiguredLeads.tsx","LeadExclusionHistory.tsx","LeadExtensionLayoutEditor.tsx","LeadOwnActivities.tsx","lead-column-width.ts","lead-extension-layout.ts","lead-sort-ui.ts"]},
+    {"rule":"L4","dir":"packages/contracts/src","names":["lead-column-alignments.ts","lead-column-widths.ts","lead-extension-layout.ts","lead-grid-columns.ts","lead-grid-settings.ts"]},
+    {"rule":"L5","dir":"frontend/src/styles","names":["global.css","tablet-design.css"]},
+    {"rule":"L6","dir":"backend/src/hq-mock","names":["account-logistics-routes.ts","account-related-routes.ts","account-service-routes.ts","activity-routes.ts","analytics-routes.ts","app.ts","contract-visibility.ts","customer-routes.ts","interfaces.ts","model.ts","opportunity-activity-routes.ts","opportunity-contact-role-routes.ts","opportunity-contract-product-routes.ts","opportunity-contract.ts","opportunity-note-routes.ts","opportunity-product-info.ts","opportunity-quote-routes.ts","opportunity-quote-sync.ts","order-fulfillment.ts","order-routes.ts","order-visibility.ts","repository.ts","sales-routes.ts","seed.ts"]},
+    {"rule":"L7","dir":"backend/src/modules/activity","names":["activity.controller.ts","activity.rules.ts","activity.service.ts","approval-route.controller.ts","approval-route.service.ts"]},
+    {"rule":"L7","dir":"backend/src/modules/analytics","names":["analytics.controller.ts","analytics.rules.ts","analytics.service.ts","localized-export.service.ts"]},
+    {"rule":"L7","dir":"backend/src/modules/contract","names":["contract.controller.ts","contract.rules.ts","contract.service.ts"]},
+    {"rule":"L7","dir":"backend/src/modules/customer","names":["customer.controller.ts","customer.rules.ts","customer.service.ts"]},
+    {"rule":"L7","dir":"backend/src/modules/opportunity","names":["opportunity.controller.ts","opportunity.rules.ts","opportunity.service.ts"]},
+    {"rule":"L7","dir":"backend/src/modules/order","names":["order.controller.ts","order.rules.ts","order.service.ts"]}
+  ],
+  "frozenOther": [
+    {"dir":"backend/src/customization","names":["lead-activities-http.spec.ts","lead-activities.spec.ts","lead-exclusion-audit.spec.ts","lead-exclusion-extension-worker-b.spec.ts","lead-exclusion-worker-b.spec.ts","lead-extension-product.spec.ts","lead-extension-routes.spec.ts","lead-extension-worker-b-product.spec.ts","lead-extension-worker-b.spec.ts","lead-gateway.spec.ts","lead-hira-extension-worker-b.spec.ts","lead-hira-gateway-worker-b.spec.ts","lead-history-worker-b.spec.ts","lead-history.spec.ts","lead-lifecycle.spec.ts","lead-list-policy.spec.ts","lead-list.spec.ts","lead-timeline-contract.spec.ts"]},
+    {"dir":"backend/src/modules/activity","names":["activity.rules.spec.ts"]},
+    {"dir":"backend/src/modules/analytics","names":["analytics.rules.spec.ts"]},
+    {"dir":"backend/src/modules/contract","names":["contract-plan-preservation.spec.ts","contract.rules.spec.ts"]},
+    {"dir":"backend/src/modules/customer","names":["account-interface.spec.ts","customer.rules.spec.ts"]},
+    {"dir":"backend/src/modules/opportunity","names":["opportunity.rules.spec.ts"]},
+    {"dir":"backend/src/modules/order","names":["order.rules.spec.ts"]},
+    {"dir":"frontend/src","names":["App.tsx","account-model.spec.ts","account-model.ts","account-sandbox.ts","api.ts","main.tsx","vite-env.d.ts"]},
+    {"dir":"frontend/src/demo","names":["demo-account-repository.spec.ts"]},
+    {"dir":"frontend/src/hq-mock","names":["AccountActionConfirm.spec.tsx","ContractCollectionMethod.spec.tsx","ContractObservedFields.spec.tsx","ContractPlanCards.spec.tsx","HqActivityFeedback.spec.tsx","HqActivityList.spec.tsx","HqCollectionPlanList.spec.tsx","HqFulfillmentLines.spec.tsx","HqOpportunityActivities.spec.tsx","HqOpportunityContactRoles.spec.tsx","HqOpportunityHistory.spec.tsx","HqOpportunityList.spec.tsx","HqOpportunityNotes.spec.tsx","HqOpportunityQuotes.spec.tsx","LeadConversionLinks.spec.tsx","LeadConversionSummary.spec.tsx","LeadMobileCards.spec.tsx","OrderContractNavigation.spec.tsx","QuotePrintView.spec.tsx","account-editor-guard.spec.ts","collection-plan-filters.spec.ts","contract-feedback.spec.ts","contract-methods.spec.ts","lead-activity-filter.spec.ts","lead-history-display.spec.ts","opportunity-navigation-guard.spec.ts","opportunity-retry.spec.ts","opportunity-timeline.spec.ts","order-delivery-draft.spec.ts","order-feedback.spec.ts","product-usage.spec.ts","product-usage.test.ts","report-filters.spec.ts"]},
+    {"dir":"frontend/src/market/templates/global","names":["global-screen-manifest.spec.ts"]},
+    {"dir":"frontend/src/market/templates/hq","names":["hq-screen-manifest.spec.ts"]},
+    {"dir":"frontend/src/styles","names":["account-mobile-design.css","demo.css","lead-account-demo.css","tokens.css","workspace.css"]}
+  ]
+}
