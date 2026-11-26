@@ -8,6 +8,7 @@
     "test": "pnpm -r test --if-present",
     "hq:check": "node --experimental-strip-types --test scripts/hq-standard/*.test.mjs",
     "guard": "node scripts/guard/run.mjs",
+    "guard:test": "node --test tests/guard/*.test.mjs",
     "regression:multi-market": "node scripts/regression/multi-market-ui-check.mjs",
     "i18n:check": "node scripts/i18n/check.mjs",
     "i18n:hardcode": "node scripts/i18n/hardcode-check.mjs",

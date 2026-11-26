@@ -9,19 +9,57 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history: the guard compares with the base branch (--protect) and reads commit subjects (--commits).
+          # In a shallow checkout the guard stops with an error instead of guessing.
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
           version: 9.15.0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: pnpm install --no-frozen-lockfile
+      - run: pnpm install --frozen-lockfile
       - name: Record resolved dependency lockfile changes
         run: git diff -- pnpm-lock.yaml
+      # --- Guard (docs/framework/ci-gates.md) ---------------------------------------------------------------
+      # Protect check first, so its summary exists even when a later step fails.
+      # P1 baseline not raised, P2 legacy list not grown, P3 no test lost, P4 protected files listed, P5 start point fixed.
+      - name: Guard protect check against the base branch
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: node scripts/guard/run.mjs --protect "origin/$BASE_REF"
+      - name: Guard change IDs on every commit of the pull request (G09)
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: node scripts/guard/run.mjs --commits "origin/$BASE_REF..HEAD"
+      # --strict: also fails when a baseline number could be lowered but was not (the ratchet must be tightened in the same PR).
+      - name: Guard framework rules G01-G11 against the baseline
+        run: pnpm guard --strict
+      - name: Guard self tests
+        run: pnpm guard:test
+      # -----------------------------------------------------------------------------------------------------
       - run: pnpm build
       - run: pnpm test
       - run: pnpm hq:check
       - run: pnpm hq:http
+      # Fast admin suites (node:test / jest / vitest, no browser). They existed but CI never ran them.
+      # The browser suites (test:admin:browser, :baseline, :entry, :*-ui, :all) are NOT added here: they need
+      # Playwright browsers and a running web server and take minutes; the HQ browser suite below already has
+      # two known failures (H02-B04, H03), see docs/framework/ci-gates.md.
+      - run: pnpm test:admin:contracts
+      - run: pnpm test:admin:api
+      - run: pnpm test:admin:security
+      - run: pnpm test:admin:configuration
+      - run: pnpm test:admin:account
+      - run: pnpm test:admin:master
+      - run: pnpm test:admin:approval
+      - run: pnpm test:admin:notification
+      - run: pnpm test:admin:integration
+      - run: pnpm test:admin:operations
+      - run: pnpm test:admin:designer-unit
       - run: pnpm exec playwright install chromium
       - name: Verify Chromium runtime and Korean font availability
         run: |
@@ -35,7 +73,9 @@ jobs:
       - run: pnpm hq:browser
       - run: pnpm regression:multi-market
       - run: pnpm i18n:check
-      - run: pnpm i18n:hardcode
+      # `pnpm i18n:hardcode` ran here. It is replaced by the guard step above: rule G04 runs the same script
+      # (scripts/i18n/hardcode-check.mjs, untouched) and ratchets its 744 existing findings per file, so a new
+      # hardcoded text fails while the old ones no longer keep this job red.
       - run: pnpm pwa:check
       - run: pnpm env:check
       - run: pnpm audit:critical
@@ -47,4 +87,24 @@ jobs:
           path: |
             frontend/dist/
             docs/hq-standard/implementation/evidence/
+          retention-days: 7
+      - name: Write the guard summary to the run page
+        if: always()
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ -f .guard/summary.md ]; then
+            cat .guard/summary.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "가드 보호 검사 요약이 없습니다. 보호 검사는 pull_request 에서만 돕니다 (이번 실행: $EVENT_NAME)." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Upload guard evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: guard-evidence
+          path: .guard/
+          # .guard is a dot folder: without this the artifact would be empty.
+          include-hidden-files: true
+          if-no-files-found: error
           retention-days: 7
