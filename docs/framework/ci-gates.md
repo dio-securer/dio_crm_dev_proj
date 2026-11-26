@@ -7,6 +7,7 @@ PR 하나가 병합되기 전에 CI(`.github/workflows/ci.yml`)가 무엇을 막
 
 코드를 읽지 않아도 된다. PR 의 CI 실행 화면(Actions > 해당 실행 > Summary)에 뜨는 **"가드 보호 검사 요약"** 만 본다.
 같은 내용이 `guard-evidence` 첨부(artifact)의 `summary.md` 에도 있다.
+이 요약과 첨부는 보호 검사 바로 다음에, PR 이 쓴 코드(설치 스크립트·빌드·테스트)가 돌기 전에 올라간다. 뒤 단계는 요약을 다시 쓰지 않는다.
 
 1. **판정** 줄. "실패"나 "오류"면 승인하지 않는다. "오류"는 검사가 돌지 못했다는 뜻이고 통과가 아니다.
 2. **예외 선언 N건 - 사람 확인 필요**. 이 PR 이 "기준선을 올린다 / legacy 목록에 파일을 넣는다 / 테스트를 지우거나 줄인다 /
@@ -19,11 +20,14 @@ PR 하나가 병합되기 전에 CI(`.github/workflows/ci.yml`)가 무엇을 막
 
 | 단계 | 무엇을 막나 |
 | --- | --- |
-| `pnpm install --frozen-lockfile` | 잠금 파일(pnpm-lock.yaml)과 다른 의존성이 설치되는 것. 잠금 파일을 안 고치고 의존성을 바꾸면 실패한다. |
-| `run.mjs --protect origin/<기준 브랜치>` (PR 에서만) | 보호 검사 P1~P5 (아래). 요약 `.guard/summary.md` 를 만든다. |
-| `run.mjs --commits origin/<기준 브랜치>..HEAD` (PR 에서만) | 변경 ID(`[REQ-숫자]`, `[F숫자-숫자]`) 없는 커밋 (G09). |
-| `pnpm guard --strict` | 프레임워크 규칙 G01~G11 의 새 위반. `--strict` 는 "기준선을 내릴 수 있는데 안 내린 것"도 실패로 본다. CODEOWNERS·규칙 문서가 원본과 다른 것도 실패. |
-| `pnpm guard:test` | 가드 자신의 테스트(`tests/guard/`). |
+| `pnpm install --frozen-lockfile --ignore-scripts --ignore-pnpmfile` | 잠금 파일(pnpm-lock.yaml)과 다른 의존성이 설치되는 것. 설치 스크립트와 `.pnpmfile.cjs` 는 돌리지 않는다. 가드가 PR 의 코드보다 먼저 돌게 하려는 것이다. |
+| `node scripts/guard/run.mjs --protect origin/<기준 브랜치>` (PR 에서만) | 보호 검사 P1~P5 (아래). 요약 `.guard/summary.md` 를 만든다. |
+| 요약 쓰기, `guard-evidence` 첨부 올리기 (항상 실행) | 막는 것은 없다. 승인하는 사람이 읽을 요약을 이 시점에 확정한다. |
+| `node scripts/guard/run.mjs --commits origin/<기준 브랜치>..HEAD` (PR 에서만) | 변경 ID(`[REQ-숫자]`, `[F숫자-숫자]`) 없는 커밋 (G09). |
+| `node scripts/guard/run.mjs --strict` | 프레임워크 규칙 G01~G11 의 새 위반. `--strict` 는 "기준선을 내릴 수 있는데 안 내린 것"도 실패로 본다. CODEOWNERS·규칙 문서·`CLAUDE.md` 의 만든 구간이 원본과 다른 것, 보호 목록에 없는 `package.json` 도 실패. |
+| `node --test tests/guard/*.test.mjs` | 가드와 `crm` 명령 자신의 테스트(`tests/guard/`). |
+| `guard-rule-results` 첨부 올리기 (항상 실행) | 막는 것은 없다. 위 두 가드 단계의 결과 파일을 남긴다. |
+| `pnpm install --frozen-lockfile`, `pnpm rebuild` | 여기서부터 PR 이 쓴 코드가 돈다. 처음 설치에서 미룬 설치 스크립트를 돌린다. |
 | `pnpm build`, `pnpm test` | 빌드 오류, 단위 테스트 실패. |
 | `pnpm hq:check`, `pnpm hq:http` | HQ 표준 계약·HTTP 테스트. |
 | `pnpm test:admin:*` 11개 | 관리자 기능의 브라우저 없는 테스트(contracts, api, security, configuration, account, master, approval, notification, integration, operations, designer-unit). |
@@ -33,6 +37,9 @@ PR 하나가 병합되기 전에 CI(`.github/workflows/ci.yml`)가 무엇을 막
 `pnpm i18n:hardcode` 단계는 없앴다. 같은 스크립트를 G04 가 돌리고, 기존 744건을 파일별로 묶어 "늘어나면 실패"로 본다.
 관리자 브라우저 테스트(`test:admin:browser`, `*-ui` 등)는 넣지 않았다. 브라우저와 서버를 띄워야 하고 오래 걸린다.
 
+가드 단계는 `pnpm guard` 가 아니라 `node scripts/guard/run.mjs` 로 직접 부른다. `package.json` 의 스크립트는 PR 이 바꿀 수 있기 때문이다
+(예: `"guard": "echo ok"`). 사람이 손으로 돌릴 때는 `pnpm guard`, `pnpm guard:test` 를 그대로 쓰면 된다.
+
 ## 보호 검사 P1~P5
 
 기준 브랜치와의 공통 조상(merge-base)과 지금 내용을 비교한다. 종료 코드: 0 통과, 1 위반, 2 검사 불가(통과 아님).
@@ -41,9 +48,25 @@ PR 하나가 병합되기 전에 CI(`.github/workflows/ci.yml`)가 무엇을 막
 | --- | --- |
 | P1 기준선 | `guard-baseline.json` 에서 규칙을 뺌, 파일별 숫자를 올림, 새 파일 항목을 넣음, 파일을 지움. 지우고 다시 만들어도 같은 비교를 받는다. |
 | P2 legacy 목록 | `legacy-files.json` 에 기준 브랜치에 없던 파일을 넣음, 분류를 바꿈. |
-| P3 테스트 | 테스트 파일을 지움, 테스트가 아닌 이름으로 바꿈, 파일 안의 테스트 수(`it`/`test`)나 묶음 수(`describe`)가 줄어듦. |
+| P3 테스트 | 테스트 파일을 지움, 테스트가 아닌 이름으로 바꿈, 파일 안의 테스트 수(`it`/`test`/`check`)나 묶음 수(`describe`)가 줄어듦. 실행될 수 없는 자리로 옮긴 테스트는 없는 것으로 센다. |
 | P4 보호 파일 | 실패 없음. 바뀐 보호 파일을 요약 맨 위에 적는다. 승인 강제는 CODEOWNERS 가 한다. |
 | P5 변경 ID 시작점 | `scripts/guard/commit-id-start.json` 의 값을 바꾸거나 파일을 지움. |
+
+P3 이 테스트 파일로 보는 것:
+
+- 이름이 `*.spec.*`·`*.test.*` 인 파일, 테스트 폴더(`backend/test/`, `tests/`) 안의 파일.
+- 인수 검사 스크립트: `scripts/` 아래에서 이름이 `-browser`, `-http`, `-verification`, `-walkthrough`, `-check`, `-smoke`, `-ui` 로 끝나는
+  `.mjs`·`.cjs`·`.js` 파일과 `check.mjs`. 이 파일들은 `it`/`test` 대신 `check(...)` 를 쓰므로 `check(...)` 호출 하나를 테스트 한 건으로 센다.
+  셀 것이 0건이어도 지우거나 이 이름 밖으로 바꾸면 실패한다.
+- 그 밖의 `scripts/` 파일과 테스트처럼 보이는 폴더의 파일은, 기준 브랜치에서 한 건이라도 세어질 때만 본다.
+
+세지 않는 테스트(실행될 수 없는 자리):
+
+- 항상 거짓인 조건 뒤: `if (false) …`, `if (0) …`, `false && …`, `true || …`, `false ? … : …`, `while (false) …`, `if (true) … else …` 의 else.
+- 파일 안에서 선언만 하고 쓰지 않는 함수의 안: `function f() { it(…) }`, `const f = () => { it(…) }`. 죽은 자리에서만 쓰이거나,
+  자기 자신만 부르거나, `export` 만 붙은 경우도 쓰지 않는 것으로 본다.
+
+살아 있던 테스트를 이런 자리로 옮기면 건수가 줄어 P3 이 실패한다.
 
 기준 브랜치에 해당 파일이 없으면 "건너뜀"이다(통과로 적지 않는다). 기준 브랜치를 읽지 못하면 오류(2)다.
 
@@ -91,7 +114,15 @@ CI 는 앞 단계가 실패하면 뒤 단계를 돌리지 않는다. 아래가 �
 
 - PR 의 CI 는 그 PR 안의 가드 코드와 워크플로로 돈다. `scripts/guard/` 나 `.github/` 를 바꾼 PR 은 검사를 스스로 무르게 만들 수 있다.
   그래서 그런 변경은 요약 맨 위(P4)에 나오고 CODEOWNERS 승인이 필요하다. 위 GitHub 설정이 꺼져 있으면 이 방어는 없다.
+- CI 의 가드 단계는 `package.json` 을 거치지 않고, PR 의 설치 스크립트보다 먼저 돈다. 하지만 가드 코드 자체(`scripts/guard/`)는 PR 의 것이다.
+  요약이 먼저 올라가도, 그 요약을 만든 것은 PR 안의 가드다. 이 한계는 위 항목과 같고 CODEOWNERS 승인으로만 막는다.
 - P3 은 건수만 본다. 테스트 내용을 비우거나, 하나를 지우고 빈 테스트를 하나 넣는 것은 잡지 못한다.
-  테스트를 실행 목록에서 빼는 것(`package.json` 스크립트, vitest/jest 설정)도 보지 않는다. 이 파일들은 보호 경로가 아니다.
+- 테스트를 실행 목록에서 빼는 것(`package.json` 스크립트, jest·vite 설정, 검사 파일을 찾아 돌리는 실행기)은 P3 이 보지 않는다.
+  대신 이 파일들은 보호 경로다. 바꾸면 요약의 "보호 파일 변경"에 나온다. 막는 것은 요약을 읽는 사람과 CODEOWNERS 다.
+  `package.json` 이 새로 생기면 보호 목록에 넣어야 `pnpm guard` 가 통과한다.
+- P3 의 "실행될 수 없는 자리" 판정은 뻔한 모양만 본다. 잡지 못하는 것: `return`·`throw`·`process.exit()` 뒤의 코드, 값이 실행 중에 정해지는 조건
+  (`if (process.env.X)`, `const off = false; if (off)`), 클래스·객체의 메서드 안, 다른 파일에서 불러 쓰는 `export` 함수 안의 테스트(0건으로 센다),
+  쓰는 척만 하는 참조(`void f`). 이름으로만 따지므로 같은 이름의 다른 변수가 쓰이면 쓰는 것으로 본다.
+- `check(...)` 는 이름으로 센다. 인수 검사가 다른 이름의 함수(`step`, `verify` 등)로 검사를 돌리면 세지 못한다. 그 파일을 지우는 것은 잡는다.
 - P3 은 git 의 이름 바꿈 판정(내용이 절반 이상 같으면 이름 바꿈)을 쓴다. 테스트 파일을 다른 테스트 이름으로 옮기면서 건수를 유지하면 통과한다.
 - 예외 선언은 AI 도 쓸 수 있다. 막는 것은 형식이 아니라 요약을 읽는 사람이다.

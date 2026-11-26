@@ -19,10 +19,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: pnpm install --frozen-lockfile
-      - name: Record resolved dependency lockfile changes
-        run: git diff -- pnpm-lock.yaml
+      # First install WITHOUT install scripts and without .pnpmfile.cjs: nothing the pull request wrote may run before the
+      # guard has compared it with the base branch. The guard itself needs only the TypeScript parser from node_modules.
+      - name: Install dependencies without running install scripts (for the guard)
+        run: pnpm install --frozen-lockfile --ignore-scripts --ignore-pnpmfile
       # --- Guard (docs/framework/ci-gates.md) ---------------------------------------------------------------
+      # The guard is called with node directly, never through a package.json script: a pull request can rewrite a script
+      # (for example "guard": "echo ok"), but it cannot change what these lines run without touching /.github/ (P4).
       # Protect check first, so its summary exists even when a later step fails.
       # P1 baseline not raised, P2 legacy list not grown, P3 no test lost, P4 protected files listed, P5 start point fixed.
       - name: Guard protect check against the base branch
@@ -30,6 +33,30 @@ jobs:
         env:
           BASE_REF: ${{ github.base_ref }}
         run: node scripts/guard/run.mjs --protect "origin/$BASE_REF"
+      # Published right here, before any step that runs code from the pull request (install scripts, build, tests),
+      # so no later step can replace what the approver reads. Nothing after this point writes the summary again.
+      - name: Write the guard summary to the run page
+        if: always()
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ -f .guard/summary.md ]; then
+            cat .guard/summary.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "가드 보호 검사 요약이 없습니다. 보호 검사는 pull_request 에서만 돕니다 (이번 실행: $EVENT_NAME)." >> "$GITHUB_STEP_SUMMARY"
+            mkdir -p .guard
+            echo "보호 검사 요약 없음 (이번 실행: $EVENT_NAME)" > .guard/no-protect-summary.txt
+          fi
+      - name: Upload guard evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: guard-evidence
+          path: .guard/
+          # .guard is a dot folder: without this the artifact would be empty.
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
       - name: Guard change IDs on every commit of the pull request (G09)
         if: github.event_name == 'pull_request'
         env:
@@ -37,10 +64,29 @@ jobs:
         run: node scripts/guard/run.mjs --commits "origin/$BASE_REF..HEAD"
       # --strict: also fails when a baseline number could be lowered but was not (the ratchet must be tightened in the same PR).
       - name: Guard framework rules G01-G11 against the baseline
-        run: pnpm guard --strict
+        run: node scripts/guard/run.mjs --strict
       - name: Guard self tests
-        run: pnpm guard:test
+        run: node --test tests/guard/*.test.mjs
+      # The results of the two steps above, uploaded before any pull-request code runs. The approver's summary and the
+      # guard-evidence artifact were already fixed right after the protect check and are not written again.
+      - name: Upload the later guard results (rules and commit IDs)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: guard-rule-results
+          path: |
+            .guard/guard-result.json
+            .guard/guard-commits-result.json
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 7
       # -----------------------------------------------------------------------------------------------------
+      # From here on the job runs code written by the pull request (install scripts, build, tests).
+      - run: pnpm install --frozen-lockfile
+      - name: Run the install scripts that the first install skipped
+        run: pnpm rebuild
+      - name: Record resolved dependency lockfile changes
+        run: git diff -- pnpm-lock.yaml
       - run: pnpm build
       - run: pnpm test
       - run: pnpm hq:check
@@ -87,24 +133,4 @@ jobs:
           path: |
             frontend/dist/
             docs/hq-standard/implementation/evidence/
-          retention-days: 7
-      - name: Write the guard summary to the run page
-        if: always()
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-        run: |
-          if [ -f .guard/summary.md ]; then
-            cat .guard/summary.md >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "가드 보호 검사 요약이 없습니다. 보호 검사는 pull_request 에서만 돕니다 (이번 실행: $EVENT_NAME)." >> "$GITHUB_STEP_SUMMARY"
-          fi
-      - name: Upload guard evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: guard-evidence
-          path: .guard/
-          # .guard is a dot folder: without this the artifact would be empty.
-          include-hidden-files: true
-          if-no-files-found: error
           retention-days: 7
