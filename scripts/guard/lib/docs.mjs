@@ -31,7 +31,8 @@ export function renderDocs(rules) {
     '| `node scripts/guard/run.mjs --commits <base>..<head>` | G09(변경 ID)만 돌린다. 범위 안에 커밋이 하나도 없으면 통과가 아니라 오류(종료 코드 2)다. |',
     '| `node scripts/guard/run.mjs --protect <기준 ref>` | 보호 검사(P1~P5). 기준 브랜치와 비교해 기준선·legacy 목록·테스트·변경 ID 시작점이 약해졌는지 본다. '
       + '결과는 `.guard/protect-result.json` 과 `.guard/summary.md`. 자세한 내용은 `docs/framework/ci-gates.md`. |',
-    '| `node scripts/guard/run.mjs --docs` | 이 문서를 다시 만든다. |',
+    '| `node scripts/guard/run.mjs --docs` | 이 문서와, `CLAUDE.md` 안의 규칙 표·보호 경로 목록을 다시 만든다. '
+      + '`CLAUDE.md` 의 그 구간이 가드와 다르면 `pnpm guard` 가 실패한다. |',
     '| `node scripts/guard/run.mjs --codeowners` | `.github/CODEOWNERS` 를 보호 경로 목록(`scripts/guard/protected-paths.json`)에서 다시 만든다. '
       + '파일이 목록과 다르면 `pnpm guard` 가 실패한다. |',
     '| `node scripts/guard/legacy-scan.mjs` | `legacy-files.json` 을 만들거나 줄인다. |',
@@ -46,7 +47,8 @@ export function renderDocs(rules) {
     '- 기준선에는 거짓 양성도 들어 있다. 예: G06 의 `direction === "IN"`(입출고 방향이지 인도가 아니다), G05 의 색처럼 보이는 글자, G08 의 테스트와 무관한 skip 속성. 건수가 곧 실제 문제의 수는 아니다.',
     '- 테스트 예외는 두 가지뿐이다: 이름이 `*.spec.*`·`*.test.*` 인 파일, 그리고 정해진 테스트 폴더 `backend/test/`, `tests/`. 폴더 이름만 test 로 짓는 것은 예외가 아니다. '
       + '예외 목록(테스트 폴더, G03 제외 폴더, G07 허용 계층)은 모두 코드에 경로 그대로 적혀 있고, 늘리려면 `scripts/guard/` 를 고쳐야 한다.',
-    '- G06·G07·G11 은 `frontend/`, `backend/`, `packages/`, `extensions/` 만 본다. 저장소 맨 위에 새 폴더를 만들어 코드를 두면 이 셋은 보지 않는다'
+    '- G07·G11 은 `frontend/`, `backend/`, `packages/`, `extensions/` 만 보고, G06 은 `frontend/src/`, `backend/src/`, `packages/` 만 본다'
+      + '(G06 은 회사 전용 코드를 두는 `extensions/` 를 보지 않는다). 저장소 맨 위에 새 폴더를 만들어 코드를 두면 이 셋은 보지 않는다'
       + '(G03·G05 는 저장소 전체를 본다). 작업 공간(pnpm-workspace.yaml)에 없는 폴더는 빌드에 들어가지 않는다.',
     '- 줄 끝 주석으로 규칙을 끄는 방법은 일부러 만들지 않았다.',
     '- `guard-baseline.json`, `legacy-files.json`, `scripts/guard/` 를 고치면 무엇이든 통과시킬 수 있다. 두 JSON 을 지우고 다시 만드는 것도 같다. '

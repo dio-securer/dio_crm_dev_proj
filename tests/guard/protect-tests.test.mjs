@@ -99,3 +99,15 @@ test('every package.json must be on the protected list', () => {
   const ctx = { files: ['package.json', 'backend/package.json', 'packages/new/package.json', 'docs/package.json.md'] };
   assert.deepEqual(unprotectedManifests(ctx, list), ['packages/new/package.json']);
 });
+
+test('CLAUDE.md blocks are filled between markers, and a missing or repeated marker is refused', async () => {
+  const { fill } = await import('../../scripts/guard/lib/claude-md.mjs');
+  const mark = (name, edge) => `<!-- guard:${name}:${edge} (node scripts/guard/run.mjs --docs 가 만든다. 직접 고치지 않는다) -->`;
+  const page = ['# t', mark('rules', 'start'), 'old', mark('rules', 'end'), 'kept', mark('protected', 'start'), mark('protected', 'end'), ''].join('\n');
+  const filled = fill(page, { rules: ['| G01 |'], protected: ['`/a`'] });
+  const expected = ['# t', mark('rules', 'start'), '| G01 |', mark('rules', 'end'), 'kept', mark('protected', 'start'), '`/a`', mark('protected', 'end'), ''];
+  assert.equal(filled, expected.join('\n'));
+  assert.equal(fill(filled, { rules: ['| G01 |'], protected: ['`/a`'] }), filled);
+  assert.equal(fill(page.replace(mark('rules', 'end'), ''), { rules: [], protected: [] }), null);
+  assert.equal(fill(`${page}${mark('rules', 'start')}\n`, { rules: [], protected: [] }), null);
+});
