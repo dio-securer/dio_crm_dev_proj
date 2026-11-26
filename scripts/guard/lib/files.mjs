@@ -2,6 +2,7 @@
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import { parse } from './ts.mjs';
 
 export const CODE_EXT = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.mts', '.cts'];
 export const STYLE_EXT = ['.css', '.scss'];
@@ -101,7 +102,20 @@ export function createContext(root) {
     return cache.get(file);
   };
   const size = file => fs.statSync(path.join(root, file)).size;
-  return { root, files, fileSet: new Set(files), read, size };
+  // Each file is parsed once; every AST rule shares the same tree. A syntax error throws (see ts.mjs).
+  const trees = new Map();
+  const ast = file => {
+    if (!trees.has(file)) trees.set(file, parse(file, read(file)));
+    return trees.get(file);
+  };
+  // Per-file derived data (for example the import list) computed once and shared between rules.
+  const derived = new Map();
+  const memo = (key, file, make) => {
+    const id = `${key}\0${file}`;
+    if (!derived.has(id)) derived.set(id, make());
+    return derived.get(id);
+  };
+  return { root, files, fileSet: new Set(files), read, size, ast, memo };
 }
 
 /** Short one-line excerpt for reports. */
