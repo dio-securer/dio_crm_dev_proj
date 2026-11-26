@@ -38,8 +38,10 @@ export function parseBaseline(text) {
   if (!doc || typeof doc.rules !== 'object' || doc.rules === null) throw new Error(`${BASELINE_FILE} 형식이 잘못되었습니다.`);
   const rules = {};
   for (const [id, entry] of Object.entries(doc.rules)) {
+    if (!/^G\d{2}$/.test(id) || !entry || typeof entry !== 'object') throw new Error(`${BASELINE_FILE}: 규칙 항목이 잘못되었습니다: ${id}`);
     const flat = flattenDirs(entry.files);
     for (const [name, value] of Object.entries(flat)) {
+      if (name === '__proto__' || (isSet(value) && Object.hasOwn(value, '__proto__'))) throw new Error(`${BASELINE_FILE}: ${id} 에 쓸 수 없는 이름(__proto__)이 있습니다.`);
       const ok = isSet(value) ? Object.keys(value).length > 0 && Object.values(value).every(validNumber) : validNumber(value);
       if (!ok) throw new Error(`${BASELINE_FILE}: ${id} ${name} 의 값이 양의 정수가 아닙니다.`);
     }
@@ -92,7 +94,7 @@ export function compare(rule, findings, frozen = {}) {
 
 /** Lower-only update: the smaller of frozen and current per file (per measure); fixed files are dropped; nothing is added or raised. */
 export function lowered(frozen, counts) {
-  const next = {};
+  const next = Object.create(null);
   for (const [file, value] of Object.entries(frozen)) {
     if (counts[file] === undefined) continue;
     const now = least(counts[file], value);

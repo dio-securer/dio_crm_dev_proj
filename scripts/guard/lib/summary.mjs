@@ -19,9 +19,12 @@ const TITLE = {
 const STATUS = { PASS: '통과', FAIL: '실패', SKIPPED: '건너뜀(비교 못 함)', REVIEW: '사람 확인 필요' };
 const CHANGE = { A: '추가', M: '수정', D: '삭제', R: '이름 바꿈', C: '복사', T: '종류 바뀜' };
 
-const cell = text => String(text).replace(/\|/g, '\\|').replace(/\s+/g, ' ');
+// Reasons, file names and error texts come from the PR itself. They are flattened to one line and stripped of anything
+// that could hide or restyle the rest of the summary (an HTML comment, a tag, a link, a table bar, a code fence).
+const ENTITY = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '|': '&#124;', '[': '&#91;', ']': '&#93;', '`': '&#96;', '*': '&#42;', _: '&#95;', '~': '&#126;' };
+const plain = text => String(text).replace(/\s+/g, ' ').trim().replace(/[&<>|[\]`*_~]/g, ch => ENTITY[ch]);
+const code = text => `\`${String(text).replace(/\s+/g, ' ').replace(/`/g, "'").replace(/\|/g, '/')}\``;
 const value = v => (v === null || v === undefined ? '없음' : typeof v === 'string' && /^[0-9a-f]{40}$/.test(v) ? v.slice(0, 12) : show(v));
-const code = text => `\`${String(text).replace(/`/g, "'")}\``;
 
 function delta(base, head) {
   if (base === null) return '비교 대상 없음(첫 도입)';
@@ -46,18 +49,26 @@ export function renderSummary(result) {
   const out = ['# 가드 보호 검사 요약', '', `**판정: ${verdictOf(result)}**`, ''];
   if (result.base?.mergeBase) out.push(`비교: 기준 ${code(result.base.ref)} (공통 조상 ${result.base.mergeBase.slice(0, 12)}) 과 지금 작업 내용.`, '');
   if (result.status === 'ERROR') {
-    out.push('## 오류', '', `- ${result.error}`, '', '검사 자체가 돌지 못했습니다. 기준 브랜치를 읽을 수 없거나 보호 파일의 형식이 깨진 경우입니다.', '');
+    out.push('## 오류', '', `- ${plain(result.error)}`, '', '검사 자체가 돌지 못했습니다. 기준 브랜치를 읽을 수 없거나 보호 파일의 형식이 깨진 경우입니다.', '');
     return `${out.join('\n')}${evidence(result)}`;
+  }
+
+  const open = result.rules.flatMap(rule => rule.violations.map(item => ({ ...item, id: rule.id })));
+  if (open.length || result.badDeclarations.length) {
+    out.push('## 실패한 이유', '');
+    for (const item of open) out.push(`- ${item.id}: ${plain(item.text)}${item.declare ? '' : ' (예외로 선언할 수 없는 변경입니다)'}`);
+    for (const item of result.badDeclarations) out.push(`- 잘못된 예외 선언 (${code(`${item.entry.rule} ${item.entry.file}`)}): ${plain(item.why)}`);
+    out.push('');
   }
 
   out.push('## 사람이 확인할 것', '', `### 예외 선언 ${result.exceptions.length}건 - 사람 확인 필요`, '');
   if (result.exceptions.length) {
     out.push('이 PR 은 아래 약화를 "예외"로 선언했습니다. 이유가 납득될 때만 승인하세요.', '');
-    out.push('| 무엇을 | 어디 | 전 -> 후 | 적어 둔 이유 | 변경 ID |', '| --- | --- | --- | --- | --- |');
+    out.push('| 무엇을 | 어디 | 전 → 후 | 적어 둔 이유 | 변경 ID |', '| --- | --- | --- | --- | --- |');
     for (const item of result.exceptions) {
       const where = item.guardRule ? `${item.guardRule} ${item.file}` : item.file;
-      const change = `${value(item.from)} -> ${value(item.to)}`;
-      out.push(`| ${WHAT[item.rule]} | ${cell(code(where))} | ${cell(change)} | ${cell(item.reason)} | ${cell(item.changeId)} |`);
+      const change = `${value(item.from)} → ${value(item.to)}`;
+      out.push(`| ${WHAT[item.rule]} | ${code(where)} | ${plain(change)} | ${plain(item.reason)} | ${plain(item.changeId)} |`);
     }
   } else out.push('없습니다.');
   out.push('', `### 보호 파일 변경 ${result.protectedChanges.length}건`, '');
@@ -69,7 +80,7 @@ export function renderSummary(result) {
       groups.get(item.protectedBy).files.push(item);
     }
     for (const [root, group] of groups) {
-      out.push(`- ${code(root)} (${group.what}) ${group.files.length}개`);
+      out.push(`- ${code(root)} (${plain(group.what)}) ${group.files.length}개`);
       for (const item of group.files.slice(0, MAX_FILES)) out.push(`  - ${CHANGE[item.status] ?? item.status}: ${code(item.file)}`);
       if (group.files.length > MAX_FILES) out.push(`  - ... 외 ${group.files.length - MAX_FILES}개 (전체는 .guard/protect-result.json)`);
     }
@@ -77,32 +88,25 @@ export function renderSummary(result) {
   const skippedRules = result.rules.filter(rule => rule.status === 'SKIPPED');
   if (skippedRules.length) {
     out.push('', `### 비교하지 못한 검사 ${skippedRules.length}건`, '');
-    for (const rule of skippedRules) out.push(`- ${rule.id} ${TITLE[rule.id]}: ${rule.note}`);
-  }
-
-  const open = result.rules.flatMap(rule => rule.violations.map(item => ({ ...item, id: rule.id })));
-  if (open.length || result.badDeclarations.length) {
-    out.push('', '## 실패한 이유', '');
-    for (const item of open) out.push(`- ${item.id}: ${item.text}${item.declare ? '' : ' (예외로 선언할 수 없는 변경입니다)'}`);
-    for (const item of result.badDeclarations) out.push(`- 잘못된 예외 선언 (${code(`${item.entry.rule} ${item.entry.file}`)}): ${item.why}`);
+    for (const rule of skippedRules) out.push(`- ${rule.id} ${TITLE[rule.id]}: ${plain(rule.note)}`);
   }
 
   out.push('', '## 검사별 결과', '', '| 검사 | 무엇을 보나 | 결과 | 비고 |', '| --- | --- | --- | --- |');
   for (const rule of result.rules) {
     const notes = [rule.note, rule.violations.length ? `위반 ${rule.violations.length}건` : '', rule.excused ? `예외로 선언됨 ${rule.excused}건` : ''];
-    out.push(`| ${rule.id} | ${TITLE[rule.id]} | ${STATUS[rule.status]} | ${cell(notes.filter(Boolean).join(' / ') || '-')} |`);
+    out.push(`| ${rule.id} | ${TITLE[rule.id]} | ${STATUS[rule.status]} | ${plain(notes.filter(Boolean).join(' / ') || '-')} |`);
   }
 
-  out.push('', '## 기준선 합계 (기준 브랜치 -> 지금)', '', '숫자는 "아직 남아 있는 기존 위반"입니다. 줄어드는 것이 좋은 방향이고, 늘어나면 안 됩니다.', '');
+  out.push('', '## 기준선 합계 (기준 브랜치 → 지금)', '', '숫자는 "아직 남아 있는 기존 위반"입니다. 줄어드는 것이 좋은 방향이고, 늘어나면 안 됩니다.', '');
   if (result.totals.length) {
     out.push('| 항목 | 기준 브랜치 | 지금 | 변화 |', '| --- | --- | --- | --- |');
-    for (const row of result.totals) out.push(`| ${row.label} | ${value(row.base)} | ${value(row.head)} | ${delta(row.base, row.head)} |`);
+    for (const row of result.totals) out.push(`| ${plain(row.label)} | ${plain(value(row.base))} | ${plain(value(row.head))} | ${delta(row.base, row.head)} |`);
   } else out.push('기준선 파일이 없습니다.');
   out.push('');
   return `${out.join('\n')}${evidence(result)}`;
 }
 
 function evidence(result) {
-  return ['', '## 증빙 종류', '', `- evidenceKind: ${result.evidenceKind}`, `- ${result.evidenceNote}`,
+  return ['', '## 증빙 종류', '', `- evidenceKind: ${result.evidenceKind}`, `- ${plain(result.evidenceNote)}`,
     `- 검사한 커밋: ${result.commit}${result.workingTreeDirty ? ' (커밋하지 않은 변경 포함)' : ''}`, ''].join('\n');
 }

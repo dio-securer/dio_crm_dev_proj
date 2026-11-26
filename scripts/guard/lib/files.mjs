@@ -143,17 +143,20 @@ export function stableJson(value, inlineDepth, depth = 0, indent = '') {
 
 /** { 'a/b/c.ts': 1 } -> { 'a/b': { 'c.ts': 1 } } with sorted keys, and back. */
 export function groupByDir(flat) {
-  const grouped = {};
+  // No prototype: a path such as `__proto__/x.ts` must be an ordinary key, never the object's prototype.
+  const grouped = Object.create(null);
   for (const file of Object.keys(flat).sort(byCodeUnit)) {
     const cut = file.lastIndexOf('/');
     const dir = cut < 0 ? '.' : file.slice(0, cut);
-    (grouped[dir] ??= {})[file.slice(cut + 1)] = flat[file];
+    (grouped[dir] ??= Object.create(null))[file.slice(cut + 1)] = flat[file];
   }
   return Object.fromEntries(Object.keys(grouped).sort(byCodeUnit).map(dir => [dir, grouped[dir]]));
 }
 
 export function flattenDirs(grouped) {
-  const flat = {};
+  // No prototype: a hand-written `"__proto__": { "some/file.ts": 99 }` entry would otherwise become the prototype of the
+  // result and allow violations in files that are not listed (lookups would find the inherited value).
+  const flat = Object.create(null);
   for (const [dir, names] of Object.entries(grouped ?? {})) {
     for (const [name, value] of Object.entries(names)) flat[dir === '.' ? name : `${dir}/${name}`] = value;
   }
