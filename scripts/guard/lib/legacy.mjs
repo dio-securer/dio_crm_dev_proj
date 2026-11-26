@@ -31,6 +31,13 @@ export const LEGACY_RULES = [
 
 const TEST_NAME = /\.(spec|test)\.[cm]?[jt]sx?$/i;
 export const isTestName = file => TEST_NAME.test(file);
+const stem = file => file.replace(/\.(spec|test)(\.[cm]?[jt]sx?)$/i, '$2').replace(/\.[^./]+$/, '');
+
+/** A new test is allowed in a frozen scope only next to an already listed file of the same name. */
+export function allowedTestCheck(known) {
+  const stems = new Set([...known].filter(file => !isTestName(file)).map(stem));
+  return file => isTestName(file) && stems.has(stem(file));
+}
 
 /** Compute the legacy list from the file universe. Deterministic. */
 export function computeLegacy(ctx) {

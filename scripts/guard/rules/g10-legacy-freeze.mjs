@@ -1,7 +1,5 @@
 import { matcher } from '../lib/files.mjs';
-import { LEGACY_FILE, LEGACY_RULES, isTestName, loadLegacy } from '../lib/legacy.mjs';
-
-const stem = file => file.replace(/\.(spec|test)(\.[cm]?[jt]sx?)$/i, '$2').replace(/\.[^./]+$/, '');
+import { LEGACY_FILE, LEGACY_RULES, allowedTestCheck, loadLegacy } from '../lib/legacy.mjs';
 
 export default {
   id: 'G10',
@@ -27,10 +25,9 @@ export default {
     if (!legacy.rulesInSync) findings.push({ file: LEGACY_FILE, line: 0, message: '파일 안의 규칙이 scripts/guard/lib/legacy.mjs 와 다릅니다. 사람이 확인한 뒤 목록을 다시 만들어야 합니다.' });
     const frozen = matcher(LEGACY_RULES.flatMap(rule => rule.freeze));
     const known = new Set([...legacy.files, ...legacy.frozenOther]);
-    const stems = new Set([...known].filter(file => !isTestName(file)).map(stem));
+    const allowedTest = allowedTestCheck(known);
     for (const file of ctx.files) {
-      if (!frozen(file) || known.has(file)) continue;
-      if (isTestName(file) && stems.has(stem(file))) continue;
+      if (!frozen(file) || known.has(file) || allowedTest(file)) continue;
       findings.push({ file, line: 0, message: 'legacy 구역의 새 파일 (목록에 없음)' });
     }
     return findings;

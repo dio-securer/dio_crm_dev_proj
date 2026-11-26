@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createContext, stableJson } from './lib/files.mjs';
-import { LEGACY_FILE, computeLegacy, loadLegacy, toDocument } from './lib/legacy.mjs';
+import { LEGACY_FILE, allowedTestCheck, computeLegacy, loadLegacy, toDocument } from './lib/legacy.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const target = path.join(root, LEGACY_FILE);
@@ -22,7 +22,8 @@ if (exists) {
   // absorbed silently. Only removals (migrated or deleted files) are written.
   const current = loadLegacy(root);
   const known = new Set([...current.files, ...current.frozenOther]);
-  const added = [...Object.keys(computed.files), ...computed.frozenOther].filter(file => !known.has(file));
+  const allowedTest = allowedTestCheck(known);
+  const added = [...Object.keys(computed.files), ...computed.frozenOther].filter(file => !known.has(file) && !allowedTest(file));
   if (added.length) {
     console.error(`[legacy-scan] 거부: 목록에 없는 새 파일 ${added.length}개가 legacy 영역에 있습니다. 목록은 줄어들 수만 있습니다.`);
     for (const file of added) console.error(` - ${file}`);
