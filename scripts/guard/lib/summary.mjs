@@ -3,6 +3,9 @@
 import { show } from './baseline.mjs';
 
 const MAX_FILES = 30;
+// Long lists are cut so the summary stays under GitHub's size limit; the heading always carries the full count.
+const MAX_ROWS = 100;
+const more = (list, unit) => (list.length > MAX_ROWS ? [`- ... 외 ${list.length - MAX_ROWS}${unit} (전체는 .guard/protect-result.json)`] : []);
 const WHAT = {
   P1: '기존 위반 허용 숫자(기준선)를 올림',
   P2: '이관 대상(legacy) 목록에 파일을 추가',
@@ -56,20 +59,24 @@ export function renderSummary(result) {
   const open = result.rules.flatMap(rule => rule.violations.map(item => ({ ...item, id: rule.id })));
   if (open.length || result.badDeclarations.length) {
     out.push('## 실패한 이유', '');
-    for (const item of open) out.push(`- ${item.id}: ${plain(item.text)}${item.declare ? '' : ' (예외로 선언할 수 없는 변경입니다)'}`);
-    for (const item of result.badDeclarations) out.push(`- 잘못된 예외 선언 (${code(`${item.entry.rule} ${item.entry.file}`)}): ${plain(item.why)}`);
-    out.push('');
+    for (const item of open.slice(0, MAX_ROWS)) out.push(`- ${item.id}: ${plain(item.text)}${item.declare ? '' : ' (예외로 선언할 수 없는 변경입니다)'}`);
+    out.push(...more(open, '건'));
+    for (const item of result.badDeclarations.slice(0, MAX_ROWS)) {
+      out.push(`- 잘못된 예외 선언 (${code(`${item.entry.rule} ${item.entry.file}`)}): ${plain(item.why)}`);
+    }
+    out.push(...more(result.badDeclarations, '건'), '');
   }
 
   out.push('## 사람이 확인할 것', '', `### 예외 선언 ${result.exceptions.length}건 - 사람 확인 필요`, '');
   if (result.exceptions.length) {
     out.push('이 PR 은 아래 약화를 "예외"로 선언했습니다. 이유가 납득될 때만 승인하세요.', '');
     out.push('| 무엇을 | 어디 | 전 → 후 | 적어 둔 이유 | 변경 ID |', '| --- | --- | --- | --- | --- |');
-    for (const item of result.exceptions) {
+    for (const item of result.exceptions.slice(0, MAX_ROWS)) {
       const where = item.guardRule ? `${item.guardRule} ${item.file}` : item.file;
       const change = `${value(item.from)} → ${value(item.to)}`;
       out.push(`| ${WHAT[item.rule]} | ${code(where)} | ${plain(change)} | ${plain(item.reason)} | ${plain(item.changeId)} |`);
     }
+    if (result.exceptions.length > MAX_ROWS) out.push('', ...more(result.exceptions, '건'), '- 예외가 이렇게 많은 PR 은 그 자체로 이상합니다. 전체 목록을 확인하기 전에는 승인하지 마세요.');
   } else out.push('없습니다.');
   out.push('', `### 보호 파일 변경 ${result.protectedChanges.length}건`, '');
   if (result.protectedChanges.length) {
