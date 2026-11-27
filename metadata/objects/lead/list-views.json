@@ -29,6 +29,30 @@
           "field": "updated_at"
         }
       ]
+    },
+    {
+      "columns": [
+        "hospital_name",
+        "status",
+        "owner_name",
+        "exclusion_reason",
+        "updated_at"
+      ],
+      "filter": {
+        "field": "status",
+        "op": "eq",
+        "value": "CONTACT_EXCLUDED"
+      },
+      "key": "excluded",
+      "labelKey": "lead.view.excluded",
+      "pageSize": 25,
+      "shared": true,
+      "sort": [
+        {
+          "direction": "DESC",
+          "field": "updated_at"
+        }
+      ]
     }
   ]
 }

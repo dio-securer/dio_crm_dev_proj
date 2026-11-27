@@ -20,10 +20,17 @@
   "lead.field.updated_at": "Updated at",
   "lead.label": "Lead",
   "lead.plural": "Leads",
+  "lead.section.info": "General",
+  "lead.section.keyman": "Key person details",
+  "lead.section.region": "Region",
+  "lead.section.system": "Systems in use",
   "lead.status.CONTACT_EXCLUDED": "Contact excluded",
   "lead.status.CONVERTED": "Converted",
   "lead.status.FIRST_VISIT": "First visit",
   "lead.status.KEYMAN_MEETING": "Key-person meeting",
   "lead.status.NEW": "New",
+  "lead.tab.basic": "Basics",
+  "lead.tab.keyman": "Key person",
+  "lead.view.excluded": "Excluded leads",
   "lead.view.hq_default": "All leads"
 }

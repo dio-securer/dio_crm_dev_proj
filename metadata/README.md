@@ -5,6 +5,21 @@
 ## 무엇이 들어가나
 
 형식과 검사는 [docs/framework/metamodel.md](../docs/framework/metamodel.md) 에 있습니다. 지금 있는 개체는 리드(`objects/lead/`) 하나입니다(F1-2). 필드는 기존 리드 목록 계약이 쓰는 열과 같습니다.
+리드는 본보기 개체입니다(F1-3). 데이터 필드, 상세 화면(`screens/detail.json`), 입력 화면(`screens/create.json`), 목록 보기 두 개, 두 언어 문구를 모두 갖추고 있습니다.
+리드에는 동작(`actions.json`)이 없습니다. 동작에는 기능(`features.json`)과 권한이 있어야 하는데, admin 권한 목록에 리드 권한이 아직 없기 때문입니다.
+
+## 리드에 필드 하나 더하기
+
+1. `objects/lead/fields.json` 의 `fields` 끝에 필드를 더합니다. 예: `{ "aliases": [], "key": "website", "labelKey": "lead.field.website", "required": false, "system": false, "type": "text" }`.
+   선택형(`enum`)이면 `codes/<그룹>.json` 을 만들고 `enumCodeGroup` 에 그 그룹을 적습니다.
+2. `terms/ko-KR/lead.json` 과 `terms/en-US/lead.json` 에 `lead.field.website` 문구를 둘 다 넣습니다. 하나라도 빠지면 G12 가 실패합니다.
+3. 화면에 보이려면 `screens/detail.json`(와 필요하면 `screens/create.json`)의 `fields.fields` 에 `{ "key": "website", "sectionId": "info", ... }` 를 더합니다. `sectionId` 는 그 화면에 있는 구역이어야 합니다.
+   필수(`required: true`) 필드는 입력 화면에 보여야 합니다.
+4. 목록에 열로 보이려면 `list-views.json` 의 `columns` 에 키를 더합니다.
+5. `pnpm crm check` 를 돌려 G12 가 PASS 인지 봅니다.
+
+이미 있는 필드를 지우거나 이름·종류를 바꾸지 않습니다(P6). 먼저 `deprecated` 로 폐기 예정 표시를 하고, 새 이름이 필요하면 옛 이름을 `aliases` 에 남깁니다.
+
 
 ## 파일 자리 (F1-1 에서 정함)
 

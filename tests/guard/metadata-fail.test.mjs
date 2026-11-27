@@ -81,3 +81,18 @@ test('P6 reads the head file list: a file only the head has is seen', () => {
   assert.equal(p6().status, 'FAIL');
   assert.match(p6().violations[0].text, /지금의 metadata/);
 });
+
+// P6 "cannot load" is never declarable: the violation carries no identity (declare is null), and a guard-raises.json
+// entry shaped like one (file metadata/, no values) does not turn the run green.
+test('P6 "cannot load" cannot be excused by a guard-raises.json entry', () => {
+  restore();
+  box.write({ [FIELDS]: '{ "fields": [\n' });
+  const reason = { reason: 'trying to excuse unreadable metadata', changeId: 'F1-3' };
+  const raises = [{ rule: 'P5', file: 'metadata/', from: null, to: null, ...reason }];
+  box.write({ 'guard-raises.json': `${JSON.stringify({ raises }, null, 2)}\n` });
+  const run = box.guard('--protect', box.base);
+  assert.equal(run.status, 1, run.stdout + run.stderr);
+  assert.equal(p6().status, 'FAIL');
+  assert.match(p6().violations[0].text, /지금의 metadata/);
+  assert.equal(p6().violations[0].declare, null);
+});

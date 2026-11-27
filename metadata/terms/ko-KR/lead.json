@@ -20,10 +20,17 @@
   "lead.field.updated_at": "수정일시",
   "lead.label": "리드",
   "lead.plural": "리드 목록",
+  "lead.section.info": "기본",
+  "lead.section.keyman": "키맨 정보",
+  "lead.section.region": "지역",
+  "lead.section.system": "사용 시스템",
   "lead.status.CONTACT_EXCLUDED": "컨택제외",
   "lead.status.CONVERTED": "변환",
   "lead.status.FIRST_VISIT": "초도방문",
   "lead.status.KEYMAN_MEETING": "키맨미팅",
   "lead.status.NEW": "신규등록",
+  "lead.tab.basic": "기본 정보",
+  "lead.tab.keyman": "키맨",
+  "lead.view.excluded": "컨택제외 리드",
   "lead.view.hq_default": "전체 리드"
 }
