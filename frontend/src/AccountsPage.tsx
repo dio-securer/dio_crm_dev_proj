@@ -109,7 +109,7 @@ function LegacyAccountsPage() {
     const source = sandbox ? listSandboxAccounts(search, scope) : listVisibleAccounts(query.data ?? [], search, scope, ownerUserId);
     return source;
   }, [sandbox, search, scope, query.data, localTick, ownerUserId]);
-  const selected = rows.find(x => x.public_id === selectedId) ?? null;
+  const selected = rows.find(x => x.public_id === selectedId) ?? null; const hqRow = (selected ?? {}) as unknown as CustomerRecord;
   const creating = screen === 'form' && !selectedId;
   const accountNavigationGuard = React.useRef<(() => boolean) | null>(null);
   const basicDirty = screen !== 'list' && JSON.stringify(form) !== JSON.stringify(selected ? formFromAccount((hqFormBaseline ?? selected) as unknown as AccountSummary) : emptyForm());
@@ -270,7 +270,7 @@ function LegacyAccountsPage() {
       if (crmField === 'erp_customer_code') return <div className="readonly-value">{String(raw || '-')}</div>;
       return <div className="readonly-value">{String(raw || '-')}</div>;
     }
-    disabled = disabled || (hqMock && (!hqPolicy.writable('account', key, selected as unknown as CustomerRecord ?? {}) || Boolean(selected && !hqPolicy.owns(selected as unknown as CustomerRecord, 'ACCOUNT.MERGE'))));
+    disabled = disabled || (hqMock && (!hqPolicy.writable('account', key, hqRow) || Boolean(selected && !hqPolicy.owns(selected as unknown as CustomerRecord, 'ACCOUNT.MERGE'))));
     const value = form[key];
     if (key === 'accountType') {
       return <select data-hq-api-field={hqMock ? key : undefined} value={value} disabled={disabled} onChange={e => setField(key, e.target.value)}>{Object.entries(ACCOUNT_TYPE_CODES).map(([code, name]) => <option key={code} value={code}>{name}</option>)}</select>;
@@ -315,14 +315,14 @@ function LegacyAccountsPage() {
   const accountAnchor = (id: string, instance: string) => hqMock ? configAnchor(id, instance) : {};
   const formSections = (compact = false) => (
     <div className={`account-form-sections${compact ? ' compact' : ''}`} {...accountAnchor('section:account.basic', 'section:account.basic.0')}>
-      <label className="full" {...accountAnchor('account.crmName', selectedId ? 'edit.crmName' : 'create.crmName')}><span>{t('account.name')}<span className="account-required-text">필수</span></span><input data-hq-field={hqMock ? 'account.crmName' : undefined} value={form.accountName} onChange={e => setField('accountName', e.target.value)} required disabled={!hqEditable || (hqMock && !hqPolicy.fieldWritable('account.crmName', selected as unknown as CustomerRecord ?? {}))} /></label>
+      <label className="full" {...accountAnchor('account.crmName', selectedId ? 'edit.crmName' : 'create.crmName')}><span>{t('account.name')}<span className="account-required-text">필수</span></span><input aria-label={t('account.name')} data-hq-field={hqMock ? 'account.crmName' : undefined} value={form.accountName} onChange={e => setField('accountName', e.target.value)} required disabled={!hqEditable || (hqMock && !hqPolicy.fieldWritable('account.crmName', hqRow))} /></label>
       <label {...accountAnchor('account.accountStatus', selectedId ? 'edit.accountStatus' : 'create.accountStatus')}>{t('account.crmStatus')}
-        <select disabled={!hqEditable || (hqMock && !hqPolicy.writable('account', 'accountStatus', selected as unknown as CustomerRecord ?? {}))} value={form.accountStatus} onChange={e => setField('accountStatus', e.target.value)}>
+        <select disabled={!hqEditable || (hqMock && !hqPolicy.writable('account', 'accountStatus', hqRow))} value={form.accountStatus} onChange={e => setField('accountStatus', e.target.value)}>
           {ACCOUNT_STATUSES.map(status => <option key={status} value={status}>{t(`account.statuses.${status}`)}</option>)}
         </select>
       </label>
       <label {...accountAnchor('account.accountGrade', selectedId ? 'edit.accountGrade' : 'create.accountGrade')}>{t('account.grade')}
-        <select disabled={!hqEditable || (hqMock && !hqPolicy.writable('account', 'accountGrade', selected as unknown as CustomerRecord ?? {}))} value={form.accountGrade} onChange={e => setField('accountGrade', e.target.value)}>
+        <select disabled={!hqEditable || (hqMock && !hqPolicy.writable('account', 'accountGrade', hqRow))} value={form.accountGrade} onChange={e => setField('accountGrade', e.target.value)}>
           <option value="GENERAL">{t('account.grades.GENERAL')}</option>
           <option value="KEY">{t('account.grades.KEY')}</option>
         </select>
@@ -349,7 +349,7 @@ function LegacyAccountsPage() {
       {formSections(mobile)}
       <div className="account-form-actions">
         <button type="button" onClick={() => (!hqMock && mobile && selectedId ? setScreen('detail') : closeScreen())}>{t('common.cancel')}</button>
-        <button type="submit" {...accountAnchor(selectedId ? 'ACC.save' : 'ACC.create', selectedId ? 'edit.submit' : 'create.submit')} className="button-primary" disabled={saving || !hqEditable || (hqMock && !hqPolicy.can(selectedId ? 'ACC.save' : 'ACC.create', selected as unknown as CustomerRecord ?? {}, toWritePayload(form) as unknown as Record<string, unknown>))}>{t('common.save')}</button>
+        <button type="submit" {...accountAnchor(selectedId ? 'ACC.save' : 'ACC.create', selectedId ? 'edit.submit' : 'create.submit')} className="button-primary" disabled={saving || !hqEditable || (hqMock && !hqPolicy.can(selectedId ? 'ACC.save' : 'ACC.create', hqRow, toWritePayload(form) as unknown as Record<string, unknown>))}>{t('common.save')}</button>
       </div>
     </form>
   );
