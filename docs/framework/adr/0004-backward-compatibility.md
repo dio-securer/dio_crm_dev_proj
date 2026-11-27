@@ -2,7 +2,7 @@
 
 ## 상태
 
-채택 (2026-11-26, F0-4). 이 결정을 받쳐 줄 설정 형식과 검사는 아직 없다.
+채택 (2026-11-26, F0-4). 설정 형식(`FieldDef` 의 폐기 예정·별칭)과 검사 함수(`diffBundles`)는 F1-1 에서 생겼다. 가드 연결은 아직 없다(F1-2).
 
 ## 맥락
 
@@ -25,10 +25,11 @@ AI 는 "안 쓰는 것 같다"는 이유로 필드를 지우거나 이름을 바
 - 치르는 값: 폐기 예정 항목이 쌓인다. 주기적으로 3번 절차로 정리해야 한다.
 - 지금 있는 것: admin 계약의 확장 필드에는 `active` 값이 있다(`packages/contracts/src/admin/schemas.ts`).
   `active` 를 끄면 그 필드에 쓰는 요청은 `EXTENSION_INACTIVE` 로 거절된다(`packages/contracts/src/admin/security.ts`).
-  이것은 "끄기"이지 이 ADR 의 "폐기 예정 표시"와 "별칭"은 아니다. 폐기 예정 표시와 별칭은 미구현이다.
+  이것은 "끄기"이지 이 ADR 의 "폐기 예정 표시"와 "별칭"은 아니다. 폐기 예정 표시와 별칭은 메타모델(ADR 0006)의 `FieldDef`·`ObjectDef` 에 있다.
 
 ## 기계 검사
 
-- 아직 기계 검사 없음 (F1에서 추가). 지금은 설정에서 필드를 지우거나 이름을 바꿔도 가드가 막지 않는다.
-- F1 에서 넣을 것: `pnpm crm add-field` 로 만든 설정을 기준 브랜치와 비교해, 사라진 필드·개체 이름이 있으면 실패하는 검사.
-  이 검사는 아직 설계도 코드도 없다. 여기 적은 것은 계획이다.
+- 검사 함수가 있다(F1-1, ADR 0006): `packages/contracts/src/metadata/diff.ts` 의 `diffBundles(base, head)`.
+  폐기 예정 표시 없이 사라진 개체·필드·목록 보기·동작·메뉴(D01), 별칭 없는 이름 바꾸기(D02), 허용 표(`SAFE_TYPE_WIDENINGS`) 밖의 종류 바꾸기(D03)를 오류로 낸다.
+  폐기 예정 필드를 새로 쓰기 시작하면 경고(D04)다. 폐기 예정 표시(`deprecated`)와 별칭(`aliases`)은 `FieldDef`·`ObjectDef` 에 있다.
+- 아직 가드는 이 검사를 돌리지 않는다. 기준 브랜치의 `metadata/` 와 비교하는 가드 연결은 F1-2 에서 한다. 그때까지는 테스트(`tests/metadata/diff.test.cjs`)로만 확인된다.

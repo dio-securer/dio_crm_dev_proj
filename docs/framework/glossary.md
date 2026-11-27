@@ -93,6 +93,13 @@
 | 목록 보기 (도메인) | `LIST_VIEW` | 목록의 열, 거르기, 정렬. | `packages/contracts/src/admin/schemas.ts` |
 | 동작 (도메인) | `ACTION` | 화면의 버튼과 동작. | `packages/contracts/src/admin/schemas.ts` |
 | 업무 흐름 (도메인) | `WORKFLOW` | 업무 상태의 흐름. | `packages/contracts/src/admin/schemas.ts` |
+| 개체 정의 | `ObjectDef`, `objectDefSchema` | 개체(리드, 거래처 등)의 데이터 정의. 이름, 문구 키, 데이터 필드 목록. | `packages/contracts/src/metadata/schemas.ts` |
+| 필드 정의 | `FieldDef`, `fieldDefSchema` | 개체의 데이터 필드 하나. 종류, 필수, 길이, 코드 그룹, 참조 개체. 화면 표시(`FIELD`)와 다르다. | `packages/contracts/src/metadata/schemas.ts` |
+| 메타데이터 묶음 | `MetadataBundle` | 검사 단위. 개체 정의와 admin 설정, 덮어쓰기를 모두 담는다. | `packages/contracts/src/metadata/schemas.ts` |
+| 폐기 예정 | `deprecated` | 더 쓰지 않을 필드·개체 표시. 지우지 않는다(ADR 0004). | `packages/contracts/src/metadata/schemas.ts` |
+| 별칭 | `aliases` | 이름을 바꾼 필드·개체의 옛 이름(ADR 0004). | `packages/contracts/src/metadata/schemas.ts` |
+| 참조 검사 | `validateBundle` | 묶음 안의 이름이 실제로 있는지 검사한다. | `packages/contracts/src/metadata/validate.ts` |
+| 하위 호환 검사 | `diffBundles` | 두 묶음을 비교해 지우기·이름 바꾸기·종류 바꾸기를 잡는다. | `packages/contracts/src/metadata/diff.ts` |
 | 승인 (도메인) | `APPROVAL` | 승인 정책과 승인 경로. | `packages/contracts/src/admin/schemas.ts` |
 | 알림 (도메인) | `NOTIFICATION` | 어떤 일에 누구에게 알릴지. | `packages/contracts/src/admin/schemas.ts` |
 | 번호 규칙 (도메인) | `NUMBERING` | 문서 번호를 매기는 방식. | `packages/contracts/src/admin/schemas.ts` |

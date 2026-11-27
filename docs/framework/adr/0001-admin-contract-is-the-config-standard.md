@@ -33,7 +33,9 @@
 
 ## 기계 검사
 
-- 아직 기계 검사 없음 (F1에서 추가). 지금은 crm-customization 에 새 기능을 넣거나 새 코드가 그것을 import 해도 가드가 막지 않는다.
+- 메타모델 검사 함수가 있다(F1-1, ADR 0006): `packages/contracts/src/metadata/` 의 `validateBundle` 이 admin 설정끼리의 참조(없는 필드·문구·코드·개체)를 검사한다.
+  지금은 테스트(`tests/metadata/`, `pnpm test`)로만 돈다. `metadata/` 파일에 대해 가드로 돌리는 연결은 F1-2 에서 한다.
+- crm-customization 쪽은 아직 기계 검사 없음. 지금은 crm-customization 에 새 기능을 넣거나 새 코드가 그것을 import 해도 가드가 막지 않는다.
 - 일부만 막힌다: G10 이 리드 전용 customization 파일의 새 생성을 막는다
   (`packages/contracts/src/lead-*`, `backend/src/customization/*lead-*`, `frontend/src/customization/` 의 `*Lead*`·`lead-*`·`Configured*.tsx`).
   이름에 lead 나 Configured 가 없는 새 파일은 막지 못한다. `crm-customization.ts` 자체는 legacy 목록에 없다.

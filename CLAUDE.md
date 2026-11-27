@@ -79,7 +79,7 @@ DIO CRM 이다. 영업 사원이 리드, 거래처, 영업기회, 계약, 주문
 
 <!-- guard:protected:start (node scripts/guard/run.mjs --docs 가 만든다. 직접 고치지 않는다) -->
 `/.github/`, `/scripts/guard/`, `/tests/guard/`, `/guard-baseline.json`, `/legacy-files.json`, `/guard-raises.json`,
-`/CLAUDE.md`, `/docs/framework/adr/`, `/packages/contracts/src/metadata/` (아직 없음), `/scripts/crm/`,
+`/CLAUDE.md`, `/docs/framework/adr/`, `/packages/contracts/src/metadata/`, `/scripts/crm/`,
 `/scripts/i18n/hardcode-check.mjs`, `/docs/framework/glossary.md`, `/docs/framework/README.md`,
 `/docs/framework/ci-gates.md`, `/docs/framework/guard-rules.md`, `/package.json`, `/backend/package.json`,
 `/frontend/package.json`, `/packages/contracts/package.json`, `/pnpm-workspace.yaml`, `/pnpm-lock.yaml`,
