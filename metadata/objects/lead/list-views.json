@@ -1,0 +1,34 @@
+{
+  "entity": "lead",
+  "views": [
+    {
+      "columns": [
+        "hospital_name",
+        "status",
+        "owner_name",
+        "sido",
+        "sigungu",
+        "phone",
+        "business_no",
+        "updated_at"
+      ],
+      "filter": {
+        "arg": {
+          "field": "hospital_name",
+          "op": "isEmpty"
+        },
+        "op": "not"
+      },
+      "key": "hq_default",
+      "labelKey": "lead.view.hq_default",
+      "pageSize": 25,
+      "shared": true,
+      "sort": [
+        {
+          "direction": "DESC",
+          "field": "updated_at"
+        }
+      ]
+    }
+  ]
+}

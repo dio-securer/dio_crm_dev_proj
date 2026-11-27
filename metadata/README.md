@@ -4,7 +4,7 @@
 
 ## 무엇이 들어가나
 
-형식과 검사는 [docs/framework/metamodel.md](../docs/framework/metamodel.md) 에 있습니다. 아직 실제 개체 파일은 없습니다(채우는 일은 F1-2 이후).
+형식과 검사는 [docs/framework/metamodel.md](../docs/framework/metamodel.md) 에 있습니다. 지금 있는 개체는 리드(`objects/lead/`) 하나입니다(F1-2). 필드는 기존 리드 목록 계약이 쓰는 열과 같습니다.
 
 ## 파일 자리 (F1-1 에서 정함)
 
@@ -43,5 +43,7 @@
 | --- | --- |
 | G01 | `.json` `.yaml` `.yml` `.md` 파일만 둘 수 있습니다(빈 폴더 표시용 `.gitkeep` 은 허용). 코드 파일을 두면 `pnpm guard` 가 실패합니다. |
 | G03 | 설정 파일도 한 파일 300줄을 넘을 수 없습니다. 넘으면 나눕니다. |
+| G12 | 위 자리에 맞지 않는 파일, 형식이 틀린 값, 없는 필드·문구·코드를 가리키는 참조가 있으면 `pnpm guard` 가 실패합니다. |
+| P6 | 기준 브랜치에 있던 필드 등을 폐기 예정 표시 없이 지우거나 이름·종류를 바꾸면 보호 검사가 실패합니다. |
 
 규칙 전체 설명: [docs/framework/guard-rules.md](../docs/framework/guard-rules.md)

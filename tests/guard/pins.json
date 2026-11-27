@@ -726,6 +726,21 @@
     "100": 1
    }
   },
+  "scripts/guard/lib/metamodel.mjs": {
+   "values": {
+    "METADATA_DIR": "metadata/",
+    "VALIDATOR_DIR": "packages/contracts/src/metadata"
+   },
+   "notPinned": [
+    "HOST",
+    "IGNORED",
+    "loaded"
+   ],
+   "patterns": [
+    "/\\.js$/"
+   ],
+   "numbers": {}
+  },
   "scripts/guard/lib/protect-data.mjs": {
    "values": {},
    "notPinned": [],
@@ -733,6 +748,15 @@
    "numbers": {
     "12": 2
    }
+  },
+  "scripts/guard/lib/protect-metadata.mjs": {
+   "values": {},
+   "notPinned": [
+    "id",
+    "name"
+   ],
+   "patterns": [],
+   "numbers": {}
   },
   "scripts/guard/lib/protect-tests.mjs": {
    "values": {},
@@ -1433,6 +1457,20 @@
    ],
    "numbers": {}
   },
+  "scripts/guard/rules/g12-metadata-valid.mjs": {
+   "values": {
+    "default": {
+     "id": "G12",
+     "name": "metadata-valid",
+     "baseline": "none"
+    }
+   },
+   "notPinned": [
+    "OWNED_ELSEWHERE"
+   ],
+   "patterns": [],
+   "numbers": {}
+  },
   "scripts/guard/rules/index.mjs": {
    "values": {
     "DEFAULT_RULES": [
@@ -1484,6 +1522,11 @@
      {
       "id": "G11",
       "name": "no-test-imports",
+      "baseline": "none"
+     },
+     {
+      "id": "G12",
+      "name": "metadata-valid",
       "baseline": "none"
      }
     ],
@@ -1542,6 +1585,11 @@
      {
       "id": "G11",
       "name": "no-test-imports",
+      "baseline": "none"
+     },
+     {
+      "id": "G12",
+      "name": "metadata-valid",
       "baseline": "none"
      }
     ]

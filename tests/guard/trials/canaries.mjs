@@ -26,6 +26,7 @@ const inner = (zone, name, body) => Object.fromEntries(INNER.map(dir => [`${zone
 
 export const CANARIES = {
   G01: inner('metadata', 'canary.mjs', code),
+  G12: inner('metadata', 'canary.json', '{}\n'),
   G02: { ...inner('extensions/acme', 'canary-import.ts', from('zod')), ...inner('packages/engine', 'canary-import.ts', from('@dio-crm/web')) },
   G03: everywhere([...OWN, ...DOCS], 'canary-big.mjs', big),
   G04: { ...inner('extensions/acme', 'canary-text.ts', text), ...inner('packages/engine', 'canary-text.ts', text) },

@@ -1,4 +1,4 @@
-// The permanent trial of every guard rule (G01-G11): the fixtures of tests/guard/trials are written into a throwaway
+// The permanent trial of every guard rule (G01-G12): the fixtures of tests/guard/trials are written into a throwaway
 // repository, the real runner is started there, and its exit code and report are compared with what must be caught.
 // Weakening a rule makes one of its failing fixtures pass, or one of its near-misses fail, and this file goes red.
 import assert from 'node:assert/strict';

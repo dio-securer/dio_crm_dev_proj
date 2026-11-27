@@ -51,6 +51,7 @@ DIO CRM 이다. 영업 사원이 리드, 거래처, 영업기회, 계약, 주문
 | G09 | 변경 ID 없는 커밋 | 커밋 제목에 해당 요청의 ID 를 넣는다 |
 | G10 | legacy(이관 대상) 구역에 새 파일을 만드는 것 | 새 화면·객체는 `metadata/` 설정과 `packages/engine` 으로 만든다 |
 | G11 | 테스트가 아닌 코드가 테스트 파일을 가져다 쓰는 것 | 운영에 필요한 코드는 테스트 이름이 아닌 일반 파일로 옮긴다(그러면 G06·G07 이 본다) |
+| G12 | `metadata/` 의 설정이 메타모델 검사(`bundleFromFiles` + `validateBundle`)를 통과하지 못하는 것 | 메시지의 검사 코드(F01, M01, R02 …)를 `docs/framework/metamodel.md` 에서 찾아 설정을 고친다 |
 <!-- guard:rules:end (node scripts/guard/run.mjs --docs 가 만든다. 직접 고치지 않는다) -->
 
 규칙마다 범위, 예외, 알려진 한계가 있다. 전부 `docs/framework/guard-rules.md` 에 있다.

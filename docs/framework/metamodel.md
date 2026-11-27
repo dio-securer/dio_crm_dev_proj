@@ -98,7 +98,12 @@
 종류 바꾸기는 `integer → decimal`, `date → datetime` 만 허용한다(`SAFE_TYPE_WIDENINGS`). 둘 다 저장된 값이 그대로 유효하고, 비교·정렬의 뜻이 바뀌지 않는다.
 목록 보기·동작·메뉴는 admin 형식에 폐기 예정 칸이 없어서 `metadata/deprecations.json` 에 적어 둔 뒤에 지운다.
 
+## 가드 연결 (F1-2)
+
+- G12 `metadata-valid`: `pnpm guard`·`pnpm crm check` 가 `metadata/` 를 `bundleFromFiles` + `validateBundle` 로 검사한다. 오류(error)가 하나라도 있으면 실패, 경고(warning)는 실패로 세지 않는다. 검사기를 읽지 못하면 통과가 아니라 가드 오류(종료 코드 2)다.
+- P6 `metadata-compat`: 보호 검사(`--protect`)가 기준 브랜치의 `metadata/` 와 `diffBundles` 로 비교한다. 예외로 선언할 수 없다.
+- 리드 개체(`metadata/objects/lead/`)는 기존 lead-* 계약이 쓰는 열 ID 와 같은 필드만 가진다. `tests/metadata/lead.test.cjs` 가 양쪽을 맞춰 본다.
+
 ## 아직 없는 것
 
-- 가드와 `pnpm crm` 에 연결하기(F1-2). 지금은 `metadata/` 에 잘못된 파일을 넣어도 가드가 막지 않는다.
 - 흐름 편집기(F4), 관리자 스크립트(F7), DB 저장, 화면 렌더러.

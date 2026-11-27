@@ -19,7 +19,9 @@ export type AuthUser = {
 
 export type PageQuery = { page?: number; pageSize?: number };
 
-export type LeadStatus = 'NEW' | 'FIRST_VISIT' | 'KEYMAN_MEETING' | 'CONTACT_EXCLUDED' | 'CONVERTED';
+/** Lead statuses. metadata/codes/lead_status.json must list the same codes (tests/metadata/lead.test.cjs). */
+export const LEAD_STATUSES = ['NEW', 'FIRST_VISIT', 'KEYMAN_MEETING', 'CONTACT_EXCLUDED', 'CONVERTED'] as const;
+export type LeadStatus = typeof LEAD_STATUSES[number];
 export type LeadSummary = { public_id:string; hospital_name:string; status:LeadStatus; owner_user_id?:number|null; owner_name?:string|null; phone?:string|null; address?:string|null; sido?:string|null; sigungu?:string|null; business_no?:string|null; };
 export type AccountStatus = 'ACTIVE' | 'NEW' | 'NON_TRADING' | 'NON_TRADING_OPP' | 'CHURN_RISK' | 'CHURNED' | 'CLOSED' | 'MERGED';
 export type AccountSummary = {

@@ -21,10 +21,10 @@ PR 하나가 병합되기 전에 CI(`.github/workflows/ci.yml`)가 무엇을 막
 | 단계 | 무엇을 막나 |
 | --- | --- |
 | `pnpm install --frozen-lockfile --ignore-scripts --ignore-pnpmfile` | 잠금 파일(pnpm-lock.yaml)과 다른 의존성이 설치되는 것. 설치 스크립트와 `.pnpmfile.cjs` 는 돌리지 않는다. 가드가 PR 의 코드보다 먼저 돌게 하려는 것이다. |
-| `node scripts/guard/run.mjs --protect origin/<기준 브랜치>` (PR 에서만) | 보호 검사 P1~P5 (아래). 요약 `.guard/summary.md` 를 만든다. |
+| `node scripts/guard/run.mjs --protect origin/<기준 브랜치>` (PR 에서만) | 보호 검사 P1~P6 (아래). 요약 `.guard/summary.md` 를 만든다. |
 | 요약 쓰기, `guard-evidence` 첨부 올리기 (항상 실행) | 막는 것은 없다. 승인하는 사람이 읽을 요약을 이 시점에 확정한다. |
 | `node scripts/guard/run.mjs --commits origin/<기준 브랜치>..HEAD` (PR 에서만) | 변경 ID(`[REQ-숫자]`, `[F숫자-숫자]`) 없는 커밋 (G09). |
-| `node scripts/guard/run.mjs --strict` | 프레임워크 규칙 G01~G11 의 새 위반. `--strict` 는 "기준선을 내릴 수 있는데 안 내린 것"도 실패로 본다. CODEOWNERS·규칙 문서·`CLAUDE.md` 의 만든 구간이 원본과 다른 것, 보호 목록에 없는 `package.json` 도 실패. |
+| `node scripts/guard/run.mjs --strict` | 프레임워크 규칙 G01~G12 의 새 위반. `--strict` 는 "기준선을 내릴 수 있는데 안 내린 것"도 실패로 본다. CODEOWNERS·규칙 문서·`CLAUDE.md` 의 만든 구간이 원본과 다른 것, 보호 목록에 없는 `package.json` 도 실패. |
 | `node --test tests/guard/*.test.mjs` | 가드와 `crm` 명령 자신의 테스트(`tests/guard/`). |
 | `guard-rule-results` 첨부 올리기 (항상 실행) | 막는 것은 없다. 위 두 가드 단계의 결과 파일을 남긴다. |
 | `pnpm install --frozen-lockfile`, `pnpm rebuild` | 여기서부터 PR 이 쓴 코드가 돈다. 처음 설치에서 미룬 설치 스크립트를 돌린다. |
@@ -40,7 +40,7 @@ PR 하나가 병합되기 전에 CI(`.github/workflows/ci.yml`)가 무엇을 막
 가드 단계는 `pnpm guard` 가 아니라 `node scripts/guard/run.mjs` 로 직접 부른다. `package.json` 의 스크립트는 PR 이 바꿀 수 있기 때문이다
 (예: `"guard": "echo ok"`). 사람이 손으로 돌릴 때는 `pnpm guard`, `pnpm guard:test` 를 그대로 쓰면 된다.
 
-## 보호 검사 P1~P5
+## 보호 검사 P1~P6
 
 기준 브랜치와의 공통 조상(merge-base)과 지금 내용을 비교한다. 종료 코드: 0 통과, 1 위반, 2 검사 불가(통과 아님).
 
@@ -51,6 +51,7 @@ PR 하나가 병합되기 전에 CI(`.github/workflows/ci.yml`)가 무엇을 막
 | P3 테스트 | 테스트 파일을 지움, 테스트가 아닌 이름으로 바꿈, 파일 안의 테스트 수(`it`/`test`/`check`)나 묶음 수(`describe`)가 줄어듦. 실행될 수 없는 자리로 옮긴 테스트는 없는 것으로 센다. |
 | P4 보호 파일 | 실패 없음. 바뀐 보호 파일을 요약 맨 위에 적는다. 승인 강제는 CODEOWNERS 가 한다. |
 | P5 변경 ID 시작점 | `scripts/guard/commit-id-start.json` 의 값을 바꾸거나 파일을 지움. |
+| P6 메타데이터 하위 호환 | 기준 브랜치의 `metadata/` 와 비교해 `diffBundles` 가 오류를 냄: 폐기 예정 표시 없이 지운 개체·필드·목록 보기·동작·메뉴, 별칭 없는 이름 바꾸기, 허용 표 밖의 종류 바꾸기. 두 쪽 다 지금 커밋의 검사기로 읽는다. 어느 쪽이든 읽지 못하면 실패다. 예외로 선언할 수 없다(먼저 폐기 예정으로 둔다). 기준 브랜치에 설정 파일이 없으면 비교할 것이 없어 통과다. |
 
 P3 이 테스트 파일로 보는 것:
 

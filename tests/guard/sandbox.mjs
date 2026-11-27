@@ -51,7 +51,8 @@ export function writeFiles(dir, files) {
 const HEX = '#';
 // The smallest tree in which every rule has something real to look at. Clean under an empty baseline.
 export const BASE_FILES = {
-  '.gitignore': 'node_modules/\n.guard/\n',
+  // The validator copy (VALIDATOR_FILES) is ignored, so no rule scans it: G12 and P6 read it from disk.
+  '.gitignore': 'node_modules/\n.guard/\npackages/contracts/src/metadata/\npackages/contracts/src/admin/\n',
   'frontend/src/App.tsx': 'export const App = () => <main />;\n',
   'frontend/src/HomePage.tsx': 'export const HomePage = () => <section />;\n',
   'frontend/src/api.ts': "export const call = (url: string) => fetch(url);\n",
@@ -77,6 +78,20 @@ export const BOUND = {
   },
 };
 
+// The metamodel validator that G12 and P6 load: packages/contracts/src/metadata and the admin files it imports.
+// Copied as they are, so the sandbox checks metadata with the same code as the repository. Git ignores them there.
+const VALIDATOR_DIRS = ['packages/contracts/src/metadata'];
+const VALIDATOR_EXTRA = ['core', 'permissions', 'resolver', 'schemas', 'versions'].map(name => `packages/contracts/src/admin/${name}.ts`);
+export const VALIDATOR_FILES = Object.fromEntries([
+  ...VALIDATOR_DIRS.flatMap(dir => fs.readdirSync(path.join(root, dir)).map(name => `${dir}/${name}`)),
+  ...VALIDATOR_EXTRA,
+].map(file => [file, fs.readFileSync(path.join(root, file), 'utf8')]));
+const CONTRACTS_MANIFEST = { 'packages/contracts/package.json': '{ "name": "@dio-crm/contracts", "private": true }\n' };
+
+function zodDir() {
+  return path.dirname(createRequire(path.join(root, 'packages/contracts/package.json')).resolve('zod/package.json'));
+}
+
 function typescriptDir() {
   for (const host of TS_HOSTS) {
     try { return path.dirname(createRequire(path.join(root, host, 'package.json')).resolve('typescript/package.json')); } catch { /* next host */ }
@@ -98,10 +113,12 @@ export function makeSandbox({ files = {}, baseline = {} } = {}) {
     fs.mkdirSync(path.dirname(path.join(dir, name)), { recursive: true });
     fs.copyFileSync(path.join(root, name), path.join(dir, name));
   }
-  writeFiles(dir, { ...BASE_FILES, ...files, 'guard-baseline.json': `${JSON.stringify({ schemaVersion: 2, rules: baseline }, null, 2)}\n` });
+  const baselineText = `${JSON.stringify({ schemaVersion: 2, rules: baseline }, null, 2)}\n`;
+  writeFiles(dir, { ...BASE_FILES, ...VALIDATOR_FILES, ...CONTRACTS_MANIFEST, ...files, 'guard-baseline.json': baselineText });
   const link = path.join(dir, TS_HOSTS[0], 'node_modules');
   fs.mkdirSync(link, { recursive: true });
   fs.symlinkSync(typescriptDir(), path.join(link, 'typescript'), 'junction');
+  fs.symlinkSync(zodDir(), path.join(link, 'zod'), 'junction');
   git('init', '-q');
   fs.writeFileSync(path.join(dir, LEGACY_FILE), `${stableJson(toDocument(computeLegacy(createContext(dir))), 2)}\n`);
   // CODEOWNERS and the rule document first: CLAUDE.md marks the protected paths that do not exist yet.

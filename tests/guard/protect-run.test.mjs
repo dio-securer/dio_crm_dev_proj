@@ -1,4 +1,4 @@
-// The protect check (P1-P5) through the real runner, in a throwaway repository: every weakening exits 1, the same
+// The protect check (P1-P6) through the real runner, in a throwaway repository: every weakening exits 1, the same
 // weakening with an exact declaration exits 0, and an inexact declaration does not pass. The comparison logic itself
 // is tested on in-memory pairs in protect.test.mjs and protect-tests.test.mjs; this file adds the runner and its exit codes.
 import assert from 'node:assert/strict';
@@ -66,6 +66,8 @@ const TRIALS = {
   P5: [
     ['a moved start point', json(START, doc => { doc.lastExemptCommit = OTHER_SHA; }), { rule: 'P5', file: START, from: box.exempt, to: OTHER_SHA }],
   ],
+  // P6 (metadata compatibility) cannot be declared; its trials are in metadata.test.mjs.
+  P6: [],
 };
 
 test('the unchanged sandbox passes, and the protect check has exactly the rules that are tried here', () => {

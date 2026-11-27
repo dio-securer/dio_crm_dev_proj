@@ -10,6 +10,7 @@ import { byCodeUnit, createContext } from './files.mjs';
 import { baseReader, changesSince, resolveBase } from './gitbase.mjs';
 import { LEGACY_FILE } from './legacy.mjs';
 import { p1, p2, p5 } from './protect-data.mjs';
+import { p6 } from './protect-metadata.mjs';
 import { p3 } from './protect-tests.mjs';
 import { RAISES_FILE, canonical, matchRaises, parseRaises } from './raises.mjs';
 import { renderSummary, verdictOf } from './summary.mjs';
@@ -53,7 +54,10 @@ function evaluate(root, ref) {
   const head = file => (fs.existsSync(path.join(root, file)) ? fs.readFileSync(path.join(root, file), 'utf8') : null);
   const entries = parseRaises(head(RAISES_FILE));
   const { row: p4row, protectedChanges } = p4(root, reader, changes);
-  const rows = [p1(reader, head(BASELINE_FILE)), p2(reader, head(LEGACY_FILE)), p3(reader, ctx, changes), p4row, p5(reader, head(START_FILE))];
+  const rows = [
+    p1(reader, head(BASELINE_FILE)), p2(reader, head(LEGACY_FILE)), p3(reader, ctx, changes), p4row, p5(reader, head(START_FILE)),
+    p6(root, reader, ctx),
+  ];
   const { excused, open, unused } = matchRaises(rows.flatMap(row => row.violations), entries);
   const badDeclarations = unused.map(item => ({ entry: item.entry, why: whyUnused(item, rows) }));
   const stillOpen = new Set(open);

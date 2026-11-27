@@ -30,7 +30,7 @@ export const g01 = {
     'trailing.json': '{ "a": 1, }\n',
     'UPPER.JSON': '{ a: 1 }\n',
   }),
-  pass: { 'metadata/a/b/c/d/e/f/.gitkeep': '', 'metadata/a/b/c/d/e/f/g01-deep.yml': 'a: 1\n', 'metadata/g01-number.json': '1\n' },
+  pass: { 'metadata/a/b/c/d/e/f/.gitkeep': '' },
 };
 
 export const g02 = {

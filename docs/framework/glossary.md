@@ -119,7 +119,7 @@
 | 엔진 구역 | `packages/engine` | 공통 코드를 둘 폴더. 지금은 안내문만 있다. | `packages/engine/README.md` |
 | 확장 구역 | `extensions/` | 회사 전용 코드를 둘 폴더. 지금은 안내문만 있다. | `extensions/README.md` |
 | 이관 대상 (legacy) | `LEGACY_RULES` | 프레임워크로 옮길 기존 코드를 고르는 규칙. 목록은 `legacy-files.json`. | `scripts/guard/lib/legacy.mjs` |
-| 가드 | `RULES` | 프레임워크 규칙 G01~G11 을 검사하는 프로그램. | `scripts/guard/rules/index.mjs` |
+| 가드 | `RULES` | 프레임워크 규칙 G01~G12 을 검사하는 프로그램. | `scripts/guard/rules/index.mjs` |
 | 기준선 | `BASELINE_FILE` | 기존 위반을 숫자로 묶어 둔 파일(`guard-baseline.json`)의 이름. | `scripts/guard/lib/baseline.mjs` |
 | 보호 경로 | `PROTECTED_FILE` | 바꾸면 사람 승인이 필요한 경로 목록 파일의 이름. | `scripts/guard/lib/codeowners.mjs` |
 | 예외 선언 | `RAISES_FILE` | 사람이 허락한 약화를 적는 파일(`guard-raises.json`)의 이름. | `scripts/guard/lib/raises.mjs` |

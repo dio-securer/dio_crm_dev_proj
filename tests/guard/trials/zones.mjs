@@ -17,12 +17,10 @@ export const g01 = {
     'metadata/setup.yaml.sh': 'echo\n',
   },
   pass: {
-    'metadata/objects/g01-lead.json': '{ "name": "lead" }\n',
-    'metadata/g01-a.yaml': 'a: 1\n',
-    'metadata/g01-b.yml': 'b: 1\n',
     'metadata/README.md': '# values\n',
     'metadata/empty/.gitkeep': '',
-    'metadata/G01-UPPER.JSON': '[1]\n',
+    // A valid metadata file: neither G01 nor G12 may report it. (Files that G01 accepts and G12 rejects are in metadata.mjs.)
+    'metadata/codes/g01_code.json': '{ "key": "g01_code", "values": [] }\n',
     'metadata-notes/g01-tool.ts': code,
     'config/metadata/g01-tool.ts': code,
   },
@@ -86,6 +84,8 @@ export const g03 = {
     'fixtures/generated/dist/big.cjs': rows(301),
     'docs/admin-platform/implementation/evidence-copy/big.tsx': rows(301),
   },
+  // G12 reports these too: they are not files of the metadata layout.
+  overlap: ['metadata/big.json', 'metadata/big.yaml'],
   pass: {
     'src/g03-edge-lines.ts': rows(300),
     'src/g03-edge-bytes.ts': bytes(15000),

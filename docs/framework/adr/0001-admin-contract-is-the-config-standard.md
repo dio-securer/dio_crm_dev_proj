@@ -34,7 +34,7 @@
 ## 기계 검사
 
 - 메타모델 검사 함수가 있다(F1-1, ADR 0006): `packages/contracts/src/metadata/` 의 `validateBundle` 이 admin 설정끼리의 참조(없는 필드·문구·코드·개체)를 검사한다.
-  지금은 테스트(`tests/metadata/`, `pnpm test`)로만 돈다. `metadata/` 파일에 대해 가드로 돌리는 연결은 F1-2 에서 한다.
+  가드 규칙 G12(F1-2)가 `metadata/` 파일에 이 검사를 돌린다. 리드 개체는 `metadata/objects/lead/` 에 있고, 기존 lead-* 계약의 열 ID 와 맞는지 `tests/metadata/lead.test.cjs` 가 본다(계약 코드 자체는 아직 그대로다).
 - crm-customization 쪽은 아직 기계 검사 없음. 지금은 crm-customization 에 새 기능을 넣거나 새 코드가 그것을 import 해도 가드가 막지 않는다.
 - 일부만 막힌다: G10 이 리드 전용 customization 파일의 새 생성을 막는다
   (`packages/contracts/src/lead-*`, `backend/src/customization/*lead-*`, `frontend/src/customization/` 의 `*Lead*`·`lead-*`·`Configured*.tsx`).

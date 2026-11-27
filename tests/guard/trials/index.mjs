@@ -21,6 +21,7 @@ import * as code from './shapes-code.mjs';
 import * as zone from './shapes-zones.mjs';
 import { g11 as imports } from './test-imports.mjs';
 import { g04, g05 } from './text.mjs';
+import { g12 } from './metadata.mjs';
 import { g01, g02, g03, g10 } from './zones.mjs';
 
 const first = {
@@ -59,6 +60,7 @@ export const TRIALS = [
   g09,
   join(g10, zone.g10),
   join(imports, code.g11, members.g11),
+  g12,
 ];
 export const MIN_FAIL = 3;
 export const MIN_PASS = 1;

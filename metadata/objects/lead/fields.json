@@ -1,0 +1,157 @@
+{
+  "fields": [
+    {
+      "aliases": [],
+      "key": "hospital_name",
+      "labelKey": "lead.field.hospital_name",
+      "required": true,
+      "system": false,
+      "type": "text"
+    },
+    {
+      "aliases": [],
+      "enumCodeGroup": "lead_status",
+      "key": "status",
+      "labelKey": "lead.field.status",
+      "required": true,
+      "system": false,
+      "type": "enum"
+    },
+    {
+      "aliases": [],
+      "key": "owner_name",
+      "labelKey": "lead.field.owner_name",
+      "required": false,
+      "system": false,
+      "type": "text"
+    },
+    {
+      "aliases": [],
+      "key": "sido",
+      "labelKey": "lead.field.sido",
+      "required": false,
+      "system": false,
+      "type": "text"
+    },
+    {
+      "aliases": [],
+      "key": "sigungu",
+      "labelKey": "lead.field.sigungu",
+      "required": false,
+      "system": false,
+      "type": "text"
+    },
+    {
+      "aliases": [],
+      "key": "phone",
+      "labelKey": "lead.field.phone",
+      "required": false,
+      "system": false,
+      "type": "text"
+    },
+    {
+      "aliases": [],
+      "key": "business_no",
+      "labelKey": "lead.field.business_no",
+      "required": false,
+      "system": false,
+      "type": "text"
+    },
+    {
+      "aliases": [],
+      "key": "updated_at",
+      "labelKey": "lead.field.updated_at",
+      "required": false,
+      "system": true,
+      "type": "datetime"
+    },
+    {
+      "aliases": [],
+      "key": "address",
+      "labelKey": "lead.field.address",
+      "required": false,
+      "system": false,
+      "type": "text"
+    },
+    {
+      "aliases": [],
+      "key": "keyman_surname",
+      "labelKey": "lead.field.keyman_surname",
+      "required": false,
+      "system": false,
+      "type": "text"
+    },
+    {
+      "aliases": [],
+      "key": "keyman_type",
+      "labelKey": "lead.field.keyman_type",
+      "required": false,
+      "system": false,
+      "type": "text"
+    },
+    {
+      "aliases": [],
+      "key": "keyman_mobile",
+      "labelKey": "lead.field.keyman_mobile",
+      "required": false,
+      "system": false,
+      "type": "text"
+    },
+    {
+      "aliases": [],
+      "key": "keyman_email",
+      "labelKey": "lead.field.keyman_email",
+      "required": false,
+      "system": false,
+      "type": "text"
+    },
+    {
+      "aliases": [],
+      "key": "keyman_school",
+      "labelKey": "lead.field.keyman_school",
+      "required": false,
+      "system": false,
+      "type": "text"
+    },
+    {
+      "aliases": [],
+      "key": "keyman_class_year",
+      "labelKey": "lead.field.keyman_class_year",
+      "required": false,
+      "system": false,
+      "type": "text"
+    },
+    {
+      "aliases": [],
+      "key": "keyman_major",
+      "labelKey": "lead.field.keyman_major",
+      "required": false,
+      "system": false,
+      "type": "text"
+    },
+    {
+      "aliases": [],
+      "key": "main_system",
+      "labelKey": "lead.field.main_system",
+      "required": false,
+      "system": false,
+      "type": "text"
+    },
+    {
+      "aliases": [],
+      "key": "sub_system",
+      "labelKey": "lead.field.sub_system",
+      "required": false,
+      "system": false,
+      "type": "text"
+    },
+    {
+      "aliases": [],
+      "key": "exclusion_reason",
+      "labelKey": "lead.field.exclusion_reason",
+      "required": false,
+      "system": false,
+      "type": "text"
+    }
+  ]
+}

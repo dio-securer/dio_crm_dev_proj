@@ -63,7 +63,7 @@ jobs:
           BASE_REF: ${{ github.base_ref }}
         run: node scripts/guard/run.mjs --commits "origin/$BASE_REF..HEAD"
       # --strict: also fails when a baseline number could be lowered but was not (the ratchet must be tightened in the same PR).
-      - name: Guard framework rules G01-G11 against the baseline
+      - name: Guard framework rules G01-G12 against the baseline
         run: node scripts/guard/run.mjs --strict
       - name: Guard self tests
         run: node --test tests/guard/*.test.mjs

@@ -157,7 +157,8 @@ export const g03 = {
     // Code and style files in metadata/ are measured as well (G01 reports them for being there at all).
     ...Object.fromEntries(IN_METADATA.map(ext => [`metadata/sizes/lines${ext}`, '/* x */\n'.repeat(301)])),
   },
-  overlap: IN_METADATA.map(ext => `metadata/sizes/lines${ext}`),
+  // G01 reports the code files for being there at all, G12 the config files for not being in the metadata layout.
+  overlap: [...IN_METADATA.map(ext => `metadata/sizes/lines${ext}`), ...rule('g03-file-size', 'METADATA_EXT').map(ext => `metadata/sizes/bytes${ext}`)],
   // The excluded folders are these exact paths: the same path below another folder is checked like everything else.
   lookalikes: Object.fromEntries(rule('g03-file-size', 'EXCLUDED_DIRS').map(([dir]) => [`any/${dir}big.js`, '// x\n'.repeat(301)])),
 };

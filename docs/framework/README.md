@@ -9,8 +9,8 @@
 | [`/CLAUDE.md`](../../CLAUDE.md) | 작업 규칙. 세 구역, 일하는 순서, 꼭 지킬 규칙, 완료를 말하는 법. | AI 작업자(작업을 시작할 때마다) |
 | [`adr/`](adr/README.md) | 결정 기록(ADR). 무엇을 왜 그렇게 정했는지. | AI 작업자, 승인하는 사람 |
 | [`glossary.md`](glossary.md) | 용어집. 업무 용어와 코드 이름. | AI 작업자, 승인하는 사람 |
-| [`guard-rules.md`](guard-rules.md) | 가드 규칙 G01~G11 의 범위, 예외, 한계. 가드 코드에서 만든다. | AI 작업자 |
-| [`ci-gates.md`](ci-gates.md) | CI 가 막는 것, 보호 검사 P1~P5, 예외를 선언하는 법, 승인하는 사람이 볼 것. | 승인하는 사람, AI 작업자 |
+| [`guard-rules.md`](guard-rules.md) | 가드 규칙 G01~G12 의 범위, 예외, 한계. 가드 코드에서 만든다. | AI 작업자 |
+| [`ci-gates.md`](ci-gates.md) | CI 가 막는 것, 보호 검사 P1~P6, 예외를 선언하는 법, 승인하는 사람이 볼 것. | 승인하는 사람, AI 작업자 |
 | [`metamodel.md`](metamodel.md) | 메타모델: 개체·필드 정의, admin 도메인과 `metadata/` 파일의 짝, 검사 코드 표. | AI 작업자, 승인하는 사람 |
 
 `CLAUDE.md` 의 규칙 표와 보호 경로 목록, 그리고 `guard-rules.md` 전체는 가드 코드에서 만들어 넣는다(`node scripts/guard/run.mjs --docs`).
