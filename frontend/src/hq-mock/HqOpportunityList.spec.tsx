@@ -21,5 +21,6 @@ it('renders each mock contract in its own currency', () => {
 });
 it('separates pipeline currencies and does not show unapproved weighted forecasts', () => {
   const html=renderToStaticMarkup(<HqPipelineView />);
-  expect(html).toContain('PROPOSAL · USD'); expect(html).toContain('PROPOSAL · KRW'); expect(html).not.toContain('가중 금액');
+  const stageCurrency=(cur:string)=>new RegExp(`<span class="pipeline-desktop-label">PROPOSAL</span><span class="pipeline-mobile-label">[^<]*</span> · ${cur}</h2>`);
+  expect(html).toMatch(stageCurrency('USD')); expect(html).toMatch(stageCurrency('KRW')); expect(html).not.toContain('가중 금액');
 });
