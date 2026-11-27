@@ -43,6 +43,15 @@ test('the default list view is the managed column order of the lead grid', () =>
   // lead-grid-settings.ts allows sorting by lead.updatedAt only, so that field must be comparable.
   const updated = lead().object.fields.find(f => f.key === fieldKey('lead.updatedAt'));
   assert.ok(m.COMPARABLE_TYPES.includes(updated.type));
+  assert.equal(updated.type, 'datetime');
+  assert.deepEqual(view.sort, [{ field: 'updated_at', direction: 'DESC' }]);
+});
+
+test('every lead field has its expected type', () => {
+  const types = Object.fromEntries(lead().object.fields.map(f => [f.key, f.type]));
+  const expected = Object.fromEntries(Object.keys(types).map(key => [key, 'text']));
+  Object.assign(expected, { status: 'enum', updated_at: 'datetime' });
+  assert.deepEqual(types, expected);
 });
 
 test('the lead_status code group is LeadStatus', () => {
