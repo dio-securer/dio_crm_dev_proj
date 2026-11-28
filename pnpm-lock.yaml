@@ -152,6 +152,16 @@ importers:
         specifier: ^5.7.2
         version: 5.9.3
 
+  packages/engine:
+    dependencies:
+      '@dio-crm/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+
 packages:
 
   '@angular-devkit/core@19.2.24':

@@ -1825,6 +1825,7 @@
    "/backend/package.json",
    "/frontend/package.json",
    "/packages/contracts/package.json",
+   "/packages/engine/package.json",
    "/pnpm-workspace.yaml",
    "/pnpm-lock.yaml",
    "/.npmrc",

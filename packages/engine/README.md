@@ -1,8 +1,13 @@
-# packages/engine — 엔진 구역 (자리만 잡아 둠)
+# packages/engine — 엔진 구역 (`@dio-crm/engine`)
 
 `metadata/` 의 설정을 읽어 화면과 API를 만들어 내는 공통 코드가 들어갈 곳입니다. 모든 회사·국가가 같은 엔진을 씁니다.
 
-지금은 이 안내문만 있습니다. 실제 코드와 패키지 설정(`package.json`)은 F2 단계에서 추가합니다. 그때까지 빌드에는 영향을 주지 않습니다.
+F2-1 에서 패키지를 만들었습니다. 지금 있는 것:
+
+- `loadRuntimeModel(files)`: `metadata/` 파일 내용을 받아 검사(`bundleFromFiles` + `validateBundle`)한 뒤 읽기 전용 모델(개체, 필드·별칭, 용어, 코드 값)을 돌려줍니다. 오류가 하나라도 있으면 모델 없이 문제 목록만 돌려줍니다. 파일은 호출자가 읽어 넘깁니다(G07).
+- 행 권한 평가기 `canAccessRow`, `filterRows`, `accessPredicate`: 규칙(`all`, `none`, `own`, `members`, `unit`, 선택적 권한 조건)을 OR 로 묶고, 규칙이 없으면 거부합니다. 규칙을 설정에서 읽는 일은 F2-2 입니다.
+
+테스트: `pnpm --filter @dio-crm/engine test`.
 
 ## 무엇이 들어가나
 

@@ -21,6 +21,7 @@
 /backend/package.json                             @dio-securer
 /frontend/package.json                            @dio-securer
 /packages/contracts/package.json                  @dio-securer
+/packages/engine/package.json                     @dio-securer
 /pnpm-workspace.yaml                              @dio-securer
 /pnpm-lock.yaml                                   @dio-securer
 /.npmrc                                           @dio-securer
