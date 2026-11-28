@@ -37,12 +37,12 @@ export function validateWrite(model: RuntimeModel, objectKey: string, input: unk
   const readOnly = readOnlyFields(model, objectKey);
   for (const name of Object.keys(input)) {
     const field = model.field(objectKey, name);
-    if (!field) { errors.push({ code: 'UNKNOWN_FIELD', field: name }); continue; }
+    // An unreadable field (key or alias, system or not) is answered as if it did not exist, before anything else, and is not counted as sent.
+    const allowed = field ? access?.(field.key) : undefined;
+    if (!field || (allowed && !allowed.read)) { errors.push({ code: 'UNKNOWN_FIELD', field: name }); continue; }
     if (seen.has(field.key)) { errors.push({ code: 'DUPLICATE_FIELD', field: field.key }); continue; }
     seen.add(field.key);
     if (field.system) { errors.push({ code: 'SYSTEM_FIELD', field: field.key }); continue; }
-    const allowed = access?.(field.key);
-    if (allowed && !allowed.read) { errors.push({ code: 'UNKNOWN_FIELD', field: name }); continue; }
     if (readOnly.has(field.key) || (allowed && !allowed.edit)) { errors.push({ code: 'READ_ONLY_FIELD', field: field.key }); continue; }
     const raw = input[name];
     if (isBlank(raw)) {
@@ -55,8 +55,9 @@ export function validateWrite(model: RuntimeModel, objectKey: string, input: unk
   if (mode === 'create') {
     let hidden = false;
     for (const f of object.object.fields) {
-      if (!f.required || f.system || seen.has(f.key)) continue;
-      if (access && !access(f.key).read) hidden = true; else errors.push({ code: 'REQUIRED', field: f.key });
+      if (!f.required || f.system) continue;
+      // Every required unreadable field counts, whatever was sent (sent ones were refused as unknown above).
+      if (access && !access(f.key).read) hidden = true; else if (!seen.has(f.key)) errors.push({ code: 'REQUIRED', field: f.key });
     }
     if (hidden) errors.push({ code: 'NOT_PERMITTED' });
   } else if (seen.size === 0 && errors.length === 0) {

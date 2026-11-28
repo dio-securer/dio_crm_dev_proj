@@ -114,3 +114,24 @@ test('only admins stage, publish, discard and roll back metadata versions', asyn
   assert.equal((await svc.rollback(admin)).id, id);
   await forbidden(svc.discard(await svc.stage(readMetadata(), admin), user));
 });
+
+test('a hidden field is answered exactly like an unknown one: key, alias, duplicate, system', () => {
+  const m2 = e.loadRuntimeModel(editJson(readMetadata(), 'metadata/objects/lead/fields.json', d => {
+    d.fields.find(f => f.key === 'status').aliases = ['state_old'];
+    d.fields.push({ aliases: [], key: 'sync_key', labelKey: 'lead.field.phone', required: false, system: true, type: 'text' });
+  })).model;
+  const hide = keys => e.fieldAccessOf({ sets: [sales], restrictions: [{ key: 'h', fields: { lead: Object.fromEntries(keys.map(k => [k, { read: true }])) } }] }, 'lead');
+  const access = hide(['status', 'sync_key']);
+  const err = input => e.validateWrite(m2, 'lead', input, 'create', access).errors;
+  const shape = (errors, name) => errors.map(x => (x.field === name ? { ...x, field: '<sent>' } : x));
+  assert.deepEqual(shape(err({ zz_nope: 1 }), 'zz_nope'), shape(err({ status: 'NEW' }), 'status'));
+  assert.ok(err({ zz_nope: 1 }).some(x => x.code === 'NOT_PERMITTED'));
+  assert.ok(err({ status: 'NEW' }).some(x => x.code === 'NOT_PERMITTED'));
+  assert.deepEqual(err({ hospital_name: 'H', status: 'NEW', state_old: 'NEW' }),
+    [{ code: 'UNKNOWN_FIELD', field: 'status' }, { code: 'UNKNOWN_FIELD', field: 'state_old' }, { code: 'NOT_PERMITTED' }]);
+  assert.deepEqual(err({ hospital_name: 'H', sync_key: 'x' }), [{ code: 'UNKNOWN_FIELD', field: 'sync_key' }, { code: 'NOT_PERMITTED' }]);
+  // Readable system field keeps its own code.
+  assert.deepEqual(e.validateWrite(m2, 'lead', { sync_key: 'x' }, 'update', hide(['status'])).errors, [{ code: 'SYSTEM_FIELD', field: 'sync_key' }]);
+  // On update a hidden field alone is unknown, and not counted as sent (no EMPTY masking it).
+  assert.deepEqual(e.validateWrite(m2, 'lead', { state_old: 'NEW' }, 'update', access).errors, [{ code: 'UNKNOWN_FIELD', field: 'state_old' }]);
+});
