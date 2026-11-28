@@ -8,7 +8,7 @@ export interface UserRow { public_id: string; organization_id: number | string |
 
 const active = (v: boolean | number | undefined) => v === undefined || v === true || v === 1;
 
-/** Inactive units and users are left out; a unit under an inactive parent keeps its parent link and so fails checkOrgChart (opens nothing). */
+/** Inactive units and users are left out; a unit under an inactive parent keeps its parent link, so that branch fails closed (hierarchyScope opens nothing below the inactive unit; the rest still works). */
 export function orgChartFromRows(orgs: readonly OrgRow[], users: readonly UserRow[], heads: Readonly<Record<string, string>> = {}): OrgChart {
   const units = orgs.filter(o => active(o.is_active)).map(o => {
     const id = String(o.organization_id), head = heads[id];

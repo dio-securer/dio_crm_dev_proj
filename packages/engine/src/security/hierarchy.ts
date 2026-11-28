@@ -57,16 +57,32 @@ export function subtreeOf(chart: OrgChart, rootId: string): string[] {
 export interface HierarchyScope { unitIds: string[]; memberIds: string[] }
 
 /**
- * What a user sees through the hierarchy: for every unit the user heads, the whole subtree (units, members and heads).
- * A user who heads nothing gets nothing here (their own rows come from the `own` rule). A broken chart opens nothing.
+ * Units that cannot be trusted, failing closed per branch: a duplicate id, a missing parent (e.g. an inactive unit that
+ * was left out), a cycle, and every unit below one of these. The rest of the chart keeps working.
+ */
+function brokenUnits(chart: OrgChart): Set<string> {
+  const issues = checkOrgChart(chart);
+  const bad = new Set<string>();
+  for (const i of issues) if (i.code === 'DUPLICATE_UNIT' || i.code === 'UNKNOWN_PARENT' || i.code === 'CYCLE') for (const id of subtreeOf(chart, i.id)) bad.add(id);
+  return bad;
+}
+
+/**
+ * What a user sees through the hierarchy: for every healthy unit the user heads, its healthy subtree (units, members
+ * and heads). A user who heads nothing gets nothing here (their own rows come from the `own` rule). A broken branch
+ * (see brokenUnits) gives its heads nothing and is not reached from above; a user listed twice is never opened.
  */
 export function hierarchyScope(chart: OrgChart, userId: string): HierarchyScope {
-  if (checkOrgChart(chart).length) return { unitIds: [], memberIds: [] };
+  const bad = brokenUnits(chart);
+  const dupUsers = new Set(checkOrgChart(chart).filter(i => i.code === 'DUPLICATE_MEMBER').map(i => i.id));
   const units = new Set<string>();
-  for (const u of chart.units) if (u.headUserId === userId) for (const id of subtreeOf(chart, u.id)) units.add(id);
+  for (const u of chart.units) {
+    if (u.headUserId !== userId || bad.has(u.id)) continue;
+    for (const id of subtreeOf(chart, u.id)) if (!bad.has(id)) units.add(id);
+  }
   const members = new Set<string>();
-  for (const m of chart.members) if (units.has(m.unitId)) members.add(m.userId);
-  for (const u of chart.units) if (units.has(u.id) && u.headUserId) members.add(u.headUserId);
+  for (const m of chart.members) if (units.has(m.unitId) && !dupUsers.has(m.userId)) members.add(m.userId);
+  for (const u of chart.units) if (units.has(u.id) && u.headUserId && !dupUsers.has(u.headUserId)) members.add(u.headUserId);
   members.delete(userId);
   return { unitIds: [...units].sort(), memberIds: [...members].sort() };
 }

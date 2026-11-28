@@ -40,6 +40,23 @@ test('a broken chart (cycle, unknown parent) opens nothing', () => {
   assert.deepEqual(e.checkOrgChart(orphan), [{ code: 'UNKNOWN_PARENT', id: 'a' }]);
 });
 
+test('an inactive (missing) unit closes only its own branch, not the whole chart', () => {
+  const cut = { units: chart.units.filter(u => u.id !== 'div-cap-1'), members: chart.members };
+  const scope = u => e.hierarchyScope(cut, u);
+  assert.deepEqual(scope('h-br-cap-1a'), { unitIds: [], memberIds: [] });
+  assert.deepEqual(scope('h-reg-cap'), { unitIds: ['reg-cap'], memberIds: [] });
+  assert.deepEqual(scope('h-reg-south').memberIds, ['h-br-south-1a', 'h-div-south-1', 's-south-1']);
+  assert.ok(!scope('h-dom').memberIds.includes('s-1a-1'));
+  assert.ok(scope('h-dom').memberIds.includes('s-south-1'));
+});
+
+test('a validateWrite on create never names a required field the actor cannot read', () => {
+  const access = e.fieldAccessOf({ sets: [sales], restrictions: [{ key: 's', fields: { lead: { status: { read: true } } } }] }, 'lead');
+  const r = e.validateWrite(model, 'lead', { hospital_name: 'H' }, 'create', access);
+  assert.deepEqual(r.errors, [{ code: 'NOT_PERMITTED' }]);
+  assert.deepEqual(e.validateWrite(model, 'lead', {}, 'create', access).errors, [{ code: 'REQUIRED', field: 'hospital_name' }, { code: 'NOT_PERMITTED' }]);
+});
+
 const sales = { key: 'sales', objects: { lead: { read: true, create: true, edit: true } }, fields: { lead: { '*': { read: true, edit: true }, phone: { read: true } } } };
 const hidePhone = { key: 'pii', fields: { lead: { business_no: { read: true } } } };
 
@@ -57,7 +74,7 @@ test('field permissions: unreadable fields are stripped and cannot be written; r
   assert.deepEqual(access('phone'), { read: true, edit: false });
   assert.deepEqual(e.readableValues({ hospital_name: 'H', business_no: '1', phone: '2' }, access), { hospital_name: 'H', phone: '2' });
   const r = e.validateWrite(model, 'lead', { hospital_name: 'H', status: 'NEW', business_no: '9', phone: '1' }, 'create', access);
-  assert.deepEqual(r.errors, [{ code: 'FIELD_FORBIDDEN', field: 'business_no' }, { code: 'READ_ONLY_FIELD', field: 'phone' }]);
+  assert.deepEqual(r.errors, [{ code: 'UNKNOWN_FIELD', field: 'business_no' }, { code: 'READ_ONLY_FIELD', field: 'phone' }]);
   assert.equal(e.validateWrite(model, 'lead', { hospital_name: 'H', status: 'NEW' }, 'create', access).ok, true);
   // No object grant: every field is closed.
   assert.deepEqual(e.fieldAccess({ sets: [{ key: 'f', fields: { lead: { '*': { read: true, edit: true } } } }] }, 'lead', 'phone'), { read: false, edit: false });
@@ -65,11 +82,18 @@ test('field permissions: unreadable fields are stripped and cannot be written; r
 
 test('the screen model loses unreadable fields and marks uneditable ones read-only', () => {
   const ui = e.buildUiModel(model, 'lead', 'en-US');
-  const narrowed = e.restrictUiModel(ui, e.fieldAccessOf({ sets: [sales], restrictions: [hidePhone] }, 'lead'));
+  const narrowed = e.restrictUiModel(ui, { sets: [sales], restrictions: [hidePhone] }, model);
   assert.ok(!JSON.stringify(narrowed.fields).includes('"business_no"'));
   assert.ok(narrowed.screens.every(s => s.fields.every(f => f.key !== 'business_no')));
   assert.equal(narrowed.fields.find(f => f.key === 'phone').readOnly, true);
-  assert.equal(e.restrictUiModel(ui, undefined), ui);
+  assert.equal(e.restrictUiModel(ui, undefined, model), ui);
+  // Related lists: kept only with read on the child object and its reference field (child grants).
+  const withRel = { ...ui, related: [{ object: 'contact', field: 'lead_ref', label: 'C', fieldLabel: 'L' }] };
+  assert.deepEqual(e.restrictUiModel(withRel, { sets: [sales] }, model).related, []);
+  const childOk = { key: 'c', objects: { contact: { read: true } }, fields: { contact: { lead_ref: { read: true } } } };
+  assert.equal(e.restrictUiModel(withRel, { sets: [sales, childOk] }, model).related.length, 1);
+  const childHidden = { key: 'h', fields: { contact: { lead_ref: { read: true } } } };
+  assert.deepEqual(e.restrictUiModel(withRel, { sets: [sales, childOk], restrictions: [childHidden] }, model).related, []);
 });
 
 test('only admins stage, publish, discard and roll back metadata versions', async () => {

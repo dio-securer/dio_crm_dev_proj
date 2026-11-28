@@ -1,13 +1,13 @@
 // F2-7: the renderers over a screen model narrowed by field permissions (as the API sends it): an unreadable field is
 // drawn nowhere, even if a record still carried its value; a readable but uneditable field is disabled and never sent.
 import { describe, expect, it } from 'vitest';
-import { fieldAccessOf, restrictUiModel } from '@dio-crm/engine';
+import { loadRuntimeModel, restrictUiModel } from '@dio-crm/engine';
 import { DetailView } from './DetailView';
 import { ListView } from './ListView';
 import { RecordForm } from './RecordForm';
 import { editableFields } from './form-values';
 import { formScreen, placeScreen } from './layout';
-import { LEADS, uiModel } from './testing/fixtures';
+import { FIXTURE_FILES, LEADS, readMetadata, uiModel } from './testing/fixtures';
 import { all, html } from './testing/render';
 import type { EngineUiModel } from './types';
 
@@ -16,7 +16,7 @@ const grants = {
   restrictions: [{ key: 'pii', fields: { lead: { business_no: { read: true } } } }],
 };
 const full = uiModel('lead');
-const lead: EngineUiModel = { ...restrictUiModel(full, fieldAccessOf(grants, 'lead')), access: full.access };
+const lead: EngineUiModel = { ...restrictUiModel(full, grants, loadRuntimeModel([...readMetadata(), ...FIXTURE_FILES]).model!), access: full.access };
 const leaky = { ...LEADS[0], values: { ...LEADS[0].values, business_no: 'SECRET-123' } };
 const noop = () => undefined;
 

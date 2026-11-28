@@ -1,7 +1,7 @@
 // The automatic API (F2-4): list / read / create / update of any object in the published metadata.
 // Field checks and row access come from the engine; the store runs parameterised SQL inside the company and access condition.
 // Closed by default: no rules means no rows and no create; a row outside the actor's access is "not found".
-import { accessPredicate, buildUiModel, canObject, fieldAccessOf, isUiLocale, matchesPredicate, readableValues, restrictUiModel, validateWrite, withOwnerDefault } from '@dio-crm/engine';
+import { accessPredicate, buildUiModel, canObject, fieldAccessOf, isUiLocale, matchesPredicate, readableValues, restrictUiModel, validateWrite, viewReadable, withOwnerDefault } from '@dio-crm/engine';
 import type { Actor, FieldAccessOf, ObjectAction, RecordError, RecordValue, RuntimeModel, AccessPredicate, UiModel } from '@dio-crm/engine';
 import { PublishedCheck, StaleVersionError } from '../../database/crm-meta-published';
 import { FilterError } from '../../database/crm-obj-filter';
@@ -93,7 +93,8 @@ export class EngineRecords {
     let pageSize: number | undefined;
     if (query.view !== undefined) {
       const view = typeof query.view === 'string' ? model.object(objectKey)?.listViews?.views.find(v => v.key === query.view) : undefined;
-      if (!view) throw new EngineApiError(400, 'BAD_VIEW');
+      // A view that filters or sorts on a field the actor cannot read would reveal that field through its rows.
+      if (!view || !viewReadable(model, objectKey, view.key, access)) throw new EngineApiError(400, 'BAD_VIEW');
       Object.assign(more, { filter: view.filter, sort: view.sort });
       pageSize = view.pageSize;
     }
@@ -131,7 +132,7 @@ export class EngineRecords {
     const built = buildUiModel(current.model, objectKey, locale);
     if (!built) throw new EngineApiError(404, 'OBJECT_NOT_FOUND');
     const key = built.object.key, grants = caller.actor.grants;
-    const ui = restrictUiModel(built, fieldAccessOf(grants, key));
+    const ui = restrictUiModel(built, grants, current.model);
     const open = accessPredicate(current.model.rowAccess(objectKey), caller.actor).kind !== 'none';
     const may = (a: ObjectAction) => open && (!grants || canObject(grants, key, a));
     return { ...ui, versionId: current.versionId, access: { read: may('read'), create: may('read') && may('create') } };

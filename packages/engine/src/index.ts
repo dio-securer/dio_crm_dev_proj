@@ -8,4 +8,4 @@ export * from './records';
 export { buildUiModel, isUiLocale, UI_TEXT_PREFIX } from './ui-model';
 export type { UiModel, UiField, UiOption, UiScreen, UiScreenField, UiListView, UiRelated } from './ui-model';
 export * from './security';
-export { restrictUiModel } from './ui-access';
+export { restrictUiModel, viewReadable, filterFields } from './ui-access';

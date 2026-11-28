@@ -23,7 +23,11 @@ function activeCodes(model: RuntimeModel, field: FieldDef): string[] {
   return field.enumCodeGroup ? model.codeValues(field.enumCodeGroup).filter(c => c.active).map(c => c.code) : [];
 }
 
-/** `access` (F2-7): a field the actor may not read is FIELD_FORBIDDEN (its existence is not confirmed), one it may only read is READ_ONLY_FIELD. */
+/**
+ * `access` (F2-7): a field the actor may not read is answered exactly like a field that does not exist (UNKNOWN_FIELD),
+ * so its existence is not confirmed; one it may only read is READ_ONLY_FIELD. A required field the actor may not read is
+ * never named: create is refused once with NOT_PERMITTED (no field).
+ */
 export function validateWrite(model: RuntimeModel, objectKey: string, input: unknown, mode: WriteMode, access?: FieldAccessOf): WriteCheck {
   const object = model.object(objectKey);
   if (!object || !isPlainObject(input)) return { ok: false, errors: [{ code: 'NOT_OBJECT' }] };
@@ -38,7 +42,7 @@ export function validateWrite(model: RuntimeModel, objectKey: string, input: unk
     seen.add(field.key);
     if (field.system) { errors.push({ code: 'SYSTEM_FIELD', field: field.key }); continue; }
     const allowed = access?.(field.key);
-    if (allowed && !allowed.read) { errors.push({ code: 'FIELD_FORBIDDEN', field: name }); continue; }
+    if (allowed && !allowed.read) { errors.push({ code: 'UNKNOWN_FIELD', field: name }); continue; }
     if (readOnly.has(field.key) || (allowed && !allowed.edit)) { errors.push({ code: 'READ_ONLY_FIELD', field: field.key }); continue; }
     const raw = input[name];
     if (isBlank(raw)) {
@@ -49,7 +53,12 @@ export function validateWrite(model: RuntimeModel, objectKey: string, input: unk
     if ('error' in checked) errors.push({ code: checked.error, field: field.key }); else values[field.key] = checked.value;
   }
   if (mode === 'create') {
-    for (const f of object.object.fields) if (f.required && !f.system && !seen.has(f.key)) errors.push({ code: 'REQUIRED', field: f.key });
+    let hidden = false;
+    for (const f of object.object.fields) {
+      if (!f.required || f.system || seen.has(f.key)) continue;
+      if (access && !access(f.key).read) hidden = true; else errors.push({ code: 'REQUIRED', field: f.key });
+    }
+    if (hidden) errors.push({ code: 'NOT_PERMITTED' });
   } else if (seen.size === 0 && errors.length === 0) {
     errors.push({ code: 'EMPTY' });
   }

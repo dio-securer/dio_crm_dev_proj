@@ -62,9 +62,9 @@ describe('object and field permissions through the API', () => {
     const g = as('sa1', sales);
     expect('business_no' in (await api.get(g, 'lead', full.id)).values).toBe(false);
     expect((await api.list(g, 'lead', {})).items.every(i => !('business_no' in i.values))).toBe(true);
-    await expect(api.update(g, 'lead', full.id, { business_no: '999' })).rejects.toMatchObject({ status: 400, errors: [{ code: 'FIELD_FORBIDDEN', field: 'business_no' }] });
+    await expect(api.update(g, 'lead', full.id, { business_no: '999' })).rejects.toMatchObject({ status: 400, errors: [{ code: 'UNKNOWN_FIELD', field: 'business_no' }] });
     await expect(api.update(g, 'lead', full.id, { phone: '011' })).rejects.toMatchObject({ status: 400, errors: [{ code: 'READ_ONLY_FIELD', field: 'phone' }] });
-    await expect(api.create(g, 'lead', { ...LEAD, business_no: '1' })).rejects.toMatchObject({ errors: [{ code: 'FIELD_FORBIDDEN' }] });
+    await expect(api.create(g, 'lead', { ...LEAD, business_no: '1' })).rejects.toMatchObject({ errors: [{ code: 'UNKNOWN_FIELD', field: 'business_no' }] });
     const updated = await api.update(g, 'lead', full.id, { hospital_name: 'H2' });
     expect(updated.values.hospital_name).toBe('H2');
     expect('business_no' in updated.values).toBe(false);
@@ -87,5 +87,20 @@ describe('object and field permissions through the API', () => {
     await expect(api.update(readOnly, 'lead', r.id, { hospital_name: 'X' })).rejects.toMatchObject({ status: 403 });
     await expect(api.create(readOnly, 'lead', LEAD)).rejects.toMatchObject({ status: 403 });
     expect((await api.ui(readOnly, 'lead', 'en-US')).access).toEqual({ read: true, create: false });
+  });
+
+  it('a hidden status: a view filtering on it is refused and left out of the UI, and create does not name it', async () => {
+    const { api } = await engineFixture();
+    await api.create(as('sa1'), 'lead', LEAD);
+    const g = as('sa1', { sets: [sales.sets[0]], restrictions: [{ key: 'st', fields: { lead: { status: { read: true } } } }] });
+    await expect(api.list(g, 'lead', { view: 'excluded' })).rejects.toMatchObject({ status: 400, code: 'BAD_VIEW' });
+    expect((await api.list(g, 'lead', { view: 'hq_default' })).items.every(i => !('status' in i.values))).toBe(true);
+    const ui = await api.ui(g, 'lead', 'en-US');
+    expect(ui.listViews.map(v => v.key)).toEqual(['hq_default']);
+    const failure = await api.create(g, 'lead', { hospital_name: 'H' }).catch(e => e);
+    expect(failure).toMatchObject({ status: 400, code: 'INVALID_RECORD' });
+    expect(JSON.stringify(failure.errors)).not.toContain('status');
+    expect(failure.errors).toEqual([{ code: 'NOT_PERMITTED' }]);
+    await expect(api.create(g, 'lead', { ...LEAD })).rejects.toMatchObject({ errors: [{ code: 'UNKNOWN_FIELD', field: 'status' }] });
   });
 });
