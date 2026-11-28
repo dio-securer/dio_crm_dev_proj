@@ -2,6 +2,7 @@
 // Only a row access widening (D05) can be declared, rule by rule, after a person approves it (ADR 0007).
 // Everything else cannot: removing or renaming a field takes a deprecation first, and unreadable metadata is never excused.
 import { METADATA_DIR, isMetadataContent, issueText, loadMetamodel } from './metamodel.mjs';
+import { canonical } from './raises.mjs';
 
 const id = 'P6';
 const name = 'metadata-compat';
@@ -14,6 +15,14 @@ function declareOf(item, head) {
   const hit = item.code === 'D05_ACCESS_WIDENED' ? WIDENED.exec(item.path) : null;
   const rule = hit ? head.objects.find(ob => ob.object.key === hit[1])?.access?.rules[Number(hit[2])] : undefined;
   return rule ? { rule: id, file: `${METADATA_DIR}objects/${hit[1]}/access.json`, from: null, to: { ...rule } } : null;
+}
+
+/** The declared rule when the base already has it, so an unused P6 declaration is reported as already merged. */
+function baseRuleOf(bundle) {
+  return entry => {
+    const rules = bundle.objects.find(ob => `${METADATA_DIR}objects/${ob.object.key}/access.json` === entry.file)?.access?.rules ?? [];
+    return rules.find(rule => canonical(rule) === canonical(entry.to));
+  };
 }
 
 /** `base` is a baseReader, `ctx` the working-tree context. */
@@ -31,5 +40,5 @@ export function p6(root, base, ctx) {
   const violations = api.diffBundles(before.bundle, after.bundle).filter(item => item.severity === 'error')
     .map(item => ({ file: METADATA_DIR, text: `하위 호환이 깨졌습니다. ${issueText(item)}`, declare: declareOf(item, after.bundle) }));
   const note = violations.length ? '' : '기준 커밋과 비교해 하위 호환이 깨진 곳이 없습니다.';
-  return { id, name, status: violations.length ? 'FAIL' : 'PASS', note, violations, baseValue };
+  return { id, name, status: violations.length ? 'FAIL' : 'PASS', note, violations, baseValue: baseRuleOf(before.bundle) };
 }

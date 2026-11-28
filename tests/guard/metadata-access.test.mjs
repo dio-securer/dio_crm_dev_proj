@@ -142,3 +142,24 @@ test('the declared file names the object that was widened', () => {
   declare({ rule: 'P6', file: ACCESS, from: null, to: ALL, ...why });
   assert.equal(box.guard('--protect', withContact).status, 1);
 });
+
+test('a declaration whose widening is already in the base is reported as already merged', () => {
+  box.reset();
+  widen();
+  box.git('add', '-A');
+  const merged = box.commit('[F2-3] lead rows opened');
+  declare({ rule: 'P6', file: ACCESS, from: null, to: ALL, ...why });
+  const run = box.guard('--protect', merged);
+  assert.equal(run.status, 1, run.stdout + run.stderr);
+  const [bad] = box.result('protect-result.json').badDeclarations;
+  assert.match(bad.why, /이미 기준 브랜치에 반영된 선언/);
+  assert.match(run.stdout, /이미 기준 브랜치에 반영된 선언/);
+});
+
+test('a declaration with no change and no rule in the base is reported as unused, not as merged', () => {
+  box.reset();
+  declare({ rule: 'P6', file: ACCESS, from: null, to: ALL, ...why });
+  const run = protect();
+  assert.equal(run.status, 1, run.stdout + run.stderr);
+  assert.match(box.result('protect-result.json').badDeclarations[0].why, /해당하는 변경이 없습니다/);
+});

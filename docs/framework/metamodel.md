@@ -112,7 +112,7 @@ ownerField·unitField 는 있는 필드여야 하고(R02) 글자나 참조 필�
 ## 가드 연결 (F1-2)
 
 - G12 `metadata-valid`: `pnpm guard`·`pnpm crm check` 가 `metadata/` 를 `bundleFromFiles` + `validateBundle` 로 검사한다. 오류(error)가 하나라도 있으면 실패, 경고(warning)는 실패로 세지 않는다. 검사기를 읽지 못하면 통과가 아니라 가드 오류(종료 코드 2)다.
-- P6 `metadata-compat`: 보호 검사(`--protect`)가 기준 브랜치의 `metadata/` 와 `diffBundles` 로 비교한다. 예외로 선언할 수 없다.
+- P6 `metadata-compat`: 보호 검사(`--protect`)가 기준 브랜치의 `metadata/` 와 `diffBundles` 로 비교한다. 행 권한 넓히기(D05)만 규칙 하나씩 `guard-raises.json` 에 예외로 선언할 수 있다(ADR 0007, `docs/framework/ci-gates.md`). 그 밖의 것(읽지 못함, D01~D03)은 예외로 선언할 수 없다.
 - 리드 개체(`metadata/objects/lead/`)는 기존 lead-* 계약이 쓰는 열 ID 와 같은 필드만 가진다. `tests/metadata/lead.test.cjs` 가 양쪽을 맞춰 본다.
 
 ## 아직 없는 것

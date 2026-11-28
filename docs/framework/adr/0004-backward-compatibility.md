@@ -32,5 +32,5 @@ AI 는 "안 쓰는 것 같다"는 이유로 필드를 지우거나 이름을 바
 - 검사 함수가 있다(F1-1, ADR 0006): `packages/contracts/src/metadata/diff.ts` 의 `diffBundles(base, head)`.
   폐기 예정 표시 없이 사라진 개체·필드·목록 보기·동작·메뉴(D01), 별칭 없는 이름 바꾸기(D02), 허용 표(`SAFE_TYPE_WIDENINGS`) 밖의 종류 바꾸기(D03)를 오류로 낸다.
   폐기 예정 필드를 새로 쓰기 시작하면 경고(D04)다. 폐기 예정 표시(`deprecated`)와 별칭(`aliases`)은 `FieldDef`·`ObjectDef` 에 있다.
-- 보호 검사 P6 `metadata-compat`(F1-2): `--protect` 가 기준 브랜치의 `metadata/` 와 지금의 `metadata/` 를 `diffBundles` 로 비교하고, 오류가 있으면 실패한다. 예외로 선언할 수 없다.
+- 보호 검사 P6 `metadata-compat`(F1-2): `--protect` 가 기준 브랜치의 `metadata/` 와 지금의 `metadata/` 를 `diffBundles` 로 비교하고, 오류가 있으면 실패한다. 행 권한 넓히기(D05)만 규칙 하나씩 예외로 선언할 수 있다(ADR 0007). 이 ADR 의 대상인 D01~D03 과 읽지 못하는 설정은 예외로 선언할 수 없다.
   보호 검사는 PR 과 `pnpm crm verify` 에서만 돈다. `pnpm crm check` 는 기준 브랜치와 비교하지 않는다.
