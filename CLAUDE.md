@@ -83,8 +83,9 @@ DIO CRM 이다. 영업 사원이 리드, 거래처, 영업기회, 계약, 주문
 `/CLAUDE.md`, `/docs/framework/adr/`, `/packages/contracts/src/metadata/`, `/scripts/crm/`,
 `/scripts/i18n/hardcode-check.mjs`, `/docs/framework/glossary.md`, `/docs/framework/README.md`,
 `/docs/framework/ci-gates.md`, `/docs/framework/guard-rules.md`, `/package.json`, `/backend/package.json`,
-`/frontend/package.json`, `/packages/contracts/package.json`, `/pnpm-workspace.yaml`, `/pnpm-lock.yaml`,
-`/.npmrc` (아직 없음), `/.pnpmfile.cjs` (아직 없음), `/backend/jest.config.cjs`, `/backend/jest.customization.config.cjs`,
+`/frontend/package.json`, `/packages/contracts/package.json`, `/packages/engine/package.json`,
+`/packages/engine-ui/package.json`, `/pnpm-workspace.yaml`, `/pnpm-lock.yaml`, `/.npmrc` (아직 없음),
+`/.pnpmfile.cjs` (아직 없음), `/backend/jest.config.cjs`, `/backend/jest.customization.config.cjs`,
 `/frontend/vite.config.ts`, `/scripts/hq-standard/run-browser.mjs`, `/scripts/admin/run-all.cjs`,
 `/scripts/admin/run-web-test.cjs`, `/scripts/admin-customization/run-stage-checks.mjs`
 <!-- guard:protected:end (node scripts/guard/run.mjs --docs 가 만든다. 직접 고치지 않는다) -->
@@ -93,8 +94,8 @@ DIO CRM 이다. 영업 사원이 리드, 거래처, 영업기회, 계약, 주문
 
 1. 먼저 규칙의 "대신 할 일"로 풀 수 있는지 본다. 대부분은 풀린다.
 2. 정말 안 되면 멈추고 사람에게 묻는다. 규칙을 피해 가는 표기를 찾지 않는다.
-3. 사람이 허락한 약화만 `guard-raises.json` 에 선언한다. 선언할 수 있는 것은 네 가지다:
-   기준선 숫자를 올림, legacy 목록에 파일을 넣음, 테스트를 지우거나 줄임, 변경 ID 시작점을 바꿈.
+3. 사람이 허락한 약화만 `guard-raises.json` 에 선언한다. 선언할 수 있는 것은 다섯 가지다:
+   기준선 숫자를 올림, legacy 목록에 파일을 넣음, 테스트를 지우거나 줄임, 변경 ID 시작점을 바꿈, 행 권한을 넓힘(D05).
 4. 선언에는 이유(`reason`)와 변경 ID(`changeId`)를 적는다. 실제 변경과 글자 그대로 같아야 한다.
 5. 선언은 PR 요약 맨 위 "예외 선언"에 그대로 나온다. 사람이 이유를 읽고 승인하거나 거절한다.
 

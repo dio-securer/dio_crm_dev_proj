@@ -4,6 +4,7 @@
 import { z } from 'zod';
 import { payloadSchemas } from '../admin/schemas';
 import { configDocumentBaseSchema, overrideOpSchema } from '../admin/versions';
+import { orgChartSchema, permissionSetSchema, profileSchema } from './security-schemas';
 
 const P = payloadSchemas;
 /** Extension field types of the admin FIELD domain (text, decimal, date, boolean, enum), read from the admin schema. */
@@ -18,6 +19,8 @@ export const ADMIN_EXTENSION_TYPES = extensionTypeSchema.options as readonly str
 export const ADDED_FIELD_TYPES = ['integer', 'datetime', 'reference'] as const;
 export const FIELD_TYPES = [...ADMIN_EXTENSION_TYPES, ...ADDED_FIELD_TYPES] as unknown as [string, ...string[]];
 export const TEXT_TYPES: readonly string[] = ['text'];
+/** A decimal field without precision or scale is DECIMAL(18,4). The checks, the engine and the record tables all read this. */
+export const DECIMAL_DEFAULT = { precision: 18, scale: 4 } as const;
 export const COMPARABLE_TYPES: readonly string[] = ['integer', 'decimal', 'date', 'datetime'];
 /** The locales every label must be translated into, read from the admin TERM schema (no second list). */
 export const REQUIRED_LOCALES = (P.TERM.shape.translations.element.shape.locale as z.ZodEnum<[string, ...string[]]>).options as readonly string[];
@@ -54,6 +57,26 @@ export const objectDefSchema = z.object({
 }).strict();
 export type ObjectDef = z.infer<typeof objectDefSchema>;
 
+/**
+ * Row access (F2-2): which rows of an object an actor may see. Rules are ORed; an object without rules is closed.
+ * `permission`: the rule counts only for an actor who has that permission (closed universe: admin permissionCatalog).
+ */
+const accessPermission = { permission: key.optional() };
+export const rowAccessRuleSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('all'), ...accessPermission }).strict(),
+  z.object({ kind: z.literal('none') }).strict(),
+  z.object({ kind: z.literal('own'), ownerField: lowerSnake, ...accessPermission }).strict(),
+  z.object({ kind: z.literal('members'), ownerField: lowerSnake, ...accessPermission }).strict(),
+  z.object({ kind: z.literal('unit'), unitField: lowerSnake, ...accessPermission }).strict(),
+  /** F2-7: rows owned by anyone in the subtree of the units the actor heads (metadata/security/org). */
+  z.object({ kind: z.literal('subtree'), ownerField: lowerSnake, ...accessPermission }).strict(),
+]);
+export type RowAccessRule = z.infer<typeof rowAccessRuleSchema>;
+export const objectAccessSchema = z.object({ entity: lowerSnake, rules: z.array(rowAccessRuleSchema).min(1) }).strict();
+export type ObjectAccess = z.infer<typeof objectAccessSchema>;
+/** Field types that can hold a user or unit id, so they can be an ownerField / unitField. */
+export const ACCESS_FIELD_TYPES: readonly string[] = ['text', 'reference'];
+
 /** One screen: the admin SCREEN payload and the admin FIELD payload whose sectionIds point into that screen. */
 export const screenEntrySchema = z.object({ screen: P.SCREEN, fields: P.FIELD }).strict();
 export type ScreenEntry = z.infer<typeof screenEntrySchema>;
@@ -65,6 +88,7 @@ export const objectBundleSchema = z.object({
   actions: P.ACTION.optional(),
   rules: P.RULE.optional(),
   workflow: P.WORKFLOW.optional(),
+  access: objectAccessSchema.optional(),
 }).strict();
 export type ObjectBundle = z.infer<typeof objectBundleSchema>;
 
@@ -106,6 +130,10 @@ export const metadataBundleSchema = z.object({
   features: P.FEATURE.optional(),
   deprecations: z.array(deprecationRecordSchema).default([]),
   overlays: z.array(overlaySchema).default([]),
+  permissionSets: z.array(permissionSetSchema).default([]),
+  /** Absent: no profiles file, nothing narrowed (as before F2-7). Present, even empty: a declaration, closed by default. */
+  profiles: z.array(profileSchema).optional(),
+  orgCharts: z.array(orgChartSchema).default([]),
 }).strict();
 export type MetadataBundle = z.infer<typeof metadataBundleSchema>;
 export type MetadataBundleInput = z.input<typeof metadataBundleSchema>;

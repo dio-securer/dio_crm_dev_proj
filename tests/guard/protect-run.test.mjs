@@ -66,7 +66,7 @@ const TRIALS = {
   P5: [
     ['a moved start point', json(START, doc => { doc.lastExemptCommit = OTHER_SHA; }), { rule: 'P5', file: START, from: box.exempt, to: OTHER_SHA }],
   ],
-  // P6 (metadata compatibility) cannot be declared; its trials are in metadata.test.mjs.
+  // P6 (metadata compatibility): only a row access widening (D05) can be declared; its trials are in metadata-access.test.mjs.
   P6: [],
 };
 

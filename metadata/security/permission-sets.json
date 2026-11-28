@@ -1,0 +1,43 @@
+{
+  "items": [
+    {
+      "fields": {
+        "lead": {
+          "*": {
+            "edit": true,
+            "read": true
+          }
+        }
+      },
+      "key": "lead_sales",
+      "name": "리드 영업 담당",
+      "objects": {
+        "lead": {
+          "create": true,
+          "edit": true,
+          "read": true
+        }
+      }
+    },
+    {
+      "fields": {
+        "lead": {
+          "*": {
+            "edit": true,
+            "read": true
+          }
+        }
+      },
+      "key": "lead_manager",
+      "name": "리드 관리",
+      "objects": {
+        "lead": {
+          "create": true,
+          "delete": true,
+          "edit": true,
+          "read": true
+        }
+      }
+    }
+  ]
+}

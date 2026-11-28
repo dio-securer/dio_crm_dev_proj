@@ -1,5 +1,130 @@
 {
   "schemaVersion": 1,
   "note": "예외 선언. 기준선을 올리거나, legacy 목록에 파일을 넣거나, 테스트를 지우거나 줄이는 변경은 여기에 정확히 선언해야 보호 검사(--protect)를 통과한다. 선언은 PR 요약 맨 위에 나오고 사람이 확인한다. 병합된 뒤에는 지운다. 쓰는 법: docs/framework/ci-gates.md",
-  "raises": []
+  "raises": [
+    {
+      "rule": "P6",
+      "file": "metadata/objects/lead/access.json",
+      "from": null,
+      "to": {
+        "kind": "own",
+        "ownerField": "owner_name"
+      },
+      "reason": "F2-2 리드 행 권한 첫 정의",
+      "changeId": "F2-2"
+    },
+    {
+      "rule": "P6",
+      "file": "metadata/objects/lead/access.json",
+      "from": null,
+      "to": {
+        "kind": "members",
+        "ownerField": "owner_name"
+      },
+      "reason": "F2-2 리드 행 권한 첫 정의",
+      "changeId": "F2-2"
+    },
+    {
+      "rule": "P6",
+      "file": "metadata/objects/lead/access.json",
+      "from": null,
+      "to": {
+        "kind": "subtree",
+        "ownerField": "owner_name"
+      },
+      "reason": "F2-7 조직 계층: 권역장·본부장·지점장이 자기 아래 조직 사람이 담당한 리드를 본다(소유자 승인, 이 스레드 결정 카드 '접근 규칙 포함 진행'). PR 검토에서 다시 승인 필요",
+      "changeId": "F2-7"
+    },
+    {
+      "rule": "P6",
+      "file": "metadata/security/org/virtual_domestic_sales.json",
+      "from": null,
+      "to": {
+        "kind": "org-widened",
+        "companyId": "-1",
+        "user": "v-br-bundang-head",
+        "gained": "v-sales-bundang-1"
+      },
+      "reason": "F2-7 가상 국내영업 조직도(회사 -1, 합성) 첫 정의: v-br-bundang-head 이(가) 자기 아래 조직 사람의 리드를 본다(소유자 승인, 이 스레드 결정 카드 '가드 수정 승인'). PR 검토에서 다시 승인 필요",
+      "changeId": "F2-7"
+    },
+    {
+      "rule": "P6",
+      "file": "metadata/security/org/virtual_domestic_sales.json",
+      "from": null,
+      "to": {
+        "kind": "org-widened",
+        "companyId": "-1",
+        "user": "v-br-gangnam-head",
+        "gained": "v-sales-gangnam-1, v-sales-gangnam-2"
+      },
+      "reason": "F2-7 가상 국내영업 조직도(회사 -1, 합성) 첫 정의: v-br-gangnam-head 이(가) 자기 아래 조직 사람의 리드를 본다(소유자 승인, 이 스레드 결정 카드 '가드 수정 승인'). PR 검토에서 다시 승인 필요",
+      "changeId": "F2-7"
+    },
+    {
+      "rule": "P6",
+      "file": "metadata/security/org/virtual_domestic_sales.json",
+      "from": null,
+      "to": {
+        "kind": "org-widened",
+        "companyId": "-1",
+        "user": "v-br-jongno-head",
+        "gained": "v-sales-jongno-1"
+      },
+      "reason": "F2-7 가상 국내영업 조직도(회사 -1, 합성) 첫 정의: v-br-jongno-head 이(가) 자기 아래 조직 사람의 리드를 본다(소유자 승인, 이 스레드 결정 카드 '가드 수정 승인'). PR 검토에서 다시 승인 필요",
+      "changeId": "F2-7"
+    },
+    {
+      "rule": "P6",
+      "file": "metadata/security/org/virtual_domestic_sales.json",
+      "from": null,
+      "to": {
+        "kind": "org-widened",
+        "companyId": "-1",
+        "user": "v-div-cap-1-head",
+        "gained": "v-br-gangnam-head, v-br-jongno-head, v-sales-gangnam-1, v-sales-gangnam-2, v-sales-jongno-1"
+      },
+      "reason": "F2-7 가상 국내영업 조직도(회사 -1, 합성) 첫 정의: v-div-cap-1-head 이(가) 자기 아래 조직 사람의 리드를 본다(소유자 승인, 이 스레드 결정 카드 '가드 수정 승인'). PR 검토에서 다시 승인 필요",
+      "changeId": "F2-7"
+    },
+    {
+      "rule": "P6",
+      "file": "metadata/security/org/virtual_domestic_sales.json",
+      "from": null,
+      "to": {
+        "kind": "org-widened",
+        "companyId": "-1",
+        "user": "v-div-cap-2-head",
+        "gained": "v-br-bundang-head, v-sales-bundang-1"
+      },
+      "reason": "F2-7 가상 국내영업 조직도(회사 -1, 합성) 첫 정의: v-div-cap-2-head 이(가) 자기 아래 조직 사람의 리드를 본다(소유자 승인, 이 스레드 결정 카드 '가드 수정 승인'). PR 검토에서 다시 승인 필요",
+      "changeId": "F2-7"
+    },
+    {
+      "rule": "P6",
+      "file": "metadata/security/org/virtual_domestic_sales.json",
+      "from": null,
+      "to": {
+        "kind": "org-widened",
+        "companyId": "-1",
+        "user": "v-dom-head",
+        "gained": "v-br-bundang-head, v-br-gangnam-head, v-br-jongno-head, v-div-cap-1-head, v-div-cap-2-head, v-reg-cap-head, v-sales-bundang-1, v-sales-gangnam-1, v-sales-gangnam-2, v-sales-jongno-1"
+      },
+      "reason": "F2-7 가상 국내영업 조직도(회사 -1, 합성) 첫 정의: v-dom-head 이(가) 자기 아래 조직 사람의 리드를 본다(소유자 승인, 이 스레드 결정 카드 '가드 수정 승인'). PR 검토에서 다시 승인 필요",
+      "changeId": "F2-7"
+    },
+    {
+      "rule": "P6",
+      "file": "metadata/security/org/virtual_domestic_sales.json",
+      "from": null,
+      "to": {
+        "kind": "org-widened",
+        "companyId": "-1",
+        "user": "v-reg-cap-head",
+        "gained": "v-br-bundang-head, v-br-gangnam-head, v-br-jongno-head, v-div-cap-1-head, v-div-cap-2-head, v-sales-bundang-1, v-sales-gangnam-1, v-sales-gangnam-2, v-sales-jongno-1"
+      },
+      "reason": "F2-7 가상 국내영업 조직도(회사 -1, 합성) 첫 정의: v-reg-cap-head 이(가) 자기 아래 조직 사람의 리드를 본다(소유자 승인, 이 스레드 결정 카드 '가드 수정 승인'). PR 검토에서 다시 승인 필요",
+      "changeId": "F2-7"
+    }
+  ]
 }

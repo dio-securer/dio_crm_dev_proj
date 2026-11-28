@@ -18,6 +18,8 @@
 | `ACTION` | `metadata/objects/<개체>/actions.json` | R01, R02, R04, R07, R08 |
 | `RULE` | `metadata/objects/<개체>/rules.json` | R01, R02, R04, R07, R08, R10 |
 | `WORKFLOW` | `metadata/objects/<개체>/workflow.json` | R01, R02, R07 |
+| (새것) 행 권한 `ObjectAccess` | `metadata/objects/<개체>/access.json` | R01, R02, R07, R09, R11 |
+| (새것) 권한 세트·프로필·조직도 (F2-7) | `metadata/security/permission-sets.json`, `profiles.json`, `org/<키>.json` | S01–S11 |
 | `MENU` | `metadata/menu.json` | R04, R07, R08 |
 | `CODE` | `metadata/codes/<그룹>.json` | R04, R08 |
 | `TERM` | `metadata/terms/<언어>/<앞부분>.json`, `metadata/terms/semantic.json` | R04, R08 |
@@ -27,10 +29,27 @@
 
 파일 자리와 이름의 자세한 규칙은 [`metadata/README.md`](../../metadata/README.md) 에 있다.
 
+## 행 권한 (F2-2)
+
+`access.json` 은 `{ entity, rules }` 다. 규칙은 `all`, `none`, `own`(ownerField), `members`(ownerField), `unit`(unitField), `subtree`(ownerField, F2-7) 이고, `none` 외에는 `permission` 을 붙일 수 있다.
+규칙은 하나라도 맞으면 보인다(OR). 파일이 없으면 아무 행도 보이지 않는다(닫힌 기본값). 엔진의 `RuntimeModel.rowAccess(개체)` 가 이 규칙을 읽어 평가기에 넘긴다. 결정의 이유는 [ADR 0007](adr/0007-row-access-in-metadata.md) 에 있다.
+ownerField·unitField 는 있는 필드여야 하고(R02) 글자나 참조 필드여야 한다(R11). `none` 은 혼자만 쓴다(R11). 덮어쓰기 대상은 아직 아니다.
+기준보다 더 많은 행을 보이게 하는 변경은 `diffBundles` 의 D05_ACCESS_WIDENED 오류다(P6). 좁히는 변경은 통과한다.
+이름을 바꾼 필드는 저장소가 열을 찾는 것과 같은 순서(키, 그다음 옛 이름. `field-names.ts` 의 `resolveByNames`)로 전의 필드 하나에 이어진다. 옛 이름들이 전의 필드 둘 이상을 가리키면 D06_ALIAS_MERGES_FIELDS 오류이고, 그 필드는 어느 것도 잇지 않는다(행 권한 규칙이 그 이름을 따라가면 D05).
+
+## 권한 세트·프로필·조직도 (F2-7)
+
+- `security/permission-sets.json` 은 `{ items }` 다. 세트마다 `key`, `name`, 개체 권한 `objects`(read/create/edit/delete), 필드 권한 `fields`(개체 → 필드 → read/edit, `*` 은 모든 필드) 가 있다.
+- `security/profiles.json` 은 `{ items }` 다. 프로필은 `roles`(토큰의 역할) 를 가진 사용자에게 `permissionSets` 를 주고, `restrictions` 의 세트가 `true` 로 적은 동작은 무엇이 허용해도 막는다. 프로필이 하나라도 있으면 맞는 프로필이 없는 사용자는 아무것도 못 한다(닫힘이 기본).
+- `security/org/<키>.json` 은 회사 하나의 조직도다(`key`, `companyId`, `units`, `members`). 조직에는 `headUserId`(권역장·본부장·지점장) 가 있고, 사용자는 한 조직에만 둔다.
+- 조직장은 자기 조직 아래 전체에 속한 사람의 기록을 `subtree` 규칙으로만 본다. `members`·`unit` 규칙은 조직도로 넓어지지 않는다. 그래서 넓히기는 언제나 `access.json` 에 보이고 D05 가 잡는다.
+- 가상 국내영업 조직(회사 -1)이 `security/org/virtual_domestic_sales.json` 에 있다. 실제 회사 행은 건드리지 않는다.
+
 ## 필드 종류
 
 `text`, `decimal`, `date`, `boolean`, `enum` 은 admin 확장 필드와 같다. `integer`, `datetime`, `reference` 셋을 더했다.
 `maxLength` 는 `text` 에만, `precision`·`scale` 은 `decimal` 에만, `enumCodeGroup` 은 `enum` 에만(꼭 있어야 함), `referenceObject` 는 `reference` 에만(꼭 있어야 함) 쓴다.
+`decimal` 의 `scale` 은 `precision` 보다 클 수 없다. 적지 않으면 `precision` 18, `scale` 4 로 본다(`DECIMAL_DEFAULT`). 그래서 `precision: 3` 만 적으면 오류(R10_DECIMAL_SCALE)다.
 
 ## 검사 함수
 
@@ -46,7 +65,7 @@
 ## 닫힌 이름과 열린 이름
 
 - 닫힘(없는 이름이면 오류): 개체, 필드(별칭·`x_` 확장 필드 포함), 화면의 구역·탭, 문구 키(필요한 모든 언어), 코드 그룹, 참조 개체,
-  동작, 기능(`features.json`), 권한(admin `permissionCatalog`), 업무 상태, 상위 메뉴.
+  동작, 기능(`features.json`), 권한(admin `permissionCatalog`, 행 권한 규칙의 `permission` 포함), 업무 상태, 상위 메뉴.
 - 열림(아직 검사하지 않음): 메뉴의 `routeKey`, 확장 필드 `enumValues`, 승인·알림·번호 등 이 묶음에 없는 도메인.
 - 범위 연결: 국가(`HQ:KR`) 덮어쓰기는 그 템플릿(`HQ`) 덮어쓰기 위에 얹어 검사한다. 법인 덮어쓰기는 소속을 모르므로 기본 설정 위에만 얹는다.
 
@@ -61,6 +80,10 @@
 | `D02_RENAMED_WITHOUT_ALIAS` | error | `diffBundles` | {kind} "{key}" 의 이름이 "{to}" 로 바뀐 것 같지만 옛 이름(alias)이 없습니다. |
 | `D03_TYPE_CHANGED` | error | `diffBundles` | 필드 "{key}" 의 형식이 {from} 에서 {to} 로 바뀌었습니다. 허용된 넓힘이 아닙니다. |
 | `D04_DEPRECATED_NEW_USE` | warning | `diffBundles` | 폐기 예정 필드 "{field}" 을(를) 새로 쓰기 시작했습니다. |
+| `D05_ACCESS_WIDENED` | error | `diffBundles` | 개체 "{entity}" 의 행 권한 규칙 "{rule}" 이(가) 전보다 더 많은 행을 보이게 합니다. 권한을 넓히는 변경은 따로 승인받아야 합니다. |
+| `D06_ALIAS_MERGES_FIELDS` | error | `diffBundles` | 필드 "{key}" 의 이름과 옛 이름(alias)이 전에 있던 서로 다른 필드 둘 이상을 가리킵니다. 한 필드는 전의 필드 하나만 이어받을 수 있습니다. |
+| `D07_ORG_WIDENED` | error | `diffBundles` | 조직도에서 사용자 "{user}" 이(가) 전에는 못 보던 사람({gained})의 기록을 보게 됩니다. 권한을 넓히는 변경은 따로 승인받아야 합니다. |
+| `D08_GRANT_WIDENED` | error | `diffBundles` | 역할 "{role}" 이(가) 전에는 못 하던 일({gained})을 할 수 있게 됩니다. 권한을 넓히는 변경은 따로 승인받아야 합니다. |
 | `F01_UNKNOWN_FILE` | error | `bundleFromFiles` | 알 수 없는 파일입니다. 정해진 자리에 있는 파일만 읽습니다. |
 | `F02_MISPLACED_FILE` | error | `bundleFromFiles` | 파일 자리와 내용이 맞지 않습니다: {detail} |
 | `F03_INVALID_JSON` | error | `bundleFromFiles` | JSON 으로 읽을 수 없습니다. |
@@ -86,11 +109,25 @@
 | `R09_DEPRECATED_USE` | warning | `validateBundle` | 폐기 예정 필드 "{field}" 을(를) 쓰고 있습니다. "{replacedBy}" 로 바꾸세요. |
 | `R09_REPLACED_BY_DEPRECATED` | error | `validateBundle` | "{key}" 을(를) 대신할 "{replacedBy}" 도 폐기 예정입니다. |
 | `R09_REPLACED_BY_MISSING` | error | `validateBundle` | "{key}" 을(를) 대신할 "{replacedBy}" 이(가) 없습니다. |
+| `R10_DECIMAL_SCALE` | error | `validateBundle` | 소수 필드 "{field}" 의 소수 자릿수({scale})가 전체 자릿수({precision})보다 큽니다. 적지 않은 값은 전체 18, 소수 4 로 봅니다. |
 | `R10_ENUM_NEEDS_GROUP` | error | `validateBundle` | 선택형 필드 "{field}" 에 코드 그룹이 없습니다. |
 | `R10_OPERATOR_TYPE` | error | `validateBundle` | 필드 "{field}"({type}) 은(는) 크기 비교("{op}")를 할 수 없습니다. |
 | `R10_OPTION_NOT_ALLOWED` | error | `validateBundle` | 필드 "{field}"({type}) 에는 "{option}" 을(를) 쓸 수 없습니다. |
 | `R10_REFERENCE_NEEDS_OBJECT` | error | `validateBundle` | 참조 필드 "{field}" 에 참조 대상 개체가 없습니다. |
 | `R10_REQUIRED_HIDDEN` | error | `validateBundle` | 필수 필드 "{field}" 이(가) 하나뿐인 입력 화면 "{screen}" 에 보이지 않습니다. |
+| `R11_ACCESS_FIELD_TYPE` | error | `validateBundle` | 행 권한 규칙의 필드 "{field}"({type}) 에는 사용자·조직 ID 를 담을 수 없습니다. 글자(text)나 참조(reference) 필드를 쓰세요. |
+| `R11_ACCESS_NONE_MIXED` | error | `validateBundle` | 행 권한 규칙 "none" 은 다른 규칙과 함께 둘 수 없습니다. 규칙은 하나라도 맞으면 보이므로 "none" 은 아무 뜻이 없습니다. |
+| `S01_DUPLICATE_PERMISSION_SET` | error | `validateBundle` | 권한 세트 "{key}" 이(가) 두 번 정의되었습니다. |
+| `S02_UNKNOWN_PERMISSION_SET` | error | `validateBundle` | 프로필 "{profile}" 이(가) 쓰는 권한 세트 "{key}" 이(가) 없습니다. |
+| `S03_UNKNOWN_OBJECT` | error | `validateBundle` | 권한 세트 "{key}" 이(가) 없는 개체 "{entity}" 에 권한을 줍니다. |
+| `S04_UNKNOWN_FIELD` | error | `validateBundle` | 권한 세트 "{key}" 이(가) 개체 "{entity}" 에 없는 필드 "{field}" 에 권한을 줍니다. |
+| `S05_DUPLICATE_PROFILE` | error | `validateBundle` | 프로필 "{key}" 이(가) 두 번 정의되었습니다. |
+| `S06_DUPLICATE_ORG_CHART` | error | `validateBundle` | 회사 {companyId} 의 조직도가 두 개 있습니다. 회사마다 조직도는 하나입니다. |
+| `S07_DUPLICATE_UNIT` | error | `validateBundle` | 조직도 "{chart}" 에 조직 "{unit}" 이(가) 두 번 있습니다. |
+| `S08_UNKNOWN_PARENT` | error | `validateBundle` | 조직도 "{chart}" 의 조직 "{unit}" 의 상위 조직 "{parent}" 이(가) 없습니다. |
+| `S09_ORG_CYCLE` | error | `validateBundle` | 조직도 "{chart}" 의 조직 "{unit}" 이(가) 자기 아래 조직을 상위로 가리킵니다(순환). |
+| `S10_UNKNOWN_UNIT` | error | `validateBundle` | 조직도 "{chart}" 의 사용자 "{user}" 이(가) 없는 조직 "{unit}" 에 배정되었습니다. |
+| `S11_DUPLICATE_MEMBER` | error | `validateBundle` | 조직도 "{chart}" 에 사용자 "{user}" 이(가) 두 조직 이상에 배정되었습니다. 사용자는 한 조직에만 둡니다. |
 <!-- issue-codes:end -->
 
 ## 하위 호환의 허용 표
@@ -101,7 +138,7 @@
 ## 가드 연결 (F1-2)
 
 - G12 `metadata-valid`: `pnpm guard`·`pnpm crm check` 가 `metadata/` 를 `bundleFromFiles` + `validateBundle` 로 검사한다. 오류(error)가 하나라도 있으면 실패, 경고(warning)는 실패로 세지 않는다. 검사기를 읽지 못하면 통과가 아니라 가드 오류(종료 코드 2)다.
-- P6 `metadata-compat`: 보호 검사(`--protect`)가 기준 브랜치의 `metadata/` 와 `diffBundles` 로 비교한다. 예외로 선언할 수 없다.
+- P6 `metadata-compat`: 보호 검사(`--protect`)가 기준 브랜치의 `metadata/` 와 `diffBundles` 로 비교한다. 행 권한 넓히기(D05)만 규칙 하나씩 `guard-raises.json` 에 예외로 선언할 수 있다(ADR 0007, `docs/framework/ci-gates.md`). 그 밖의 것(읽지 못함, D01~D03)은 예외로 선언할 수 없다.
 - 리드 개체(`metadata/objects/lead/`)는 기존 lead-* 계약이 쓰는 열 ID 와 같은 필드만 가진다. `tests/metadata/lead.test.cjs` 가 양쪽을 맞춰 본다.
 
 ## 아직 없는 것

@@ -4,7 +4,9 @@ import { CODE_TABLE_HEADER, ISSUE_MESSAGES } from './messages';
 
 export type Severity = 'error' | 'warning';
 export type IssueCode = keyof typeof ISSUE_MESSAGES;
-export interface Issue { code: IssueCode; severity: Severity; path: string; message: string }
+/** `data` carries the structured values of a widening (D07 / D08), so a declaration never has to be read out of the message. */
+export type IssueData = Record<string, string | number | string[]>;
+export interface Issue { code: IssueCode; severity: Severity; path: string; message: string; data?: IssueData }
 
 export const ISSUE_CODES: Record<IssueCode, { severity: Severity; check: string }> = {
   M01_SCHEMA_INVALID: { severity: 'error', check: 'validateBundle' },
@@ -29,10 +31,24 @@ export const ISSUE_CODES: Record<IssueCode, { severity: Severity; check: string 
   R09_DEPRECATED_USE: { severity: 'warning', check: 'validateBundle' },
   R09_ALIAS_USE: { severity: 'warning', check: 'validateBundle' },
   R10_OPTION_NOT_ALLOWED: { severity: 'error', check: 'validateBundle' },
+  R10_DECIMAL_SCALE: { severity: 'error', check: 'validateBundle' },
   R10_ENUM_NEEDS_GROUP: { severity: 'error', check: 'validateBundle' },
   R10_REFERENCE_NEEDS_OBJECT: { severity: 'error', check: 'validateBundle' },
   R10_OPERATOR_TYPE: { severity: 'error', check: 'validateBundle' },
   R10_REQUIRED_HIDDEN: { severity: 'error', check: 'validateBundle' },
+  R11_ACCESS_FIELD_TYPE: { severity: 'error', check: 'validateBundle' },
+  R11_ACCESS_NONE_MIXED: { severity: 'error', check: 'validateBundle' },
+  S01_DUPLICATE_PERMISSION_SET: { severity: 'error', check: 'validateBundle' },
+  S02_UNKNOWN_PERMISSION_SET: { severity: 'error', check: 'validateBundle' },
+  S03_UNKNOWN_OBJECT: { severity: 'error', check: 'validateBundle' },
+  S04_UNKNOWN_FIELD: { severity: 'error', check: 'validateBundle' },
+  S05_DUPLICATE_PROFILE: { severity: 'error', check: 'validateBundle' },
+  S06_DUPLICATE_ORG_CHART: { severity: 'error', check: 'validateBundle' },
+  S07_DUPLICATE_UNIT: { severity: 'error', check: 'validateBundle' },
+  S08_UNKNOWN_PARENT: { severity: 'error', check: 'validateBundle' },
+  S09_ORG_CYCLE: { severity: 'error', check: 'validateBundle' },
+  S10_UNKNOWN_UNIT: { severity: 'error', check: 'validateBundle' },
+  S11_DUPLICATE_MEMBER: { severity: 'error', check: 'validateBundle' },
   F01_UNKNOWN_FILE: { severity: 'error', check: 'bundleFromFiles' },
   F02_MISPLACED_FILE: { severity: 'error', check: 'bundleFromFiles' },
   F03_INVALID_JSON: { severity: 'error', check: 'bundleFromFiles' },
@@ -41,11 +57,15 @@ export const ISSUE_CODES: Record<IssueCode, { severity: Severity; check: string 
   D02_RENAMED_WITHOUT_ALIAS: { severity: 'error', check: 'diffBundles' },
   D03_TYPE_CHANGED: { severity: 'error', check: 'diffBundles' },
   D04_DEPRECATED_NEW_USE: { severity: 'warning', check: 'diffBundles' },
+  D05_ACCESS_WIDENED: { severity: 'error', check: 'diffBundles' },
+  D06_ALIAS_MERGES_FIELDS: { severity: 'error', check: 'diffBundles' },
+  D07_ORG_WIDENED: { severity: 'error', check: 'diffBundles' },
+  D08_GRANT_WIDENED: { severity: 'error', check: 'diffBundles' },
 };
 
-export function issue(code: IssueCode, path: string, params: Record<string, string | number | undefined> = {}): Issue {
+export function issue(code: IssueCode, path: string, params: Record<string, string | number | undefined> = {}, data?: IssueData): Issue {
   const message = ISSUE_MESSAGES[code].replace(/\{(\w+)\}/g, (_, name: string) => String(params[name] ?? '-'));
-  return { code, severity: ISSUE_CODES[code].severity, path, message };
+  return { code, severity: ISSUE_CODES[code].severity, path, message, ...(data ? { data } : {}) };
 }
 
 const cmp = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);

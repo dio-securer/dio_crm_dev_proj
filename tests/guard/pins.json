@@ -752,11 +752,21 @@
   "scripts/guard/lib/protect-metadata.mjs": {
    "values": {},
    "notPinned": [
+    "GAINED",
+    "SAFE",
+    "WIDENED",
     "id",
     "name"
    ],
-   "patterns": [],
-   "numbers": {}
+   "patterns": [
+    "/^objects\\[([a-z][a-z0-9_]*)\\]\\/access\\/rules\\[#(\\d+)\\]$/",
+    "/^[A-Za-z0-9._-]+$/",
+    "/^[A-Za-z0-9._:*-]+$/",
+    "/^[a-z][a-z0-9_]*$/"
+   ],
+   "numbers": {
+    "2": 1
+   }
   },
   "scripts/guard/lib/protect-tests.mjs": {
    "values": {},
@@ -779,6 +789,10 @@
   },
   "scripts/guard/lib/raises.mjs": {
    "values": {
+    "ACCESS_FILE": {
+     "$regex": "^metadata\\/objects\\/[a-z][a-z0-9_]*\\/access\\.json$",
+     "flags": ""
+    },
     "ID_ONLY": {
      "$regex": "^(?:REQ-\\d+|F\\d+-\\d+)$",
      "flags": ""
@@ -793,16 +807,25 @@
      "changeId"
     ],
     "MIN_REASON": 10,
+    "ORG_FILE": {
+     "$regex": "^metadata\\/security\\/org\\/[a-z][a-z0-9_]*\\.json$",
+     "flags": ""
+    },
+    "PROFILES_FILE": "metadata/security/profiles.json",
     "RAISES_FILE": "guard-raises.json",
     "RAISE_RULES": [
      "P1",
      "P2",
      "P3",
-     "P5"
+     "P5",
+     "P6"
     ]
    },
    "notPinned": [],
    "patterns": [
+    "/^metadata\\/objects\\/[a-z][a-z0-9_]*\\/access\\.json$/",
+    "/^metadata\\/security\\/org\\/[a-z][a-z0-9_]*\\.json$/",
+    "/^-?\\d+$/",
     "/^\\\\\\[/",
     "/\\\\\\]$/",
     "/^G\\d{2}$/",
@@ -1825,6 +1848,8 @@
    "/backend/package.json",
    "/frontend/package.json",
    "/packages/contracts/package.json",
+   "/packages/engine/package.json",
+   "/packages/engine-ui/package.json",
    "/pnpm-workspace.yaml",
    "/pnpm-lock.yaml",
    "/.npmrc",

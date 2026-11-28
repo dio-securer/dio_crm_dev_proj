@@ -17,6 +17,7 @@ import { useHqMock } from './hq-mock/HqMockProvider';
 import { useQuery } from '@tanstack/react-query';
 import { apiGet } from './api';
 import type { ScreenKey } from './app/screen-profile';
+import { EngineScreen } from './app/engine-screen';
 
 type HqMenu = { screenKey?: string; path?: string; label: string; labelKey: string };
 const hqAdminRoutes: Array<{ screenKey: ScreenKey; path: string; icon: string }> = [
@@ -72,6 +73,7 @@ export default function App() {
     <AppShell links={links}>
       <HqMockControls />
       <Routes>
+        <Route path="/engine/:object/*" element={<EngineScreen />} />
         {navigation.managed&&MANAGED_EXTRA_ROUTES.filter(r=>navigation.allowed(r.screen)).map(r=><Route key={r.path} path={r.path} element={r.element}/>)}
         {hq.enabled ? hqRoutes.map(route => <Route key={route.path} path={route.path}
           element={permitted.has(route.screenKey) ? (route.path === '/collection-plans' ? <HqCollectionPlansPage /> : renderScreen(route.screenKey)) : <main role="alert">SCREEN_ACCESS_DENIED</main>} />) : activeRoutes.map(route => {

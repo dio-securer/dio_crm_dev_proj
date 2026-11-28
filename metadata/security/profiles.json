@@ -1,0 +1,38 @@
+{
+  "items": [
+    {
+      "key": "sales",
+      "name": "영업사원",
+      "permissionSets": [
+        "lead_sales"
+      ],
+      "restrictions": [],
+      "roles": [
+        "SALES_REP"
+      ]
+    },
+    {
+      "key": "manager",
+      "name": "영업 관리자(권역장·본부장·지점장)",
+      "permissionSets": [
+        "lead_manager"
+      ],
+      "restrictions": [],
+      "roles": [
+        "BRANCH_MANAGER",
+        "HQ_MANAGER"
+      ]
+    },
+    {
+      "key": "admin",
+      "name": "CRM 관리자",
+      "permissionSets": [
+        "lead_manager"
+      ],
+      "restrictions": [],
+      "roles": [
+        "CRM_ADMIN"
+      ]
+    }
+  ]
+}

@@ -3,6 +3,8 @@ import { Issue, issue, sortIssues } from './issues';
 import { FieldDef, MetadataBundle, ObjectBundle } from './schemas';
 import { analyzeBundle } from './validate';
 import { KIND_LABELS } from './messages';
+import { baseFieldOf, continuedField, diffAccess } from './diff-access';
+import { diffSecurity } from './diff-security';
 
 /**
  * Type changes that keep every stored value valid and every reader working:
@@ -13,17 +15,20 @@ import { KIND_LABELS } from './messages';
 export const SAFE_TYPE_WIDENINGS: readonly (readonly [string, string])[] = [['integer', 'decimal'], ['date', 'datetime']];
 const safe = (from: string, to: string) => SAFE_TYPE_WIDENINGS.some(([a, b]) => a === from && b === to);
 
-function findRenamed<T extends { key: string; aliases: string[] }>(list: T[], key: string) { return list.find(x => x.aliases.includes(key)); }
-
 function diffFields(base: ObjectBundle, head: ObjectBundle, path: string, out: Issue[]) {
-  const headKeys = new Set(head.object.fields.map(f => f.key)), baseKeys = new Set(base.object.fields.map(f => f.key));
+  const baseKeys = new Set(base.object.fields.map(f => f.key));
   const added = head.object.fields.filter(f => !baseKeys.has(f.key));
+  // A head field whose names mean two base fields would merge their columns: an error of its own, and it continues neither.
+  head.object.fields.forEach(f => {
+    if (baseFieldOf(base, f).merged) out.push(issue('D06_ALIAS_MERGES_FIELDS', `${path}/object/fields[${f.key}]/aliases`, { key: f.key }));
+  });
   base.object.fields.forEach(f => {
     const p = `${path}/object/fields[${f.key}]`;
-    const now: FieldDef | undefined = headKeys.has(f.key) ? head.object.fields.find(x => x.key === f.key) : findRenamed(head.object.fields, f.key);
+    // A rename is followed only as the storage follows it (continuedField). A field that kept its key is compared as itself.
+    const now: FieldDef | undefined = continuedField(base, head, f.key) ?? head.object.fields.find(x => x.key === f.key);
     if (now) { if (now.type !== f.type && !safe(f.type, now.type)) out.push(issue('D03_TYPE_CHANGED', `${p}/type`, { key: f.key, from: f.type, to: now.type })); return; }
     if (f.deprecated) return;
-    const guess = added.find(a => a.type === f.type);
+    const guess = added.find(a => a.type === f.type && !a.aliases.includes(f.key));
     out.push(guess ? issue('D02_RENAMED_WITHOUT_ALIAS', p, { kind: KIND_LABELS.field, key: f.key, to: guess.key }) : issue('D01_REMOVED_WITHOUT_DEPRECATION', p, { kind: KIND_LABELS.field, key: f.key }));
   });
 }
@@ -46,6 +51,7 @@ function diffObjects(base: MetadataBundle, head: MetadataBundle, out: Issue[]) {
       continue;
     }
     diffFields(ob, now, p, out);
+    diffAccess(ob, now, p, out);
     diffKeyed((ob.listViews?.views ?? []).map(v => v.key), (now.listViews?.views ?? []).map(v => v.key), KIND_LABELS.listView, k => recorded('LIST_VIEW', key, k), k => `${p}/listViews/views[${k}]`, out);
     diffKeyed((ob.actions?.actions ?? []).map(a => a.key), (now.actions?.actions ?? []).map(a => a.key), KIND_LABELS.action, k => recorded('ACTION', key, k), k => `${p}/actions/actions[${k}]`, out);
   }
@@ -53,7 +59,7 @@ function diffObjects(base: MetadataBundle, head: MetadataBundle, out: Issue[]) {
 }
 
 /**
- * Errors for changes that break existing data or references (D01-D03), warnings for new uses of deprecated
+ * Errors for changes that break existing data or references (D01-D03) or widen row access (D05) or security settings (D07 org chart, D08 grants), warnings for new uses of deprecated
  * fields (D04). Additions are always fine. Both inputs are parsed first; a bundle that does not parse gives M01.
  */
 export function diffBundles(baseInput: unknown, headInput: unknown): Issue[] {
@@ -63,6 +69,7 @@ export function diffBundles(baseInput: unknown, headInput: unknown): Issue[] {
   if (!base.bundle || !head.bundle) return sortIssues(broken);
   const out: Issue[] = [];
   diffObjects(base.bundle, head.bundle, out);
+  diffSecurity(base.bundle, head.bundle, out);
   const before = new Set(base.uses.map(u => `${u.entity}\u0000${u.field}\u0000${u.site}`));
   const deprecated = new Set(head.bundle.objects.flatMap(o => o.object.fields.filter(f => f.deprecated).map(f => `${o.object.key}\u0000${f.key}`)));
   for (const u of head.uses) {

@@ -1,6 +1,7 @@
 // Cross-reference checks inside one object bundle: data fields, screens, list views, actions, rules, workflow.
 import { Context, at, checkCondition, checkFeatureAndPermission, checkLabel, checkUnique, fieldIndex, useField } from './context';
-import { ObjectBundle, TEXT_TYPES } from './schemas';
+import { DECIMAL_DEFAULT, ObjectBundle, TEXT_TYPES } from './schemas';
+import { checkAccess } from './check-access';
 import { KIND_LABELS } from './messages';
 
 /** A create screen is one whose screenKey is `create` or starts with `create_` / `create-`. */
@@ -28,6 +29,11 @@ function checkDataFields(ctx: Context, ob: ObjectBundle, base: string) {
     option('scale', f.type === 'decimal');
     option('enumCodeGroup', f.type === 'enum');
     option('referenceObject', f.type === 'reference');
+    if (f.type === 'decimal') {
+      // A missing precision or scale takes its default, so precision 3 alone is DECIMAL(3,4): no database can make that column.
+      const precision = f.precision ?? DECIMAL_DEFAULT.precision, scale = f.scale ?? DECIMAL_DEFAULT.scale;
+      if (scale > precision) ctx.add('R10_DECIMAL_SCALE', `${p}/${f.scale === undefined ? 'precision' : 'scale'}`, { field: f.key, precision, scale });
+    }
     if (f.type === 'enum') {
       if (!f.enumCodeGroup) ctx.add('R10_ENUM_NEEDS_GROUP', p, { field: f.key });
       else if (!(ctx.bundle.codes?.groups ?? []).some(g => g.key === f.enumCodeGroup)) ctx.add('R05_UNKNOWN_CODE_GROUP', `${p}/enumCodeGroup`, { group: f.enumCodeGroup });
@@ -149,4 +155,5 @@ export function checkObject(ctx: Context, ob: ObjectBundle, index: number): void
   checkScreens(ctx, ob, base);
   checkViewsActions(ctx, ob, base);
   checkRulesWorkflow(ctx, ob, base);
+  checkAccess(ctx, ob, base);
 }

@@ -26,6 +26,18 @@ test('R10 referenceObject on a non-reference field, and gte/lte on non-comparabl
   expectIssue(variant(b => { obj(b, 'lead').listViews.views[1].filter = { op: 'lte', field: 'hot', value: 1 }; }), 'R10_OPERATOR_TYPE', `${L}/listViews/views[hot]/filter/op`);
 });
 
+test('R10_DECIMAL_SCALE: the scale, written or default (4), cannot be larger than the precision, written or default (18)', () => {
+  const P = 'objects[account]/object/fields[revenue]';
+  expectIssue(variant(b => { Object.assign(field(b, 'account', 'revenue'), { precision: 3, scale: 4 }); }), 'R10_DECIMAL_SCALE', `${P}/scale`);
+  const byDefault = variant(b => { const f = field(b, 'account', 'revenue'); f.precision = 3; delete f.scale; });
+  assert.match(expectIssue(byDefault, 'R10_DECIMAL_SCALE', `${P}/precision`).find(i => i.code === 'R10_DECIMAL_SCALE').message, /"revenue".*\(4\).*\(3\)/);
+  expectIssue(variant(b => { const f = field(b, 'account', 'revenue'); delete f.precision; f.scale = 18; f.precision = 17; }), 'R10_DECIMAL_SCALE', `${P}/scale`);
+  for (const [precision, scale] of [[4, 4], [5, 4], [1, 0], [38, 18]]) expectClean(variant(b => { Object.assign(field(b, 'account', 'revenue'), { precision, scale }); }));
+  expectClean(variant(b => { const f = field(b, 'account', 'revenue'); delete f.precision; f.scale = 18; }));
+  expectClean(variant(b => { const f = field(b, 'account', 'revenue'); f.precision = 4; delete f.scale; }));
+  expectClean(variant(b => { const f = field(b, 'account', 'revenue'); delete f.precision; delete f.scale; }));
+});
+
 test('R10_REQUIRED_HIDDEN is skipped with several create screens, and system fields are exempt', () => {
   const two = variant(b => {
     const s = structuredClone(obj(b, 'lead').screens[0]);

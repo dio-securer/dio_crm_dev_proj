@@ -5,7 +5,26 @@ import { byCodeUnit } from './files.mjs';
 import { GuardError } from './gitbase.mjs';
 
 export const RAISES_FILE = 'guard-raises.json';
-export const RAISE_RULES = ['P1', 'P2', 'P3', 'P5'];
+export const RAISE_RULES = ['P1', 'P2', 'P3', 'P5', 'P6'];
+/** P6 can excuse only a widening of access: a row rule of an object's access.json (D05), a user of an org chart who now sees
+ * more people (D07, metadata/security/org/<key>.json), or a role allowed more actions (D08, metadata/security/profiles.json). */
+export const ACCESS_FILE = /^metadata\/objects\/[a-z][a-z0-9_]*\/access\.json$/;
+export const ORG_FILE = /^metadata\/security\/org\/[a-z][a-z0-9_]*\.json$/;
+export const PROFILES_FILE = 'metadata/security/profiles.json';
+const ONLY = (value, keys) => Object.keys(value).length === keys.length && keys.every(key => typeof value[key] === 'string' && value[key] !== '');
+/** D07: { kind: 'org-widened', companyId, user, gained } and D08: { kind: 'grant-widened', role, gained }, gained as the diff lists it. */
+const isObject = value => !!value && typeof value === 'object' && !Array.isArray(value);
+const isOrgWidening = value => isObject(value) && value.kind === 'org-widened' && ONLY(value, ['kind', 'companyId', 'user', 'gained'])
+  && /^-?\d+$/.test(value.companyId);
+const isGrantWidening = value => isObject(value) && value.kind === 'grant-widened' && ONLY(value, ['kind', 'role', 'gained']);
+/** Whether a P6 entry has one of the three declarable shapes. */
+export function isP6Shape(entry) {
+  if (entry.from !== null) return false;
+  if (ACCESS_FILE.test(entry.file)) return isAccessRule(entry.to) && !isOrgWidening(entry.to) && !isGrantWidening(entry.to);
+  if (ORG_FILE.test(entry.file)) return isOrgWidening(entry.to);
+  if (entry.file === PROFILES_FILE) return isGrantWidening(entry.to);
+  return false;
+}
 export const KEYS = ['rule', 'guardRule', 'file', 'from', 'to', 'reason', 'changeId'];
 export const MIN_REASON = 10;
 export const ID_ONLY = new RegExp(`^${CHANGE_ID.source.replace(/^\\\[/, '').replace(/\\\]$/, '')}$`);
@@ -24,6 +43,10 @@ export const targetOf = item => canonical({ rule: item.rule, guardRule: item.gua
 const isValue = value => value === null || typeof value === 'string' || (Number.isInteger(value) && value >= 0)
   || (typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length > 0 && Object.values(value).every(n => Number.isInteger(n) && n >= 0));
 
+/** A row access rule as written in access.json: a `kind` and only string values. */
+const isAccessRule = value => !!value && typeof value === 'object' && !Array.isArray(value) && typeof value.kind === 'string'
+  && Object.values(value).every(v => typeof v === 'string' && v !== '');
+
 /** Parse and validate. `text === null` (no file) means no declarations. Throws GuardError on any malformed entry. */
 export function parseRaises(text) {
   if (text === null) return [];
@@ -39,7 +62,13 @@ export function parseRaises(text) {
     if (entry.rule === 'P1' ? !/^G\d{2}$/.test(entry.guardRule ?? '') : entry.guardRule !== undefined) bad('guardRule 은 P1 에만, 규칙 ID(예: "G03")로 적습니다.');
     if (typeof entry.file !== 'string' || entry.file === '') bad('file 이 없습니다.');
     if (/[*?[\]{}]/.test(entry.file)) bad(`file 에 와일드카드를 쓸 수 없습니다: ${entry.file}`);
-    if (!('from' in entry) || !('to' in entry) || !isValue(entry.from) || !isValue(entry.to)) bad('from / to 는 바뀌기 전과 후의 값을 그대로 적습니다(숫자, 글자, 숫자 묶음, null).');
+    if (entry.rule === 'P6' && !isP6Shape(entry)) {
+      bad('P6 은 권한 넓히기만 선언합니다: 행 권한(D05)은 file 이 metadata/objects/<개체>/access.json, to 는 넓어진 규칙 그대로. '
+        + '조직도(D07)는 file 이 metadata/security/org/<키>.json, to 는 { kind: "org-widened", companyId, user, gained }. '
+        + '역할 권한(D08)은 file 이 metadata/security/profiles.json, to 는 { kind: "grant-widened", role, gained }. from 은 언제나 null.');
+    }
+    const values = 'from' in entry && 'to' in entry && isValue(entry.from) && isValue(entry.to);
+    if (entry.rule !== 'P6' && !values) bad('from / to 는 바뀌기 전과 후의 값을 그대로 적습니다(숫자, 글자, 숫자 묶음, null).');
     if (typeof entry.reason !== 'string' || entry.reason.trim().length < MIN_REASON) bad(`reason 은 사람이 읽을 이유를 ${MIN_REASON}자 이상 적습니다.`);
     if (typeof entry.changeId !== 'string' || !ID_ONLY.test(entry.changeId)) bad('changeId 는 REQ-숫자 또는 F숫자-숫자 형식입니다.');
     return entry;

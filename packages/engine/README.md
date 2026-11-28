@@ -1,8 +1,13 @@
-# packages/engine — 엔진 구역 (자리만 잡아 둠)
+# packages/engine — 엔진 구역 (`@dio-crm/engine`)
 
 `metadata/` 의 설정을 읽어 화면과 API를 만들어 내는 공통 코드가 들어갈 곳입니다. 모든 회사·국가가 같은 엔진을 씁니다.
 
-지금은 이 안내문만 있습니다. 실제 코드와 패키지 설정(`package.json`)은 F2 단계에서 추가합니다. 그때까지 빌드에는 영향을 주지 않습니다.
+F2-1 에서 패키지를 만들었습니다. 지금 있는 것:
+
+- `loadRuntimeModel(files)`: `metadata/` 파일 내용을 받아 검사(`bundleFromFiles` + `validateBundle`)한 뒤 읽기 전용 모델(개체, 필드·별칭, 용어, 코드 값)을 돌려줍니다. 오류가 하나라도 있으면 모델 없이 문제 목록만 돌려줍니다. 파일은 호출자가 읽어 넘깁니다(G07).
+- 행 권한 평가기 `canAccessRow`, `filterRows`, `accessPredicate`: 규칙(`all`, `none`, `own`, `members`, `unit`, 선택적 권한 조건)을 OR 로 묶고, 규칙이 없으면 거부합니다. 규칙을 설정에서 읽는 일은 F2-2 입니다.
+
+테스트: `pnpm --filter @dio-crm/engine test`.
 
 ## 무엇이 들어가나
 
@@ -14,6 +19,57 @@
 - 프레임워크 작업 단위(F2 이후)를 맡은 AI 작업자만 고칩니다.
 - 개별 화면 요청(REQ) 작업에서는 엔진을 고치지 않고 `metadata/` 를 고칩니다.
 
+## 메타데이터 버전 (F2-3)
+
+`src/versions/` 는 설정 묶음의 버전을 staging → publish → rollback 으로 옮기는 순수 규칙입니다. 저장은 `VersionStore` 포트로만 합니다.
+- 상태 표: `transitions.ts` 하나가 정합니다. publish 는 설정 검사(오류 0)와 지금 게시본과의 하위 호환 검사(`diffBundles`, 행 권한 넓히기 D05 포함)를 통과해야 합니다.
+- 메모리 포트 `memoryVersionStore()` 는 테스트용입니다. MS SQL 어댑터는 `backend/src/database/crm-meta-version-store.ts`(전용 표 `crm_meta_*`)입니다.
+- 실제 DB 확인은 `node scripts/meta-db/run-publish-rollback.mjs` 를 DB 가 있는 PC 에서 돌립니다. 연결 정보는 환경 변수 `CRM_META_DB_*` 이고 기본은 SQL 로그인(USER/PASSWORD)입니다. PowerShell 예시는 스크립트 머리말에 있습니다.
+
+## 자동 API 의 쓰기 검사 (F2-4)
+
+`src/records/` 의 `validateWrite(model, objectKey, body, 'create' | 'update')` 는 요청 본문을 설정의 필드로 검사합니다(순수).
+알 수 없는 필드, 시스템 필드, 화면 어디서든 읽기 전용인 필드, 필수 누락, 형식·길이·범위·코드 값 오류를 모두 모아 돌려줍니다. 별칭은 정식 키로 바꿉니다.
+`withOwnerDefault` 는 생성 때 `own` 규칙의 담당자 필드가 비어 있으면 행위자로 채웁니다.
+
+API 자체는 백엔드에 있습니다: 끝점 `backend/src/modules/engine-api/`(`/api/engine/objects/:object/records`), 표와 SQL `backend/src/database/crm-obj-*.ts`(전용 표 `crm_obj_<개체>`).
+게시된 설정 버전만 API 를 움직이고, 행 권한(`accessPredicate`)은 매개변수 SQL 조건으로 바뀐 뒤 엔진이 한 번 더 확인합니다.
+실제 DB 확인은 `node scripts/meta-db/run-engine-api.mjs`(연결 정보는 `CRM_META_DB_*` 환경 변수)입니다.
+
+### 이름 바꾸기와 날짜 (F2-4 보강)
+
+- 표·열의 실제 이름은 처음 만들 때 정해 `dbo.crm_meta_obj_name` 에 적습니다. 별칭을 남긴 이름 바꾸기는 같은 표·열을 계속 씁니다(ADR 0004 덧붙임).
+  한 필드는 전의 필드 하나만 이어받습니다. 이름을 찾는 순서(키, 그다음 옛 이름)는 설정 비교와 저장소가 같은 함수(`resolveByNames`)를 씁니다. 옛 이름들이 서로 다른 필드 둘을 가리키면 합치기로 보고 막습니다: 설정 비교는 D06(합침), D01(흡수된 필드), D05(그 이름을 따라간 행 권한 규칙)를 내고, 저장소는 `CRM_OBJ_COLUMN_AMBIGUOUS` 로 그 개체의 표를 만들지 않습니다.
+- 날짜(`date`)와 일시(`datetime`)는 ISO 글자(`YYYY-MM-DD`, `YYYY-MM-DDTHH:mm:ss.fff`, UTC)로 보내고 SQL Server 가 열 형식(`DATE`, `DATETIME2(3)`)으로 바꿉니다(`backend/src/database/sql-params.ts`). 0001~9999년, 밀리초 그대로입니다.
+  드라이버(mssql 11 / tedious 18)가 `Date` 값의 연도를 PC 시간대로 검사해서, UTC 동쪽(한국)에서는 `9999-12-31T23:59:59.999Z` 가, 서쪽에서는 `0001-01-01` 이 `EPARAM` 으로 거절됐기 때문입니다.
+- 표를 만들 수 없는 개체(형식이 어긋남 등)는 그 개체만 503 `OBJECT_TABLE_UNAVAILABLE` 로 닫히고, 30초 뒤 다시 시도합니다. 다른 개체는 그대로 동작합니다.
+
+### 알려진 한계 (F2-4)
+
+- **개체 단위 권한이 없습니다.** 로그인한 사용자는 게시된 모든 개체의 API 를 부를 수 있고, 무엇이 보이는지는 행 권한(`access.json`)만 정합니다.
+  "이 개체를 읽을 권한", "만들 권한", "고칠 권한" 같은 구분은 아직 없습니다(주인 결정 대기). 행 권한 규칙이 없는 개체는 닫혀 있습니다.
+- 필드 단위 권한(누구는 이 필드를 못 봄)이 없습니다. 볼 수 있는 행은 모든 필드가 보입니다.
+- 삭제, 사용자가 고르는 검색·정렬(목록 뷰가 정한 조건·정렬은 F2-5 부터 있음), 낙관적 잠금이 없습니다. `members` 규칙은 팀 정보의 출처가 없어 지금은 아무것도 열지 않습니다.
+- 이미 만든 열의 형식 바꾸기(허용된 넓히기 포함)는 자동으로 하지 않습니다. 사람이 마이그레이션합니다.
+- 게시본에서 사라진 개체·필드의 이름은 은퇴합니다. 같은 이름으로 다시 만들면 새 표·새 열을 받고 옛 데이터는 보이지 않습니다. 삭제를 게시한 뒤의 rollback 도 마찬가지입니다. 옛 데이터를 다시 잇는 마이그레이션 절차는 아직 없습니다(ADR 0004 덧붙임).
+- 이름표(`crm_meta_obj_name`)에 적힌 적 없는 표·열(이름표가 생기기 전에 만든 것)은 이어받지 않습니다. 그런 DB 에서는 개체가 새 표로 시작합니다.
+- `run-engine-api.mjs` 의 점검용 표(`crm_obj_zz_engine_check`)는 게시본에 없는 개체라서, 게시가 한 번 있을 때마다 다음 실행이 새 표(`_r2`, `_r3` …)를 만듭니다.
+- 실제 SQL Server 에서의 동작은 `node scripts/meta-db/run-engine-api.mjs` 를 DB 가 있는 PC 에서 돌려야 확인됩니다. 이 저장소의 검사는 SQLite 가짜 DB 로 한 합성 검사입니다.
+
+## 범용 화면 (F2-5)
+
+게시된 설정만 읽어 그리는 화면 네 가지(목록, 상세, 생성·편집 폼, 관련 목록)가 `packages/engine-ui/` 에 있습니다.
+프런트에서는 `/engine/<개체>` 로 열립니다(`frontend/src/app/engine-screen.tsx`). 기존 리드 화면은 그대로입니다.
+
+- 화면 설정은 `GET /api/engine/objects/:object/ui?locale=ko-KR|en-US` 가 줍니다(`buildUiModel`, `src/ui-model.ts`). 글자는 `metadata/terms/` 에서 그 언어로 바꿔서 줍니다. 행 권한 규칙과 행 자체는 담지 않습니다.
+- 목록은 `view=<뷰 키>`(뷰의 조건·정렬·쪽 크기)와 `ref.<참조 필드>=<값>`(관련 목록) 을 받습니다. 둘 다 매개변수 SQL 이고, 회사·행 권한 조건과 AND 로만 묶입니다.
+- 화면 자체의 글자(버튼, 오류 문구)는 `metadata/terms/<언어>/engine.json` 에 있습니다.
+- 화면 확인: `node scripts/engine-ui/browser-check.mjs`(가짜 API, Chromium). 화면 사진은 `.guard/engine-ui/` 에 남고 커밋되지 않습니다.
+
+알려진 한계: 실제 백엔드·로그인과 붙여서는 확인하지 않았습니다(가짜 API 로 한 합성 검사). 참조 필드는 id 를 글자로 입력합니다(찾기 창 없음). 날짜는 그 언어 형식으로 보여 줍니다(날짜는 시간대 없이, 일시는 사용자 시간대). 일시 입력은 사용자 시간대라서 9999-12-31 의 마지막 몇 시간처럼 그 시간대에서 9999년을 넘는 값은 폼에서 고칠 수 없습니다.
+목록에 검색·사용자 정렬·전체 건수가 없습니다(뷰가 정한 조건·정렬, 이전/다음 쪽만). 삭제가 없습니다. 개체 단위 권한이 없어 `access.create` 는 "행 권한 규칙이 하나라도 적용되는가"만 뜻합니다.
+`verify` 는 `packages/engine-ui` 의 단위 테스트는 돌리지만 브라우저 확인은 돌리지 않습니다.
+
 ## 적용되는 규칙
 
 | 규칙 | 내용 |
@@ -24,3 +80,11 @@
 | G07 | DB·네트워크 직접 호출은 허용 목록에 있는 인프라 폴더에서만 됩니다. 엔진의 데이터 접근 폴더가 정해지면 사람이 허용 목록에 추가합니다. |
 
 규칙 전체 설명: [docs/framework/guard-rules.md](../../docs/framework/guard-rules.md)
+
+## 권한 모델 (F2-7)
+
+`src/security/` 와 `src/ui-access.ts`, `src/versions/admin.ts`. 요구사항 문서 `salesforce/세일즈포스 어드민 화면,메뉴 카달로그.md` 의 10·12·13·38·39절에 맞췄습니다.
+- 역할 계층: `withHierarchy(actor, chart)` 가 조직도(ERP 조직 `parent_organization_id`)에서 사용자가 장인 조직의 하위 전체(조직, 소속 사원, 하위 장)를 `memberIds`·`unitIds` 에 더합니다. 기존 `members`·`unit` 규칙을 그대로 쓰므로 규칙 종류를 늘리거나 설정의 행 권한을 넓히지 않습니다. 조직도의 깨진 갈래(순환, 없는 상위, 중복)는 그 갈래만 닫습니다.
+- 개체·필드 권한: `canObject`, `fieldAccess` 는 기본 거부이고, 제한(`restrictions`)이 허용보다 먼저입니다. `validateWrite(…, access)` 는 읽을 수 없는 필드를 없는 필드처럼 `UNKNOWN_FIELD`, 읽기만 되는 필드를 `READ_ONLY_FIELD` 로 거부하고, 읽을 수 없는 필수 필드는 이름 없이 `NOT_PERMITTED` 로 거부합니다. `readableValues` 와 `restrictUiModel` 이 응답과 화면 모델에서 읽을 수 없는 필드, 그 필드로 거르거나 정렬하는 목록 보기, 자식 개체·필드를 읽을 수 없는 관련 목록을 뺍니다.
+- 관리자 권한: `AdminVersions` 는 stage·discard 에 `config.edit`, publish·rollback 에 플랫폼 전체 게시 권한 `config.publish.scope` 를 요구합니다(기본 COMPANY_ADMIN 에는 없음)(없으면 `FORBIDDEN`).
+- 한계: 권한 묶음과 조직도를 `metadata/` 에 두려면 메타모델(`packages/contracts/src/metadata/`, 보호 파일)에 파일 자리가 있어야 해서 아직 설정으로 읽지 않습니다. 호출자가 `actor.grants` 와 조직도를 넘길 때만 좁혀집니다.

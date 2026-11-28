@@ -88,5 +88,9 @@ const permissions: ReadonlySet<string> = new Set(permissionCatalog);
 /** R07 for feature and permission keys. Both universes are closed: FEATURE of the bundle, permissionCatalog of admin. */
 export function checkFeatureAndPermission(ctx: Context, item: { featureKey: string; permission: string }, path: string): void {
   if (!featureKeys(ctx).has(item.featureKey)) ctx.add('R07_UNKNOWN_FEATURE', `${path}/featureKey`, { feature: item.featureKey });
-  if (!permissions.has(item.permission)) ctx.add('R07_UNKNOWN_PERMISSION', `${path}/permission`, { permission: item.permission });
+  checkPermission(ctx, item.permission, `${path}/permission`);
+}
+/** R07 for one permission key against the admin permissionCatalog. */
+export function checkPermission(ctx: Context, permission: string, path: string): void {
+  if (!permissions.has(permission)) ctx.add('R07_UNKNOWN_PERMISSION', path, { permission });
 }

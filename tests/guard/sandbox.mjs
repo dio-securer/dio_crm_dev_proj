@@ -113,6 +113,9 @@ export function makeSandbox({ files = {}, baseline = {} } = {}) {
     fs.mkdirSync(path.dirname(path.join(dir, name)), { recursive: true });
     fs.copyFileSync(path.join(root, name), path.join(dir, name));
   }
+  // The repository's own declarations belong to its open PR, not to the sandbox: the sandbox starts with none.
+  const raises = JSON.parse(fs.readFileSync(path.join(dir, 'guard-raises.json'), 'utf8'));
+  fs.writeFileSync(path.join(dir, 'guard-raises.json'), `${JSON.stringify({ ...raises, raises: [] }, null, 2)}\n`);
   const baselineText = `${JSON.stringify({ schemaVersion: 2, rules: baseline }, null, 2)}\n`;
   writeFiles(dir, { ...BASE_FILES, ...VALIDATOR_FILES, ...CONTRACTS_MANIFEST, ...files, 'guard-baseline.json': baselineText });
   const link = path.join(dir, TS_HOSTS[0], 'node_modules');

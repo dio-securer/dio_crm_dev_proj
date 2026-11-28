@@ -1,0 +1,69 @@
+{
+  "companyId": -1,
+  "key": "virtual_domestic_sales",
+  "members": [
+    {
+      "name": "강남 영업사원 1",
+      "unitId": "br_gangnam",
+      "userId": "v-sales-gangnam-1"
+    },
+    {
+      "name": "강남 영업사원 2",
+      "unitId": "br_gangnam",
+      "userId": "v-sales-gangnam-2"
+    },
+    {
+      "name": "종로 영업사원 1",
+      "unitId": "br_jongno",
+      "userId": "v-sales-jongno-1"
+    },
+    {
+      "name": "분당 영업사원 1",
+      "unitId": "br_bundang",
+      "userId": "v-sales-bundang-1"
+    }
+  ],
+  "units": [
+    {
+      "headUserId": "v-dom-head",
+      "id": "dom",
+      "name": "국내영업"
+    },
+    {
+      "headUserId": "v-reg-cap-head",
+      "id": "reg_cap",
+      "name": "수도권역",
+      "parentId": "dom"
+    },
+    {
+      "headUserId": "v-div-cap-1-head",
+      "id": "div_cap_1",
+      "name": "수도권1본부",
+      "parentId": "reg_cap"
+    },
+    {
+      "headUserId": "v-div-cap-2-head",
+      "id": "div_cap_2",
+      "name": "수도권2본부",
+      "parentId": "reg_cap"
+    },
+    {
+      "headUserId": "v-br-gangnam-head",
+      "id": "br_gangnam",
+      "name": "강남지점",
+      "parentId": "div_cap_1"
+    },
+    {
+      "headUserId": "v-br-jongno-head",
+      "id": "br_jongno",
+      "name": "종로지점",
+      "parentId": "div_cap_1"
+    },
+    {
+      "headUserId": "v-br-bundang-head",
+      "id": "br_bundang",
+      "name": "분당지점",
+      "parentId": "div_cap_2"
+    }
+  ]
+}
