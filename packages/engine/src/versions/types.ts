@@ -31,7 +31,7 @@ export interface VersionTx {
 }
 export interface VersionStore { transaction<T>(work: (tx: VersionTx) => Promise<T>): Promise<T> }
 
-export type VersionErrorCode = 'NOT_FOUND' | 'BAD_STATE' | 'INVALID_METADATA' | 'INCOMPATIBLE' | 'NO_PREVIOUS' | 'NO_PUBLISHED';
+export type VersionErrorCode = 'NOT_FOUND' | 'BAD_STATE' | 'INVALID_METADATA' | 'INCOMPATIBLE' | 'NO_PREVIOUS' | 'NO_PUBLISHED' | 'FORBIDDEN';
 export class VersionError extends Error {
   constructor(readonly code: VersionErrorCode, readonly issues: Issue[] = []) { super(code); this.name = 'VersionError'; }
 }

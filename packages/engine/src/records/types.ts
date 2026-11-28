@@ -4,7 +4,7 @@ export type WriteMode = 'create' | 'update';
 
 export type RecordErrorCode =
   | 'NOT_OBJECT' | 'EMPTY' | 'UNKNOWN_FIELD' | 'DUPLICATE_FIELD' | 'SYSTEM_FIELD' | 'READ_ONLY_FIELD'
-  | 'REQUIRED' | 'TYPE' | 'TOO_LONG' | 'OUT_OF_RANGE' | 'BAD_ENUM';
+  | 'FIELD_FORBIDDEN' | 'REQUIRED' | 'TYPE' | 'TOO_LONG' | 'OUT_OF_RANGE' | 'BAD_ENUM';
 export interface RecordError { code: RecordErrorCode; field?: string }
 
 export type WriteCheck =

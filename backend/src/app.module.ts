@@ -30,6 +30,7 @@ import { MarketFeatureGuard } from './globalization/feature.guard';
 import { ConfigurationModule } from './customization/config.module';
 import { EngineApiController } from './modules/engine-api/engine-api.controller';
 import { EngineApiService } from './modules/engine-api/engine-api.service';
+import { MetadataAdminController, MetadataAdminService } from './modules/engine-api/metadata-admin.controller';
 
 @Module({
   imports: [JwtModule.register({}), ConfigurationModule],
@@ -57,7 +58,8 @@ import { EngineApiService } from './modules/engine-api/engine-api.service';
     HealthController,
     OpsController,
     GlobalizationController,
-    EngineApiController
+    EngineApiController,
+    MetadataAdminController
   ],
   providers: [
     DatabaseService,
@@ -77,7 +79,8 @@ import { EngineApiService } from './modules/engine-api/engine-api.service';
     InterfaceService,
     GlobalizationService,
     MarketFeatureGuard,
-    EngineApiService
+    EngineApiService,
+    MetadataAdminService
   ]
 })
 export class AppModule {}

@@ -2,6 +2,7 @@
 // accessPredicate gives the same answer as canAccessRow in a form a data layer can turn into a query (F2-4).
 
 import type { RowAccessRule } from '@dio-crm/contracts/metadata';
+import type { PermissionGrants } from './security/permissions';
 /** The rule shape is the settings schema of access.json (contracts), so settings and evaluator cannot drift apart. */
 export type { RowAccessRule };
 
@@ -12,6 +13,8 @@ export interface Actor {
   /** Organization units whose rows this actor may see through a `unit` rule. */
   unitIds?: readonly string[];
   permissions: readonly string[];
+  /** Object and field permissions (F2-7). Absent: the caller narrows nothing beyond row access (no source yet). */
+  grants?: PermissionGrants;
 }
 
 export type Row = Readonly<Record<string, unknown>>;

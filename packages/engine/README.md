@@ -80,3 +80,11 @@ API 자체는 백엔드에 있습니다: 끝점 `backend/src/modules/engine-api/
 | G07 | DB·네트워크 직접 호출은 허용 목록에 있는 인프라 폴더에서만 됩니다. 엔진의 데이터 접근 폴더가 정해지면 사람이 허용 목록에 추가합니다. |
 
 규칙 전체 설명: [docs/framework/guard-rules.md](../../docs/framework/guard-rules.md)
+
+## 권한 모델 (F2-7)
+
+`src/security/` 와 `src/ui-access.ts`, `src/versions/admin.ts`. 요구사항 문서 `salesforce/세일즈포스 어드민 화면,메뉴 카달로그.md` 의 10·12·13·38·39절에 맞췄습니다.
+- 역할 계층: `withHierarchy(actor, chart)` 가 조직도(ERP 조직 `parent_organization_id`)에서 사용자가 장인 조직의 하위 전체(조직, 소속 사원, 하위 장)를 `memberIds`·`unitIds` 에 더합니다. 기존 `members`·`unit` 규칙을 그대로 쓰므로 규칙 종류를 늘리거나 설정의 행 권한을 넓히지 않습니다. 조직도가 깨져 있으면(순환, 없는 상위) 아무것도 열지 않습니다.
+- 개체·필드 권한: `canObject`, `fieldAccess` 는 기본 거부이고, 제한(`restrictions`)이 허용보다 먼저입니다. `validateWrite(…, access)` 는 읽을 수 없는 필드를 `FIELD_FORBIDDEN`, 읽기만 되는 필드를 `READ_ONLY_FIELD` 로 거부합니다. `readableValues` 와 `restrictUiModel` 이 응답과 화면 모델에서 읽을 수 없는 필드를 뺍니다.
+- 관리자 권한: `AdminVersions` 는 stage·discard 에 `config.edit`, publish·rollback 에 `config.publish` 를 요구합니다(없으면 `FORBIDDEN`).
+- 한계: 권한 묶음과 조직도를 `metadata/` 에 두려면 메타모델(`packages/contracts/src/metadata/`, 보호 파일)에 파일 자리가 있어야 해서 아직 설정으로 읽지 않습니다. 호출자가 `actor.grants` 와 조직도를 넘길 때만 좁혀집니다.

@@ -2,6 +2,7 @@
 import type { FieldDef } from '@dio-crm/contracts/metadata';
 import type { RuntimeModel } from '../model';
 import type { Actor, RowAccessRule } from '../row-access';
+import type { FieldAccessOf } from '../security/permissions';
 import { checkValue } from './values';
 import { RecordError, RecordValue, WriteCheck, WriteMode } from './types';
 
@@ -22,7 +23,8 @@ function activeCodes(model: RuntimeModel, field: FieldDef): string[] {
   return field.enumCodeGroup ? model.codeValues(field.enumCodeGroup).filter(c => c.active).map(c => c.code) : [];
 }
 
-export function validateWrite(model: RuntimeModel, objectKey: string, input: unknown, mode: WriteMode): WriteCheck {
+/** `access` (F2-7): a field the actor may not read is FIELD_FORBIDDEN (its existence is not confirmed), one it may only read is READ_ONLY_FIELD. */
+export function validateWrite(model: RuntimeModel, objectKey: string, input: unknown, mode: WriteMode, access?: FieldAccessOf): WriteCheck {
   const object = model.object(objectKey);
   if (!object || !isPlainObject(input)) return { ok: false, errors: [{ code: 'NOT_OBJECT' }] };
   const errors: RecordError[] = [];
@@ -35,7 +37,9 @@ export function validateWrite(model: RuntimeModel, objectKey: string, input: unk
     if (seen.has(field.key)) { errors.push({ code: 'DUPLICATE_FIELD', field: field.key }); continue; }
     seen.add(field.key);
     if (field.system) { errors.push({ code: 'SYSTEM_FIELD', field: field.key }); continue; }
-    if (readOnly.has(field.key)) { errors.push({ code: 'READ_ONLY_FIELD', field: field.key }); continue; }
+    const allowed = access?.(field.key);
+    if (allowed && !allowed.read) { errors.push({ code: 'FIELD_FORBIDDEN', field: name }); continue; }
+    if (readOnly.has(field.key) || (allowed && !allowed.edit)) { errors.push({ code: 'READ_ONLY_FIELD', field: field.key }); continue; }
     const raw = input[name];
     if (isBlank(raw)) {
       if (field.required) errors.push({ code: 'REQUIRED', field: field.key }); else values[field.key] = null;
