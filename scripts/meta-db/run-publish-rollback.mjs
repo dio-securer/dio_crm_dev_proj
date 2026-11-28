@@ -3,11 +3,12 @@
 // Meant for the owner's PC. Creates only the crm_meta_* tables (idempotent) and never touches other tables.
 // Connection settings come from environment variables only (see settings.mjs); nothing secret is in code or in the result.
 //
-// Windows PowerShell, signed-in Windows account (owner's PC: SQL Server on 127.0.0.1:1433, database "DIO CRM"):
+// Windows PowerShell, SQL login (owner's PC: SQL Server on 127.0.0.1:1433, database "DIO CRM", login sa):
 //   pnpm install; pnpm build
-//   $env:CRM_META_DB_AUTH = "windows-integrated"
 //   $env:CRM_META_DB_SERVER = "127.0.0.1"; $env:CRM_META_DB_PORT = "1433"; $env:CRM_META_DB_DATABASE = "DIO CRM"
+//   $env:CRM_META_DB_USER = "sa"; $env:CRM_META_DB_PASSWORD = Read-Host "SQL password"
 //   node scripts/meta-db/run-publish-rollback.mjs
+// Optional, signed-in Windows account instead: $env:CRM_META_DB_AUTH = "windows-integrated" (no user/password; needs msnodesqlv8).
 // If the msnodesqlv8 driver is missing the script prints how to add it without changing the repository.
 // Result: .guard/real-db/meta-versions-<time>.json (kind REAL, verdict PASS or FAIL). Exit code 0 only on PASS.
 import fs from 'node:fs';

@@ -24,7 +24,7 @@ F2-1 에서 패키지를 만들었습니다. 지금 있는 것:
 `src/versions/` 는 설정 묶음의 버전을 staging → publish → rollback 으로 옮기는 순수 규칙입니다. 저장은 `VersionStore` 포트로만 합니다.
 - 상태 표: `transitions.ts` 하나가 정합니다. publish 는 설정 검사(오류 0)와 지금 게시본과의 하위 호환 검사(`diffBundles`, 행 권한 넓히기 D05 포함)를 통과해야 합니다.
 - 메모리 포트 `memoryVersionStore()` 는 테스트용입니다. MS SQL 어댑터는 `backend/src/database/crm-meta-version-store.ts`(전용 표 `crm_meta_*`)입니다.
-- 실제 DB 확인은 `node scripts/meta-db/run-publish-rollback.mjs` 를 DB 가 있는 PC 에서 돌립니다(연결 정보는 환경 변수 `CRM_META_DB_*`).
+- 실제 DB 확인은 `node scripts/meta-db/run-publish-rollback.mjs` 를 DB 가 있는 PC 에서 돌립니다. 연결 정보는 환경 변수 `CRM_META_DB_*` 이고 기본은 SQL 로그인(USER/PASSWORD)입니다. PowerShell 예시는 스크립트 머리말에 있습니다.
 
 ## 적용되는 규칙
 
