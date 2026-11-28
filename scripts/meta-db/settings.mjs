@@ -31,6 +31,9 @@ export function settingsFrom(env) {
   return { driverModule: 'mssql', summary, config: { ...common, server, port, database, ...login, options: { encrypt: e('CRM_META_DB_ENCRYPT') === 'true', trustServerCertificate: trust } } };
 }
 
+/** The secret texts of a connection config (the password), so an error line can blank them if a message repeats them. */
+export const secretsOf = config => [config?.password, config?.authentication?.options?.password].filter(v => typeof v === 'string' && v !== '');
+
 /**
  * The synthetic company of run-engine-api.mjs. It must be negative, so it can never be a real company's id, and
  * the id below it ("another company") must still fit an INT column.

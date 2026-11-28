@@ -18,8 +18,8 @@
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import { readMetadata, transactional, writeResult } from './db.mjs';
-import { MSNODESQLV8_HELP, checkCompanyId, settingsFrom } from './settings.mjs';
+import { errorLine, readMetadata, transactional, writeResult } from './db.mjs';
+import { MSNODESQLV8_HELP, checkCompanyId, secretsOf, settingsFrom } from './settings.mjs';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const backendRequire = createRequire(path.join(repo, 'backend/package.json'));
@@ -33,10 +33,10 @@ const must = (ok, text) => { if (!ok) throw new Error(text); };
 
 async function main() {
   const started = new Date().toISOString();
-  const steps = [];
+  const steps = [], secrets = [];
   const step = async (name, fn) => {
     try { const detail = await fn(); steps.push({ name, ok: true, ...(detail ? { detail } : {}) }); return detail; }
-    catch (e) { steps.push({ name, ok: false, error: e.code ? `${e.code}${e.errors?.length ? ` ${JSON.stringify(e.errors)}` : ''}` : String(e.message).split('\n')[0] }); throw e; }
+    catch (e) { steps.push({ name, ok: false, error: errorLine(e, e.errors?.length ? ` ${JSON.stringify(e.errors)}` : '', secrets) }); throw e; }
   };
   let company;
   const tag = started.replace(/\D/g, '').slice(0, 14);
@@ -47,6 +47,7 @@ async function main() {
     cfg = await step('settings', async () => {
       company = checkCompanyId(process.env);
       conn = settingsFrom(process.env);
+      secrets.push(...secretsOf(conn.config));
       return { ...conn.summary, company };
     });
     const sql = await step('load driver', async () => {

@@ -31,4 +31,25 @@ describe('scripts/meta-db', () => {
       console.log(JSON.stringify({ calls, log, refused }));`);
     expect(result).toEqual({ calls: [{ isRequest: true, params: { a: 1 }, sameSql: true }], log: ['begin', 'SELECT 1', 'commit'], refused: 'transactional needs the backend bindParams' });
   });
+
+  it('records a failed step with its code, its message and the driver\'s own message, never the password', () => {
+    const result = run(`import { errorLine } from './db.mjs';
+      import { secretsOf } from './settings.mjs';
+      const wrapped = Object.assign(new Error('Validation failed for parameter \\'p0\\'. Out of range.'), { code: 'EPARAM', originalError: new TypeError('Out of range.\\n  at somewhere') });
+      const login = Object.assign(new Error('Login failed with hunter2-pw'), { code: 'ELOGIN', originalError: Object.assign(new Error('inner hunter2-pw'), { cause: new Error('root cause') }) });
+      console.log(JSON.stringify({
+        wrapped: errorLine(wrapped),
+        same: errorLine(Object.assign(new Error('boom'), { originalError: new Error('boom') })),
+        extra: errorLine(Object.assign(new Error('bad'), { code: 'INVALID_RECORD' }), ' [1]'),
+        login: errorLine(login, '', secretsOf({ password: 'hunter2-pw' })),
+        ntlm: secretsOf({ authentication: { options: { password: 'pw-ntlm' } } }), none: secretsOf({ connectionString: 'x' }),
+        long: errorLine(new Error('x'.repeat(1000))).length, plain: errorLine('text'), empty: errorLine(null),
+      }));`);
+    expect(result).toEqual({
+      wrapped: "EPARAM | Validation failed for parameter 'p0'. Out of range. | Out of range.",
+      same: 'boom', extra: 'INVALID_RECORD [1] | bad',
+      login: 'ELOGIN | Login failed with *** | inner *** | root cause',
+      ntlm: ['pw-ntlm'], none: [], long: 300, plain: 'text', empty: 'null',
+    });
+  });
 });

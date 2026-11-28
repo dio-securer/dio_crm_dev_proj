@@ -39,7 +39,8 @@ API 자체는 백엔드에 있습니다: 끝점 `backend/src/modules/engine-api/
 ### 이름 바꾸기와 날짜 (F2-4 보강)
 
 - 표·열의 실제 이름은 처음 만들 때 정해 `dbo.crm_meta_obj_name` 에 적습니다. 별칭을 남긴 이름 바꾸기는 같은 표·열을 계속 씁니다(ADR 0004 덧붙임).
-- 날짜(`date`)와 일시(`datetime`)는 `DATE`, `DATETIME2(3)` 형식을 밝혀 보냅니다(`backend/src/database/sql-params.ts`). 0001~9999년, 밀리초 그대로입니다.
+- 날짜(`date`)와 일시(`datetime`)는 ISO 글자(`YYYY-MM-DD`, `YYYY-MM-DDTHH:mm:ss.fff`, UTC)로 보내고 SQL Server 가 열 형식(`DATE`, `DATETIME2(3)`)으로 바꿉니다(`backend/src/database/sql-params.ts`). 0001~9999년, 밀리초 그대로입니다.
+  드라이버(mssql 11 / tedious 18)가 `Date` 값의 연도를 PC 시간대로 검사해서, UTC 동쪽(한국)에서는 `9999-12-31T23:59:59.999Z` 가, 서쪽에서는 `0001-01-01` 이 `EPARAM` 으로 거절됐기 때문입니다.
 - 표를 만들 수 없는 개체(형식이 어긋남 등)는 그 개체만 503 `OBJECT_TABLE_UNAVAILABLE` 로 닫히고, 30초 뒤 다시 시도합니다. 다른 개체는 그대로 동작합니다.
 
 ### 알려진 한계 (F2-4)

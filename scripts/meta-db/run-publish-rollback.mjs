@@ -14,8 +14,8 @@
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import { readMetadata as readFrom, transactional, writeResult } from './db.mjs';
-import { MSNODESQLV8_HELP, settingsFrom } from './settings.mjs';
+import { errorLine, readMetadata as readFrom, transactional, writeResult } from './db.mjs';
+import { MSNODESQLV8_HELP, secretsOf, settingsFrom } from './settings.mjs';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const backendRequire = createRequire(path.join(repo, 'backend/package.json'));
@@ -23,15 +23,15 @@ const readMetadata = () => readFrom(repo);
 
 async function main() {
   const started = new Date().toISOString();
-  const steps = [];
+  const steps = [], secrets = [];
   const step = async (name, fn) => {
     try { const detail = await fn(); steps.push({ name, ok: true, ...(detail ? { detail } : {}) }); return detail; }
-    catch (e) { steps.push({ name, ok: false, error: e.code ? `${e.code}${e.issues?.length ? ` ${e.issues.map(i => i.code).join(',')}` : ''}` : String(e.message) }); throw e; }
+    catch (e) { steps.push({ name, ok: false, error: errorLine(e, e.issues?.length ? ` ${e.issues.map(i => i.code).join(',')}` : '', secrets) }); throw e; }
   };
   let pool, cfg;
   try {
     let conn;
-    cfg = await step('settings', async () => { conn = settingsFrom(process.env); return conn.summary; });
+    cfg = await step('settings', async () => { conn = settingsFrom(process.env); secrets.push(...secretsOf(conn.config)); return conn.summary; });
     const sql = await step('load driver', async () => {
       try { return backendRequire(conn.driverModule); } catch (e) {
         if (conn.driverModule !== 'mssql') console.error(MSNODESQLV8_HELP);

@@ -17,7 +17,7 @@ export function readMetadata(repo) {
 /**
  * A MetaTransactional over an mssql pool: one SQL transaction per call, rolled back on any error.
  * `bind` is the backend's bindParams (backend/dist/src/database/sql-params.js): the same typed binding the API uses,
- * so dates travel as DATETIME2(3) / DATE and not as the driver's legacy DATETIME guess.
+ * so dates travel as ISO text the server converts, not as the driver's legacy DATETIME guess (see sql-params.ts).
  */
 export function transactional(sql, pool, bind) {
   if (typeof bind !== 'function') throw new Error('transactional needs the backend bindParams');
@@ -37,6 +37,22 @@ export function transactional(sql, pool, bind) {
       }
     },
   };
+}
+
+/**
+ * A failed step as one line: the code, the message, and the driver's own message under it (mssql wraps the cause in
+ * originalError). `secrets` (the password, a connection string) are blanked if a message repeats them.
+ */
+export function errorLine(e, extra = '', secrets = []) {
+  const first = v => (typeof v === 'string' ? v.split('\n')[0].slice(0, 300) : '');
+  const parts = [];
+  const add = text => { if (text && !parts.includes(text)) parts.push(text); };
+  add(e?.code ? `${e.code}${extra}` : '');
+  add(first(e?.message));
+  for (let cause = e?.originalError ?? e?.cause, depth = 0; cause && depth < 3; cause = cause.originalError ?? cause.cause, depth += 1) add(first(cause.message));
+  let line = parts.join(' | ') || String(e);
+  for (const secret of secrets) if (typeof secret === 'string' && secret.length >= 4) line = line.split(secret).join('***');
+  return line;
 }
 
 /** Writes a result file under .guard/real-db/ and prints the verdict and the steps (never a secret: steps hold none). */
