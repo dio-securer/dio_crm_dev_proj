@@ -28,6 +28,8 @@ import { GlobalizationController } from './globalization/globalization.controlle
 import { GlobalizationService } from './globalization/globalization.service';
 import { MarketFeatureGuard } from './globalization/feature.guard';
 import { ConfigurationModule } from './customization/config.module';
+import { EngineApiController } from './modules/engine-api/engine-api.controller';
+import { EngineApiService } from './modules/engine-api/engine-api.service';
 
 @Module({
   imports: [JwtModule.register({}), ConfigurationModule],
@@ -54,7 +56,8 @@ import { ConfigurationModule } from './customization/config.module';
     AnalyticsController,
     HealthController,
     OpsController,
-    GlobalizationController
+    GlobalizationController,
+    EngineApiController
   ],
   providers: [
     DatabaseService,
@@ -73,7 +76,8 @@ import { ConfigurationModule } from './customization/config.module';
     PermissionGuard,
     InterfaceService,
     GlobalizationService,
-    MarketFeatureGuard
+    MarketFeatureGuard,
+    EngineApiService
   ]
 })
 export class AppModule {}

@@ -6,9 +6,9 @@ import * as path from 'node:path';
 import { CRM_META_SCHEMA, CRM_META_TABLES } from './crm-meta-schema';
 import { MetaQuery, MetaTransactional, SqlMetaVersionStore, applyCrmMetaSchema, metaVersionTx } from './crm-meta-version-store';
 import { DatabaseService } from './database.service';
-// The engine is not a backend dependency; its built output is loaded at test time (pnpm build runs first).
+// The engine is a backend dependency since F2-4 (@dio-crm/engine, built before the backend by pnpm -r build).
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const engine = require('../../../packages/engine/dist');
+const engine = require('@dio-crm/engine');
 
 type Row = Record<string, any>;
 /** A fake database that keeps crm_meta_* rows in memory and answers exactly the adapter's statements. */

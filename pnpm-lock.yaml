@@ -22,6 +22,9 @@ importers:
       '@dio-crm/contracts':
         specifier: workspace:*
         version: link:../packages/contracts
+      '@dio-crm/engine':
+        specifier: workspace:*
+        version: link:../packages/engine
       '@nestjs/common':
         specifier: ^11.0.0
         version: 11.2.4(reflect-metadata@0.2.2)(rxjs@7.8.2)

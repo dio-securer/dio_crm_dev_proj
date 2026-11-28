@@ -11,45 +11,15 @@
 // Optional, signed-in Windows account instead: $env:CRM_META_DB_AUTH = "windows-integrated" (no user/password; needs msnodesqlv8).
 // If the msnodesqlv8 driver is missing the script prints how to add it without changing the repository.
 // Result: .guard/real-db/meta-versions-<time>.json (kind REAL, verdict PASS or FAIL). Exit code 0 only on PASS.
-import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
+import { readMetadata as readFrom, transactional, writeResult } from './db.mjs';
 import { MSNODESQLV8_HELP, settingsFrom } from './settings.mjs';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const backendRequire = createRequire(path.join(repo, 'backend/package.json'));
-function readMetadata() {
-  const out = [];
-  const walk = dir => {
-    for (const e of fs.readdirSync(path.join(repo, dir), { withFileTypes: true })) {
-      const rel = `${dir}/${e.name}`;
-      if (e.isDirectory()) walk(rel); else out.push({ path: rel, content: fs.readFileSync(path.join(repo, rel), 'utf8') });
-    }
-  };
-  walk('metadata');
-  return out;
-}
-
-/** A MetaTransactional over an mssql pool: one SQL transaction per call, rolled back on any error. */
-function transactional(sql, pool) {
-  return {
-    async transaction(work) {
-      const tx = new sql.Transaction(pool);
-      await tx.begin();
-      const query = async (text, params = {}) => {
-        const req = new sql.Request(tx);
-        for (const [k, v] of Object.entries(params)) req.input(k, v);
-        return req.query(text);
-      };
-      try { const out = await work(query); await tx.commit(); return out; } catch (e) {
-        // A failed rollback (e.g. the connection dropped) must not hide the error that caused it.
-        try { await tx.rollback(); } catch { /* keep the original error */ }
-        throw e;
-      }
-    },
-  };
-}
+const readMetadata = () => readFrom(repo);
 
 async function main() {
   const started = new Date().toISOString();
@@ -96,12 +66,7 @@ async function main() {
   }
   const verdict = steps.length > 0 && steps.every(s => s.ok) && steps.some(s => s.name.startsWith('refuses')) ? 'PASS' : 'FAIL';
   const result = { kind: 'REAL', check: 'F2-3 metadata versions publish/rollback', verdict, started, finished: new Date().toISOString(), target: cfg ?? null, steps };
-  const dir = path.join(repo, '.guard/real-db');
-  fs.mkdirSync(dir, { recursive: true });
-  const file = path.join(dir, `meta-versions-${started.replace(/[:.]/g, '-')}.json`);
-  fs.writeFileSync(file, `${JSON.stringify(result, null, 2)}\n`);
-  console.log(`[meta-db] ${verdict}  ${path.relative(repo, file)}`);
-  for (const s of steps) console.log(`  ${s.ok ? 'ok  ' : 'FAIL'} ${s.name}${s.error ? `: ${s.error}` : ''}`);
+  writeResult(repo, 'meta-versions', result);
   process.exitCode = verdict === 'PASS' ? 0 : 1;
 }
 main();

@@ -26,6 +26,16 @@ F2-1 에서 패키지를 만들었습니다. 지금 있는 것:
 - 메모리 포트 `memoryVersionStore()` 는 테스트용입니다. MS SQL 어댑터는 `backend/src/database/crm-meta-version-store.ts`(전용 표 `crm_meta_*`)입니다.
 - 실제 DB 확인은 `node scripts/meta-db/run-publish-rollback.mjs` 를 DB 가 있는 PC 에서 돌립니다. 연결 정보는 환경 변수 `CRM_META_DB_*` 이고 기본은 SQL 로그인(USER/PASSWORD)입니다. PowerShell 예시는 스크립트 머리말에 있습니다.
 
+## 자동 API 의 쓰기 검사 (F2-4)
+
+`src/records/` 의 `validateWrite(model, objectKey, body, 'create' | 'update')` 는 요청 본문을 설정의 필드로 검사합니다(순수).
+알 수 없는 필드, 시스템 필드, 화면 어디서든 읽기 전용인 필드, 필수 누락, 형식·길이·범위·코드 값 오류를 모두 모아 돌려줍니다. 별칭은 정식 키로 바꿉니다.
+`withOwnerDefault` 는 생성 때 `own` 규칙의 담당자 필드가 비어 있으면 행위자로 채웁니다.
+
+API 자체는 백엔드에 있습니다: 끝점 `backend/src/modules/engine-api/`(`/api/engine/objects/:object/records`), 표와 SQL `backend/src/database/crm-obj-*.ts`(전용 표 `crm_obj_<개체>`).
+게시된 설정 버전만 API 를 움직이고, 행 권한(`accessPredicate`)은 매개변수 SQL 조건으로 바뀐 뒤 엔진이 한 번 더 확인합니다.
+실제 DB 확인은 `node scripts/meta-db/run-engine-api.mjs`(연결 정보는 `CRM_META_DB_*` 환경 변수)입니다.
+
 ## 적용되는 규칙
 
 | 규칙 | 내용 |
