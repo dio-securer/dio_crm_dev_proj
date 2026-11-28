@@ -42,12 +42,12 @@ async function request(path: string, init: RequestInit = {}): Promise<Response> 
 async function responseError(response: Response): Promise<ApiError> {
   const text = await response.text();
   try {
-    const body = JSON.parse(text) as { message?: unknown; error?: unknown; details?: unknown; code?: string };
+    const body = JSON.parse(text) as { message?: unknown; error?: unknown; details?: unknown; errors?: unknown; code?: string };
     const message = Array.isArray(body.message) ? body.message.join(', ')
       : typeof body.message === 'string' ? body.message
       : typeof body.error === 'string' ? body.error : text;
     return new ApiError(message || `API ${response.status}`, response.status,
-      body.code ?? (typeof body.error === 'string' ? body.error : undefined), body.details);
+      body.code ?? (typeof body.error === 'string' ? body.error : undefined), body.details ?? body.errors);
   } catch { return new ApiError(text || `API ${response.status}`, response.status); }
 }
 

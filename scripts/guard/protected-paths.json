@@ -23,6 +23,7 @@
     { "path": "/frontend/package.json", "what": "프런트엔드 실행 명령과 의존성 목록" },
     { "path": "/packages/contracts/package.json", "what": "계약 패키지 실행 명령과 의존성 목록" },
     { "path": "/packages/engine/package.json", "what": "엔진 패키지 실행 명령과 의존성 목록" },
+    { "path": "/packages/engine-ui/package.json", "what": "엔진 화면 패키지 실행 명령과 의존성 목록" },
     { "path": "/pnpm-workspace.yaml", "what": "작업 공간 목록(어느 폴더를 빌드·테스트하는지)과 설치 스크립트 허용 목록" },
     { "path": "/pnpm-lock.yaml", "what": "설치되는 의존성 버전을 고정한 잠금 파일" },
     { "path": "/.npmrc", "what": "설치 도구 설정(지금은 없는 파일. 생기면 보호된다)" },

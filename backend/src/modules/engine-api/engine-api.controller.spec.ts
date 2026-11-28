@@ -58,6 +58,18 @@ describe('engine API over HTTP', () => {
     expect((await call('GET', '/api/engine/objects/lead/records?limit=500', token('pub-1'))).body.error).toBe('BAD_PAGE');
   });
 
+  it('serves the screen model and a list view to a signed-in user only', async () => {
+    expect((await call('GET', '/api/engine/objects/lead/ui?locale=en-US')).status).toBe(401);
+    const ui = await call('GET', '/api/engine/objects/lead/ui?locale=en-US', token('pub-1'));
+    expect(ui.status).toBe(200);
+    expect(ui.body).toMatchObject({ locale: 'en-US', object: { key: 'lead', label: 'Lead', pluralLabel: 'Leads' }, access: { read: true, create: true } });
+    expect((await call('GET', '/api/engine/objects/lead/ui', token('pub-1'))).body.error).toBe('BAD_LOCALE');
+    const view = await call('GET', '/api/engine/objects/lead/records?view=hq_default', token('pub-1'));
+    expect([view.status, view.body.limit]).toEqual([200, 25]);
+    expect((await call('GET', '/api/engine/objects/lead/records?view=nope', token('pub-1'))).body.error).toBe('BAD_VIEW');
+    expect((await call('GET', '/api/engine/objects/lead/records?ref.phone=1', token('pub-1'))).body.error).toBe('BAD_FILTER');
+  });
+
   it('turns the data layer\'s too-wide refusal into 403 with its code, and leaves unknown errors to Nest (500)', () => {
     const http = toHttp(new AccessTooWideError()) as HttpException;
     expect([http.getStatus(), http.getResponse()]).toEqual([403, { statusCode: 403, error: 'ACCESS_TOO_WIDE', errors: [] }]);

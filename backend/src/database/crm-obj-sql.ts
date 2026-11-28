@@ -2,11 +2,14 @@
 // identifiers come from metadata keys checked in crm-obj-names.ts. The engine's access predicate becomes a WHERE condition.
 import type { AccessPredicate, RecordValue } from '@dio-crm/engine';
 import { ObjectShape, columnFor, fieldColumns, quote, tableOf } from './crm-obj-names';
+import { Condition, SortKey, conditionSql, orderBySql } from './crm-obj-filter';
 import { dateParam, dateTimeParam } from './sql-params';
 
 export interface Statement { text: string; params: Record<string, unknown> }
 export interface RecordScope { companyId: number; actor: string }
 export interface Page { limit: number; offset: number }
+/** What a list adds to the company and access conditions: a view's filter and sort, and one reference field equal to a value. */
+export interface ListQuery { filter?: Condition; sort?: readonly SortKey[]; equals?: { field: string; value: string } }
 /** SQL Server takes at most 2100 parameters; an actor whose rules expand past this many values is refused. */
 export const MAX_ACCESS_VALUES = 1000;
 export class AccessTooWideError extends Error {
@@ -57,11 +60,14 @@ function toParam(object: ObjectShape, key: string, value: RecordValue): unknown 
   return value;
 }
 
-export function listStatement(object: ObjectShape, scope: RecordScope, predicate: AccessPredicate, page: Page): Statement {
+export function listStatement(object: ObjectShape, scope: RecordScope, predicate: AccessPredicate, page: Page, query: ListQuery = {}): Statement {
   const params = new Params({ company: scope.companyId, offset: page.offset, limit: page.limit });
-  const where = accessCondition(predicate, object, params);
-  const text = `SELECT ${selectList(object)} FROM dbo.${quote(tableOf(object))} WHERE [company_id] = @company AND ${where}
-ORDER BY [id] OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY`;
+  // The company and access conditions always come first and are ANDed with everything else: a filter can only narrow.
+  const where = [accessCondition(predicate, object, params)];
+  if (query.equals) where.push(`${quote(columnFor(object, fieldOf(object, query.equals.field)))} COLLATE ${EXACT} = ${params.add(String(query.equals.value))}`);
+  if (query.filter) where.push(conditionSql(query.filter, object, params));
+  const text = `SELECT ${selectList(object)} FROM dbo.${quote(tableOf(object))} WHERE [company_id] = @company AND ${where.join(' AND ')}
+ORDER BY ${orderBySql(query.sort ?? [], object)} OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY`;
   return { text, params: params.values };
 }
 

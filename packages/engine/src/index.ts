@@ -5,3 +5,5 @@ export { canAccessRow, filterRows, accessPredicate, matchesPredicate } from './r
 export type { Actor, RowAccessRule, AccessPredicate, Row } from './row-access';
 export * from './versions';
 export * from './records';
+export { buildUiModel, isUiLocale, UI_TEXT_PREFIX } from './ui-model';
+export type { UiModel, UiField, UiOption, UiScreen, UiScreenField, UiListView, UiRelated } from './ui-model';

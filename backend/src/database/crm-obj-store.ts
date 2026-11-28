@@ -4,7 +4,7 @@ import type { AccessPredicate, RecordValue } from '@dio-crm/engine';
 import type { FieldDef } from '@dio-crm/contracts/metadata';
 import { MetaQuery, MetaTransactional } from './crm-meta-version-store';
 import { ObjectShape, columnFor } from './crm-obj-names';
-import { Page, RecordScope, Statement, getStatement, insertStatement, listStatement, updateStatement } from './crm-obj-sql';
+import { ListQuery, Page, RecordScope, Statement, getStatement, insertStatement, listStatement, updateStatement } from './crm-obj-sql';
 
 export interface StoredRecord { id: string; values: Record<string, RecordValue> }
 const run = (query: MetaQuery, s: Statement) => query(s.text, s.params);
@@ -30,9 +30,9 @@ export function recordOf(object: ObjectShape, row: Record<string, unknown>): Sto
 export class SqlObjectRecords {
   constructor(private readonly db: MetaTransactional) {}
 
-  list(object: ObjectShape, scope: RecordScope, predicate: AccessPredicate, page: Page): Promise<StoredRecord[]> {
+  list(object: ObjectShape, scope: RecordScope, predicate: AccessPredicate, page: Page, more: ListQuery = {}): Promise<StoredRecord[]> {
     if (predicate.kind === 'none') return Promise.resolve([]);
-    return this.db.transaction(async query => (await run(query, listStatement(object, scope, predicate, page))).recordset.map(r => recordOf(object, r)));
+    return this.db.transaction(async query => (await run(query, listStatement(object, scope, predicate, page, more))).recordset.map(r => recordOf(object, r)));
   }
 
   get(object: ObjectShape, scope: RecordScope, predicate: AccessPredicate, id: number): Promise<StoredRecord | undefined> {

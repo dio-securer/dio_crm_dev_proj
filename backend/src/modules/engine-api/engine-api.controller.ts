@@ -13,6 +13,11 @@ async function answer<T>(work: () => Promise<T>): Promise<T> {
 export class EngineApiController {
   constructor(private readonly api: EngineApiService) {}
 
+  @Get(':object/ui')
+  ui(@Req() req: AuthenticatedRequest, @Param('object') object: string, @Query('locale') locale: unknown) {
+    return answer(() => this.api.records.ui(callerOf(req.authUser), object, locale));
+  }
+
   @Get(':object/records')
   list(@Req() req: AuthenticatedRequest, @Param('object') object: string, @Query() query: Record<string, unknown>) {
     return answer(() => this.api.records.list(callerOf(req.authUser), object, query));
