@@ -101,6 +101,6 @@ describe('object and field permissions through the API', () => {
     expect(failure).toMatchObject({ status: 400, code: 'INVALID_RECORD' });
     expect(JSON.stringify(failure.errors)).not.toContain('status');
     expect(failure.errors).toEqual([{ code: 'NOT_PERMITTED' }]);
-    await expect(api.create(g, 'lead', { ...LEAD })).rejects.toMatchObject({ errors: [{ code: 'UNKNOWN_FIELD', field: 'status' }] });
+    await expect(api.create(g, 'lead', { ...LEAD })).rejects.toMatchObject({ errors: [{ code: 'UNKNOWN_FIELD', field: 'status' }, { code: 'NOT_PERMITTED' }] });
   });
 });
