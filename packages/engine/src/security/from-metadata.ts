@@ -6,11 +6,12 @@ import { withHierarchy, type OrgChart } from './hierarchy';
 import type { PermissionGrants, PermissionSet } from './permissions';
 
 /**
- * Grants of the profiles whose roles the actor holds. Undefined when the settings define no profile at all (nothing to
- * narrow, as before F2-7). Once profiles exist, an actor matching none gets no sets: closed by default.
+ * Grants of the profiles whose roles the actor holds. Undefined only when the settings have no profiles file at all
+ * (nothing to narrow, as before F2-7). A profiles file, even an empty one, is a declaration: an actor matching no
+ * profile gets no sets, closed by default.
  */
 export function grantsFromMetadata(bundle: MetadataBundle, roles: readonly string[]): PermissionGrants | undefined {
-  if (bundle.profiles.length === 0) return undefined;
+  if (bundle.profiles === undefined) return undefined;
   const byKey = new Map<string, PermissionSet>(bundle.permissionSets.map(s => [s.key, { key: s.key, objects: s.objects, fields: s.fields }]));
   const mine = bundle.profiles.filter(p => p.roles.some(r => roles.includes(r)));
   const pick = (keys: string[]) => [...new Set(keys)].sort().flatMap(k => (byKey.has(k) ? [byKey.get(k)!] : []));

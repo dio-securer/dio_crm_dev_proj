@@ -58,7 +58,32 @@ test('narrowing is clean: removing a member, a head, a role, a grant, or adding 
   assert.ok(!moved.some(c => c.includes('v-br-jongno-head')));
 });
 
-test('first definitions are not compared: no profiles before, or no chart for that company before', () => {
-  const bare = edit(b => { b.profiles = []; b.permissionSets = []; b.orgCharts = []; });
-  assert.deepEqual(m.diffBundles(bare, base).map(i => i.code), []);
+test('no profiles file before narrows nothing, so the first profiles are not a widening; a first chart is', () => {
+  const noProfiles = edit(b => { delete b.profiles; });
+  assert.deepEqual(m.diffBundles(noProfiles, base).map(i => i.code), []);
+  const noChart = edit(b => { b.orgCharts = []; });
+  const first = m.diffBundles(noChart, base).map(i => `${i.code} ${i.path}`);
+  assert.ok(first.includes('D07_ORG_WIDENED orgCharts[virtual_domestic_sales]/users[v-br-gangnam-head]'), first.join('\n'));
+});
+
+test('abuse 1: deleting the profiles file is D08; an empty profiles list is a declaration that denies, not a widening', () => {
+  assert.deepEqual(codes(edit(b => { delete b.profiles; })), ['D08_GRANT_WIDENED profiles']);
+  assert.deepEqual(codes(edit(b => { b.profiles = []; })), []);
+  const files = m.filesFromBundle(edit(b => { b.profiles = []; }));
+  const back = m.bundleFromFiles(files).bundle;
+  assert.deepEqual(back.profiles, []);
+  assert.equal(m.bundleFromFiles(files.filter(f => !f.path.endsWith('profiles.json'))).bundle.profiles, undefined);
+});
+
+test('abuse 2: deleting a chart and re-adding it widened is caught on the re-add', () => {
+  const gone = edit(b => { b.orgCharts = []; });
+  assert.deepEqual(m.diffBundles(base, gone).map(i => i.code), []);
+  const widened = edit(b => { chart(b).members.find(x => x.userId === 'v-sales-jongno-1').unitId = 'br_gangnam'; });
+  const back = m.diffBundles(gone, widened).map(i => `${i.code} ${i.path}`);
+  assert.ok(back.includes('D07_ORG_WIDENED orgCharts[virtual_domestic_sales]/users[v-br-gangnam-head]'));
+});
+
+test('abuse 3: moving a chart to another company is a removal plus a widened add for that company', () => {
+  const moved = codes(edit(b => { chart(b).companyId = 1; }));
+  assert.ok(moved.includes('D07_ORG_WIDENED orgCharts[virtual_domestic_sales]/users[v-br-gangnam-head]'), moved.join('\n'));
 });

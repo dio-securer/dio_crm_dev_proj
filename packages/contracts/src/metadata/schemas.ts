@@ -131,7 +131,8 @@ export const metadataBundleSchema = z.object({
   deprecations: z.array(deprecationRecordSchema).default([]),
   overlays: z.array(overlaySchema).default([]),
   permissionSets: z.array(permissionSetSchema).default([]),
-  profiles: z.array(profileSchema).default([]),
+  /** Absent: no profiles file, nothing narrowed (as before F2-7). Present, even empty: a declaration, closed by default. */
+  profiles: z.array(profileSchema).optional(),
   orgCharts: z.array(orgChartSchema).default([]),
 }).strict();
 export type MetadataBundle = z.infer<typeof metadataBundleSchema>;

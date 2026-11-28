@@ -1,7 +1,8 @@
 // D07 / D08 (F2-7): security settings that let someone see or do more than before. Narrowing is always fine.
 // D07: a user of an org chart who now heads a subtree with users they could not see before (moving a user, a new head).
 // D08: a role that is now allowed an object or field action it was not allowed before (a new role, set, grant, or a
-//      removed restriction). A base without any profile narrowed nothing, so adding the first profiles is not compared.
+//      removed restriction, or the profiles file removed). Without a profiles file nothing is narrowed, so a base without
+//      one allowed everything and any head can only narrow; a head without one after a base with one widens everything.
 import { Issue, issue } from './issues';
 import type { MetadataBundle } from './schemas';
 import type { OrgChartDef, PermissionSetDef } from './security-schemas';
@@ -32,9 +33,8 @@ function visibleByUser(chart: OrgChartDef): Map<string, Set<string>> {
 function diffOrg(base: MetadataBundle, head: MetadataBundle, out: Issue[]): void {
   for (const chart of head.orgCharts) {
     const before = base.orgCharts.find(c => c.companyId === chart.companyId);
-    // A chart for a company the base had none for opens rows only through a `subtree` rule, which D05 already compares.
-    if (!before) continue;
-    const was = visibleByUser(before);
+    // A chart is identified by its company: a company the base had no chart for is compared against an empty chart.
+    const was = before ? visibleByUser(before) : new Map<string, Set<string>>();
     for (const [user, now] of [...visibleByUser(chart)].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) {
       const old = was.get(user) ?? new Set<string>();
       const gained = [...now].filter(u => !old.has(u)).sort();
@@ -47,7 +47,7 @@ type Allowance = Set<string>;
 /** Every object and field action one role is allowed, as `object:action` and `object.field:action`, like the engine decides. */
 function allowedFor(bundle: MetadataBundle, role: string, fieldsOf: (object: string) => string[]): Allowance {
   const byKey = new Map(bundle.permissionSets.map(s => [s.key, s] as const));
-  const mine = bundle.profiles.filter(p => p.roles.includes(role));
+  const mine = (bundle.profiles ?? []).filter(p => p.roles.includes(role));
   const pick = (keys: string[]) => keys.flatMap(k => (byKey.has(k) ? [byKey.get(k)!] : []));
   const sets = pick(mine.flatMap(p => p.permissionSets)), denies = pick(mine.flatMap(p => p.restrictions));
   const obj = (list: PermissionSetDef[], o: string, a: 'read' | 'create' | 'edit' | 'delete') => list.some(s => s.objects[o]?.[a] === true);
@@ -68,7 +68,8 @@ function allowedFor(bundle: MetadataBundle, role: string, fieldsOf: (object: str
 }
 
 function diffGrants(base: MetadataBundle, head: MetadataBundle, out: Issue[]): void {
-  if (base.profiles.length === 0) return;
+  if (base.profiles === undefined) return;
+  if (head.profiles === undefined) { out.push(issue('D08_GRANT_WIDENED', 'profiles', { role: '*', gained: 'profiles.json' })); return; }
   const fields = new Map(head.objects.map(ob => [ob.object.key, ob.object.fields.map(f => f.key)] as const));
   const fieldsOf = (o: string) => fields.get(o) ?? [];
   const roles = [...new Set(head.profiles.flatMap(p => p.roles))].sort();

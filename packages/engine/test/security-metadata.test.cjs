@@ -64,3 +64,10 @@ test('restrictions win over grants from the settings', () => {
   assert.equal(e.canObject(g, 'lead', 'edit'), false);
   assert.equal(e.canObject(g, 'lead', 'read'), true);
 });
+
+test('a present but empty profiles list denies everyone; only an absent profiles file narrows nothing', () => {
+  const empty = { ...model.bundle, profiles: [] };
+  assert.equal(e.canObject(e.grantsFromMetadata(empty, ['CRM_ADMIN']), 'lead', 'read'), false);
+  const absent = { ...model.bundle, profiles: undefined };
+  assert.equal(e.grantsFromMetadata(absent, ['CRM_ADMIN']), undefined);
+});

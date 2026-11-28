@@ -1,7 +1,7 @@
 // filesFromBundle: writes a MetadataBundle as metadata/ files. Deterministic: same bundle, same bytes, sorted by path.
 import { MAX_FILE_BYTES, MAX_FILE_LINES, byteCount, canonicalJson, lineCount } from './canonical';
 import { MetadataFile } from './files';
-import { OBJECT_FILES, ORG_DIR, ROOT, SECURITY_DIR, SECURITY_FILES, chunkName, namespaceOf, safeName, scopeKeyToDir } from './layout';
+import { OBJECT_FILES, ORG_DIR, ROOT, SECURITY_DIR, chunkName, namespaceOf, safeName, scopeKeyToDir } from './layout';
 import { FieldDef, MetadataBundle, MetadataBundleInput, metadataBundleSchema } from './schemas';
 import { overlayName } from './validate';
 
@@ -60,7 +60,9 @@ export function filesFromBundle(input: MetadataBundle | MetadataBundleInput): Me
     overlays.set(path, [...(overlays.get(path) ?? []), ...o.overrides]);
   }
   for (const [path, overrides] of overlays) put(path, { overrides });
-  for (const [file, prop] of Object.entries(SECURITY_FILES)) if (bundle[prop].length) put(`${SECURITY_DIR}/${file}`, { items: bundle[prop] });
+  if (bundle.permissionSets.length) put(`${SECURITY_DIR}/permission-sets.json`, { items: bundle.permissionSets });
+  // A profiles file is written whenever it was declared, also empty: an empty list denies everything, no file narrows nothing.
+  if (bundle.profiles !== undefined) put(`${SECURITY_DIR}/profiles.json`, { items: bundle.profiles });
   for (const chart of bundle.orgCharts) put(`${SECURITY_DIR}/${ORG_DIR}/${name(chart.key)}.json`, chart);
   return files.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
 }

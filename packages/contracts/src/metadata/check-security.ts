@@ -20,7 +20,7 @@ export function checkSecurity(ctx: Context): void {
     }
   });
   const seenProfiles = new Set<string>();
-  profiles.forEach((profile, i) => {
+  (profiles ?? []).forEach((profile, i) => {
     const p = `profiles${at(profile.key, i)}`;
     if (seenProfiles.has(profile.key)) ctx.add('S05_DUPLICATE_PROFILE', p, { key: profile.key });
     seenProfiles.add(profile.key);
