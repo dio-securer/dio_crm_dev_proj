@@ -87,3 +87,33 @@ test('abuse 3: moving a chart to another company is a removal plus a widened add
   const moved = codes(edit(b => { chart(b).companyId = 1; }));
   assert.ok(moved.includes('D07_ORG_WIDENED orgCharts[virtual_domestic_sales]/users[v-br-gangnam-head]'), moved.join('\n'));
 });
+
+test('D07 / D08 carry structured data (chart, company, user or role, gained list), not only a message', () => {
+  const moved = edit(b => { chart(b).members.find(x => x.userId === 'v-sales-jongno-1').unitId = 'br_gangnam'; });
+  const d07 = m.diffBundles(base, moved).find(i => i.code === 'D07_ORG_WIDENED' && i.path.endsWith('[v-br-gangnam-head]'));
+  assert.deepEqual(d07.data, { chart: 'virtual_domestic_sales', companyId: -1, user: 'v-br-gangnam-head', gained: ['v-sales-jongno-1'] });
+  const role = edit(b => { profile(b, 'sales').roles.push('ANYONE'); });
+  const d08 = m.diffBundles(base, role).find(i => i.code === 'D08_GRANT_WIDENED');
+  assert.equal(d08.data.role, 'ANYONE');
+  assert.ok(Array.isArray(d08.data.gained) && d08.data.gained.length > 0);
+});
+
+test('org ids and role names with brackets, commas or spaces are rejected by validation', () => {
+  const withFile = (rel, change) => files.map(f => {
+    if (f.path !== `metadata/${rel}`) return f;
+    const v = JSON.parse(f.content); change(v); return { path: f.path, content: JSON.stringify(v) };
+  });
+  const ORG = 'security/org/virtual_domestic_sales.json';
+  for (const bad of ['zz(evil', 'a)b', 'a, b', 'a b', 'a[b]', '한글']) {
+    for (const list of [
+      withFile(ORG, v => { v.members.push({ userId: bad, unitId: 'br_gangnam' }); }),
+      withFile(ORG, v => { v.units[0].headUserId = bad; }),
+      withFile(ORG, v => { v.units.push({ id: bad, name: 'x', parentId: v.units[0].id }); }),
+      withFile('security/profiles.json', v => { v.items[0].roles.push(bad); }),
+    ]) {
+      const out = m.bundleFromFiles(list);
+      const issues = out.bundle ? [...out.issues, ...m.validateBundle(out.bundle)] : out.issues;
+      assert.ok(issues.some(i => i.severity === 'error'), bad);
+    }
+  }
+});

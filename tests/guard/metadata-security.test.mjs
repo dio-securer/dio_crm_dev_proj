@@ -76,6 +76,7 @@ test('the exact org chart declarations excuse it and are shown in the summary', 
 test('an org chart declaration with another gained list, user or file does not excuse it and is reported', () => {
   for (const change of [d => ({ ...d, to: { ...d.to, gained: `${d.to.gained}, someone-else` } }),
     d => ({ ...d, to: { ...d.to, user: 'nobody' } }),
+    d => ({ ...d, to: { ...d.to, companyId: '7' } }),
     d => ({ ...d, file: 'metadata/security/org/other_chart.json' })]) {
     box.reset();
     moveMember();
@@ -91,7 +92,7 @@ test('an org chart declaration with another gained list, user or file does not e
 
 test('an unused org chart declaration fails', () => {
   box.reset();
-  declare({ rule: 'P6', file: ORG, from: null, to: { kind: 'org-widened', user: 'nobody', gained: 'someone' }, ...why });
+  declare({ rule: 'P6', file: ORG, from: null, to: { kind: 'org-widened', companyId: '-1', user: 'nobody', gained: 'someone' }, ...why });
   const run = protect();
   assert.equal(run.status, 1, run.stdout + run.stderr);
   assert.equal(result().badDeclarations.length, 1);
@@ -119,8 +120,10 @@ test('security declarations with a wrong shape are refused as malformed', () => 
   for (const entry of [
     { rule: 'P6', file: ORG, from: null, to: { kind: 'all' }, ...why },
     { rule: 'P6', file: ORG, from: null, to: { kind: 'org-widened', user: 'a' }, ...why },
-    { rule: 'P6', file: ORG, from: null, to: { kind: 'org-widened', user: 'a', gained: 'b', extra: 'c' }, ...why },
-    { rule: 'P6', file: ORG, from: 'x', to: { kind: 'org-widened', user: 'a', gained: 'b' }, ...why },
+    { rule: 'P6', file: ORG, from: null, to: { kind: 'org-widened', user: 'a', gained: 'b' }, ...why },
+    { rule: 'P6', file: ORG, from: null, to: { kind: 'org-widened', companyId: 'x', user: 'a', gained: 'b' }, ...why },
+    { rule: 'P6', file: ORG, from: null, to: { kind: 'org-widened', companyId: '-1', user: 'a', gained: 'b', extra: 'c' }, ...why },
+    { rule: 'P6', file: ORG, from: 'x', to: { kind: 'org-widened', companyId: '-1', user: 'a', gained: 'b' }, ...why },
     { rule: 'P6', file: PROFILES, from: null, to: { kind: 'org-widened', user: 'a', gained: 'b' }, ...why },
     { rule: 'P6', file: 'metadata/objects/lead/access.json', from: null, to: { kind: 'grant-widened', role: 'a', gained: 'b' }, ...why },
     { rule: 'P6', file: 'metadata/security/permission-sets.json', from: null, to: { kind: 'grant-widened', role: 'a', gained: 'b' }, ...why },
@@ -131,4 +134,32 @@ test('security declarations with a wrong shape are refused as malformed', () => 
     assert.equal(run.status, 2, JSON.stringify(entry) + run.stdout + run.stderr);
     assert.match(run.stdout + run.stderr, /P6 은 권한 넓히기만 선언합니다/);
   }
+});
+
+test('a user id with a bracket cannot make a declaration name fewer people: the chart is refused as unreadable', () => {
+  box.reset();
+  // The probe: a member whose id would end the bracketed list of a message, so a text-derived declaration named only part.
+  editJson(ORG, v => { const unit = v.members[0].unitId; v.members.push({ userId: 'zz(evil', unitId: unit }); });
+  let run = protect();
+  assert.equal(run.status, 1, run.stdout + run.stderr);
+  assert.equal(p6().status, 'FAIL');
+  assert.deepEqual(p6().violations.map(v => v.declare), [null]);
+  declare({ rule: 'P6', file: ORG, from: null, to: { kind: 'org-widened', companyId: '-1', user: 'x', gained: 'evil' }, ...why });
+  run = protect();
+  assert.equal(run.status, 1, run.stdout + run.stderr);
+  assert.equal(p6().status, 'FAIL');
+});
+
+test('a chart moved to another company is not excused by the declarations of its old company', () => {
+  box.reset();
+  const old = Object.entries(JSON.parse(fs.readFileSync(path.join(root, 'guard-raises.json'), 'utf8')).raises)
+    .map(([, entry]) => entry).filter(entry => entry.file === ORG);
+  assert.equal(old.length, 7);
+  editJson(ORG, v => { v.companyId = 7; });
+  declare(...old);
+  const run = protect();
+  assert.equal(run.status, 1, run.stdout + run.stderr);
+  assert.equal(p6().status, 'FAIL');
+  for (const d of p6().violations.map(v => v.declare)) assert.equal(d.to.companyId, '7');
+  assert.equal(result().badDeclarations.length, 7);
 });

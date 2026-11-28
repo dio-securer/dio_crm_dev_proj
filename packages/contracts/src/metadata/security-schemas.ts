@@ -3,8 +3,10 @@
 import { z } from 'zod';
 
 const lowerSnake = z.string().max(100).regex(/^[a-z][a-z0-9_]*$/);
-const key = z.string().min(1).max(100);
-const id = z.string().min(1).max(100);
+// Role names and org ids are repeated in declarations and messages: letters, digits, dot, underscore and hyphen only.
+const SAFE = /^[A-Za-z0-9._-]+$/;
+const key = z.string().min(1).max(100).regex(SAFE);
+const id = z.string().min(1).max(100).regex(SAFE);
 
 export const objectGrantSchema = z.object({ read: z.boolean().optional(), create: z.boolean().optional(), edit: z.boolean().optional(), delete: z.boolean().optional() }).strict();
 export const fieldGrantSchema = z.object({ read: z.boolean().optional(), edit: z.boolean().optional() }).strict();

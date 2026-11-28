@@ -11,26 +11,28 @@ const baseValue = () => undefined;
 const fail = text => ({ id, name, status: 'FAIL', violations: [{ file: METADATA_DIR, text, declare: null }], baseValue });
 const WIDENED = /^objects\[([a-z][a-z0-9_]*)\]\/access\/rules\[#(\d+)\]$/;
 
-const ORG_USER = /^orgCharts\[([a-z][a-z0-9_]*)\]\/users\[([^\]]+)\]$/;
-const ROLE = /^profiles\/roles\[([^\]]+)\]$/;
-/** The gained list as the message lists it: the last parenthesised part of the D07 / D08 message. */
-const gainedOf = item => [...item.message.matchAll(/\(([^()]*)\)/g)].at(-1)?.[1] || null;
+const SAFE = /^[A-Za-z0-9._-]+$/;
+const GAINED = /^[A-Za-z0-9._:*-]+$/;
+const texts = (list, pattern) => Array.isArray(list) && list.length > 0 && list.every(text => typeof text === 'string' && pattern.test(text));
 
-/** The declaration that excuses one widening issue, exactly; null for anything that cannot be declared. */
+/** The declaration that excuses one widening issue, exactly; null for anything that cannot be declared.
+ * D07 / D08 are built only from the issue's structured `data`, never from its message text. */
 function declareOf(item, head) {
   if (item.code === 'D05_ACCESS_WIDENED') {
     const hit = WIDENED.exec(item.path);
     const rule = hit ? head.objects.find(ob => ob.object.key === hit[1])?.access?.rules[Number(hit[2])] : undefined;
     return rule ? { rule: id, file: `${METADATA_DIR}objects/${hit[1]}/access.json`, from: null, to: { ...rule } } : null;
   }
-  const gained = item.code === 'D07_ORG_WIDENED' || item.code === 'D08_GRANT_WIDENED' ? gainedOf(item) : null;
-  if (!gained) return null;
+  const data = item.data;
+  if (!data || !texts(data.gained, GAINED)) return null;
+  const gained = data.gained.join(', ');
   if (item.code === 'D07_ORG_WIDENED') {
-    const hit = ORG_USER.exec(item.path);
-    return hit ? { rule: id, file: `${METADATA_DIR}security/org/${hit[1]}.json`, from: null, to: { kind: 'org-widened', user: hit[2], gained } } : null;
+    if (!/^[a-z][a-z0-9_]*$/.test(data.chart ?? '') || !Number.isInteger(data.companyId) || !SAFE.test(data.user ?? '')) return null;
+    const to = { kind: 'org-widened', companyId: String(data.companyId), user: data.user, gained };
+    return { rule: id, file: `${METADATA_DIR}security/org/${data.chart}.json`, from: null, to };
   }
-  const role = item.path === 'profiles' ? '*' : ROLE.exec(item.path)?.[1];
-  return role ? { rule: id, file: `${METADATA_DIR}security/profiles.json`, from: null, to: { kind: 'grant-widened', role, gained } } : null;
+  if (item.code !== 'D08_GRANT_WIDENED' || !(data.role === '*' || SAFE.test(data.role ?? ''))) return null;
+  return { rule: id, file: `${METADATA_DIR}security/profiles.json`, from: null, to: { kind: 'grant-widened', role: data.role, gained } };
 }
 
 /** The declared rule when the base already has it, so an unused P6 declaration is reported as already merged. */

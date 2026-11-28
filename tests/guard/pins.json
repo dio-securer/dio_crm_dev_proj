@@ -752,20 +752,20 @@
   "scripts/guard/lib/protect-metadata.mjs": {
    "values": {},
    "notPinned": [
-    "ORG_USER",
-    "ROLE",
+    "GAINED",
+    "SAFE",
     "WIDENED",
     "id",
     "name"
    ],
    "patterns": [
     "/^objects\\[([a-z][a-z0-9_]*)\\]\\/access\\/rules\\[#(\\d+)\\]$/",
-    "/^orgCharts\\[([a-z][a-z0-9_]*)\\]\\/users\\[([^\\]]+)\\]$/",
-    "/^profiles\\/roles\\[([^\\]]+)\\]$/",
-    "/\\(([^()]*)\\)/g"
+    "/^[A-Za-z0-9._-]+$/",
+    "/^[A-Za-z0-9._:*-]+$/",
+    "/^[a-z][a-z0-9_]*$/"
    ],
    "numbers": {
-    "2": 2
+    "2": 1
    }
   },
   "scripts/guard/lib/protect-tests.mjs": {
@@ -825,6 +825,7 @@
    "patterns": [
     "/^metadata\\/objects\\/[a-z][a-z0-9_]*\\/access\\.json$/",
     "/^metadata\\/security\\/org\\/[a-z][a-z0-9_]*\\.json$/",
+    "/^-?\\d+$/",
     "/^\\\\\\[/",
     "/\\\\\\]$/",
     "/^G\\d{2}$/",

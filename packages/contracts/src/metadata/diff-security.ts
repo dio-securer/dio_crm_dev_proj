@@ -38,7 +38,8 @@ function diffOrg(base: MetadataBundle, head: MetadataBundle, out: Issue[]): void
     for (const [user, now] of [...visibleByUser(chart)].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) {
       const old = was.get(user) ?? new Set<string>();
       const gained = [...now].filter(u => !old.has(u)).sort();
-      if (gained.length) out.push(issue('D07_ORG_WIDENED', `orgCharts[${chart.key}]/users[${user}]`, { user, gained: gained.join(', ') }));
+      if (gained.length) out.push(issue('D07_ORG_WIDENED', `orgCharts[${chart.key}]/users[${user}]`, { user, gained: gained.join(', ') },
+        { chart: chart.key, companyId: chart.companyId, user, gained }));
     }
   }
 }
@@ -69,14 +70,14 @@ function allowedFor(bundle: MetadataBundle, role: string, fieldsOf: (object: str
 
 function diffGrants(base: MetadataBundle, head: MetadataBundle, out: Issue[]): void {
   if (base.profiles === undefined) return;
-  if (head.profiles === undefined) { out.push(issue('D08_GRANT_WIDENED', 'profiles', { role: '*', gained: 'profiles.json' })); return; }
+  if (head.profiles === undefined) { out.push(issue('D08_GRANT_WIDENED', 'profiles', { role: '*', gained: 'profiles.json' }, { role: '*', gained: ['profiles.json'] })); return; }
   const fields = new Map(head.objects.map(ob => [ob.object.key, ob.object.fields.map(f => f.key)] as const));
   const fieldsOf = (o: string) => fields.get(o) ?? [];
   const roles = [...new Set(head.profiles.flatMap(p => p.roles))].sort();
   for (const role of roles) {
     const was = allowedFor(base, role, fieldsOf);
     const gained = [...allowedFor(head, role, fieldsOf)].filter(a => !was.has(a)).sort();
-    if (gained.length) out.push(issue('D08_GRANT_WIDENED', `profiles/roles[${role}]`, { role, gained: gained.join(', ') }));
+    if (gained.length) out.push(issue('D08_GRANT_WIDENED', `profiles/roles[${role}]`, { role, gained: gained.join(', ') }, { role, gained }));
   }
 }
 

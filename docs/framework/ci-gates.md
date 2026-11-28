@@ -90,7 +90,7 @@ P3 이 테스트 파일로 보는 것:
   예: `{ "rule": "P6", "file": "metadata/objects/lead/access.json", "from": null, "to": { "kind": "own", "ownerField": "owner_name" }, "reason": "...", "changeId": "F2-2" }`
 - P6 은 조직도 넓히기(D07)와 역할 권한 넓히기(D08)도 선언한다. 보호 검사 결과의 `declare` 를 그대로 옮긴다.
   - D07: 보는 사람이 늘어난 사용자 한 명당 항목 하나. `file` 은 `metadata/security/org/<키>.json`, `from` 은 `null`,
-    `to` 는 `{ "kind": "org-widened", "user": "<사용자>", "gained": "<새로 보게 된 사람, 쉼표로>" }`.
+    `to` 는 `{ "kind": "org-widened", "companyId": "<회사 번호, 글자로>", "user": "<사용자>", "gained": "<새로 보게 된 사람, 쉼표로>" }`.
   - D08: 할 수 있는 일이 늘어난 역할 하나당 항목 하나. `file` 은 `metadata/security/profiles.json`, `from` 은 `null`,
     `to` 는 `{ "kind": "grant-widened", "role": "<역할>", "gained": "<새로 할 수 있게 된 일, 쉼표로>" }`. 프로필 파일을 지우면 `role` 은 `*` 이다.
   - `gained` 는 검사가 적은 목록과 글자 그대로 같아야 한다. 한 사람이라도 다르면 맞지 않는 선언으로 실패한다.

@@ -4,7 +4,9 @@ import { CODE_TABLE_HEADER, ISSUE_MESSAGES } from './messages';
 
 export type Severity = 'error' | 'warning';
 export type IssueCode = keyof typeof ISSUE_MESSAGES;
-export interface Issue { code: IssueCode; severity: Severity; path: string; message: string }
+/** `data` carries the structured values of a widening (D07 / D08), so a declaration never has to be read out of the message. */
+export type IssueData = Record<string, string | number | string[]>;
+export interface Issue { code: IssueCode; severity: Severity; path: string; message: string; data?: IssueData }
 
 export const ISSUE_CODES: Record<IssueCode, { severity: Severity; check: string }> = {
   M01_SCHEMA_INVALID: { severity: 'error', check: 'validateBundle' },
@@ -61,9 +63,9 @@ export const ISSUE_CODES: Record<IssueCode, { severity: Severity; check: string 
   D08_GRANT_WIDENED: { severity: 'error', check: 'diffBundles' },
 };
 
-export function issue(code: IssueCode, path: string, params: Record<string, string | number | undefined> = {}): Issue {
+export function issue(code: IssueCode, path: string, params: Record<string, string | number | undefined> = {}, data?: IssueData): Issue {
   const message = ISSUE_MESSAGES[code].replace(/\{(\w+)\}/g, (_, name: string) => String(params[name] ?? '-'));
-  return { code, severity: ISSUE_CODES[code].severity, path, message };
+  return { code, severity: ISSUE_CODES[code].severity, path, message, ...(data ? { data } : {}) };
 }
 
 const cmp = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);

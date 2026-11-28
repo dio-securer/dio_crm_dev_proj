@@ -41,6 +41,7 @@
       "from": null,
       "to": {
         "kind": "org-widened",
+        "companyId": "-1",
         "user": "v-br-bundang-head",
         "gained": "v-sales-bundang-1"
       },
@@ -53,6 +54,7 @@
       "from": null,
       "to": {
         "kind": "org-widened",
+        "companyId": "-1",
         "user": "v-br-gangnam-head",
         "gained": "v-sales-gangnam-1, v-sales-gangnam-2"
       },
@@ -65,6 +67,7 @@
       "from": null,
       "to": {
         "kind": "org-widened",
+        "companyId": "-1",
         "user": "v-br-jongno-head",
         "gained": "v-sales-jongno-1"
       },
@@ -77,6 +80,7 @@
       "from": null,
       "to": {
         "kind": "org-widened",
+        "companyId": "-1",
         "user": "v-div-cap-1-head",
         "gained": "v-br-gangnam-head, v-br-jongno-head, v-sales-gangnam-1, v-sales-gangnam-2, v-sales-jongno-1"
       },
@@ -89,6 +93,7 @@
       "from": null,
       "to": {
         "kind": "org-widened",
+        "companyId": "-1",
         "user": "v-div-cap-2-head",
         "gained": "v-br-bundang-head, v-sales-bundang-1"
       },
@@ -101,6 +106,7 @@
       "from": null,
       "to": {
         "kind": "org-widened",
+        "companyId": "-1",
         "user": "v-dom-head",
         "gained": "v-br-bundang-head, v-br-gangnam-head, v-br-jongno-head, v-div-cap-1-head, v-div-cap-2-head, v-reg-cap-head, v-sales-bundang-1, v-sales-gangnam-1, v-sales-gangnam-2, v-sales-jongno-1"
       },
@@ -113,6 +119,7 @@
       "from": null,
       "to": {
         "kind": "org-widened",
+        "companyId": "-1",
         "user": "v-reg-cap-head",
         "gained": "v-br-bundang-head, v-br-gangnam-head, v-br-jongno-head, v-div-cap-1-head, v-div-cap-2-head, v-sales-bundang-1, v-sales-gangnam-1, v-sales-gangnam-2, v-sales-jongno-1"
       },

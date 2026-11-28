@@ -12,9 +12,10 @@ export const ACCESS_FILE = /^metadata\/objects\/[a-z][a-z0-9_]*\/access\.json$/;
 export const ORG_FILE = /^metadata\/security\/org\/[a-z][a-z0-9_]*\.json$/;
 export const PROFILES_FILE = 'metadata/security/profiles.json';
 const ONLY = (value, keys) => Object.keys(value).length === keys.length && keys.every(key => typeof value[key] === 'string' && value[key] !== '');
-/** D07: { kind: 'org-widened', user, gained } and D08: { kind: 'grant-widened', role, gained }, gained as the diff lists it. */
+/** D07: { kind: 'org-widened', companyId, user, gained } and D08: { kind: 'grant-widened', role, gained }, gained as the diff lists it. */
 const isObject = value => !!value && typeof value === 'object' && !Array.isArray(value);
-const isOrgWidening = value => isObject(value) && value.kind === 'org-widened' && ONLY(value, ['kind', 'user', 'gained']);
+const isOrgWidening = value => isObject(value) && value.kind === 'org-widened' && ONLY(value, ['kind', 'companyId', 'user', 'gained'])
+  && /^-?\d+$/.test(value.companyId);
 const isGrantWidening = value => isObject(value) && value.kind === 'grant-widened' && ONLY(value, ['kind', 'role', 'gained']);
 /** Whether a P6 entry has one of the three declarable shapes. */
 export function isP6Shape(entry) {
@@ -63,7 +64,7 @@ export function parseRaises(text) {
     if (/[*?[\]{}]/.test(entry.file)) bad(`file 에 와일드카드를 쓸 수 없습니다: ${entry.file}`);
     if (entry.rule === 'P6' && !isP6Shape(entry)) {
       bad('P6 은 권한 넓히기만 선언합니다: 행 권한(D05)은 file 이 metadata/objects/<개체>/access.json, to 는 넓어진 규칙 그대로. '
-        + '조직도(D07)는 file 이 metadata/security/org/<키>.json, to 는 { kind: "org-widened", user, gained }. '
+        + '조직도(D07)는 file 이 metadata/security/org/<키>.json, to 는 { kind: "org-widened", companyId, user, gained }. '
         + '역할 권한(D08)은 file 이 metadata/security/profiles.json, to 는 { kind: "grant-widened", role, gained }. from 은 언제나 null.');
     }
     const values = 'from' in entry && 'to' in entry && isValue(entry.from) && isValue(entry.to);
