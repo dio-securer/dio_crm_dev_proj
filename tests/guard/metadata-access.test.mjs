@@ -76,7 +76,7 @@ test('a P6 declaration with a value in from, or a file that is not access.json, 
     declare(entry);
     const run = protect();
     assert.equal(run.status, 2, JSON.stringify(entry) + run.stdout + run.stderr);
-    assert.match(run.stdout + run.stderr, /P6 은 행 권한 넓히기\(D05\)만 선언합니다/);
+    assert.match(run.stdout + run.stderr, /P6 은 권한 넓히기만 선언합니다/);
   }
 });
 

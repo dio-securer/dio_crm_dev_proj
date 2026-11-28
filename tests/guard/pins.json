@@ -752,15 +752,20 @@
   "scripts/guard/lib/protect-metadata.mjs": {
    "values": {},
    "notPinned": [
+    "ORG_USER",
+    "ROLE",
     "WIDENED",
     "id",
     "name"
    ],
    "patterns": [
-    "/^objects\\[([a-z][a-z0-9_]*)\\]\\/access\\/rules\\[#(\\d+)\\]$/"
+    "/^objects\\[([a-z][a-z0-9_]*)\\]\\/access\\/rules\\[#(\\d+)\\]$/",
+    "/^orgCharts\\[([a-z][a-z0-9_]*)\\]\\/users\\[([^\\]]+)\\]$/",
+    "/^profiles\\/roles\\[([^\\]]+)\\]$/",
+    "/\\(([^()]*)\\)/g"
    ],
    "numbers": {
-    "2": 1
+    "2": 2
    }
   },
   "scripts/guard/lib/protect-tests.mjs": {
@@ -802,6 +807,11 @@
      "changeId"
     ],
     "MIN_REASON": 10,
+    "ORG_FILE": {
+     "$regex": "^metadata\\/security\\/org\\/[a-z][a-z0-9_]*\\.json$",
+     "flags": ""
+    },
+    "PROFILES_FILE": "metadata/security/profiles.json",
     "RAISES_FILE": "guard-raises.json",
     "RAISE_RULES": [
      "P1",
@@ -814,6 +824,7 @@
    "notPinned": [],
    "patterns": [
     "/^metadata\\/objects\\/[a-z][a-z0-9_]*\\/access\\.json$/",
+    "/^metadata\\/security\\/org\\/[a-z][a-z0-9_]*\\.json$/",
     "/^\\\\\\[/",
     "/\\\\\\]$/",
     "/^G\\d{2}$/",

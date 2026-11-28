@@ -1,5 +1,6 @@
 // P6: backward compatibility of metadata/ against the base (ADR 0004). Both sides are read with the HEAD validator.
-// Only a row access widening (D05) can be declared, rule by rule, after a person approves it (ADR 0007).
+// Only a widening of access can be declared, one by one, after a person approves it (ADR 0007): a row rule (D05), a user of
+// an org chart who now sees more people (D07) or a role allowed more actions (D08).
 // Everything else cannot: removing or renaming a field takes a deprecation first, and unreadable metadata is never excused.
 import { METADATA_DIR, isMetadataContent, issueText, loadMetamodel } from './metamodel.mjs';
 import { canonical } from './raises.mjs';
@@ -10,11 +11,26 @@ const baseValue = () => undefined;
 const fail = text => ({ id, name, status: 'FAIL', violations: [{ file: METADATA_DIR, text, declare: null }], baseValue });
 const WIDENED = /^objects\[([a-z][a-z0-9_]*)\]\/access\/rules\[#(\d+)\]$/;
 
-/** The declaration that excuses one D05 issue: the object's access.json and the widened head rule, exactly. */
+const ORG_USER = /^orgCharts\[([a-z][a-z0-9_]*)\]\/users\[([^\]]+)\]$/;
+const ROLE = /^profiles\/roles\[([^\]]+)\]$/;
+/** The gained list as the message lists it: the last parenthesised part of the D07 / D08 message. */
+const gainedOf = item => [...item.message.matchAll(/\(([^()]*)\)/g)].at(-1)?.[1] || null;
+
+/** The declaration that excuses one widening issue, exactly; null for anything that cannot be declared. */
 function declareOf(item, head) {
-  const hit = item.code === 'D05_ACCESS_WIDENED' ? WIDENED.exec(item.path) : null;
-  const rule = hit ? head.objects.find(ob => ob.object.key === hit[1])?.access?.rules[Number(hit[2])] : undefined;
-  return rule ? { rule: id, file: `${METADATA_DIR}objects/${hit[1]}/access.json`, from: null, to: { ...rule } } : null;
+  if (item.code === 'D05_ACCESS_WIDENED') {
+    const hit = WIDENED.exec(item.path);
+    const rule = hit ? head.objects.find(ob => ob.object.key === hit[1])?.access?.rules[Number(hit[2])] : undefined;
+    return rule ? { rule: id, file: `${METADATA_DIR}objects/${hit[1]}/access.json`, from: null, to: { ...rule } } : null;
+  }
+  const gained = item.code === 'D07_ORG_WIDENED' || item.code === 'D08_GRANT_WIDENED' ? gainedOf(item) : null;
+  if (!gained) return null;
+  if (item.code === 'D07_ORG_WIDENED') {
+    const hit = ORG_USER.exec(item.path);
+    return hit ? { rule: id, file: `${METADATA_DIR}security/org/${hit[1]}.json`, from: null, to: { kind: 'org-widened', user: hit[2], gained } } : null;
+  }
+  const role = item.path === 'profiles' ? '*' : ROLE.exec(item.path)?.[1];
+  return role ? { rule: id, file: `${METADATA_DIR}security/profiles.json`, from: null, to: { kind: 'grant-widened', role, gained } } : null;
 }
 
 /** The declared rule when the base already has it, so an unused P6 declaration is reported as already merged. */
