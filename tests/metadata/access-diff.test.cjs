@@ -59,6 +59,42 @@ test('renaming the owner field and keeping the old name as an alias is not a wid
   assert.deepEqual(codes(withRules([own]), dropped).filter(c => c.startsWith('D05')), [W(0)]);
 });
 
+test('an existing field that takes the removed owner field\'s name as an alias is another field: D05, and the removal is D01', () => {
+  // base: own(name). head: field `name` removed, the existing field `phone` gets aliases ['name']. Ownership would move from name's column to phone's.
+  const steal = rule => variant(b => {
+    const o = obj(b, 'lead').object; o.fields = o.fields.filter(f => f.key !== 'name');
+    field(b, 'lead', 'phone').aliases = ['name'];
+    for (const s of obj(b, 'lead').screens) s.fields.fields = s.fields.fields.filter(f => f.key !== 'name');
+    obj(b, 'lead').access = { entity: 'lead', rules: [rule] };
+  });
+  const REMOVED = 'D01_REMOVED_WITHOUT_DEPRECATION objects[lead]/object/fields[name]';
+  for (const rule of [own, { kind: 'own', ownerField: 'phone' }]) {
+    const found = codes(withRules([own]), steal(rule));
+    assert.ok(found.includes(W(0)), `no D05 for ${rule.ownerField}: ${found}`);
+    assert.ok(found.includes(REMOVED), `no D01 for ${rule.ownerField}: ${found}`);
+    assert.ok(!found.some(c => c.startsWith('D03')), `followed as a rename: ${found}`);
+  }
+  // Even when the old field was deprecated first (its removal is allowed), the rule does not follow the name to phone.
+  const deprecatedBase = variant(b => { field(b, 'lead', 'name').deprecated = { since: '2026-01-01' }; obj(b, 'lead').access = { entity: 'lead', rules: [own] }; });
+  assert.deepEqual(codes(deprecatedBase, steal(own)), [W(0)]);
+  // A head field whose key was an alias in the base is not "new" either.
+  const aliasBase = variant(b => { field(b, 'lead', 'phone').aliases = ['tel']; obj(b, 'lead').access = { entity: 'lead', rules: [own] }; });
+  const viaAlias = variant(b => {
+    const o = obj(b, 'lead').object; o.fields = o.fields.filter(f => f.key !== 'name');
+    const p = field(b, 'lead', 'phone'); p.key = 'tel'; p.aliases = ['phone', 'name'];
+    for (const s of obj(b, 'lead').screens) s.fields.fields = s.fields.fields.filter(f => f.key !== 'name');
+    obj(b, 'lead').access = { entity: 'lead', rules: [own] };
+  });
+  assert.ok(codes(aliasBase, viaAlias).includes(W(0)));
+  // Two new fields both claiming the old name: neither is followed.
+  const twice = variant(b => {
+    const o = obj(b, 'lead').object, f = field(b, 'lead', 'name'); f.key = 'title'; f.aliases = ['name'];
+    o.fields.push({ ...f, key: 'title2', aliases: ['name'] });
+    obj(b, 'lead').access = { entity: 'lead', rules: [{ kind: 'own', ownerField: 'title' }] };
+  });
+  assert.ok(codes(withRules([own]), twice).includes(W(0)));
+});
+
 test('a field named by its alias is the same field', () => {
   const head = variant(b => { field(b, 'lead', 'name').aliases = ['title']; obj(b, 'lead').access = { entity: 'lead', rules: [{ kind: 'own', ownerField: 'title' }] }; });
   assert.deepEqual(codes(withRules([own]), head), []);

@@ -3,7 +3,7 @@ import { Issue, issue, sortIssues } from './issues';
 import { FieldDef, MetadataBundle, ObjectBundle } from './schemas';
 import { analyzeBundle } from './validate';
 import { KIND_LABELS } from './messages';
-import { diffAccess } from './diff-access';
+import { continuedField, diffAccess } from './diff-access';
 
 /**
  * Type changes that keep every stored value valid and every reader working:
@@ -14,14 +14,13 @@ import { diffAccess } from './diff-access';
 export const SAFE_TYPE_WIDENINGS: readonly (readonly [string, string])[] = [['integer', 'decimal'], ['date', 'datetime']];
 const safe = (from: string, to: string) => SAFE_TYPE_WIDENINGS.some(([a, b]) => a === from && b === to);
 
-function findRenamed<T extends { key: string; aliases: string[] }>(list: T[], key: string) { return list.find(x => x.aliases.includes(key)); }
-
 function diffFields(base: ObjectBundle, head: ObjectBundle, path: string, out: Issue[]) {
-  const headKeys = new Set(head.object.fields.map(f => f.key)), baseKeys = new Set(base.object.fields.map(f => f.key));
+  const baseKeys = new Set(base.object.fields.map(f => f.key));
   const added = head.object.fields.filter(f => !baseKeys.has(f.key));
   base.object.fields.forEach(f => {
     const p = `${path}/object/fields[${f.key}]`;
-    const now: FieldDef | undefined = headKeys.has(f.key) ? head.object.fields.find(x => x.key === f.key) : findRenamed(head.object.fields, f.key);
+    // A rename is followed only to a field that is new in the head; an existing field taking the old name as an alias is a removal.
+    const now: FieldDef | undefined = continuedField(base, head, f.key);
     if (now) { if (now.type !== f.type && !safe(f.type, now.type)) out.push(issue('D03_TYPE_CHANGED', `${p}/type`, { key: f.key, from: f.type, to: now.type })); return; }
     if (f.deprecated) return;
     const guess = added.find(a => a.type === f.type);
