@@ -17,8 +17,9 @@ export function errorText(model: Pick<EngineUiModel, 'texts'>, code: string): st
 
 export const fieldOf = (model: EngineUiModel, key: string): UiField | undefined => model.fields.find(f => f.key === key);
 
+const DAY = /^\d{4}-\d{2}-\d{2}$/;
 export interface DisplayOptions { timeZone?: string }
-/** A stored value as the user reads it: code labels, yes / no, numbers and date-times in the model's language. */
+/** A stored value as the user reads it: code labels, yes / no, numbers, dates and date-times in the model's language. */
 export function displayValue(model: EngineUiModel, field: UiField | undefined, value: FieldValue | undefined, options: DisplayOptions = {}): string {
   if (value === null || value === undefined || value === '') return '';
   if (!field) return String(value);
@@ -26,6 +27,12 @@ export function displayValue(model: EngineUiModel, field: UiField | undefined, v
     case 'enum': return field.options?.find(o => o.code === value)?.label ?? String(value);
     case 'boolean': return textOf(model, value ? TEXT.yes : TEXT.no);
     case 'integer': case 'decimal': return typeof value === 'number' ? new Intl.NumberFormat(model.locale, { maximumFractionDigits: 18 }).format(value) : String(value);
+    case 'date': {
+      // A calendar day has no time zone: it is read and written as UTC so the day never shifts.
+      const text = String(value), at = DAY.test(text) ? new Date(`${text}T00:00:00.000Z`) : new Date(NaN);
+      if (Number.isNaN(at.getTime())) return text;
+      return new Intl.DateTimeFormat(model.locale, { dateStyle: 'medium', timeZone: 'UTC' }).format(at);
+    }
     case 'datetime': {
       const at = new Date(String(value));
       if (Number.isNaN(at.getTime())) return String(value);

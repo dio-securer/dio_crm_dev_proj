@@ -23,7 +23,11 @@ describe('value display', () => {
     expect([displayValue(contact, f('vip'), true), displayValue(contact, f('vip'), false)]).toEqual(['Yes', 'No']);
     expect(displayValue(contact, f('visits'), 1200)).toBe('1,200');
     expect(displayValue(contact, f('amount'), 1234.5)).toBe('1,234.5');
-    expect(displayValue(contact, f('born_on'), '1990-02-03')).toBe('1990-02-03');
+    expect(displayValue(contact, f('born_on'), '1990-02-03')).toBe('Feb 3, 1990');
+    expect(displayValue(uiModel('contact', 'ko-KR'), f('born_on'), '1990-02-03')).toBe('1990. 2. 3.');
+    // A day is a day: the first and the last one are not moved by any time zone, and text that is not a day stays as it is.
+    expect([displayValue(contact, f('born_on'), '0001-01-01'), displayValue(contact, f('born_on'), '9999-12-31')]).toEqual(['Jan 1, 1', 'Dec 31, 9999']);
+    expect([displayValue(contact, f('born_on'), '1990-02-30x'), displayValue(contact, f('born_on'), '1990-13-45'), displayValue(contact, f('born_on'), '1990-02-03T10:00:00Z')]).toEqual(['1990-02-30x', '1990-13-45', '1990-02-03T10:00:00Z']);
     expect(displayValue(contact, f('met_at'), '2026-11-28T01:02:00.000Z', { timeZone: 'UTC' })).toMatch(/^Nov 28, 2026, 1:02\sAM$/);
     expect(displayValue(contact, f('met_at'), '2026-11-28T01:02:00.000Z', { timeZone: 'Asia/Seoul' })).toMatch(/10:02\sAM$/);
     expect(displayValue(contact, f('met_at'), 'not a date')).toBe('not a date');

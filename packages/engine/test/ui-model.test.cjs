@@ -72,6 +72,29 @@ test('a field that some screen shows read-only is read-only for the form, as the
   assert.equal(ui.fields.find(f => f.key === 'sido').readOnly, false);
 });
 
+test('a system field is read-only whatever the screens say; an ordinary field no screen locks is not', () => {
+  const ui = buildUiModel(load(), 'lead', 'en-US');
+  const system = ui.fields.filter(f => f.system).map(f => f.key);
+  assert.deepEqual(system, ['updated_at']);
+  for (const f of ui.fields) if (f.system) assert.equal(f.readOnly, true, f.key);
+  // Even on a screen that places it as writable, the system field stays read-only for the form.
+  const files = editJson(readMetadata(), 'metadata/objects/lead/screens/detail.json', d => { for (const f of d.fields.fields) f.readOnly = false; });
+  const open = buildUiModel(load(files), 'lead', 'en-US');
+  assert.equal(open.fields.find(f => f.key === 'updated_at').readOnly, true);
+  assert.equal(open.fields.find(f => f.key === 'hospital_name').readOnly, false);
+});
+
+test('an enum field offers only the active codes, in their order; the others stay out of the options', () => {
+  const all = buildUiModel(load(), 'lead', 'en-US').fields.find(f => f.key === 'status').options.map(o => o.code);
+  assert.ok(all.includes('FIRST_VISIT') && all.length > 2);
+  const files = editJson(readMetadata(), 'metadata/codes/lead_status.json', d => { d.values.find(v => v.code === 'FIRST_VISIT').active = false; });
+  const ui = buildUiModel(load(files), 'lead', 'en-US');
+  const options = ui.fields.find(f => f.key === 'status').options;
+  assert.deepEqual(options.map(o => o.code), all.filter(c => c !== 'FIRST_VISIT'));
+  assert.ok(!JSON.stringify(options).includes('FIRST_VISIT'));
+  assert.equal(options[0].label, term('en-US', 'lead', 'lead.status.NEW'));
+});
+
 test('related lists come from reference fields of other objects that point here (deprecated ones left out)', () => {
   const model = load([...readMetadata(), ...visit]);
   assert.deepEqual(buildUiModel(model, 'lead', 'en-US').related, [{ object: 'visit', field: 'lead_ref', label: 'Key person', fieldLabel: 'Lead' }]);

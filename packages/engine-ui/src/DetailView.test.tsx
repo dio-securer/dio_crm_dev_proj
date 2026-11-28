@@ -40,7 +40,7 @@ describe('generic detail: fixture object with every field type', () => {
     expect(markup).not.toContain('hidden-value');
     expect(markup).toContain('<dt>EN amount</dt><dd>1,234.5</dd>');
     expect(markup).toContain('<dt>EN vip</dt><dd>Yes</dd>');
-    expect(markup).toContain('<dt>EN born_on</dt><dd>1990-02-03</dd>');
+    expect(markup).toContain('<dt>EN born_on</dt><dd>Feb 3, 1990</dd>');
     expect(markup).toContain('grid-template-columns:repeat(3, minmax(0, 1fr))');
     const first = html(<DetailView model={contact} record={CONTACT} navigate={noop} />);
     expect(cells(first)).toEqual(['name', 'account_ref', 'grade', 'visits']);

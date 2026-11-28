@@ -8,11 +8,16 @@ export type InputValue = string | boolean;
 export type FormState = Record<string, InputValue>;
 
 const pad = (n: number, width = 2) => String(n).padStart(width, '0');
-/** An ISO instant as the value of a datetime-local input (the user's own time zone, to the minute). */
+/**
+ * An ISO instant as the value of a datetime-local input, in the user's own time zone. Seconds and milliseconds are
+ * written only when they are not zero, so the instant always comes back exactly (old dates have zone offsets with seconds).
+ */
 export function toLocalInput(iso: string): string {
   const at = new Date(iso);
   if (Number.isNaN(at.getTime())) return '';
-  return `${pad(at.getFullYear(), 4)}-${pad(at.getMonth() + 1)}-${pad(at.getDate())}T${pad(at.getHours())}:${pad(at.getMinutes())}`;
+  const seconds = at.getSeconds(), ms = at.getMilliseconds();
+  const tail = ms !== 0 ? `:${pad(seconds)}.${pad(ms, 3)}` : seconds !== 0 ? `:${pad(seconds)}` : '';
+  return `${pad(at.getFullYear(), 4)}-${pad(at.getMonth() + 1)}-${pad(at.getDate())}T${pad(at.getHours())}:${pad(at.getMinutes())}${tail}`;
 }
 
 export function toInput(field: UiField, value: FieldValue | undefined): InputValue {

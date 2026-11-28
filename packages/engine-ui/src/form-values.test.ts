@@ -21,13 +21,18 @@ describe('input values', () => {
     expect([fromInput(f('visits'), '12abc'), fromInput(f('amount'), '1,5'), fromInput(f('met_at'), 'soon')]).toEqual(['12abc', '1,5', 'soon']);
   });
 
-  it('keeps a date-time through the local input and back (to the minute), whatever the time zone', () => {
-    for (const iso of ['2026-11-28T01:02:00.000Z', '1000-01-01T00:00:00.000Z', '2024-02-29T23:59:00.000Z']) {
+  it('keeps a date-time through the local input and back exactly, whatever the time zone', () => {
+    for (const iso of ['2026-11-28T01:02:00.000Z', '1000-01-01T00:00:00.000Z', '2024-02-29T23:59:00.000Z', '2026-11-28T01:02:03.000Z', '2026-11-28T01:02:03.004Z', '1000-01-01T00:00:00.001Z', '9999-12-30T12:00:00.000Z']) {
       const local = toLocalInput(iso);
-      expect(local).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/);
+      expect(local).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{3})?)?$/);
       expect(fromInput(f('met_at'), local)).toBe(iso);
     }
     expect(toLocalInput('junk')).toBe('');
+  });
+
+  it('writes whole minutes without seconds, as the input shows them', () => {
+    const at = new Date(2026, 10, 28, 9, 5, 0, 0), withSeconds = new Date(2026, 10, 28, 9, 5, 7, 0), withMs = new Date(2026, 10, 28, 9, 5, 7, 30);
+    expect([toLocalInput(at.toISOString()), toLocalInput(withSeconds.toISOString()), toLocalInput(withMs.toISOString())]).toEqual(['2026-11-28T09:05', '2026-11-28T09:05:07', '2026-11-28T09:05:07.030']);
   });
 });
 
