@@ -18,6 +18,7 @@
 | `ACTION` | `metadata/objects/<개체>/actions.json` | R01, R02, R04, R07, R08 |
 | `RULE` | `metadata/objects/<개체>/rules.json` | R01, R02, R04, R07, R08, R10 |
 | `WORKFLOW` | `metadata/objects/<개체>/workflow.json` | R01, R02, R07 |
+| (새것) 행 권한 `ObjectAccess` | `metadata/objects/<개체>/access.json` | R01, R02, R07, R09, R11 |
 | `MENU` | `metadata/menu.json` | R04, R07, R08 |
 | `CODE` | `metadata/codes/<그룹>.json` | R04, R08 |
 | `TERM` | `metadata/terms/<언어>/<앞부분>.json`, `metadata/terms/semantic.json` | R04, R08 |
@@ -26,6 +27,12 @@
 | 덮어쓰기(SET, REMOVE_ITEM) | `metadata/overlays/<범위>/<범위 키>/<도메인>[.<개체>[.<화면>]].json` | M02, M03, 그리고 적용 뒤의 R 코드 |
 
 파일 자리와 이름의 자세한 규칙은 [`metadata/README.md`](../../metadata/README.md) 에 있다.
+
+## 행 권한 (F2-2)
+
+`access.json` 은 `{ entity, rules }` 다. 규칙은 `all`, `none`, `own`(ownerField), `members`(ownerField), `unit`(unitField) 이고, `none` 외에는 `permission` 을 붙일 수 있다.
+규칙은 하나라도 맞으면 보인다(OR). 파일이 없으면 아무 행도 보이지 않는다(닫힌 기본값). 엔진의 `RuntimeModel.rowAccess(개체)` 가 이 규칙을 읽어 평가기에 넘긴다. 결정의 이유는 [ADR 0007](adr/0007-row-access-in-metadata.md) 에 있다.
+ownerField·unitField 는 있는 필드여야 하고(R02) 글자나 참조 필드여야 한다(R11). `none` 은 혼자만 쓴다(R11). 덮어쓰기 대상은 아직 아니다.
 
 ## 필드 종류
 
@@ -46,7 +53,7 @@
 ## 닫힌 이름과 열린 이름
 
 - 닫힘(없는 이름이면 오류): 개체, 필드(별칭·`x_` 확장 필드 포함), 화면의 구역·탭, 문구 키(필요한 모든 언어), 코드 그룹, 참조 개체,
-  동작, 기능(`features.json`), 권한(admin `permissionCatalog`), 업무 상태, 상위 메뉴.
+  동작, 기능(`features.json`), 권한(admin `permissionCatalog`, 행 권한 규칙의 `permission` 포함), 업무 상태, 상위 메뉴.
 - 열림(아직 검사하지 않음): 메뉴의 `routeKey`, 확장 필드 `enumValues`, 승인·알림·번호 등 이 묶음에 없는 도메인.
 - 범위 연결: 국가(`HQ:KR`) 덮어쓰기는 그 템플릿(`HQ`) 덮어쓰기 위에 얹어 검사한다. 법인 덮어쓰기는 소속을 모르므로 기본 설정 위에만 얹는다.
 
@@ -91,6 +98,8 @@
 | `R10_OPTION_NOT_ALLOWED` | error | `validateBundle` | 필드 "{field}"({type}) 에는 "{option}" 을(를) 쓸 수 없습니다. |
 | `R10_REFERENCE_NEEDS_OBJECT` | error | `validateBundle` | 참조 필드 "{field}" 에 참조 대상 개체가 없습니다. |
 | `R10_REQUIRED_HIDDEN` | error | `validateBundle` | 필수 필드 "{field}" 이(가) 하나뿐인 입력 화면 "{screen}" 에 보이지 않습니다. |
+| `R11_ACCESS_FIELD_TYPE` | error | `validateBundle` | 행 권한 규칙의 필드 "{field}"({type}) 에는 사용자·조직 ID 를 담을 수 없습니다. 글자(text)나 참조(reference) 필드를 쓰세요. |
+| `R11_ACCESS_NONE_MIXED` | error | `validateBundle` | 행 권한 규칙 "none" 은 다른 규칙과 함께 둘 수 없습니다. 규칙은 하나라도 맞으면 보이므로 "none" 은 아무 뜻이 없습니다. |
 <!-- issue-codes:end -->
 
 ## 하위 호환의 허용 표

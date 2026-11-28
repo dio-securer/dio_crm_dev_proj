@@ -33,6 +33,8 @@ export const ISSUE_CODES: Record<IssueCode, { severity: Severity; check: string 
   R10_REFERENCE_NEEDS_OBJECT: { severity: 'error', check: 'validateBundle' },
   R10_OPERATOR_TYPE: { severity: 'error', check: 'validateBundle' },
   R10_REQUIRED_HIDDEN: { severity: 'error', check: 'validateBundle' },
+  R11_ACCESS_FIELD_TYPE: { severity: 'error', check: 'validateBundle' },
+  R11_ACCESS_NONE_MIXED: { severity: 'error', check: 'validateBundle' },
   F01_UNKNOWN_FILE: { severity: 'error', check: 'bundleFromFiles' },
   F02_MISPLACED_FILE: { severity: 'error', check: 'bundleFromFiles' },
   F03_INVALID_JSON: { severity: 'error', check: 'bundleFromFiles' },

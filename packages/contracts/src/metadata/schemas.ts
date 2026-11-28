@@ -54,6 +54,24 @@ export const objectDefSchema = z.object({
 }).strict();
 export type ObjectDef = z.infer<typeof objectDefSchema>;
 
+/**
+ * Row access (F2-2): which rows of an object an actor may see. Rules are ORed; an object without rules is closed.
+ * `permission`: the rule counts only for an actor who has that permission (closed universe: admin permissionCatalog).
+ */
+const accessPermission = { permission: key.optional() };
+export const rowAccessRuleSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('all'), ...accessPermission }).strict(),
+  z.object({ kind: z.literal('none') }).strict(),
+  z.object({ kind: z.literal('own'), ownerField: lowerSnake, ...accessPermission }).strict(),
+  z.object({ kind: z.literal('members'), ownerField: lowerSnake, ...accessPermission }).strict(),
+  z.object({ kind: z.literal('unit'), unitField: lowerSnake, ...accessPermission }).strict(),
+]);
+export type RowAccessRule = z.infer<typeof rowAccessRuleSchema>;
+export const objectAccessSchema = z.object({ entity: lowerSnake, rules: z.array(rowAccessRuleSchema).min(1) }).strict();
+export type ObjectAccess = z.infer<typeof objectAccessSchema>;
+/** Field types that can hold a user or unit id, so they can be an ownerField / unitField. */
+export const ACCESS_FIELD_TYPES: readonly string[] = ['text', 'reference'];
+
 /** One screen: the admin SCREEN payload and the admin FIELD payload whose sectionIds point into that screen. */
 export const screenEntrySchema = z.object({ screen: P.SCREEN, fields: P.FIELD }).strict();
 export type ScreenEntry = z.infer<typeof screenEntrySchema>;
@@ -65,6 +83,7 @@ export const objectBundleSchema = z.object({
   actions: P.ACTION.optional(),
   rules: P.RULE.optional(),
   workflow: P.WORKFLOW.optional(),
+  access: objectAccessSchema.optional(),
 }).strict();
 export type ObjectBundle = z.infer<typeof objectBundleSchema>;
 

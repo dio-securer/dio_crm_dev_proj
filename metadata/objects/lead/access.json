@@ -1,0 +1,13 @@
+{
+  "entity": "lead",
+  "rules": [
+    {
+      "kind": "own",
+      "ownerField": "owner_name"
+    },
+    {
+      "kind": "members",
+      "ownerField": "owner_name"
+    }
+  ]
+}

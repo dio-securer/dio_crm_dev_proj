@@ -1,0 +1,32 @@
+# ADR 0007. 행 권한 규칙은 설정에 두고, 엔진은 읽기만 한다
+
+## 상태
+
+채택 (2026-11-28, F2-2).
+
+## 맥락
+
+F2-1 에서 엔진에 행 권한 평가기(`canAccessRow`, `accessPredicate`)를 만들었다. 규칙은 코드에서 넘겨야 했다.
+회사마다 "누가 어떤 행을 보나"가 다른데, 이것을 코드에 적으면 회사별 분기(G06)가 되고, 주인이 설정으로 바꿀 수 없다.
+또 규칙에 없는 필드나 없는 권한을 적어도 아무도 잡지 않는다.
+
+## 결정
+
+1. 개체마다 `metadata/objects/<개체>/access.json` 에 `{ entity, rules }` 를 둔다. 규칙 형식(`RowAccessRule`)은 계약(`packages/contracts/src/metadata/schemas.ts`)에 한 번만 정의하고, 엔진 평가기는 그 타입을 그대로 쓴다.
+2. 규칙 종류는 `all`, `none`, `own`, `members`, `unit` 다섯 가지로 닫는다. `none` 외에는 선택적 `permission` 을 붙인다. 규칙끼리는 OR 이다.
+3. 파일이 없으면 규칙 없음, 곧 아무 행도 보이지 않는다(닫힌 기본값). `rules` 는 비울 수 없다(형식 오류 M01). 막으려면 `none` 을 쓴다.
+4. 검사: 없는 필드 R02, 없는 권한 R07(admin `permissionCatalog`), 개체 이름 불일치 R01, 별칭·폐기 예정 필드 사용 R09 경고,
+   사용자·조직 ID 를 담을 수 없는 필드(글자·참조가 아닌 것) R11_ACCESS_FIELD_TYPE, 다른 규칙과 섞인 `none` R11_ACCESS_NONE_MIXED.
+5. 엔진 `loadRuntimeModel` 이 규칙을 적재하고 `rowAccess(개체)` 로 내준다. 별칭으로 적은 필드는 정식 필드 키로 바꿔 내준다.
+6. 미룬 것: 덮어쓰기(overlay) 대상으로 행 권한을 여는 일, DB 조회 조건으로 바꾸는 일(F2-4), 리드 전용 권한(권한 목록 확장).
+
+## 결과
+
+- 좋은 점: 행 권한을 설정으로 바꾼다. 지어낸 필드·권한은 G12 에서 오류가 된다. 설정과 평가기의 형식이 갈라질 수 없다.
+- 치르는 값: 권한 목록에 lead.* 권한이 없어 리드 규칙(`own`, `members`)에는 아직 권한 조건을 붙이지 않았다.
+- 한계: 담당자 필드(`owner_name`)가 사용자 ID 를 담는지는 형식(글자)만 본다. 실제 값이 사용자 ID 인지는 확인하지 않음.
+
+## 기계 검사
+
+- 가드 규칙 G12 `metadata-valid`: `access.json` 도 `bundleFromFiles` + `validateBundle` 로 검사한다.
+- `tests/metadata/access.test.cjs`(계약), `packages/engine/test/access-config.test.cjs`(엔진).

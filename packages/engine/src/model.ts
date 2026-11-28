@@ -1,6 +1,6 @@
 // loadRuntimeModel: metadata file contents -> a validated, read-only model. No IO: the caller passes the files (G07).
 import { bundleFromFiles, validateBundle } from '@dio-crm/contracts/metadata';
-import type { FieldDef, Issue, MetadataBundle, MetadataFile, ObjectBundle } from '@dio-crm/contracts/metadata';
+import type { FieldDef, Issue, MetadataBundle, MetadataFile, ObjectBundle, RowAccessRule } from '@dio-crm/contracts/metadata';
 
 export interface CodeValue { code: string; labelKey: string; active: boolean; order: number }
 
@@ -13,6 +13,8 @@ export interface RuntimeModel {
   /** The translated text, or undefined when the key has no text in that locale. */
   term(termKey: string, locale: string): string | undefined;
   codeValues(group: string): CodeValue[];
+  /** Row access rules of access.json, field aliases resolved to field keys; [] (no access) when the object has none. */
+  rowAccess(objectKey: string): RowAccessRule[];
 }
 
 export interface RuntimeLoad { model?: RuntimeModel; issues: Issue[] }
@@ -42,6 +44,15 @@ function buildModel(bundle: MetadataBundle): RuntimeModel {
     object: key => objects.get(key),
     field: (objectKey, fieldKey) => fields.get(objectKey)?.get(fieldKey),
     term: (termKey, locale) => texts.get(`${locale}\u0000${termKey}`),
+    rowAccess: objectKey => (objects.get(objectKey)?.access?.rules ?? []).map(rule => canonical(rule, fields.get(objectKey))),
     codeValues: group => [...(groups.get(group) ?? [])].sort((a, b) => a.order - b.order),
   };
+}
+
+/** Rewrites an aliased ownerField / unitField to the field key, so rows are read by their real column. */
+function canonical(rule: RowAccessRule, byKey: Map<string, FieldDef> | undefined): RowAccessRule {
+  const real = (name: string) => byKey?.get(name)?.key ?? name;
+  if (rule.kind === 'own' || rule.kind === 'members') return { ...rule, ownerField: real(rule.ownerField) };
+  if (rule.kind === 'unit') return { ...rule, unitField: real(rule.unitField) };
+  return { ...rule };
 }

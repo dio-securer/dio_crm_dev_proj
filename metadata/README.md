@@ -34,6 +34,7 @@
 | `objects/<개체>/actions.json` | admin `ACTION` |
 | `objects/<개체>/rules.json` | admin `RULE` |
 | `objects/<개체>/workflow.json` | admin `WORKFLOW` |
+| `objects/<개체>/access.json` | 행 권한 규칙 `ObjectAccess` (없으면 아무 행도 보이지 않음) |
 | `menu.json` | admin `MENU` |
 | `features.json` | admin `FEATURE` |
 | `codes/<그룹 키>.json` | admin `CODE` 의 그룹 하나. 파일 이름은 그룹 `key` 와 같아야 합니다. |

@@ -27,6 +27,8 @@ export const ISSUE_MESSAGES = {
   R10_REFERENCE_NEEDS_OBJECT: '참조 필드 "{field}" 에 참조 대상 개체가 없습니다.',
   R10_OPERATOR_TYPE: '필드 "{field}"({type}) 은(는) 크기 비교("{op}")를 할 수 없습니다.',
   R10_REQUIRED_HIDDEN: '필수 필드 "{field}" 이(가) 하나뿐인 입력 화면 "{screen}" 에 보이지 않습니다.',
+  R11_ACCESS_FIELD_TYPE: '행 권한 규칙의 필드 "{field}"({type}) 에는 사용자·조직 ID 를 담을 수 없습니다. 글자(text)나 참조(reference) 필드를 쓰세요.',
+  R11_ACCESS_NONE_MIXED: '행 권한 규칙 "none" 은 다른 규칙과 함께 둘 수 없습니다. 규칙은 하나라도 맞으면 보이므로 "none" 은 아무 뜻이 없습니다.',
   F01_UNKNOWN_FILE: '알 수 없는 파일입니다. 정해진 자리에 있는 파일만 읽습니다.',
   F02_MISPLACED_FILE: '파일 자리와 내용이 맞지 않습니다: {detail}',
   F03_INVALID_JSON: 'JSON 으로 읽을 수 없습니다.',

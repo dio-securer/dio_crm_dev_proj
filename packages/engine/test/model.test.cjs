@@ -1,22 +1,8 @@
 // loadRuntimeModel against the real metadata/ folder and against broken input.
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
 const { loadRuntimeModel } = require('../dist');
-
-const repo = path.resolve(__dirname, '../../..');
-function readMetadata() {
-  const out = [];
-  const walk = dir => {
-    for (const e of fs.readdirSync(path.join(repo, dir), { withFileTypes: true })) {
-      const rel = `${dir}/${e.name}`;
-      if (e.isDirectory()) walk(rel); else out.push({ path: rel, content: fs.readFileSync(path.join(repo, rel), 'utf8') });
-    }
-  };
-  walk('metadata');
-  return out;
-}
+const { readMetadata } = require('./metadata-files.cjs');
 
 test('the real metadata/ loads into a model with no errors', () => {
   const { model, issues } = loadRuntimeModel(readMetadata());
@@ -25,6 +11,8 @@ test('the real metadata/ loads into a model with no errors', () => {
   assert.ok(model.objectKeys().includes('lead'));
   assert.equal(model.field('lead', 'status').enumCodeGroup, 'lead_status');
   assert.equal(model.field('lead', 'no_such_field'), undefined);
+  assert.equal(model.object('no_such'), undefined);
+  assert.deepEqual(model.codeValues('no_such'), []);
   assert.equal(model.term('lead.label', 'en-US'), 'Lead');
   assert.ok(model.term('lead.label', 'ko-KR'));
   assert.equal(model.term('lead.no_such_key', 'en-US'), undefined);

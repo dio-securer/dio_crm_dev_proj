@@ -1,6 +1,7 @@
 // Cross-reference checks inside one object bundle: data fields, screens, list views, actions, rules, workflow.
 import { Context, at, checkCondition, checkFeatureAndPermission, checkLabel, checkUnique, fieldIndex, useField } from './context';
 import { ObjectBundle, TEXT_TYPES } from './schemas';
+import { checkAccess } from './check-access';
 import { KIND_LABELS } from './messages';
 
 /** A create screen is one whose screenKey is `create` or starts with `create_` / `create-`. */
@@ -149,4 +150,5 @@ export function checkObject(ctx: Context, ob: ObjectBundle, index: number): void
   checkScreens(ctx, ob, base);
   checkViewsActions(ctx, ob, base);
   checkRulesWorkflow(ctx, ob, base);
+  checkAccess(ctx, ob, base);
 }

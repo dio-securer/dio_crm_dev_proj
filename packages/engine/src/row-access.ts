@@ -1,12 +1,9 @@
 // Row-level access: which rows an actor may see. Pure; rules are ORed; no rule means no access (closed by default).
 // accessPredicate gives the same answer as canAccessRow in a form a data layer can turn into a query (F2-4).
 
-export type RowAccessRule =
-  | { kind: 'all'; permission?: string }
-  | { kind: 'none' }
-  | { kind: 'own'; ownerField: string; permission?: string }
-  | { kind: 'members'; ownerField: string; permission?: string }
-  | { kind: 'unit'; unitField: string; permission?: string };
+import type { RowAccessRule } from '@dio-crm/contracts/metadata';
+/** The rule shape is the settings schema of access.json (contracts), so settings and evaluator cannot drift apart. */
+export type { RowAccessRule };
 
 export interface Actor {
   userId: string;
