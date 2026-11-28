@@ -19,7 +19,9 @@ async function call(method: string, path: string, auth?: string, body?: unknown)
     body: body === undefined ? undefined : JSON.stringify(body) });
   return { status: res.status, body: await res.json() };
 }
-const ADMIN = ['config.edit', 'config.publish'];
+const ADMIN = ['config.edit', 'config.publish.scope'];
+/** The built-in COMPANY_ADMIN grants: company-scope config.publish only, never config.publish.scope. */
+const COMPANY_ADMIN = ['config.edit', 'config.publish'];
 const V = '/api/engine/metadata/versions';
 
 beforeAll(async () => {
@@ -45,7 +47,9 @@ describe('metadata versions are admin work', () => {
     const id = (await call('POST', V, token('ad', ADMIN), { files: readMetadata() })).body.id;
     expect((await call('POST', `${V}/${id}/publish`, user)).status).toBe(403);
     expect((await call('POST', `${V}/${id}/publish`, token('ed', ['config.edit']))).status).toBe(403);
+    expect((await call('POST', `${V}/${id}/publish`, token('ca', COMPANY_ADMIN))).status).toBe(403);
     expect((await call('POST', `${V}/rollback`, user)).status).toBe(403);
+    expect((await call('POST', `${V}/rollback`, token('ca', COMPANY_ADMIN))).status).toBe(403);
     expect((await call('POST', `${V}/${id}/discard`, user)).status).toBe(403);
   });
 

@@ -86,5 +86,5 @@ API 자체는 백엔드에 있습니다: 끝점 `backend/src/modules/engine-api/
 `src/security/` 와 `src/ui-access.ts`, `src/versions/admin.ts`. 요구사항 문서 `salesforce/세일즈포스 어드민 화면,메뉴 카달로그.md` 의 10·12·13·38·39절에 맞췄습니다.
 - 역할 계층: `withHierarchy(actor, chart)` 가 조직도(ERP 조직 `parent_organization_id`)에서 사용자가 장인 조직의 하위 전체(조직, 소속 사원, 하위 장)를 `memberIds`·`unitIds` 에 더합니다. 기존 `members`·`unit` 규칙을 그대로 쓰므로 규칙 종류를 늘리거나 설정의 행 권한을 넓히지 않습니다. 조직도의 깨진 갈래(순환, 없는 상위, 중복)는 그 갈래만 닫습니다.
 - 개체·필드 권한: `canObject`, `fieldAccess` 는 기본 거부이고, 제한(`restrictions`)이 허용보다 먼저입니다. `validateWrite(…, access)` 는 읽을 수 없는 필드를 없는 필드처럼 `UNKNOWN_FIELD`, 읽기만 되는 필드를 `READ_ONLY_FIELD` 로 거부하고, 읽을 수 없는 필수 필드는 이름 없이 `NOT_PERMITTED` 로 거부합니다. `readableValues` 와 `restrictUiModel` 이 응답과 화면 모델에서 읽을 수 없는 필드, 그 필드로 거르거나 정렬하는 목록 보기, 자식 개체·필드를 읽을 수 없는 관련 목록을 뺍니다.
-- 관리자 권한: `AdminVersions` 는 stage·discard 에 `config.edit`, publish·rollback 에 `config.publish` 를 요구합니다(없으면 `FORBIDDEN`).
+- 관리자 권한: `AdminVersions` 는 stage·discard 에 `config.edit`, publish·rollback 에 플랫폼 전체 게시 권한 `config.publish.scope` 를 요구합니다(기본 COMPANY_ADMIN 에는 없음)(없으면 `FORBIDDEN`).
 - 한계: 권한 묶음과 조직도를 `metadata/` 에 두려면 메타모델(`packages/contracts/src/metadata/`, 보호 파일)에 파일 자리가 있어야 해서 아직 설정으로 읽지 않습니다. 호출자가 `actor.grants` 와 조직도를 넘길 때만 좁혀집니다.

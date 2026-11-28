@@ -99,18 +99,21 @@ test('the screen model loses unreadable fields and marks uneditable ones read-on
 test('only admins stage, publish, discard and roll back metadata versions', async () => {
   const svc = new e.AdminVersions(new e.MetadataVersions(e.memoryVersionStore(), () => '2026-11-28T00:00:00Z'));
   const user = { userId: 'u', permissions: ['config.read'] }, editor = { userId: 'ed', permissions: ['config.edit'] };
-  const admin = { userId: 'ad', permissions: ['config.edit', 'config.publish'] };
+  const admin = { userId: 'ad', permissions: ['config.edit', 'config.publish.scope'] };
+  const companyAdmin = { userId: 'ca', permissions: ['config.edit', 'config.publish'] };
   const forbidden = p => assert.rejects(p, x => x instanceof e.VersionError && x.code === 'FORBIDDEN');
   await forbidden(svc.stage(readMetadata(), user));
   await forbidden(svc.stage(readMetadata(), undefined));
   const id = await svc.stage(readMetadata(), editor);
   await forbidden(svc.publish(id, editor));
   await forbidden(svc.publish(id, user));
+  await forbidden(svc.publish(id, companyAdmin));
   await svc.publish(id, admin);
   const id2 = await svc.stage(editJson(readMetadata(), 'metadata/terms/en-US/lead.json', d => { d['lead.label'] = 'X'; }), admin);
   await svc.publish(id2, admin);
   await forbidden(svc.rollback(user));
   await forbidden(svc.rollback(editor));
+  await forbidden(svc.rollback(companyAdmin));
   assert.equal((await svc.rollback(admin)).id, id);
   await forbidden(svc.discard(await svc.stage(readMetadata(), admin), user));
 });

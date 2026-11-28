@@ -1,5 +1,6 @@
 // Admin-only metadata versions (F2-7): staging, publishing, rolling back and discarding are admin work.
 // Requirements: only the CRM admin customises screens; the server checks it, not only the screen.
+// Publish and rollback need the platform-wide publish permission (ADMIN_PERMISSIONS.publish).
 import type { MetadataFile } from '@dio-crm/contracts/metadata';
 import { ADMIN_PERMISSIONS } from '../security/permissions';
 import type { MetadataVersions } from './service';

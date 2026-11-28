@@ -54,5 +54,10 @@ export function readableValues<V>(values: Readonly<Record<string, V>>, access: F
   return out;
 }
 
-/** Permissions of the admin work on metadata (requirements: CRM_ADMIN manages screens). Keys are of the admin permission catalog. */
-export const ADMIN_PERMISSIONS = { edit: 'config.edit', publish: 'config.publish' } as const;
+/**
+ * Permissions of the admin work on metadata (requirements: CRM_ADMIN manages screens). Keys are of the admin permission catalog.
+ * Metadata versions are platform-wide (not per company), so publishing and rolling back need `config.publish.scope`,
+ * the catalog's beyond-one-company publish permission that the built-in COMPANY_ADMIN role does not hold
+ * (`config.publish` is the catalog's company-scope publish; see admin/configuration.ts).
+ */
+export const ADMIN_PERMISSIONS = { edit: 'config.edit', publish: 'config.publish.scope' } as const;
