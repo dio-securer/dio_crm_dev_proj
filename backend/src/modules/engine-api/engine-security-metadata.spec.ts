@@ -7,7 +7,7 @@ import { callerOf } from './actor';
 const token = (publicId: string, roles: string[], companyId = -1, more: Partial<JwtPayload> = {}): JwtPayload =>
   ({ sub: 1, publicId, loginId: publicId, name: publicId, companyId, roles, permissions: [], scope: 'SELF', ...more });
 const owners = (items: { values: Record<string, unknown> }[]) => items.map(i => i.values.owner_name).sort();
-const S = ['SALES'], M = ['MANAGER'];
+const S = ['SALES_REP'], M = ['BRANCH_MANAGER'];
 
 async function seeded() {
   const fx = await engineFixture(readMetadata({ security: true }));

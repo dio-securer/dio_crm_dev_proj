@@ -51,6 +51,8 @@ export const ISSUE_MESSAGES = {
   D04_DEPRECATED_NEW_USE: '폐기 예정 필드 "{field}" 을(를) 새로 쓰기 시작했습니다.',
   D05_ACCESS_WIDENED: '개체 "{entity}" 의 행 권한 규칙 "{rule}" 이(가) 전보다 더 많은 행을 보이게 합니다. 권한을 넓히는 변경은 따로 승인받아야 합니다.',
   D06_ALIAS_MERGES_FIELDS: '필드 "{key}" 의 이름과 옛 이름(alias)이 전에 있던 서로 다른 필드 둘 이상을 가리킵니다. 한 필드는 전의 필드 하나만 이어받을 수 있습니다.',
+  D07_ORG_WIDENED: '조직도에서 사용자 "{user}" 이(가) 전에는 못 보던 사람({gained})의 기록을 보게 됩니다. 권한을 넓히는 변경은 따로 승인받아야 합니다.',
+  D08_GRANT_WIDENED: '역할 "{role}" 이(가) 전에는 못 하던 일({gained})을 할 수 있게 됩니다. 권한을 넓히는 변경은 따로 승인받아야 합니다.',
 } as const;
 
 /** Names of the kinds of things a message can talk about (the {kind} parameter). */

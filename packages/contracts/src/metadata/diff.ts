@@ -4,6 +4,7 @@ import { FieldDef, MetadataBundle, ObjectBundle } from './schemas';
 import { analyzeBundle } from './validate';
 import { KIND_LABELS } from './messages';
 import { baseFieldOf, continuedField, diffAccess } from './diff-access';
+import { diffSecurity } from './diff-security';
 
 /**
  * Type changes that keep every stored value valid and every reader working:
@@ -58,7 +59,7 @@ function diffObjects(base: MetadataBundle, head: MetadataBundle, out: Issue[]) {
 }
 
 /**
- * Errors for changes that break existing data or references (D01-D03) or widen row access (D05), warnings for new uses of deprecated
+ * Errors for changes that break existing data or references (D01-D03) or widen row access (D05) or security settings (D07 org chart, D08 grants), warnings for new uses of deprecated
  * fields (D04). Additions are always fine. Both inputs are parsed first; a bundle that does not parse gives M01.
  */
 export function diffBundles(baseInput: unknown, headInput: unknown): Issue[] {
@@ -68,6 +69,7 @@ export function diffBundles(baseInput: unknown, headInput: unknown): Issue[] {
   if (!base.bundle || !head.bundle) return sortIssues(broken);
   const out: Issue[] = [];
   diffObjects(base.bundle, head.bundle, out);
+  diffSecurity(base.bundle, head.bundle, out);
   const before = new Set(base.uses.map(u => `${u.entity}\u0000${u.field}\u0000${u.site}`));
   const deprecated = new Set(head.bundle.objects.flatMap(o => o.object.fields.filter(f => f.deprecated).map(f => `${o.object.key}\u0000${f.key}`)));
   for (const u of head.uses) {

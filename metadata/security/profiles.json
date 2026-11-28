@@ -8,7 +8,7 @@
       ],
       "restrictions": [],
       "roles": [
-        "SALES"
+        "SALES_REP"
       ]
     },
     {
@@ -19,7 +19,8 @@
       ],
       "restrictions": [],
       "roles": [
-        "MANAGER"
+        "BRANCH_MANAGER",
+        "HQ_MANAGER"
       ]
     },
     {
@@ -30,8 +31,7 @@
       ],
       "restrictions": [],
       "roles": [
-        "COMPANY_ADMIN",
-        "PLATFORM_ADMIN"
+        "CRM_ADMIN"
       ]
     }
   ]

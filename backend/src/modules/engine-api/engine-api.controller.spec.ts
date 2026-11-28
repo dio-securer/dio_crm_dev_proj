@@ -14,7 +14,7 @@ let app: INestApplication;
 let base = '';
 let jwt: JwtService;
 const token = (publicId: string, companyId = 1, more: Record<string, unknown> = {}) =>
-  jwt.sign({ sub: 1, publicId, loginId: publicId, name: publicId, companyId, roles: ['SALES'], permissions: [], scope: 'SELF', ...more }, { secret: env.JWT_ACCESS_SECRET });
+  jwt.sign({ sub: 1, publicId, loginId: publicId, name: publicId, companyId, roles: ['SALES_REP'], permissions: [], scope: 'SELF', ...more }, { secret: env.JWT_ACCESS_SECRET });
 async function call(method: string, path: string, auth?: string, body?: unknown) {
   const res = await fetch(`${base}${path}`, { method, headers: { 'content-type': 'application/json', ...(auth ? { authorization: `Bearer ${auth}` } : {}) },
     body: body === undefined ? undefined : JSON.stringify(body) });

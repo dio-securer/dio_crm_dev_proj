@@ -33,7 +33,7 @@ export function editJson(files: File[], file: string, edit: (doc: any) => void):
 }
 export const ACCESS = 'metadata/objects/lead/access.json';
 export const caller = (userId: string, companyId = 1, more: Partial<Caller['actor']> = {}): Caller =>
-  ({ companyId, actor: { userId, permissions: [], roles: ['MANAGER'], memberIds: [], unitIds: [], ...more } });
+  ({ companyId, actor: { userId, permissions: [], roles: ['BRANCH_MANAGER'], memberIds: [], unitIds: [], ...more } });
 export const NOW = new Date('2026-11-28T01:02:03.000Z');
 
 export async function engineFixture(files: File[] | null = readMetadata()) {
