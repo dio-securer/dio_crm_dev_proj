@@ -45,6 +45,7 @@ export const ISSUE_CODES: Record<IssueCode, { severity: Severity; check: string 
   D03_TYPE_CHANGED: { severity: 'error', check: 'diffBundles' },
   D04_DEPRECATED_NEW_USE: { severity: 'warning', check: 'diffBundles' },
   D05_ACCESS_WIDENED: { severity: 'error', check: 'diffBundles' },
+  D06_ALIAS_MERGES_FIELDS: { severity: 'error', check: 'diffBundles' },
 };
 
 export function issue(code: IssueCode, path: string, params: Record<string, string | number | undefined> = {}): Issue {

@@ -39,6 +39,7 @@ export const ISSUE_MESSAGES = {
   D03_TYPE_CHANGED: '필드 "{key}" 의 형식이 {from} 에서 {to} 로 바뀌었습니다. 허용된 넓힘이 아닙니다.',
   D04_DEPRECATED_NEW_USE: '폐기 예정 필드 "{field}" 을(를) 새로 쓰기 시작했습니다.',
   D05_ACCESS_WIDENED: '개체 "{entity}" 의 행 권한 규칙 "{rule}" 이(가) 전보다 더 많은 행을 보이게 합니다. 권한을 넓히는 변경은 따로 승인받아야 합니다.',
+  D06_ALIAS_MERGES_FIELDS: '필드 "{key}" 의 이름과 옛 이름(alias)이 전에 있던 서로 다른 필드 둘 이상을 가리킵니다. 한 필드는 전의 필드 하나만 이어받을 수 있습니다.',
 } as const;
 
 /** Names of the kinds of things a message can talk about (the {kind} parameter). */

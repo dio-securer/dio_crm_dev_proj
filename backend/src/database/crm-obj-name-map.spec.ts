@@ -74,4 +74,23 @@ describe('physical names of record tables', () => {
     expect(() => resolveNames({ key: 'lead', fields: [field('a')] }, [rows[0], { scope: 'crm_obj_lead', name_key: 'a', physical: 'id' }], [])).toThrow('CRM_OBJ_BAD_IDENTIFIER');
     expect(resolveNames({ key: 'lead', fields: [field('a')] }, rows.slice(0, 2), ['F_A']).add).toEqual([]);
   });
+
+  it('refuses a field whose names mean two different columns (a merge), whichever alias comes first', async () => {
+    const rows = [{ scope: '', name_key: 'lead', physical: 'crm_obj_lead' }, { scope: 'crm_obj_lead', name_key: 'company_name', physical: 'f_company_name' }, { scope: 'crm_obj_lead', name_key: 'name', physical: 'f_name' }];
+    for (const aliases of [['company_name', 'name'], ['name', 'company_name']]) {
+      expect(() => resolveNames({ key: 'lead', fields: [field('cn2', aliases)] }, rows, [])).toThrow('CRM_OBJ_COLUMN_AMBIGUOUS crm_obj_lead.cn2');
+      // A table from before names were recorded: the existing columns say the same.
+      expect(() => resolveNames({ key: 'lead', fields: [field('cn2', aliases)] }, rows.slice(0, 1), ['f_company_name', 'f_name'])).toThrow('CRM_OBJ_COLUMN_AMBIGUOUS crm_obj_lead.cn2');
+    }
+    expect(() => resolveNames({ key: 'lead', fields: [field('name', ['company_name'])] }, rows, [])).toThrow('CRM_OBJ_COLUMN_AMBIGUOUS crm_obj_lead.name');
+    // One column under several names is not a merge: a rename chain resolves as before.
+    const chain = [...rows, { scope: 'crm_obj_lead', name_key: 'title', physical: 'f_name' }];
+    expect(resolveNames({ key: 'lead', fields: [field('subject', ['title', 'name'])] }, chain, []).shape.columns).toEqual({ subject: 'f_name' });
+    // Through the schema step: the publish that merges two fields makes no column and records no name.
+    const db = sqliteDb();
+    await applyObjectSchema(db, [{ key: 'lead', aliases: [], fields: [field('company_name'), field('name')] }]);
+    await expect(applyObjectSchema(db, [{ key: 'lead', aliases: [], fields: [field('cn2', ['company_name', 'name'])] }])).rejects.toThrow('CRM_OBJ_COLUMN_AMBIGUOUS');
+    expect(columnsOf(db, 'crm_obj_lead')).toEqual(['f_company_name', 'f_name']);
+    expect(namesOf(db).some((n: string) => n.includes('cn2'))).toBe(false);
+  });
 });

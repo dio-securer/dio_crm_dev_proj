@@ -1,6 +1,7 @@
 // D05: a row access rule set that lets anyone see more rows than before (ADR 0007). Narrowing is always fine.
 import { Issue, issue } from './issues';
 import { FieldDef, ObjectBundle, RowAccessRule } from './schemas';
+import { fieldNames, resolveByNames } from './field-names';
 
 /** The field a rule reads, by its real key (aliases resolved), or undefined for `all` / `none`. */
 function fieldOf(rule: RowAccessRule, ob: ObjectBundle): string | undefined {
@@ -10,17 +11,25 @@ function fieldOf(rule: RowAccessRule, ob: ObjectBundle): string | undefined {
 }
 
 /**
- * The head field that continues a base field (the same stored column): the field with the same key, or - when that key
- * is gone from the head - the one head field that lists it as an alias AND is new in the head (its key was neither a
- * key nor an alias of any base field). A field that already existed and merely takes over the old name as an alias is
- * NOT the same field: it has its own column and its own values (ADR 0004), so nothing may follow the old name to it.
+ * The base field a head field continues (the same stored column), by the storage's own resolution (field-names.ts):
+ * its key and aliases, looked up among the base's keys and aliases. A head field whose names mean more than one base
+ * field would merge two columns, so it continues none (`merged`).
+ */
+export function baseFieldOf(base: ObjectBundle, headField: FieldDef): { field: FieldDef | undefined; merged: boolean } {
+  const known = new Map<string, FieldDef>();
+  for (const f of base.object.fields) for (const name of fieldNames(f)) if (!known.has(name)) known.set(name, f);
+  const hit = resolveByNames(headField, name => known.get(name));
+  return { field: hit.ambiguous ? undefined : hit.value, merged: hit.ambiguous };
+}
+
+/**
+ * The head field that continues a base field: the one head field whose names resolve to that base field and to no
+ * other. Two head fields on one base field, or a head field that absorbs two base fields, continue nothing: the
+ * storage refuses both, and nothing (a row access rule above all) may follow a name into another field's values.
  */
 export function continuedField(base: ObjectBundle, head: ObjectBundle, baseKey: string): FieldDef | undefined {
-  const same = head.object.fields.find(f => f.key === baseKey);
-  if (same) return same;
-  const known = new Set(base.object.fields.flatMap(f => [f.key, ...f.aliases]));
-  const renamed = head.object.fields.filter(f => f.aliases.includes(baseKey) && !known.has(f.key));
-  return renamed.length === 1 ? renamed[0] : undefined;
+  const hits = head.object.fields.filter(f => baseFieldOf(base, f).field?.key === baseKey);
+  return hits.length === 1 ? hits[0] : undefined;
 }
 
 /**

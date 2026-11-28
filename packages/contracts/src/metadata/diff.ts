@@ -3,7 +3,7 @@ import { Issue, issue, sortIssues } from './issues';
 import { FieldDef, MetadataBundle, ObjectBundle } from './schemas';
 import { analyzeBundle } from './validate';
 import { KIND_LABELS } from './messages';
-import { continuedField, diffAccess } from './diff-access';
+import { baseFieldOf, continuedField, diffAccess } from './diff-access';
 
 /**
  * Type changes that keep every stored value valid and every reader working:
@@ -17,13 +17,17 @@ const safe = (from: string, to: string) => SAFE_TYPE_WIDENINGS.some(([a, b]) => 
 function diffFields(base: ObjectBundle, head: ObjectBundle, path: string, out: Issue[]) {
   const baseKeys = new Set(base.object.fields.map(f => f.key));
   const added = head.object.fields.filter(f => !baseKeys.has(f.key));
+  // A head field whose names mean two base fields would merge their columns: an error of its own, and it continues neither.
+  head.object.fields.forEach(f => {
+    if (baseFieldOf(base, f).merged) out.push(issue('D06_ALIAS_MERGES_FIELDS', `${path}/object/fields[${f.key}]/aliases`, { key: f.key }));
+  });
   base.object.fields.forEach(f => {
     const p = `${path}/object/fields[${f.key}]`;
-    // A rename is followed only to a field that is new in the head; an existing field taking the old name as an alias is a removal.
-    const now: FieldDef | undefined = continuedField(base, head, f.key);
+    // A rename is followed only as the storage follows it (continuedField). A field that kept its key is compared as itself.
+    const now: FieldDef | undefined = continuedField(base, head, f.key) ?? head.object.fields.find(x => x.key === f.key);
     if (now) { if (now.type !== f.type && !safe(f.type, now.type)) out.push(issue('D03_TYPE_CHANGED', `${p}/type`, { key: f.key, from: f.type, to: now.type })); return; }
     if (f.deprecated) return;
-    const guess = added.find(a => a.type === f.type);
+    const guess = added.find(a => a.type === f.type && !a.aliases.includes(f.key));
     out.push(guess ? issue('D02_RENAMED_WITHOUT_ALIAS', p, { kind: KIND_LABELS.field, key: f.key, to: guess.key }) : issue('D01_REMOVED_WITHOUT_DEPRECATION', p, { kind: KIND_LABELS.field, key: f.key }));
   });
 }

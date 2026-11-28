@@ -3,7 +3,7 @@
 // to its column. A renamed object or field (the old name kept as an alias) finds the old row and keeps its data; the
 // new name is recorded next to it, so a rollback to the old name reads the same table and column too. Rows are never
 // deleted: a name once used by an object keeps meaning the same column.
-import type { FieldDef } from '@dio-crm/contracts/metadata';
+import { FieldDef, resolveByNames } from '@dio-crm/contracts/metadata';
 import { ObjectShape, columnOf, fieldColumns, safeColumn, safeTable, tableName } from './crm-obj-names';
 
 export interface NameRow { scope: string; name_key: string; physical: string }
@@ -29,13 +29,19 @@ export function resolveTable(object: ObjectShape, rows: readonly NameRow[]): str
   return safeTable(lookup(rows, TABLES, [object.key, ...(object.aliases ?? [])]) ?? tableName(object.key));
 }
 
+/**
+ * The column of a field, by the shared resolution order (the field's key, then its aliases: resolveByNames, the same
+ * function the compatibility diff uses). A field whose names mean two different columns would merge them: refused.
+ */
 function resolveColumn(field: FieldDef, table: string, rows: readonly NameRow[], existing: ReadonlySet<string>): string {
-  const names = [field.key, ...field.aliases];
-  const recorded = lookup(rows, table, names);
-  if (recorded !== undefined) return safeColumn(recorded);
+  const ambiguous = () => new Error(`CRM_OBJ_COLUMN_AMBIGUOUS ${table}.${field.key}`);
+  const recorded = resolveByNames(field, name => lookup(rows, table, [name]));
+  if (recorded.ambiguous) throw ambiguous();
+  if (recorded.value !== undefined) return safeColumn(recorded.value);
   // Nothing recorded yet (a table made before names were recorded): an existing column of the key or of an alias is the field's column.
-  const found = names.map(n => columnOf({ key: n, system: false })).find(c => existing.has(c));
-  return found ?? columnOf(field);
+  const found = resolveByNames(field, name => { const column = columnOf({ key: name, system: false }); return existing.has(column) ? column : undefined; });
+  if (found.ambiguous) throw ambiguous();
+  return found.value ?? columnOf(field);
 }
 
 /**
