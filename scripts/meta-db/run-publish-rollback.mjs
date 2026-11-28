@@ -42,7 +42,7 @@ async function main() {
     const store = backendRequire(path.join(repo, 'backend/dist/src/database/crm-meta-version-store.js'));
     const engine = createRequire(path.join(repo, 'packages/engine/package.json'))(path.join(repo, 'packages/engine/dist/index.js'));
     await step('connect', async () => { pool = await new sql.ConnectionPool(conn.config).connect(); });
-    const db = transactional(sql, pool);
+    const db = transactional(sql, pool, backendRequire(path.join(repo, 'backend/dist/src/database/sql-params.js')).bindParams);
     await step('apply crm_meta schema', () => store.applyCrmMetaSchema(db));
     const svc = new engine.MetadataVersions(new store.SqlMetaVersionStore(db));
     const actor = 'f2-3-real-db-check';

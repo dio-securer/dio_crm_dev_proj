@@ -1,4 +1,5 @@
 import { CRM_META_SCHEMA } from './crm-meta-schema';
+import { dateTimeParam } from './sql-params';
 // MS SQL adapter of the engine's metadata VersionStore port (packages/engine/src/versions/types.ts).
 // The shapes below mirror that port; crm-meta-version-store.spec.ts runs the engine service on this adapter.
 type Row = Record<string, unknown>;
@@ -23,7 +24,7 @@ export interface MetaVersionTx {
 /** Only these columns can be changed by update(); the SET list is built from this table, never from input names. */
 const UPDATABLE: Record<keyof Change, string> = { status: 'status', publishedAt: 'published_at', previousId: 'previous_id' };
 const iso = (v: unknown) => (v instanceof Date ? v.toISOString() : v === null || v === undefined ? undefined : String(v));
-const date = (v: string | undefined) => (v === undefined ? null : new Date(v));
+const date = (v: string | undefined) => dateTimeParam(v);
 const num = (v: unknown) => (v === null || v === undefined ? undefined : Number(v));
 
 function toRecord(r: Row): MetaVersionRecord {

@@ -31,6 +31,19 @@ export function settingsFrom(env) {
   return { driverModule: 'mssql', summary, config: { ...common, server, port, database, ...login, options: { encrypt: e('CRM_META_DB_ENCRYPT') === 'true', trustServerCertificate: trust } } };
 }
 
+/**
+ * The synthetic company of run-engine-api.mjs. It must be negative, so it can never be a real company's id, and
+ * the id below it ("another company") must still fit an INT column.
+ */
+export function checkCompanyId(env) {
+  const raw = read(env)('CRM_ENGINE_CHECK_COMPANY_ID');
+  const company = raw === '' ? -4242 : /^-?[0-9]{1,10}$/.test(raw) ? Number(raw) : NaN;
+  if (!Number.isSafeInteger(company) || company >= 0 || company - 1 < -2147483648) {
+    throw new Error('CRM_ENGINE_CHECK_COMPANY_ID must be a negative integer (from -1 to -2147483647): real company ids are refused');
+  }
+  return company;
+}
+
 export const MSNODESQLV8_HELP = [
   'windows-integrated needs the msnodesqlv8 driver, which is not installed in this repository (adding it changes protected package files).',
   'Without changing the repository (PowerShell):',

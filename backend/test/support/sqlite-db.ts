@@ -2,7 +2,11 @@
 // SQL after a few dialect rewrites (dbo., lock hints, OFFSET/FETCH, OUTPUT, IDENTITY, COLLATE). WHERE conditions,
 // parameters and data are evaluated by a real SQL engine, so access and injection tests see real query semantics.
 // Statements it does not know are refused, so new SQL cannot pass untested. This is not SQL Server (see F2-4 spec).
+import { TypedParam, isTypedParam } from '../../src/database/sql-params';
+
 type Row = Record<string, unknown>;
+/** A typed parameter as SQLite text: DATETIME2(3) as the UTC ISO text, DATE as YYYY-MM-DD. */
+const typed = (p: TypedParam) => (p.value === null ? null : p.sqlParam === 'date' ? p.value.toISOString().slice(0, 10) : p.value.toISOString());
 const sqlite = (process as any).getBuiltinModule('node:sqlite');
 
 export interface LoggedStatement { text: string; params: Record<string, unknown> }
@@ -15,7 +19,7 @@ export function sqliteDb() {
     const out: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(params)) {
       if (!new RegExp(`@${k}\\b`).test(sql)) continue;
-      out[k] = v instanceof Date ? v.toISOString() : typeof v === 'boolean' ? (v ? 1 : 0) : v;
+      out[k] = isTypedParam(v) ? typed(v) : v instanceof Date ? v.toISOString() : typeof v === 'boolean' ? (v ? 1 : 0) : v;
     }
     return out;
   };

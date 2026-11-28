@@ -18,6 +18,8 @@ export const ADMIN_EXTENSION_TYPES = extensionTypeSchema.options as readonly str
 export const ADDED_FIELD_TYPES = ['integer', 'datetime', 'reference'] as const;
 export const FIELD_TYPES = [...ADMIN_EXTENSION_TYPES, ...ADDED_FIELD_TYPES] as unknown as [string, ...string[]];
 export const TEXT_TYPES: readonly string[] = ['text'];
+/** A decimal field without precision or scale is DECIMAL(18,4). The checks, the engine and the record tables all read this. */
+export const DECIMAL_DEFAULT = { precision: 18, scale: 4 } as const;
 export const COMPARABLE_TYPES: readonly string[] = ['integer', 'decimal', 'date', 'datetime'];
 /** The locales every label must be translated into, read from the admin TERM schema (no second list). */
 export const REQUIRED_LOCALES = (P.TERM.shape.translations.element.shape.locale as z.ZodEnum<[string, ...string[]]>).options as readonly string[];

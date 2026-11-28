@@ -9,7 +9,10 @@ const DATETIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,9})?)?(Z|[+-]\d{2
 function realDate(text: string): boolean {
   const m = DATE.exec(text);
   if (!m) return false;
-  const d = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
+  // Years 0001-9999 only (what DATE and DATETIME2 hold). setUTCFullYear, because Date.UTC reads years 0-99 as 1900-1999.
+  if (Number(m[1]) < 1) return false;
+  const d = new Date(0);
+  d.setUTCFullYear(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
   return d.getUTCFullYear() === Number(m[1]) && d.getUTCMonth() === Number(m[2]) - 1 && d.getUTCDate() === Number(m[3]);
 }
 
@@ -39,7 +42,9 @@ export function checkValue(field: FieldDef, value: unknown, activeCodes: readonl
     case 'datetime': {
       if (typeof value !== 'string' || !DATETIME.test(value) || !realDate(value.slice(0, 10))) return { error: 'TYPE' };
       const at = new Date(value);
-      return Number.isNaN(at.getTime()) ? { error: 'TYPE' } : { value: at.toISOString() };
+      // After the move to UTC the year must still be 0001-9999 (0001-01-01T00:00+01:00 is the year 0000 in UTC).
+      if (Number.isNaN(at.getTime()) || at.getUTCFullYear() < 1 || at.getUTCFullYear() > 9999) return { error: 'TYPE' };
+      return { value: at.toISOString() };
     }
     case 'enum':
       if (typeof value !== 'string') return { error: 'TYPE' };

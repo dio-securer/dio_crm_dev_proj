@@ -4,11 +4,17 @@
 import { accessPredicate, matchesPredicate, validateWrite, withOwnerDefault } from '@dio-crm/engine';
 import type { Actor, RecordError, RecordValue, RuntimeModel, AccessPredicate } from '@dio-crm/engine';
 import type { ObjectShape } from '../../database/crm-obj-schema';
+import { MAX_ACCESS_VALUES, accessValueCount } from '../../database/crm-obj-sql';
 import type { Page, RecordScope } from '../../database/crm-obj-sql';
 import type { StoredRecord } from '../../database/crm-obj-store';
 
 export interface Caller { actor: Actor; companyId: number }
-export interface Published { versionId: number; model: RuntimeModel }
+export interface Published {
+  versionId: number;
+  model: RuntimeModel;
+  /** The object with its physical table and column names; makes the table complete on first use (503 when it cannot). */
+  shape(objectKey: string): Promise<ObjectShape>;
+}
 export interface PublishedSource { current(): Promise<Published | undefined> }
 export interface RecordStore {
   list(object: ObjectShape, scope: RecordScope, predicate: AccessPredicate, page: Page): Promise<StoredRecord[]>;
@@ -51,10 +57,13 @@ export class EngineRecords {
     if (!current) throw new EngineApiError(503, 'NO_PUBLISHED_METADATA');
     const object = current.model.object(objectKey);
     if (!object) throw new EngineApiError(404, 'OBJECT_NOT_FOUND');
-    const shape: ObjectShape = { key: object.object.key, fields: object.object.fields };
     const rules = current.model.rowAccess(objectKey);
+    const predicate = accessPredicate(rules, caller.actor);
+    // More ids than one statement can carry: refused rather than answered with a part of the rows.
+    if (accessValueCount(predicate) > MAX_ACCESS_VALUES) throw new EngineApiError(403, 'ACCESS_TOO_WIDE');
+    const shape = await current.shape(object.object.key);
     const scope: RecordScope = { companyId: caller.companyId, actor: caller.actor.userId };
-    return { current, shape, rules, scope, predicate: accessPredicate(rules, caller.actor) };
+    return { current, shape, rules, scope, predicate };
   }
 
   async list(caller: Caller, objectKey: string, query: { limit?: unknown; offset?: unknown }) {

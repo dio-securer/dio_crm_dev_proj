@@ -2,6 +2,7 @@ import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import sql, { ConnectionPool, IResult, Request, Transaction } from 'mssql';
 import { env } from '../config/env';
 import { AsyncLocalStorage } from 'node:async_hooks';
+import { bindParams } from './sql-params';
 
 export type DbQuery = <T = any>(text: string, params?: Record<string, unknown>) => Promise<IResult<T>>;
 
@@ -69,7 +70,7 @@ export class DatabaseService implements OnModuleDestroy {
   hasActiveTransaction():boolean {return DatabaseService.transactionScope.getStore()!==undefined;}
 
   private async executeRequest<T>(request: Request, text: string, params: Record<string, unknown>): Promise<IResult<T>> {
-    for (const [key, value] of Object.entries(params)) request.input(key, value as never);
+    bindParams(request, params, sql);
     const started = Date.now();
     try {
       return await request.query<T>(text);

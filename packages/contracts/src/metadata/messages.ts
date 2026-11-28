@@ -23,6 +23,7 @@ export const ISSUE_MESSAGES = {
   R09_DEPRECATED_USE: '폐기 예정 필드 "{field}" 을(를) 쓰고 있습니다. "{replacedBy}" 로 바꾸세요.',
   R09_ALIAS_USE: '"{alias}" 는 옛 이름입니다. 새 이름 "{field}" 을(를) 쓰세요.',
   R10_OPTION_NOT_ALLOWED: '필드 "{field}"({type}) 에는 "{option}" 을(를) 쓸 수 없습니다.',
+  R10_DECIMAL_SCALE: '소수 필드 "{field}" 의 소수 자릿수({scale})가 전체 자릿수({precision})보다 큽니다. 적지 않은 값은 전체 18, 소수 4 로 봅니다.',
   R10_ENUM_NEEDS_GROUP: '선택형 필드 "{field}" 에 코드 그룹이 없습니다.',
   R10_REFERENCE_NEEDS_OBJECT: '참조 필드 "{field}" 에 참조 대상 개체가 없습니다.',
   R10_OPERATOR_TYPE: '필드 "{field}"({type}) 은(는) 크기 비교("{op}")를 할 수 없습니다.',

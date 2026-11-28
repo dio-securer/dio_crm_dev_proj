@@ -3,8 +3,7 @@
 import type { AccessPredicate, RecordValue } from '@dio-crm/engine';
 import type { FieldDef } from '@dio-crm/contracts/metadata';
 import { MetaQuery, MetaTransactional } from './crm-meta-version-store';
-import { columnOf } from './crm-obj-names';
-import type { ObjectShape } from './crm-obj-schema';
+import { ObjectShape, columnFor } from './crm-obj-names';
 import { Page, RecordScope, Statement, getStatement, insertStatement, listStatement, updateStatement } from './crm-obj-sql';
 
 export interface StoredRecord { id: string; values: Record<string, RecordValue> }
@@ -24,7 +23,7 @@ function valueOf(field: FieldDef, raw: unknown): RecordValue {
 
 export function recordOf(object: ObjectShape, row: Record<string, unknown>): StoredRecord {
   const values: Record<string, RecordValue> = {};
-  for (const f of object.fields) values[f.key] = valueOf(f, row[columnOf(f)]);
+  for (const f of object.fields) values[f.key] = valueOf(f, row[columnFor(object, f)]);
   return { id: String(row.id), values };
 }
 

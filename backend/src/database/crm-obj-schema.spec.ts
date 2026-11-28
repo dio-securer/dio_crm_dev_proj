@@ -34,7 +34,7 @@ describe('record table schema', () => {
     await applyObjectSchema(db, [{ ...lead, fields: [...lead.fields, field('sido')] }]);
     expect(db.raw.prepare('SELECT f_hospital_name, f_sido FROM crm_obj_lead').all().map((r: any) => ({ ...r }))).toEqual([{ f_hospital_name: 'H', f_sido: null }]);
     expect(db.raw.prepare('SELECT * FROM legacy_lead').all().map((r: any) => ({ ...r }))).toEqual([{ id: 1, name: 'kept' }]);
-    expect(db.tables()).toEqual(['crm_obj_lead', 'legacy_lead']);
+    expect(db.tables()).toEqual(['crm_meta_obj_name', 'crm_obj_lead', 'legacy_lead']);
   });
 
   it('stops on a column whose type no longer matches (e.g. integer widened to decimal) and rolls the run back', async () => {

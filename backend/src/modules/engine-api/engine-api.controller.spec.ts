@@ -1,5 +1,5 @@
 // HTTP layer of the automatic API (F2-4): the real AuthGuard and controller over the engine records on the SQLite fake.
-import { INestApplication } from '@nestjs/common';
+import { HttpException, INestApplication } from '@nestjs/common';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import { env } from '../../config/env';
@@ -7,7 +7,8 @@ import { AuthGuard } from '../../security/security';
 import { LEAD, engineFixture } from '../../../test/support/engine-fixture';
 import { callerOf } from './actor';
 import { EngineApiController } from './engine-api.controller';
-import { EngineApiService } from './engine-api.service';
+import { EngineApiService, toHttp } from './engine-api.service';
+import { AccessTooWideError } from '../../database/crm-obj-sql';
 
 let app: INestApplication;
 let base = '';
@@ -55,6 +56,13 @@ describe('engine API over HTTP', () => {
     expect((await call('POST', '/api/engine/objects/lead/records', token('pub-1'), { ...LEAD, owner_name: 'pub-2' })).status).toBe(403);
     expect((await call('GET', '/api/engine/objects/nope/records', token('pub-1'))).body.error).toBe('OBJECT_NOT_FOUND');
     expect((await call('GET', '/api/engine/objects/lead/records?limit=500', token('pub-1'))).body.error).toBe('BAD_PAGE');
+  });
+
+  it('turns the data layer\'s too-wide refusal into 403 with its code, and leaves unknown errors to Nest (500)', () => {
+    const http = toHttp(new AccessTooWideError()) as HttpException;
+    expect([http.getStatus(), http.getResponse()]).toEqual([403, { statusCode: 403, error: 'ACCESS_TOO_WIDE', errors: [] }]);
+    const other = new Error('boom');
+    expect(toHttp(other)).toBe(other);
   });
 });
 

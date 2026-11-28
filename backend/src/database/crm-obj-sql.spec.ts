@@ -1,7 +1,7 @@
 // The SQL of the record layer (F2-4): access predicates become parameterised conditions; values never enter the SQL text.
 import type { FieldDef } from '@dio-crm/contracts/metadata';
 import { columnOf, quote, safeKey, sqlTypeOf, tableName } from './crm-obj-names';
-import { MAX_ACCESS_VALUES, getStatement, insertStatement, listStatement, updateStatement } from './crm-obj-sql';
+import { AccessTooWideError, MAX_ACCESS_VALUES, getStatement, insertStatement, listStatement, updateStatement } from './crm-obj-sql';
 
 const field = (key: string, type = 'text', more: Partial<FieldDef> = {}): FieldDef =>
   ({ key, type, labelKey: 'x', required: false, system: false, aliases: [], ...more } as FieldDef);
@@ -33,10 +33,11 @@ describe('record SQL', () => {
     const ins = insertStatement(lead, scope, { hospital_name: EVIL[1], owner_name: EVIL[0], met_at: '2026-01-01T00:00:00.000Z' }, new Date(0));
     expect(ins.text).toBe('INSERT INTO dbo.[crm_obj_lead] ([company_id], [created_at], [created_by], [updated_at], [updated_by], [f_hospital_name], [f_owner_name], [f_met_at]) '
       + 'OUTPUT INSERTED.[id] VALUES (@company, @at, @by, @at, @by, @p0, @p1, @p2)');
-    expect(ins.params.p2).toEqual(new Date('2026-01-01T00:00:00.000Z'));
+    expect(ins.params.p2).toEqual({ sqlParam: 'datetime2', value: new Date('2026-01-01T00:00:00.000Z') });
+    expect(ins.params.at).toEqual({ sqlParam: 'datetime2', value: new Date(0) });
     const up = updateStatement(lead, scope, 3, { sido: EVIL[2] }, new Date(0));
     expect(up.text).toBe('UPDATE dbo.[crm_obj_lead] SET [f_sido] = @p0, [updated_at] = @at, [updated_by] = @by WHERE [id] = @id AND [company_id] = @company');
-    expect(up.params).toMatchObject({ p0: EVIL[2], id: 3, company: 7, by: 'u1' });
+    expect(up.params).toEqual({ p0: EVIL[2], id: 3, company: 7, by: 'u1', at: { sqlParam: 'datetime2', value: new Date(0) } });
   });
 
   it('refuses identifiers that are not metadata keys, unknown fields and managed columns as write targets', () => {
@@ -50,7 +51,29 @@ describe('record SQL', () => {
 
   it('refuses an access predicate with more values than SQL Server can take', () => {
     const values = Array.from({ length: MAX_ACCESS_VALUES + 1 }, (_, i) => `u${i}`);
-    expect(() => listStatement(lead, scope, { kind: 'anyOf', terms: [{ field: 'owner_name', values }] }, page)).toThrow('ACCESS_TOO_WIDE');
+    expect(() => listStatement(lead, scope, { kind: 'anyOf', terms: [{ field: 'owner_name', values }] }, page)).toThrow(AccessTooWideError);
+    const split = { kind: 'anyOf' as const, terms: [{ field: 'owner_name', values: values.slice(0, 600) }, { field: 'sido', values: values.slice(0, 401) }] };
+    expect(() => getStatement(lead, scope, split, 1, false)).toThrow(expect.objectContaining({ code: 'ACCESS_TOO_WIDE' }));
+    expect(listStatement(lead, scope, { kind: 'anyOf', terms: [{ field: 'owner_name', values: values.slice(1) }] }, page).params.p999).toBe('u1000');
+  });
+
+  it('sends dates and date-times as typed parameters (never the driver\'s legacy DATETIME guess), nulls included', () => {
+    const o = { key: 'lead', fields: [field('met_at', 'datetime'), field('opened_on', 'date'), field('sido')] };
+    const ins = insertStatement(o, scope, { met_at: '1000-01-01T00:00:00.001Z', opened_on: '0001-01-01', sido: 'S' }, new Date('2026-11-28T01:02:03.004Z'));
+    expect(ins.params).toEqual({ company: 7, by: 'u1', at: { sqlParam: 'datetime2', value: new Date('2026-11-28T01:02:03.004Z') },
+      p0: { sqlParam: 'datetime2', value: new Date('1000-01-01T00:00:00.001Z') }, p1: { sqlParam: 'date', value: new Date('0001-01-01T00:00:00.000Z') }, p2: 'S' });
+    const up = updateStatement(o, scope, 1, { met_at: null, opened_on: null, sido: null }, new Date(0));
+    expect(up.params).toMatchObject({ p0: { sqlParam: 'datetime2', value: null }, p1: { sqlParam: 'date', value: null }, p2: null });
+  });
+
+  it('builds every statement from the recorded physical names when the object carries them', () => {
+    const renamed = { key: 'prospect', table: 'crm_obj_lead', columns: { owner: 'f_owner_name', hospital_name: 'f_hospital_name' }, fields: [field('hospital_name'), field('owner'), field('updated_at', 'datetime', { system: true })] };
+    const s = getStatement(renamed, scope, { kind: 'anyOf', terms: [{ field: 'owner', values: ['u1'] }] }, 1, false);
+    expect(s.text).toBe('SELECT [id], [f_hospital_name], [f_owner_name], [updated_at] FROM dbo.[crm_obj_lead] WHERE [id] = @id AND [company_id] = @company AND ([f_owner_name] COLLATE Latin1_General_100_BIN2 IN (@p0))');
+    expect(insertStatement(renamed, scope, { owner: 'u1' }, new Date(0)).text).toContain('INSERT INTO dbo.[crm_obj_lead] ([company_id], [created_at], [created_by], [updated_at], [updated_by], [f_owner_name])');
+    expect(updateStatement(renamed, scope, 1, { owner: 'u2' }, new Date(0)).text).toContain('UPDATE dbo.[crm_obj_lead] SET [f_owner_name] = @p0,');
+    for (const bad of ['users', 'crm_obj_lead]; DROP TABLE x', 'crm_meta_version']) expect(() => listStatement({ ...renamed, table: bad }, scope, { kind: 'all' }, page)).toThrow('CRM_OBJ_BAD_IDENTIFIER');
+    for (const bad of ['id', 'company_id', 'f_x] = 1; --', 'F_OWNER']) expect(() => listStatement({ ...renamed, columns: { owner: bad } }, scope, { kind: 'all' }, page)).toThrow('CRM_OBJ_BAD_IDENTIFIER');
   });
 
   it('maps every metadata type to a column type, and managed system fields to managed columns', () => {

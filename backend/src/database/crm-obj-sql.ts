@@ -1,14 +1,22 @@
 // SQL of the record tables (F2-4). Values only ever travel as parameters with generated names (@p0, @p1, ...);
 // identifiers come from metadata keys checked in crm-obj-names.ts. The engine's access predicate becomes a WHERE condition.
 import type { AccessPredicate, RecordValue } from '@dio-crm/engine';
-import { columnOf, fieldColumns, quote, tableName } from './crm-obj-names';
-import type { ObjectShape } from './crm-obj-schema';
+import { ObjectShape, columnFor, fieldColumns, quote, tableOf } from './crm-obj-names';
+import { dateParam, dateTimeParam } from './sql-params';
 
 export interface Statement { text: string; params: Record<string, unknown> }
 export interface RecordScope { companyId: number; actor: string }
 export interface Page { limit: number; offset: number }
 /** SQL Server takes at most 2100 parameters; an actor whose rules expand past this many values is refused. */
 export const MAX_ACCESS_VALUES = 1000;
+export class AccessTooWideError extends Error {
+  readonly code = 'ACCESS_TOO_WIDE';
+  constructor() { super('ACCESS_TOO_WIDE'); this.name = 'AccessTooWideError'; }
+}
+export const accessValueCount = (predicate: AccessPredicate) => (predicate.kind === 'anyOf' ? predicate.terms.reduce((n, t) => n + t.values.length, 0) : 0);
+export function assertAccessWidth(predicate: AccessPredicate): void {
+  if (accessValueCount(predicate) > MAX_ACCESS_VALUES) throw new AccessTooWideError();
+}
 /** Owner and unit ids are compared exactly (case-sensitive), as the engine compares them, whatever the database collation. */
 export const EXACT = 'Latin1_General_100_BIN2';
 
@@ -29,26 +37,30 @@ function fieldOf(object: ObjectShape, key: string) {
 function accessCondition(predicate: AccessPredicate, object: ObjectShape, params: Params): string {
   if (predicate.kind === 'all') return '1 = 1';
   if (predicate.kind === 'none') return '1 = 0';
-  const count = predicate.terms.reduce((n, t) => n + t.values.length, 0);
-  if (count > MAX_ACCESS_VALUES) throw new Error('ACCESS_TOO_WIDE');
+  assertAccessWidth(predicate);
   const parts = predicate.terms.filter(t => t.values.length > 0)
-    .map(t => `${quote(columnOf(fieldOf(object, t.field)))} COLLATE ${EXACT} IN (${t.values.map(v => params.add(String(v))).join(', ')})`);
+    .map(t => `${quote(columnFor(object, fieldOf(object, t.field)))} COLLATE ${EXACT} IN (${t.values.map(v => params.add(String(v))).join(', ')})`);
   return parts.length ? `(${parts.join(' OR ')})` : '1 = 0';
 }
 
 /** [id] and one column per field, each field's column once. */
 export function selectList(object: ObjectShape): string {
-  const columns = ['id', ...new Set(object.fields.map(columnOf))];
+  const columns = ['id', ...new Set(object.fields.map(f => columnFor(object, f)))];
   return columns.map(quote).join(', ');
 }
 
-const toParam = (object: ObjectShape, key: string, value: RecordValue) =>
-  value !== null && fieldOf(object, key).type === 'datetime' ? new Date(String(value)) : value;
+/** Dates and date-times travel with an explicit SQL type (DATE, DATETIME2(3)); see sql-params.ts. */
+function toParam(object: ObjectShape, key: string, value: RecordValue): unknown {
+  const type = fieldOf(object, key).type;
+  if (type === 'datetime') return dateTimeParam(value === null ? null : String(value));
+  if (type === 'date') return dateParam(value === null ? null : String(value));
+  return value;
+}
 
 export function listStatement(object: ObjectShape, scope: RecordScope, predicate: AccessPredicate, page: Page): Statement {
   const params = new Params({ company: scope.companyId, offset: page.offset, limit: page.limit });
   const where = accessCondition(predicate, object, params);
-  const text = `SELECT ${selectList(object)} FROM dbo.${quote(tableName(object.key))} WHERE [company_id] = @company AND ${where}
+  const text = `SELECT ${selectList(object)} FROM dbo.${quote(tableOf(object))} WHERE [company_id] = @company AND ${where}
 ORDER BY [id] OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY`;
   return { text, params: params.values };
 }
@@ -57,7 +69,7 @@ export function getStatement(object: ObjectShape, scope: RecordScope, predicate:
   const params = new Params({ company: scope.companyId, id });
   const where = accessCondition(predicate, object, params);
   const hint = lock ? ' WITH (UPDLOCK, ROWLOCK)' : '';
-  const text = `SELECT ${selectList(object)} FROM dbo.${quote(tableName(object.key))}${hint} WHERE [id] = @id AND [company_id] = @company AND ${where}`;
+  const text = `SELECT ${selectList(object)} FROM dbo.${quote(tableOf(object))}${hint} WHERE [id] = @id AND [company_id] = @company AND ${where}`;
   return { text, params: params.values };
 }
 
@@ -70,21 +82,21 @@ function writable(object: ObjectShape, values: Record<string, RecordValue>): [st
 }
 
 export function insertStatement(object: ObjectShape, scope: RecordScope, values: Record<string, RecordValue>, at: Date): Statement {
-  const params = new Params({ company: scope.companyId, at, by: scope.actor });
+  const params = new Params({ company: scope.companyId, at: dateTimeParam(at), by: scope.actor });
   const columns = ['[company_id]', '[created_at]', '[created_by]', '[updated_at]', '[updated_by]'];
   const slots = ['@company', '@at', '@by', '@at', '@by'];
   for (const [key, value] of writable(object, values)) {
-    columns.push(quote(columnOf(fieldOf(object, key))));
+    columns.push(quote(columnFor(object, fieldOf(object, key))));
     slots.push(params.add(toParam(object, key, value)));
   }
-  const text = `INSERT INTO dbo.${quote(tableName(object.key))} (${columns.join(', ')}) OUTPUT INSERTED.[id] VALUES (${slots.join(', ')})`;
+  const text = `INSERT INTO dbo.${quote(tableOf(object))} (${columns.join(', ')}) OUTPUT INSERTED.[id] VALUES (${slots.join(', ')})`;
   return { text, params: params.values };
 }
 
 export function updateStatement(object: ObjectShape, scope: RecordScope, id: number, values: Record<string, RecordValue>, at: Date): Statement {
-  const params = new Params({ company: scope.companyId, id, at, by: scope.actor });
-  const sets = writable(object, values).map(([key, value]) => `${quote(columnOf(fieldOf(object, key)))} = ${params.add(toParam(object, key, value))}`);
+  const params = new Params({ company: scope.companyId, id, at: dateTimeParam(at), by: scope.actor });
+  const sets = writable(object, values).map(([key, value]) => `${quote(columnFor(object, fieldOf(object, key)))} = ${params.add(toParam(object, key, value))}`);
   sets.push('[updated_at] = @at', '[updated_by] = @by');
-  const text = `UPDATE dbo.${quote(tableName(object.key))} SET ${sets.join(', ')} WHERE [id] = @id AND [company_id] = @company`;
+  const text = `UPDATE dbo.${quote(tableOf(object))} SET ${sets.join(', ')} WHERE [id] = @id AND [company_id] = @company`;
   return { text, params: params.values };
 }

@@ -18,7 +18,7 @@ describe('engine API: records of a published object', () => {
     expect(made.id).toBe('1');
     expect(made.values).toMatchObject({ ...LEAD, phone: '010', owner_name: 'u1', updated_at: NOW.toISOString(), sido: null });
     expect(await api.get(u1, 'lead', '1')).toEqual(made);
-    expect(db.tables()).toEqual(['crm_obj_lead']);
+    expect(db.tables()).toEqual(['crm_meta_obj_name', 'crm_obj_lead']);
   });
 
   it('never shows another owner\'s row: list, read and update all behave as if it did not exist', async () => {

@@ -15,4 +15,4 @@ export type WriteCheck =
 export const MANAGED_FIELDS: readonly string[] = ['created_at', 'created_by', 'updated_at', 'updated_by'];
 export const TEXT_DEFAULT_MAX = 4000;
 export const CODE_MAX = 100;
-export const DECIMAL_DEFAULT = { precision: 18, scale: 4 } as const;
+export { DECIMAL_DEFAULT } from '@dio-crm/contracts/metadata';

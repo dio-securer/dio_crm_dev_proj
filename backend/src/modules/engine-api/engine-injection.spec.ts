@@ -17,7 +17,7 @@ describe('engine API: injection attempts', () => {
     for (const evil of EVIL) await api.create(u1, 'lead', { ...LEAD, hospital_name: evil, phone: evil });
     const items = (await api.list(u1, 'lead', {})).items;
     expect(items.map(r => r.values.hospital_name)).toEqual(EVIL);
-    expect(db.tables()).toEqual(['crm_obj_lead']);
+    expect(db.tables()).toEqual(['crm_meta_obj_name', 'crm_obj_lead']);
     for (const s of db.log) for (const evil of EVIL) expect(s.text).not.toContain(evil);
   });
 

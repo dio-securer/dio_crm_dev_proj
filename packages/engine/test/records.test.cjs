@@ -63,6 +63,7 @@ const table = [
   ['amount', 1000, 'OUT_OF_RANGE'], ['amount', 1.234, 'OUT_OF_RANGE'], ['amount', Infinity, 'TYPE'], ['amount', '1', 'TYPE'],
   ['vip', 'true', 'TYPE'], ['vip', 1, 'TYPE'],
   ['opened_on', '2026-02-30', 'TYPE'], ['opened_on', '2026-2-3', 'TYPE'], ['opened_on', '2026-02-03T00:00:00Z', 'TYPE'],
+  ['opened_on', '0000-01-01', 'TYPE'], ['met_at', '0000-06-01T00:00:00Z', 'TYPE'], ['met_at', '0001-01-01T00:00:00+01:00', 'TYPE'], ['met_at', '9999-12-31T23:59:59-01:00', 'TYPE'],
   ['met_at', '2026-01-02T03:04:05', 'TYPE'], ['met_at', '2026-01-02T25:00:00Z', 'TYPE'], ['met_at', 1700000000000, 'TYPE'],
   ['status', 'WON', 'BAD_ENUM'], ['status', 1, 'TYPE'],
   ['account_ref', 'x'.repeat(101), 'TOO_LONG'], ['memo', '123456', 'TOO_LONG'], ['phone', 10, 'TYPE'],
@@ -79,6 +80,12 @@ test('values at the edges are accepted', () => {
   assert.equal(validateWrite(m, 'lead', ok, 'update').ok, true);
 });
 
+test('dates and date-times of any year from 0001 to 9999 are accepted, with exact milliseconds', () => {
+  const r = validateWrite(m, 'lead', { opened_on: '0001-01-01', met_at: '1000-01-01T00:00:00.001Z' }, 'update');
+  assert.deepEqual(r.values, { opened_on: '0001-01-01', met_at: '1000-01-01T00:00:00.001Z' });
+  assert.deepEqual(validateWrite(m, 'lead', { opened_on: '0099-12-31', met_at: '9999-12-31T23:59:59.999Z' }, 'update').values, { opened_on: '0099-12-31', met_at: '9999-12-31T23:59:59.999Z' });
+});
+
 test('an inactive code is refused', () => {
   const off = model(files => editJson(files, 'metadata/codes/lead_status.json', d => { d.values.find(v => v.code === 'CONVERTED').active = false; }));
   assert.deepEqual(validateWrite(off, 'lead', { status: 'CONVERTED' }, 'update').errors, [{ code: 'BAD_ENUM', field: 'status' }]);
@@ -93,6 +100,7 @@ test('the owner default fills an applicable own rule only when the owner was not
   const own = [{ kind: 'own', ownerField: 'owner_name' }];
   assert.deepEqual(withOwnerDefault(own, actor, { a: 1 }), { a: 1, owner_name: 'u1' });
   assert.deepEqual(withOwnerDefault(own, actor, { owner_name: 'u2' }), { owner_name: 'u2' });
+  assert.deepEqual(withOwnerDefault(own, actor, { owner_name: null }), { owner_name: 'u1' }, 'an owner sent as null (or blank, which is null by then) is filled too');
   assert.deepEqual(withOwnerDefault([{ kind: 'own', ownerField: 'owner_name', permission: 'p' }], actor, {}), {});
   assert.deepEqual(withOwnerDefault([{ kind: 'members', ownerField: 'owner_name' }], actor, {}), {});
 });

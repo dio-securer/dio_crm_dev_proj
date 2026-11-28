@@ -39,6 +39,7 @@ ownerField·unitField 는 있는 필드여야 하고(R02) 글자나 참조 필�
 
 `text`, `decimal`, `date`, `boolean`, `enum` 은 admin 확장 필드와 같다. `integer`, `datetime`, `reference` 셋을 더했다.
 `maxLength` 는 `text` 에만, `precision`·`scale` 은 `decimal` 에만, `enumCodeGroup` 은 `enum` 에만(꼭 있어야 함), `referenceObject` 는 `reference` 에만(꼭 있어야 함) 쓴다.
+`decimal` 의 `scale` 은 `precision` 보다 클 수 없다. 적지 않으면 `precision` 18, `scale` 4 로 본다(`DECIMAL_DEFAULT`). 그래서 `precision: 3` 만 적으면 오류(R10_DECIMAL_SCALE)다.
 
 ## 검사 함수
 
@@ -95,6 +96,7 @@ ownerField·unitField 는 있는 필드여야 하고(R02) 글자나 참조 필�
 | `R09_DEPRECATED_USE` | warning | `validateBundle` | 폐기 예정 필드 "{field}" 을(를) 쓰고 있습니다. "{replacedBy}" 로 바꾸세요. |
 | `R09_REPLACED_BY_DEPRECATED` | error | `validateBundle` | "{key}" 을(를) 대신할 "{replacedBy}" 도 폐기 예정입니다. |
 | `R09_REPLACED_BY_MISSING` | error | `validateBundle` | "{key}" 을(를) 대신할 "{replacedBy}" 이(가) 없습니다. |
+| `R10_DECIMAL_SCALE` | error | `validateBundle` | 소수 필드 "{field}" 의 소수 자릿수({scale})가 전체 자릿수({precision})보다 큽니다. 적지 않은 값은 전체 18, 소수 4 로 봅니다. |
 | `R10_ENUM_NEEDS_GROUP` | error | `validateBundle` | 선택형 필드 "{field}" 에 코드 그룹이 없습니다. |
 | `R10_OPERATOR_TYPE` | error | `validateBundle` | 필드 "{field}"({type}) 은(는) 크기 비교("{op}")를 할 수 없습니다. |
 | `R10_OPTION_NOT_ALLOWED` | error | `validateBundle` | 필드 "{field}"({type}) 에는 "{option}" 을(를) 쓸 수 없습니다. |

@@ -14,6 +14,7 @@ function fieldOf(rule: RowAccessRule, ob: ObjectBundle): string | undefined {
  * - `none` grants nothing, so it is always covered;
  * - a base `all` covers every rule whose actors it already covered (no permission, or the same permission);
  * - otherwise the base rule must be the same kind on the same field, with no permission or the same permission.
+ *   "The same field" follows a rename: the base field's key is looked up in the head by key or alias.
  */
 function covered(rule: RowAccessRule, head: ObjectBundle, base: ObjectBundle, baseRules: readonly RowAccessRule[]): boolean {
   if (rule.kind === 'none') return true;
@@ -22,7 +23,10 @@ function covered(rule: RowAccessRule, head: ObjectBundle, base: ObjectBundle, ba
     if (b.kind === 'none') return false;
     if (b.permission !== undefined && b.permission !== perm) return false;
     if (b.kind === 'all') return true;
-    return b.kind === rule.kind && fieldOf(b, base) === fieldOf(rule, head);
+    // A base field renamed in the head (old key kept as an alias, ADR 0004) is still the same field, the same stored values.
+    const baseField = fieldOf(b, base);
+    const sameField = baseField !== undefined && fieldOf({ kind: 'own', ownerField: baseField }, head) === fieldOf(rule, head);
+    return b.kind === rule.kind && sameField;
   });
 }
 

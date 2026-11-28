@@ -14,15 +14,20 @@ export function readMetadata(repo) {
   return out;
 }
 
-/** A MetaTransactional over an mssql pool: one SQL transaction per call, rolled back on any error. */
-export function transactional(sql, pool) {
+/**
+ * A MetaTransactional over an mssql pool: one SQL transaction per call, rolled back on any error.
+ * `bind` is the backend's bindParams (backend/dist/src/database/sql-params.js): the same typed binding the API uses,
+ * so dates travel as DATETIME2(3) / DATE and not as the driver's legacy DATETIME guess.
+ */
+export function transactional(sql, pool, bind) {
+  if (typeof bind !== 'function') throw new Error('transactional needs the backend bindParams');
   return {
     async transaction(work) {
       const tx = new sql.Transaction(pool);
       await tx.begin();
       const query = async (text, params = {}) => {
         const req = new sql.Request(tx);
-        for (const [k, v] of Object.entries(params)) req.input(k, v);
+        bind(req, params, sql);
         return req.query(text);
       };
       try { const out = await work(query); await tx.commit(); return out; } catch (e) {

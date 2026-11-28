@@ -29,6 +29,7 @@ export const ISSUE_CODES: Record<IssueCode, { severity: Severity; check: string 
   R09_DEPRECATED_USE: { severity: 'warning', check: 'validateBundle' },
   R09_ALIAS_USE: { severity: 'warning', check: 'validateBundle' },
   R10_OPTION_NOT_ALLOWED: { severity: 'error', check: 'validateBundle' },
+  R10_DECIMAL_SCALE: { severity: 'error', check: 'validateBundle' },
   R10_ENUM_NEEDS_GROUP: { severity: 'error', check: 'validateBundle' },
   R10_REFERENCE_NEEDS_OBJECT: { severity: 'error', check: 'validateBundle' },
   R10_OPERATOR_TYPE: { severity: 'error', check: 'validateBundle' },

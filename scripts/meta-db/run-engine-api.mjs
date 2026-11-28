@@ -9,14 +9,17 @@
 //   $env:CRM_META_DB_SERVER = "127.0.0.1"; $env:CRM_META_DB_PORT = "1433"; $env:CRM_META_DB_DATABASE = "DIO CRM"
 //   $env:CRM_META_DB_USER = "sa"; $env:CRM_META_DB_PASSWORD = Read-Host "SQL password"
 //   node scripts/meta-db/run-engine-api.mjs
-// Optional: $env:CRM_ENGINE_CHECK_COMPANY_ID = "-4242" (default; a company id no real company uses; the next id down is
-// used as "another company"). If nothing is published yet, the repository metadata is staged and published first.
+// Optional: $env:CRM_ENGINE_CHECK_COMPANY_ID = "-4242" (default). It must be negative: no real company has a negative id,
+// and zero or a positive id is refused. The next id down is used as "another company".
+// If nothing is published yet, the repository metadata is staged and published first.
+// The date check writes to its own table dbo.crm_obj_zz_engine_check (made if missing, never dropped; its rows are
+// deleted again): the repository's lead has no writable date field, and the check must not change what is published.
 // Result: .guard/real-db/engine-api-<time>.json (kind REAL, verdict PASS or FAIL). Exit code 0 only on PASS.
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { readMetadata, transactional, writeResult } from './db.mjs';
-import { MSNODESQLV8_HELP, settingsFrom } from './settings.mjs';
+import { MSNODESQLV8_HELP, checkCompanyId, settingsFrom } from './settings.mjs';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const backendRequire = createRequire(path.join(repo, 'backend/package.json'));
@@ -35,14 +38,14 @@ async function main() {
     try { const detail = await fn(); steps.push({ name, ok: true, ...(detail ? { detail } : {}) }); return detail; }
     catch (e) { steps.push({ name, ok: false, error: e.code ? `${e.code}${e.errors?.length ? ` ${JSON.stringify(e.errors)}` : ''}` : String(e.message).split('\n')[0] }); throw e; }
   };
-  const company = Number((process.env.CRM_ENGINE_CHECK_COMPANY_ID ?? '').trim() || -4242);
+  let company;
   const tag = started.replace(/\D/g, '').slice(0, 14);
-  const created = [];
+  const created = [], createdDates = [];
   let pool, cfg, db;
   try {
     let conn;
     cfg = await step('settings', async () => {
-      if (!Number.isSafeInteger(company)) throw new Error('CRM_ENGINE_CHECK_COMPANY_ID must be an integer');
+      company = checkCompanyId(process.env);
       conn = settingsFrom(process.env);
       return { ...conn.summary, company };
     });
@@ -59,7 +62,7 @@ async function main() {
     const { PublishedModels, sqlPublishedPorts } = dist('modules/engine-api/published-model.js');
     const engine = backendRequire('@dio-crm/engine');
     await step('connect', async () => { pool = await new sql.ConnectionPool(conn.config).connect(); });
-    db = transactional(sql, pool);
+    db = transactional(sql, pool, dist('database/sql-params.js').bindParams);
     await step('apply crm_meta schema', () => meta.applyCrmMetaSchema(db));
     await step('published metadata version', async () => {
       const versions = new engine.MetadataVersions(new meta.SqlMetaVersionStore(db));
@@ -102,8 +105,32 @@ async function main() {
       const t = await db.transaction(q => q("SELECT OBJECT_ID(N'dbo.crm_obj_lead', N'U') AS id"));
       must(t.recordset[0].id !== null, 'crm_obj_lead is gone');
     });
+    await step('dates: year 1000 with .001 ms, date 0001-01-01, typed nulls (own table crm_obj_zz_engine_check)', async () => {
+      const { applyObjectSchema } = dist('database/crm-obj-schema.js');
+      const f = (key, type, more = {}) => ({ key, type, labelKey: 'x', required: false, system: false, aliases: [], ...more });
+      const [shape] = await applyObjectSchema(db, [{ key: 'zz_engine_check', aliases: [], fields: [f('met_at', 'datetime'), f('opened_on', 'date'), f('updated_at', 'datetime', { system: true })] }]);
+      const store = new SqlObjectRecords(db), scope = { companyId: company, actor: a.actor.userId }, all = { kind: 'all' };
+      const sent = { met_at: '1000-01-01T00:00:00.001Z', opened_on: '0001-01-01' }, at = new Date('2026-01-01T00:00:00.001Z');
+      const made = await store.insert(shape, scope, sent, at);
+      createdDates.push(made.id);
+      const read = (await store.get(shape, scope, all, Number(made.id))).values;
+      must(read.met_at === sent.met_at, `met_at came back as ${read.met_at}`);
+      must(read.opened_on === sent.opened_on, `opened_on came back as ${read.opened_on}`);
+      must(read.updated_at === at.toISOString(), `updated_at came back as ${read.updated_at}`);
+      const later = (await store.update(shape, scope, all, Number(made.id), () => ({ met_at: '9999-12-31T23:59:59.999Z', opened_on: null }), at)).values;
+      must(later.met_at === '9999-12-31T23:59:59.999Z' && later.opened_on === null, `update came back as ${JSON.stringify(later)}`);
+      return { id: made.id, read, later };
+    });
     await step('B still sees none of A\'s rows', async () => { must((await api.list(b, 'lead', {})).items.length === 0, 'B sees rows'); });
   } catch { /* recorded in steps */ } finally {
+    if (db && createdDates.length) {
+      await step('delete only the date rows this run created', async () => {
+        const ids = createdDates.map(Number);
+        const r = await db.transaction(q => q(`DELETE FROM dbo.crm_obj_zz_engine_check WHERE company_id = @company AND id IN (${ids.map((_, i) => `@id${i}`).join(', ')})`,
+          { company, ...Object.fromEntries(ids.map((id, i) => [`id${i}`, id])) }));
+        return { deleted: r.rowsAffected?.[0] ?? null, ids };
+      }).catch(() => undefined);
+    }
     if (db && created.length) {
       await step('delete only the rows this run created', async () => {
         const ids = created.map(Number);
@@ -114,7 +141,8 @@ async function main() {
     }
     if (pool) await pool.close().catch(() => undefined);
   }
-  const verdict = steps.length > 0 && steps.every(s => s.ok) && steps.some(s => s.name.startsWith('B still')) ? 'PASS' : 'FAIL';
+  const reached = ['dates:', 'B still'].every(start => steps.some(s => s.name.startsWith(start)));
+  const verdict = steps.length > 0 && steps.every(s => s.ok) && reached ? 'PASS' : 'FAIL';
   const result = { kind: 'REAL', check: 'F2-4 engine API on a real database', verdict, started, finished: new Date().toISOString(), target: cfg ?? null, steps };
   writeResult(repo, 'engine-api', result);
   process.exitCode = verdict === 'PASS' ? 0 : 1;

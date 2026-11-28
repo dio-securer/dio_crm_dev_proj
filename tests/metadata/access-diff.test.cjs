@@ -48,6 +48,17 @@ test('changing the ownerField of a members rule is a widening', () => {
   assert.deepEqual(codes(withRules([members('name')]), withRules([members('phone')])), [W(0)]);
 });
 
+test('renaming the owner field and keeping the old name as an alias is not a widening; another field under the new name is', () => {
+  const rename = rule => variant(b => { const f = field(b, 'lead', 'name'); f.key = 'title'; f.aliases = ['name']; obj(b, 'lead').access = { entity: 'lead', rules: [rule] }; });
+  assert.deepEqual(codes(withRules([own]), rename(own)).filter(c => c.startsWith('D05')), []);
+  assert.deepEqual(codes(withRules([own]), rename({ kind: 'own', ownerField: 'title' })).filter(c => c.startsWith('D05')), []);
+  assert.deepEqual(codes(withRules([own]), rename({ kind: 'own', ownerField: 'phone' })).filter(c => c.startsWith('D05')), [W(0)]);
+  assert.deepEqual(codes(withRules([own]), rename({ kind: 'members', ownerField: 'title' })).filter(c => c.startsWith('D05')), [W(0)]);
+  // The alias dropped: the head's "name" is no longer known to be the base's field.
+  const dropped = variant(b => { const f = field(b, 'lead', 'name'); f.key = 'title'; obj(b, 'lead').access = { entity: 'lead', rules: [{ kind: 'own', ownerField: 'title' }] }; });
+  assert.deepEqual(codes(withRules([own]), dropped).filter(c => c.startsWith('D05')), [W(0)]);
+});
+
 test('a field named by its alias is the same field', () => {
   const head = variant(b => { field(b, 'lead', 'name').aliases = ['title']; obj(b, 'lead').access = { entity: 'lead', rules: [{ kind: 'own', ownerField: 'title' }] }; });
   assert.deepEqual(codes(withRules([own]), head), []);
