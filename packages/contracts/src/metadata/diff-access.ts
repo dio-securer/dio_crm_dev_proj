@@ -5,7 +5,7 @@ import { fieldNames, resolveByNames } from './field-names';
 
 /** The field a rule reads, by its real key (aliases resolved), or undefined for `all` / `none`. */
 function fieldOf(rule: RowAccessRule, ob: ObjectBundle): string | undefined {
-  const name = rule.kind === 'unit' ? rule.unitField : rule.kind === 'own' || rule.kind === 'members' ? rule.ownerField : undefined;
+  const name = rule.kind === 'unit' ? rule.unitField : rule.kind === 'own' || rule.kind === 'members' || rule.kind === 'subtree' ? rule.ownerField : undefined;
   if (name === undefined) return undefined;
   return ob.object.fields.find(f => f.key === name || f.aliases.includes(name))?.key ?? name;
 }

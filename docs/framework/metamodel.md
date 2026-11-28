@@ -19,6 +19,7 @@
 | `RULE` | `metadata/objects/<개체>/rules.json` | R01, R02, R04, R07, R08, R10 |
 | `WORKFLOW` | `metadata/objects/<개체>/workflow.json` | R01, R02, R07 |
 | (새것) 행 권한 `ObjectAccess` | `metadata/objects/<개체>/access.json` | R01, R02, R07, R09, R11 |
+| (새것) 권한 세트·프로필·조직도 (F2-7) | `metadata/security/permission-sets.json`, `profiles.json`, `org/<키>.json` | S01–S11 |
 | `MENU` | `metadata/menu.json` | R04, R07, R08 |
 | `CODE` | `metadata/codes/<그룹>.json` | R04, R08 |
 | `TERM` | `metadata/terms/<언어>/<앞부분>.json`, `metadata/terms/semantic.json` | R04, R08 |
@@ -30,11 +31,19 @@
 
 ## 행 권한 (F2-2)
 
-`access.json` 은 `{ entity, rules }` 다. 규칙은 `all`, `none`, `own`(ownerField), `members`(ownerField), `unit`(unitField) 이고, `none` 외에는 `permission` 을 붙일 수 있다.
+`access.json` 은 `{ entity, rules }` 다. 규칙은 `all`, `none`, `own`(ownerField), `members`(ownerField), `unit`(unitField), `subtree`(ownerField, F2-7) 이고, `none` 외에는 `permission` 을 붙일 수 있다.
 규칙은 하나라도 맞으면 보인다(OR). 파일이 없으면 아무 행도 보이지 않는다(닫힌 기본값). 엔진의 `RuntimeModel.rowAccess(개체)` 가 이 규칙을 읽어 평가기에 넘긴다. 결정의 이유는 [ADR 0007](adr/0007-row-access-in-metadata.md) 에 있다.
 ownerField·unitField 는 있는 필드여야 하고(R02) 글자나 참조 필드여야 한다(R11). `none` 은 혼자만 쓴다(R11). 덮어쓰기 대상은 아직 아니다.
 기준보다 더 많은 행을 보이게 하는 변경은 `diffBundles` 의 D05_ACCESS_WIDENED 오류다(P6). 좁히는 변경은 통과한다.
 이름을 바꾼 필드는 저장소가 열을 찾는 것과 같은 순서(키, 그다음 옛 이름. `field-names.ts` 의 `resolveByNames`)로 전의 필드 하나에 이어진다. 옛 이름들이 전의 필드 둘 이상을 가리키면 D06_ALIAS_MERGES_FIELDS 오류이고, 그 필드는 어느 것도 잇지 않는다(행 권한 규칙이 그 이름을 따라가면 D05).
+
+## 권한 세트·프로필·조직도 (F2-7)
+
+- `security/permission-sets.json` 은 `{ items }` 다. 세트마다 `key`, `name`, 개체 권한 `objects`(read/create/edit/delete), 필드 권한 `fields`(개체 → 필드 → read/edit, `*` 은 모든 필드) 가 있다.
+- `security/profiles.json` 은 `{ items }` 다. 프로필은 `roles`(토큰의 역할) 를 가진 사용자에게 `permissionSets` 를 주고, `restrictions` 의 세트가 `true` 로 적은 동작은 무엇이 허용해도 막는다. 프로필이 하나라도 있으면 맞는 프로필이 없는 사용자는 아무것도 못 한다(닫힘이 기본).
+- `security/org/<키>.json` 은 회사 하나의 조직도다(`key`, `companyId`, `units`, `members`). 조직에는 `headUserId`(권역장·본부장·지점장) 가 있고, 사용자는 한 조직에만 둔다.
+- 조직장은 자기 조직 아래 전체에 속한 사람의 기록을 `subtree` 규칙으로만 본다. `members`·`unit` 규칙은 조직도로 넓어지지 않는다. 그래서 넓히기는 언제나 `access.json` 에 보이고 D05 가 잡는다.
+- 가상 국내영업 조직(회사 -1)이 `security/org/virtual_domestic_sales.json` 에 있다. 실제 회사 행은 건드리지 않는다.
 
 ## 필드 종류
 
@@ -106,6 +115,17 @@ ownerField·unitField 는 있는 필드여야 하고(R02) 글자나 참조 필�
 | `R10_REQUIRED_HIDDEN` | error | `validateBundle` | 필수 필드 "{field}" 이(가) 하나뿐인 입력 화면 "{screen}" 에 보이지 않습니다. |
 | `R11_ACCESS_FIELD_TYPE` | error | `validateBundle` | 행 권한 규칙의 필드 "{field}"({type}) 에는 사용자·조직 ID 를 담을 수 없습니다. 글자(text)나 참조(reference) 필드를 쓰세요. |
 | `R11_ACCESS_NONE_MIXED` | error | `validateBundle` | 행 권한 규칙 "none" 은 다른 규칙과 함께 둘 수 없습니다. 규칙은 하나라도 맞으면 보이므로 "none" 은 아무 뜻이 없습니다. |
+| `S01_DUPLICATE_PERMISSION_SET` | error | `validateBundle` | 권한 세트 "{key}" 이(가) 두 번 정의되었습니다. |
+| `S02_UNKNOWN_PERMISSION_SET` | error | `validateBundle` | 프로필 "{profile}" 이(가) 쓰는 권한 세트 "{key}" 이(가) 없습니다. |
+| `S03_UNKNOWN_OBJECT` | error | `validateBundle` | 권한 세트 "{key}" 이(가) 없는 개체 "{entity}" 에 권한을 줍니다. |
+| `S04_UNKNOWN_FIELD` | error | `validateBundle` | 권한 세트 "{key}" 이(가) 개체 "{entity}" 에 없는 필드 "{field}" 에 권한을 줍니다. |
+| `S05_DUPLICATE_PROFILE` | error | `validateBundle` | 프로필 "{key}" 이(가) 두 번 정의되었습니다. |
+| `S06_DUPLICATE_ORG_CHART` | error | `validateBundle` | 회사 {companyId} 의 조직도가 두 개 있습니다. 회사마다 조직도는 하나입니다. |
+| `S07_DUPLICATE_UNIT` | error | `validateBundle` | 조직도 "{chart}" 에 조직 "{unit}" 이(가) 두 번 있습니다. |
+| `S08_UNKNOWN_PARENT` | error | `validateBundle` | 조직도 "{chart}" 의 조직 "{unit}" 의 상위 조직 "{parent}" 이(가) 없습니다. |
+| `S09_ORG_CYCLE` | error | `validateBundle` | 조직도 "{chart}" 의 조직 "{unit}" 이(가) 자기 아래 조직을 상위로 가리킵니다(순환). |
+| `S10_UNKNOWN_UNIT` | error | `validateBundle` | 조직도 "{chart}" 의 사용자 "{user}" 이(가) 없는 조직 "{unit}" 에 배정되었습니다. |
+| `S11_DUPLICATE_MEMBER` | error | `validateBundle` | 조직도 "{chart}" 에 사용자 "{user}" 이(가) 두 조직 이상에 배정되었습니다. 사용자는 한 조직에만 둡니다. |
 <!-- issue-codes:end -->
 
 ## 하위 호환의 허용 표

@@ -1,6 +1,7 @@
 // Role hierarchy over the organisation tree (F2-7): the head of a unit sees what is owned inside that unit's subtree.
 // Pure. The tree comes from the ERP organisation (crm_organization.parent_organization_id); the backend maps the rows.
-// The result feeds the existing `members` and `unit` row rules, so no rule kind is added and no settings rule is widened.
+// The result feeds only the `subtree` row rule (F2-7, declared in access.json), never `members` or `unit`, so an
+// existing settings rule is not widened by code: the widening is visible in the settings and checked by D05/P6.
 import type { Actor } from '../row-access';
 
 export interface OrgUnit {
@@ -87,9 +88,7 @@ export function hierarchyScope(chart: OrgChart, userId: string): HierarchyScope 
   return { unitIds: [...units].sort(), memberIds: [...members].sort() };
 }
 
-/** The actor with its hierarchy scope added to the members and units it already had. */
+/** The actor with the users of its hierarchy scope as `subtreeIds` (read only by a `subtree` rule). */
 export function withHierarchy(actor: Actor, chart: OrgChart): Actor {
-  const scope = hierarchyScope(chart, actor.userId);
-  const merge = (a: readonly string[] | undefined, b: string[]) => [...new Set([...(a ?? []), ...b])].sort();
-  return { ...actor, memberIds: merge(actor.memberIds, scope.memberIds), unitIds: merge(actor.unitIds, scope.unitIds) };
+  return { ...actor, subtreeIds: hierarchyScope(chart, actor.userId).memberIds };
 }

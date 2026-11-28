@@ -1,4 +1,4 @@
-// Cross-reference checks of an object's row access rules (access.json, F2-2).
+// Cross-reference checks of an object's row access rules (access.json, F2-2; `subtree` F2-7).
 import { Context, checkPermission, useField } from './context';
 import { ACCESS_FIELD_TYPES, ObjectBundle } from './schemas';
 

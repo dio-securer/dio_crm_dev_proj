@@ -10,7 +10,7 @@ const rows = [{ id: 1, owner_name: 'u1' }, { id: 2, owner_name: 'u2' }, { id: 3,
 test('the lead rules of access.json reach the evaluator', () => {
   const { model, issues } = loadRuntimeModel(readMetadata());
   assert.deepEqual(issues.filter(i => i.severity === 'error'), []);
-  assert.deepEqual(model.rowAccess('lead'), [{ kind: 'own', ownerField: 'owner_name' }, { kind: 'members', ownerField: 'owner_name' }]);
+  assert.deepEqual(model.rowAccess('lead'), [{ kind: 'own', ownerField: 'owner_name' }, { kind: 'members', ownerField: 'owner_name' }, { kind: 'subtree', ownerField: 'owner_name' }]);
   const rules = model.rowAccess('lead');
   assert.deepEqual(filterRows(rules, { userId: 'u1', permissions: [] }, rows).map(r => r.id), [1]);
   assert.deepEqual(filterRows(rules, { userId: 'u1', memberIds: ['u3'], permissions: [] }, rows).map(r => r.id), [1, 3]);
@@ -49,7 +49,7 @@ test('rules are per object: an unknown object gets none and a second object keep
   assert.deepEqual(issues.filter(i => i.severity === 'error'), []);
   assert.deepEqual(model.rowAccess('no_such'), []);
   assert.deepEqual(model.rowAccess('contact'), [{ kind: 'unit', unitField: 'unit_id' }]);
-  assert.deepEqual(model.rowAccess('lead'), [{ kind: 'own', ownerField: 'owner_name' }, { kind: 'members', ownerField: 'owner_name' }]);
+  assert.deepEqual(model.rowAccess('lead'), [{ kind: 'own', ownerField: 'owner_name' }, { kind: 'members', ownerField: 'owner_name' }, { kind: 'subtree', ownerField: 'owner_name' }]);
 });
 
 test('aliases are resolved for members and unit rules too', () => {

@@ -52,7 +52,7 @@ function buildModel(bundle: MetadataBundle): RuntimeModel {
 /** Rewrites an aliased ownerField / unitField to the field key, so rows are read by their real column. */
 function canonical(rule: RowAccessRule, byKey: Map<string, FieldDef> | undefined): RowAccessRule {
   const real = (name: string) => byKey?.get(name)?.key ?? name;
-  if (rule.kind === 'own' || rule.kind === 'members') return { ...rule, ownerField: real(rule.ownerField) };
+  if (rule.kind === 'own' || rule.kind === 'members' || rule.kind === 'subtree') return { ...rule, ownerField: real(rule.ownerField) };
   if (rule.kind === 'unit') return { ...rule, unitField: real(rule.unitField) };
   return { ...rule };
 }

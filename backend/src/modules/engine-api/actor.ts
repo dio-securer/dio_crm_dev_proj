@@ -4,10 +4,9 @@ import { ForbiddenException } from '@nestjs/common';
 import type { JwtPayload } from '../../security/security';
 import type { Caller } from './engine-records';
 
-// F2-7: deliberately not wired to the org chart or to permission grants. Adding withHierarchy(actor, chart) here
-// would let unit heads see their subordinates' rows, i.e. it WIDENS row access compared with today; it needs a P6
-// declaration in guard-raises.json or the owner's explicit approval, and a settings source for the chart and grants,
-// which waits on the metamodel change (packages/contracts/src/metadata) the owner has not approved yet.
+// F2-7: the token gives the roles; grants and the hierarchy are added from the PUBLISHED settings (metadata/security)
+// by EngineRecords (secureActor), never from the request. The hierarchy opens rows only through a `subtree` rule
+// declared in an object's access.json, so a widening shows in the settings (D05) and needs a P6 declaration.
 export function callerOf(user: JwtPayload | undefined): Caller {
   if (!user || typeof user.publicId !== 'string' || !user.publicId || !Number.isSafeInteger(user.companyId)) {
     throw new ForbiddenException('ENGINE_API_NO_ACTOR');
@@ -18,6 +17,7 @@ export function callerOf(user: JwtPayload | undefined): Caller {
     actor: {
       userId: user.publicId,
       permissions: Array.isArray(user.permissions) ? [...user.permissions] : [],
+      roles: Array.isArray(user.roles) ? user.roles.filter(r => typeof r === 'string') : [],
       unitIds: unit === undefined || unit === null ? [] : [String(unit)],
       memberIds: [],
     },

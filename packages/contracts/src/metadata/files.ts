@@ -3,11 +3,12 @@ import { z } from 'zod';
 import { fitsLimits, byteCount, lineCount } from './canonical';
 import { Issue, issue, sortIssues } from './issues';
 import {
-  CHUNK_PATTERN, GLOBAL_FILES, GLOBAL_FILE_SCHEMAS, IGNORED_NAMES, OBJECT_FILES, OBJECT_FILE_SCHEMAS, ROOT, codeGroupFileSchema,
+  CHUNK_PATTERN, GLOBAL_FILES, ORG_DIR, SECURITY_DIR, SECURITY_FILES, SECURITY_FILE_SCHEMAS, GLOBAL_FILE_SCHEMAS, IGNORED_NAMES, OBJECT_FILES, OBJECT_FILE_SCHEMAS, ROOT, codeGroupFileSchema,
   deprecationsFileSchema, dirToScopeKey, fieldsFileSchema, namespaceOf, objectFileSchema, overlayFileSchema, screenEntrySchema,
   semanticFileSchema, translationFileSchema,
 } from './layout';
 import { DETAILS } from './messages';
+import { orgChartSchema } from './security-schemas';
 import { MetadataBundle, OVERLAY_DOMAINS, REQUIRED_LOCALES, SCOPES, metadataBundleSchema } from './schemas';
 
 export interface MetadataFile { path: string; content: string }
@@ -18,7 +19,7 @@ interface ObjectParts { object?: any; fields?: any[]; chunks: Map<number, any[]>
 export function bundleFromFiles(files: MetadataFile[]): LoadResult {
   const issues: Issue[] = [];
   const objects = new Map<string, ObjectParts>();
-  const raw: Record<string, any> = { schemaVersion: 1, objects: [], deprecations: [], overlays: [] };
+  const raw: Record<string, any> = { schemaVersion: 1, objects: [], deprecations: [], overlays: [], orgCharts: [] };
   const codeGroups: any[] = [], translations: any[] = [];
   const misplaced = (path: string, detail: string) => issues.push(issue('F02_MISPLACED_FILE', path, { detail }));
   const parse = <T extends z.ZodTypeAny>(schema: T, value: unknown, path: string): z.infer<T> | undefined => {
@@ -52,6 +53,12 @@ export function bundleFromFiles(files: MetadataFile[]): LoadResult {
         if (namespaceOf(termKey) !== stem) misplaced(`${path}#${termKey}`, DETAILS.namespaceMismatch);
         else translations.push({ termKey, locale: parts[1], text: map[termKey] });
       }
+    } else if (depth === 2 && parts[0] === SECURITY_DIR && name in SECURITY_FILES) {
+      const prop = SECURITY_FILES[name as keyof typeof SECURITY_FILES];
+      raw[prop] = parse(SECURITY_FILE_SCHEMAS[prop], value, path)?.items ?? [];
+    } else if (depth === 3 && parts[0] === SECURITY_DIR && parts[1] === ORG_DIR) {
+      const chart = parse(orgChartSchema, value, path);
+      if (chart && chart.key !== stem) misplaced(path, DETAILS.nameMismatch); else if (chart) raw.orgCharts.push(chart);
     } else if (parts[0] === 'objects' && depth >= 3) readObjectFile(partsOf(parts[1]), parts, stem, value, path);
     else if (parts[0] === 'overlays' && depth === 4) {
       const scope = parts[1], [domain, entity, ...rest] = stem.split('.');

@@ -1,7 +1,7 @@
 // filesFromBundle: writes a MetadataBundle as metadata/ files. Deterministic: same bundle, same bytes, sorted by path.
 import { MAX_FILE_BYTES, MAX_FILE_LINES, byteCount, canonicalJson, lineCount } from './canonical';
 import { MetadataFile } from './files';
-import { OBJECT_FILES, ROOT, chunkName, namespaceOf, safeName, scopeKeyToDir } from './layout';
+import { OBJECT_FILES, ORG_DIR, ROOT, SECURITY_DIR, SECURITY_FILES, chunkName, namespaceOf, safeName, scopeKeyToDir } from './layout';
 import { FieldDef, MetadataBundle, MetadataBundleInput, metadataBundleSchema } from './schemas';
 import { overlayName } from './validate';
 
@@ -60,5 +60,7 @@ export function filesFromBundle(input: MetadataBundle | MetadataBundleInput): Me
     overlays.set(path, [...(overlays.get(path) ?? []), ...o.overrides]);
   }
   for (const [path, overrides] of overlays) put(path, { overrides });
+  for (const [file, prop] of Object.entries(SECURITY_FILES)) if (bundle[prop].length) put(`${SECURITY_DIR}/${file}`, { items: bundle[prop] });
+  for (const chart of bundle.orgCharts) put(`${SECURITY_DIR}/${ORG_DIR}/${name(chart.key)}.json`, chart);
   return files.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
 }

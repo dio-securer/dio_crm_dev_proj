@@ -4,6 +4,7 @@
 import { z } from 'zod';
 import { payloadSchemas } from '../admin/schemas';
 import { configDocumentBaseSchema, overrideOpSchema } from '../admin/versions';
+import { orgChartSchema, permissionSetSchema, profileSchema } from './security-schemas';
 
 const P = payloadSchemas;
 /** Extension field types of the admin FIELD domain (text, decimal, date, boolean, enum), read from the admin schema. */
@@ -67,6 +68,8 @@ export const rowAccessRuleSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('own'), ownerField: lowerSnake, ...accessPermission }).strict(),
   z.object({ kind: z.literal('members'), ownerField: lowerSnake, ...accessPermission }).strict(),
   z.object({ kind: z.literal('unit'), unitField: lowerSnake, ...accessPermission }).strict(),
+  /** F2-7: rows owned by anyone in the subtree of the units the actor heads (metadata/security/org). */
+  z.object({ kind: z.literal('subtree'), ownerField: lowerSnake, ...accessPermission }).strict(),
 ]);
 export type RowAccessRule = z.infer<typeof rowAccessRuleSchema>;
 export const objectAccessSchema = z.object({ entity: lowerSnake, rules: z.array(rowAccessRuleSchema).min(1) }).strict();
@@ -127,6 +130,9 @@ export const metadataBundleSchema = z.object({
   features: P.FEATURE.optional(),
   deprecations: z.array(deprecationRecordSchema).default([]),
   overlays: z.array(overlaySchema).default([]),
+  permissionSets: z.array(permissionSetSchema).default([]),
+  profiles: z.array(profileSchema).default([]),
+  orgCharts: z.array(orgChartSchema).default([]),
 }).strict();
 export type MetadataBundle = z.infer<typeof metadataBundleSchema>;
 export type MetadataBundleInput = z.input<typeof metadataBundleSchema>;

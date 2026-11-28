@@ -23,6 +23,17 @@
       },
       "reason": "F2-2 리드 행 권한 첫 정의",
       "changeId": "F2-2"
+    },
+    {
+      "rule": "P6",
+      "file": "metadata/objects/lead/access.json",
+      "from": null,
+      "to": {
+        "kind": "subtree",
+        "ownerField": "owner_name"
+      },
+      "reason": "F2-7 조직 계층: 권역장·본부장·지점장이 자기 아래 조직 사람이 담당한 리드를 본다(소유자 승인, 이 스레드 결정 카드 '접근 규칙 포함 진행'). PR 검토에서 다시 승인 필요",
+      "changeId": "F2-7"
     }
   ]
 }

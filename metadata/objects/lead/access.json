@@ -8,6 +8,10 @@
     {
       "kind": "members",
       "ownerField": "owner_name"
+    },
+    {
+      "kind": "subtree",
+      "ownerField": "owner_name"
     }
   ]
 }

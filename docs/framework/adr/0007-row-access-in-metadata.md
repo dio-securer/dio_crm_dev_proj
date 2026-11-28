@@ -34,3 +34,11 @@ F2-1 에서 엔진에 행 권한 평가기(`canAccessRow`, `accessPredicate`)를
 - 보호 검사 P6 `metadata-compat`: D05 로 행 권한 넓히기를 막는다(`tests/metadata/access-diff.test.cjs`).
 - 가드 규칙 G12 `metadata-valid`: `access.json` 도 `bundleFromFiles` + `validateBundle` 로 검사한다.
 - `tests/metadata/access.test.cjs`(계약), `packages/engine/test/access-config.test.cjs`(엔진).
+
+## 덧붙임 (F2-7, 조직 계층)
+
+- 규칙 `subtree`(ownerField) 를 더한다. 조직도(`metadata/security/org/<키>.json`) 에서 사용자가 조직장인 조직의 아래 전체에 속한 사람이 담당한 행을 연다.
+- 조직도는 `members`·`unit` 규칙을 넓히지 않는다. 계층으로 넓히는 것은 `subtree` 규칙을 `access.json` 에 적을 때만 생기므로 D05 가 잡고, P6 예외 선언과 사람의 승인이 필요하다.
+- 깨진 조직도(중복 조직, 없는 상위, 순환)는 G12 에서 S07–S09 오류다. 엔진은 그래도 깨진 갈래만 닫는다.
+- 개체·필드 권한은 `metadata/security/` 의 권한 세트와 프로필에서 온다. 요청이 권한을 실어 보낼 수 없다. 서버가 게시된 설정에서 읽는다.
+- 소유자 승인: 이 변경(보호 파일 수정, 접근 규칙 형식 추가)은 소유자가 결정 카드로 승인했다. 리드 `subtree` 규칙의 P6 선언은 PR 검토에서 다시 승인받는다.

@@ -13,7 +13,11 @@ import { sqliteDb } from './sqlite-db';
 
 type File = { path: string; content: string };
 const repo = path.resolve(__dirname, '../../..');
-export function readMetadata(): File[] {
+/**
+ * The repository metadata. Without `security`, metadata/security/ (profiles, permission sets, org charts; F2-7) is left
+ * out, so storage and API tests are narrowed by row access only; engine-security-metadata.spec reads it all.
+ */
+export function readMetadata(opts: { security?: boolean } = {}): File[] {
   const out: File[] = [];
   const walk = (dir: string) => {
     for (const e of fs.readdirSync(path.join(repo, dir), { withFileTypes: true })) {
@@ -22,14 +26,14 @@ export function readMetadata(): File[] {
     }
   };
   walk('metadata');
-  return out;
+  return opts.security ? out : out.filter(f => !f.path.startsWith('metadata/security/'));
 }
 export function editJson(files: File[], file: string, edit: (doc: any) => void): File[] {
   return files.map(f => { if (f.path !== file) return f; const doc = JSON.parse(f.content); edit(doc); return { ...f, content: JSON.stringify(doc) }; });
 }
 export const ACCESS = 'metadata/objects/lead/access.json';
 export const caller = (userId: string, companyId = 1, more: Partial<Caller['actor']> = {}): Caller =>
-  ({ companyId, actor: { userId, permissions: [], memberIds: [], unitIds: [], ...more } });
+  ({ companyId, actor: { userId, permissions: [], roles: ['MANAGER'], memberIds: [], unitIds: [], ...more } });
 export const NOW = new Date('2026-11-28T01:02:03.000Z');
 
 export async function engineFixture(files: File[] | null = readMetadata()) {

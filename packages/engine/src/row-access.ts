@@ -13,6 +13,10 @@ export interface Actor {
   /** Organization units whose rows this actor may see through a `unit` rule. */
   unitIds?: readonly string[];
   permissions: readonly string[];
+  /** Membership roles of the token; profiles in metadata/security give permission sets by role (F2-7). */
+  roles?: readonly string[];
+  /** Users in the subtree of the units this actor heads (org chart, F2-7); read only by a `subtree` rule. */
+  subtreeIds?: readonly string[];
   /** Object and field permissions (F2-7). Absent: the caller narrows nothing beyond row access (no source yet). */
   grants?: PermissionGrants;
 }
@@ -36,6 +40,7 @@ function termOf(rule: RowAccessRule, actor: Actor): { field: string; values: str
     case 'own': return { field: rule.ownerField, values: [actor.userId] };
     case 'members': return { field: rule.ownerField, values: [...(actor.memberIds ?? [])] };
     case 'unit': return { field: rule.unitField, values: [...(actor.unitIds ?? [])] };
+    case 'subtree': return { field: rule.ownerField, values: [...(actor.subtreeIds ?? [])] };
     default: return undefined;
   }
 }

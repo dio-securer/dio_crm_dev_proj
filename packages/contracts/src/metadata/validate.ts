@@ -3,6 +3,7 @@ import { resolveOverrides, validateResolved } from '../admin/resolver';
 import { configDocumentSchema } from '../admin/versions';
 import { checkGlobal } from './check-global';
 import { checkObject } from './check-object';
+import { checkSecurity } from './check-security';
 import { Context, FieldUse, createContext } from './context';
 import { Issue, issue, sortIssues } from './issues';
 import { ENTITY_DOMAINS, MetadataBundle, Overlay, SCREEN_DOMAINS, metadataBundleSchema } from './schemas';
@@ -15,6 +16,7 @@ function checkBase(bundle: MetadataBundle): Context {
   const ctx = createContext(bundle);
   checkGlobal(ctx);
   bundle.objects.forEach((ob, i) => checkObject(ctx, ob, i));
+  checkSecurity(ctx);
   return ctx;
 }
 

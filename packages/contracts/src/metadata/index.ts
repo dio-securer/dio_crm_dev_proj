@@ -14,3 +14,5 @@ export { filesFromBundle } from './write';
 export * from './layout';
 export { fieldNames, resolveByNames } from './field-names';
 export type { NamedField, NameResolution } from './field-names';
+export * from './security-schemas';
+export { checkSecurity } from './check-security';

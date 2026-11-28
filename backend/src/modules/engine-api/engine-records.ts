@@ -1,7 +1,7 @@
 // The automatic API (F2-4): list / read / create / update of any object in the published metadata.
 // Field checks and row access come from the engine; the store runs parameterised SQL inside the company and access condition.
 // Closed by default: no rules means no rows and no create; a row outside the actor's access is "not found".
-import { accessPredicate, buildUiModel, canObject, fieldAccessOf, isUiLocale, matchesPredicate, readableValues, restrictUiModel, validateWrite, viewReadable, withOwnerDefault } from '@dio-crm/engine';
+import { accessPredicate, buildUiModel, canObject, fieldAccessOf, isUiLocale, matchesPredicate, readableValues, restrictUiModel, secureActor, validateWrite, viewReadable, withOwnerDefault } from '@dio-crm/engine';
 import type { Actor, FieldAccessOf, ObjectAction, RecordError, RecordValue, RuntimeModel, AccessPredicate, UiModel } from '@dio-crm/engine';
 import { PublishedCheck, StaleVersionError } from '../../database/crm-meta-published';
 import { FilterError } from '../../database/crm-obj-filter';
@@ -66,13 +66,16 @@ function needObject(actor: Actor, objectKey: string, action: ObjectAction): void
 }
 /** What leaves the API: only the fields the actor may read. */
 const shaped = (record: StoredRecord, access: FieldAccessOf | undefined): StoredRecord => ({ id: record.id, values: readableValues(record.values, access) });
+/** The caller with grants and hierarchy from the published settings (F2-7); the request never supplies them. */
+const secured = (caller: Caller, model: RuntimeModel): Caller => ({ ...caller, actor: secureActor(caller.actor, model.bundle, caller.companyId) });
 
 export class EngineRecords {
   constructor(private readonly published: PublishedSource, private readonly store: RecordStore, private readonly now: () => Date = () => new Date()) {}
 
-  private async open(caller: Caller, objectKey: string, action: ObjectAction = 'read') {
+  private async open(given: Caller, objectKey: string, action: ObjectAction = 'read') {
     const current = await this.published.current();
     if (!current) throw new EngineApiError(503, 'NO_PUBLISHED_METADATA');
+    const caller = secured(given, current.model);
     const object = current.model.object(objectKey);
     if (!object) throw new EngineApiError(404, 'OBJECT_NOT_FOUND');
     needObject(caller.actor, object.object.key, 'read');
@@ -84,7 +87,7 @@ export class EngineRecords {
     if (accessValueCount(predicate) > MAX_ACCESS_VALUES) throw new EngineApiError(403, 'ACCESS_TOO_WIDE');
     const shape = await current.shape(object.object.key);
     const scope: RecordScope = { companyId: caller.companyId, actor: caller.actor.userId };
-    return { current, shape, rules, scope, predicate, access };
+    return { current, shape, rules, scope, predicate, access, caller };
   }
 
   /** The view named by `view` (its filter, sort and page size) and at most one `ref.<field>=<value>` condition. */
@@ -125,9 +128,10 @@ export class EngineRecords {
   }
 
   /** The object's settings in one language, for the generic screens. Only the published version; no table is touched. */
-  async ui(caller: Caller, objectKey: string, locale: unknown): Promise<UiAnswer> {
+  async ui(given: Caller, objectKey: string, locale: unknown): Promise<UiAnswer> {
     const current = await this.published.current();
     if (!current) throw new EngineApiError(503, 'NO_PUBLISHED_METADATA');
+    const caller = secured(given, current.model);
     if (!isUiLocale(locale)) throw new EngineApiError(400, 'BAD_LOCALE');
     const built = buildUiModel(current.model, objectKey, locale);
     if (!built) throw new EngineApiError(404, 'OBJECT_NOT_FOUND');
@@ -147,10 +151,10 @@ export class EngineRecords {
   }
 
   async create(caller: Caller, objectKey: string, body: unknown): Promise<StoredRecord> {
-    const { current, shape, rules, scope, predicate, access } = await this.open(caller, objectKey, 'create');
+    const { current, shape, rules, scope, predicate, access, caller: secure } = await this.open(caller, objectKey, 'create');
     const checked = validateWrite(current.model, objectKey, body, 'create', access);
     if (!checked.ok) throw new EngineApiError(400, 'INVALID_RECORD', checked.errors);
-    const values = withOwnerDefault(rules, caller.actor, checked.values);
+    const values = withOwnerDefault(rules, secure.actor, checked.values);
     // The new row must be one the actor can see: nobody creates rows for others or outside their access.
     if (!matchesPredicate(predicate, values)) throw new EngineApiError(403, 'ACCESS_DENIED');
     return shaped(await this.store.insert(shape, scope, values, this.now(), current.check).catch(stale), access);

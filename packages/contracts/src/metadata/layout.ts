@@ -2,6 +2,7 @@
 // Every path is relative to the repository root and starts with `metadata/`.
 import { z } from 'zod';
 import { payloadSchemas } from '../admin/schemas';
+import { permissionSetsFileSchema, profilesFileSchema } from './security-schemas';
 import { deprecationRecordSchema, objectAccessSchema, fieldDefSchema, objectDefSchema, overlaySchema, screenEntrySchema } from './schemas';
 
 export const ROOT = 'metadata/';
@@ -13,6 +14,12 @@ export const OBJECT_FILE_SCHEMAS = { listViews: payloadSchemas.LIST_VIEW, action
 /** Global files, by path under metadata/. */
 export const GLOBAL_FILES = { 'menu.json': 'menu', 'features.json': 'features' } as const;
 export const GLOBAL_FILE_SCHEMAS = { menu: payloadSchemas.MENU, features: payloadSchemas.FEATURE };
+
+/** Security files (F2-7), under metadata/security/: two list files and one org chart per file in org/<key>.json. */
+export const SECURITY_DIR = 'security';
+export const SECURITY_FILES = { 'permission-sets.json': 'permissionSets', 'profiles.json': 'profiles' } as const;
+export const SECURITY_FILE_SCHEMAS = { permissionSets: permissionSetsFileSchema, profiles: profilesFileSchema };
+export const ORG_DIR = 'org';
 
 export const objectFileSchema = objectDefSchema.omit({ fields: true });
 export const fieldsFileSchema = z.object({ fields: z.array(fieldDefSchema) }).strict();
