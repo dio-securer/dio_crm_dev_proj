@@ -26,8 +26,26 @@ test('keeping, narrowing, adding a permission, none, and removing access.json ar
   assert.deepEqual(codes(withRules([own]), variant(() => {})), []);
 });
 
-test('a first access.json on an existing object is a new definition, not compared', () => {
-  assert.deepEqual(codes(variant(() => {}), withRules([{ kind: 'all' }])), []);
+test('an existing object without access.json was closed: a first rule set is a widening, none is not', () => {
+  assert.deepEqual(codes(variant(() => {}), withRules([{ kind: 'all' }])), [W(0)]);
+  assert.deepEqual(codes(variant(() => {}), withRules([own])), [W(0)]);
+  assert.deepEqual(codes(variant(() => {}), withRules([{ kind: 'none' }])), []);
+});
+
+test('two steps, delete access.json then re-add it as all, are each judged: the second is a widening', () => {
+  const step1 = variant(() => {});
+  assert.deepEqual(codes(withRules([own]), step1), []);
+  assert.deepEqual(codes(step1, withRules([{ kind: 'all' }])), [W(0)]);
+});
+
+test('a new object (absent from the base) is a new definition, not compared', () => {
+  const head = variant(b => { b.objects.push({ object: { key: 'contact', labelKey: 'lead.label', pluralLabelKey: 'lead.plural', fields: [] }, access: { entity: 'contact', rules: [{ kind: 'all' }] } }); });
+  assert.deepEqual(codes(variant(() => {}), head), []);
+});
+
+test('changing the ownerField of a members rule is a widening', () => {
+  const members = f => ({ kind: 'members', ownerField: f });
+  assert.deepEqual(codes(withRules([members('name')]), withRules([members('phone')])), [W(0)]);
 });
 
 test('a field named by its alias is the same field', () => {

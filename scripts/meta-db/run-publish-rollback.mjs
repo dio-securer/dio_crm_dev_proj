@@ -1,35 +1,23 @@
 #!/usr/bin/env node
 // F2-3 real-database check: stage -> publish -> publish -> rollback of metadata versions on a real SQL Server.
 // Meant for the owner's PC. Creates only the crm_meta_* tables (idempotent) and never touches other tables.
-// Connection settings come from environment variables only; nothing secret is written in code or in the result.
-//   CRM_META_DB_SERVER (e.g. 127.0.0.1)   CRM_META_DB_PORT (default 1433)   CRM_META_DB_DATABASE (e.g. "DIO CRM")
-//   CRM_META_DB_USER   CRM_META_DB_PASSWORD   CRM_META_DB_DOMAIN (only for Windows/NTLM sign-in)
-//   CRM_META_DB_ENCRYPT=true|false (default false)   CRM_META_DB_TRUST_CERT=true|false (default true)
-// Before running: pnpm install && pnpm build. Run from the repository root: node scripts/meta-db/run-publish-rollback.mjs
+// Connection settings come from environment variables only (see settings.mjs); nothing secret is in code or in the result.
+//
+// Windows PowerShell, signed-in Windows account (owner's PC: SQL Server on 127.0.0.1:1433, database "DIO CRM"):
+//   pnpm install; pnpm build
+//   $env:CRM_META_DB_AUTH = "windows-integrated"
+//   $env:CRM_META_DB_SERVER = "127.0.0.1"; $env:CRM_META_DB_PORT = "1433"; $env:CRM_META_DB_DATABASE = "DIO CRM"
+//   node scripts/meta-db/run-publish-rollback.mjs
+// If the msnodesqlv8 driver is missing the script prints how to add it without changing the repository.
 // Result: .guard/real-db/meta-versions-<time>.json (kind REAL, verdict PASS or FAIL). Exit code 0 only on PASS.
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
+import { MSNODESQLV8_HELP, settingsFrom } from './settings.mjs';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const backendRequire = createRequire(path.join(repo, 'backend/package.json'));
-const env = name => (process.env[name] ?? '').trim();
-
-function settings() {
-  const missing = ['CRM_META_DB_SERVER', 'CRM_META_DB_DATABASE', 'CRM_META_DB_USER', 'CRM_META_DB_PASSWORD'].filter(n => !env(n));
-  if (missing.length) throw new Error(`missing environment variables: ${missing.join(', ')}`);
-  const domain = env('CRM_META_DB_DOMAIN');
-  return {
-    server: env('CRM_META_DB_SERVER'), port: Number(env('CRM_META_DB_PORT') || 1433), database: env('CRM_META_DB_DATABASE'),
-    ...(domain
-      ? { authentication: { type: 'ntlm', options: { domain, userName: env('CRM_META_DB_USER'), password: env('CRM_META_DB_PASSWORD') } } }
-      : { user: env('CRM_META_DB_USER'), password: env('CRM_META_DB_PASSWORD') }),
-    options: { encrypt: env('CRM_META_DB_ENCRYPT') === 'true', trustServerCertificate: env('CRM_META_DB_TRUST_CERT') !== 'false' },
-    pool: { min: 0, max: 2 }, connectionTimeout: 15000, requestTimeout: 30000,
-  };
-}
-
 function readMetadata() {
   const out = [];
   const walk = dir => {
@@ -53,7 +41,11 @@ function transactional(sql, pool) {
         for (const [k, v] of Object.entries(params)) req.input(k, v);
         return req.query(text);
       };
-      try { const out = await work(query); await tx.commit(); return out; } catch (e) { await tx.rollback(); throw e; }
+      try { const out = await work(query); await tx.commit(); return out; } catch (e) {
+        // A failed rollback (e.g. the connection dropped) must not hide the error that caused it.
+        try { await tx.rollback(); } catch { /* keep the original error */ }
+        throw e;
+      }
     },
   };
 }
@@ -67,11 +59,18 @@ async function main() {
   };
   let pool, cfg;
   try {
-    cfg = await step('settings', async () => { const c = settings(); return { server: c.server, port: c.port, database: c.database }; });
-    const sql = backendRequire('mssql');
+    let conn;
+    cfg = await step('settings', async () => { conn = settingsFrom(process.env); return conn.summary; });
+    const sql = await step('load driver', async () => {
+      try { return backendRequire(conn.driverModule); } catch (e) {
+        if (conn.driverModule !== 'mssql') console.error(MSNODESQLV8_HELP);
+        throw new Error(`cannot load ${conn.driverModule}: ${e.message.split('\n')[0]}`);
+      }
+    });
+    delete steps[steps.length - 1].detail;
     const store = backendRequire(path.join(repo, 'backend/dist/src/database/crm-meta-version-store.js'));
     const engine = createRequire(path.join(repo, 'packages/engine/package.json'))(path.join(repo, 'packages/engine/dist/index.js'));
-    await step('connect', async () => { pool = await new sql.ConnectionPool(settings()).connect(); });
+    await step('connect', async () => { pool = await new sql.ConnectionPool(conn.config).connect(); });
     const db = transactional(sql, pool);
     await step('apply crm_meta schema', () => store.applyCrmMetaSchema(db));
     const svc = new engine.MetadataVersions(new store.SqlMetaVersionStore(db));

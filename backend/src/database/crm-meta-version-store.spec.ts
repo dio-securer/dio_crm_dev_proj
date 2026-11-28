@@ -13,13 +13,24 @@ const engine = require('../../../packages/engine/dist');
 type Row = Record<string, any>;
 /** A fake database that keeps crm_meta_* rows in memory and answers exactly the adapter's statements. */
 function fakeDb() {
-  let state = { versions: new Map<number, Row>(), pointer: null as number | null, events: [] as Row[], next: 1 };
+  let state = { versions: new Map<number, Row>(), pointer: null as number | null, events: [] as Row[], next: 1, tables: new Set<string>(['crm_meta_version', 'crm_meta_pointer', 'crm_meta_event']), pointerRow: true };
   const log: { text: string; params: Record<string, unknown> }[] = [];
-  const clone = () => ({ versions: new Map([...state.versions].map(([k, v]) => [k, { ...v }])), pointer: state.pointer, events: [...state.events], next: state.next });
+  const clone = () => ({ versions: new Map([...state.versions].map(([k, v]) => [k, { ...v }])), pointer: state.pointer, events: [...state.events], next: state.next, tables: new Set(state.tables), pointerRow: state.pointerRow });
+  const created: string[] = [];
   const run = (s: typeof state): MetaQuery => async (text, params = {}) => {
     log.push({ text, params });
     const p = params as Row;
-    if (text.startsWith('SELECT published_version_id')) return { recordset: [{ published_version_id: s.pointer }] };
+    const guard = /^IF OBJECT_ID\(N'dbo\.(\w+)', N'U'\) IS NULL\nCREATE TABLE dbo\.(\w+) /.exec(text);
+    if (guard) {
+      if (guard[1] !== guard[2]) throw new Error('guard and table differ');
+      if (!s.tables.has(guard[2])) { s.tables.add(guard[2]); created.push(guard[2]); }
+      return { recordset: [] };
+    }
+    if (text.startsWith('IF NOT EXISTS (SELECT 1 FROM dbo.crm_meta_pointer WHERE id = 1)\nINSERT')) {
+      if (!s.pointerRow) { s.pointerRow = true; created.push('pointer row'); }
+      return { recordset: [] };
+    }
+    if (text.startsWith('SELECT published_version_id')) return { recordset: s.pointerRow ? [{ published_version_id: s.pointer }] : [] };
     if (text.startsWith('UPDATE dbo.crm_meta_pointer')) { s.pointer = p.id; return { recordset: [] }; }
     if (text.startsWith('SELECT id, status')) { const r = s.versions.get(p.id); return { recordset: r ? [{ ...r }] : [] }; }
     if (text.startsWith('INSERT INTO dbo.crm_meta_version')) {
@@ -33,11 +44,11 @@ function fakeDb() {
       return { recordset: [] };
     }
     if (text.startsWith('INSERT INTO dbo.crm_meta_event')) { s.events.push({ ...p }); return { recordset: [] }; }
-    if (text.includes('crm_meta_')) return { recordset: [] };
     throw new Error(`unexpected SQL: ${text}`);
   };
   const db: MetaTransactional = { async transaction(work) { const draft = clone(); const out = await work(run(draft)); state = draft; return out; } };
-  return { db, log, get state() { return state; } };
+  const empty = () => { state.tables.clear(); state.pointerRow = false; };
+  return { db, log, created, empty, get state() { return state; } };
 }
 
 function readMetadata() {
@@ -60,6 +71,16 @@ describe('crm_meta schema', () => {
     const f = fakeDb();
     await applyCrmMetaSchema(f.db);
     expect(f.log.map(l => l.text)).toEqual([...CRM_META_SCHEMA]);
+  });
+  it('running the schema twice creates each table once and keeps the published pointer', async () => {
+    const f = fakeDb();
+    f.empty();
+    await applyCrmMetaSchema(f.db);
+    expect(f.created).toEqual(['crm_meta_version', 'crm_meta_pointer', 'pointer row', 'crm_meta_event']);
+    await f.db.transaction(async q => { const tx = metaVersionTx(q); await tx.setPointer(await tx.insert({ status: 'published', files: [], createdBy: 'o', createdAt: '2026-11-28T00:00:00.000Z' })); });
+    await applyCrmMetaSchema(f.db);
+    expect(f.created).toHaveLength(4);
+    expect(f.state.pointer).toBe(1);
   });
 });
 

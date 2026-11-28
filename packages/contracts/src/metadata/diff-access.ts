@@ -27,12 +27,15 @@ function covered(rule: RowAccessRule, head: ObjectBundle, base: ObjectBundle, ba
 }
 
 /**
- * An object whose base had no access.json is not compared: its first rule set is a new definition, reviewed as such.
+ * Only a new object (absent from the base) is not compared. An existing object without access.json was closed
+ * (no rows), so its base counts as `none` and any head rule other than `none` is a widening.
  * A head without access.json closes the object (no rows), which is a narrowing.
  */
+const CLOSED: readonly RowAccessRule[] = [{ kind: 'none' }];
 export function diffAccess(base: ObjectBundle, head: ObjectBundle, path: string, out: Issue[]): void {
-  if (!base.access || !head.access) return;
+  if (!head.access) return;
+  const baseRules = base.access?.rules ?? CLOSED;
   head.access.rules.forEach((rule, i) => {
-    if (!covered(rule, head, base, base.access!.rules)) out.push(issue('D05_ACCESS_WIDENED', `${path}/access/rules[#${i}]`, { entity: head.object.key, rule: rule.kind }));
+    if (!covered(rule, head, base, baseRules)) out.push(issue('D05_ACCESS_WIDENED', `${path}/access/rules[#${i}]`, { entity: head.object.key, rule: rule.kind }));
   });
 }

@@ -28,6 +28,7 @@ export class MetadataVersions {
 
   discard(id: number, actor: string): Promise<void> {
     return this.store.transaction(async tx => {
+      await tx.lockPointer();
       const v = await must(tx, id);
       await tx.update(id, { status: nextStatus('discard', v.status) });
       await tx.addEvent({ versionId: id, action: 'discard', actor, at: this.clock() });

@@ -13,6 +13,11 @@ function setup() {
 const rejects = (p, code) => assert.rejects(p, e => e instanceof VersionError && e.code === code);
 const relabel = text => editJson(readMetadata(), 'metadata/terms/en-US/lead.json', d => { d['lead.label'] = text; });
 
+test('the transition table is exactly the agreed list', () => {
+  const pairs = Object.entries(TRANSITIONS).flatMap(([a, m]) => Object.entries(m).map(([f, t]) => `${a}:${f}->${t}`)).sort();
+  assert.deepEqual(pairs, ['discard:staging->discarded', 'publish:staging->published', 'restore:superseded->published', 'rollback:published->rolled_back', 'supersede:published->superseded']);
+});
+
 test('the transition table: only listed moves are allowed', () => {
   assert.equal(nextStatus('publish', 'staging'), 'published');
   assert.equal(nextStatus('restore', 'superseded'), 'published');
@@ -46,12 +51,13 @@ test('stage -> publish -> publish -> rollback -> rollback', async () => {
 });
 
 test('rollback with nothing published, unknown ids, discard', async () => {
-  const { svc } = setup();
+  const { store, svc } = setup();
   await rejects(svc.rollback('owner'), 'NO_PUBLISHED');
   await rejects(svc.publish(99, 'owner'), 'NOT_FOUND');
   const v = await svc.stage(readMetadata(), 'owner');
   await svc.discard(v, 'owner');
   await rejects(svc.publish(v, 'owner'), 'BAD_STATE');
+  assert.deepEqual(store.snapshot().events.map(e => `${e.action}:${e.versionId}:${e.actor}`), ['stage:1:owner', 'discard:1:owner']);
   await rejects(svc.discard(v, 'owner'), 'BAD_STATE');
 });
 
@@ -93,4 +99,28 @@ test('concurrent publishes of two staged versions: one wins, the other supersede
   assert.equal(snap.pointer, b);
   assert.equal(snap.versions.find(v => v.id === b).previousId, a);
   assert.equal(snap.versions.filter(v => v.status === 'published').length, 1);
+});
+
+test('every read-then-write operation locks the pointer first', async () => {
+  const store = memoryVersionStore(), calls = [];
+  const spy = { transaction: work => store.transaction(tx => work(new Proxy(tx, { get: (t, k) => (...a) => { calls.push(k); return t[k](...a); } }))) };
+  const svc = new MetadataVersions(spy, () => 'T');
+  const firstCall = async fn => { calls.length = 0; await fn(); return calls[0]; };
+  const a = await svc.stage(readMetadata(), 'o'), b = await svc.stage(readMetadata(), 'o');
+  assert.equal(await firstCall(() => svc.discard(a, 'o')), 'lockPointer');
+  assert.equal(await firstCall(() => svc.publish(b, 'o')), 'lockPointer');
+  assert.equal(await firstCall(() => svc.published()), 'lockPointer');
+});
+
+test('warnings do not block publish', async () => {
+  const { svc } = setup();
+  let files = editJson(readMetadata(), 'metadata/objects/lead/fields.json', d => { d.fields.find(x => x.key === 'owner_name').aliases = ['owner']; });
+  files = editJson(files, ACCESS, d => { d.rules = [{ kind: 'own', ownerField: 'owner' }]; });
+  assert.equal((await svc.publish(await svc.stage(files, 'o'), 'o')).status, 'published');
+});
+
+test('the service path: lead published without access.json is closed, so adding rules is refused (D05)', async () => {
+  const { svc } = setup();
+  await svc.publish(await svc.stage(readMetadata().filter(f => f.path !== ACCESS), 'o'), 'o');
+  await assert.rejects(svc.publish(await svc.stage(readMetadata(), 'o'), 'o'), e => e.code === 'INCOMPATIBLE' && e.issues.some(i => i.code === 'D05_ACCESS_WIDENED'));
 });
