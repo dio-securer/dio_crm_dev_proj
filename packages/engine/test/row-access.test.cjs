@@ -48,8 +48,38 @@ test('missing member or unit lists and non-string values never match', () => {
 
 test('predicate and row check agree on every row', () => {
   const ruleSets = [[], [{ kind: 'all' }], [{ kind: 'own', ownerField: 'owner_id' }, { kind: 'unit', unitField: 'unit_id' }],
-    [{ kind: 'members', ownerField: 'owner_id', permission: 'x' }]];
-  for (const rules of ruleSets) for (const row of rows) {
-    assert.equal(canAccessRow(rules, actor, row), matchesPredicate(accessPredicate(rules, actor), row));
+    [{ kind: 'members', ownerField: 'owner_id', permission: 'x' }], [{ kind: 'all', permission: 'lead.read_all' }]];
+  for (const who of [actor, { userId: 'u1', permissions: [] }]) for (const rules of ruleSets) for (const row of rows) {
+    assert.equal(canAccessRow(rules, who, row), matchesPredicate(accessPredicate(rules, who), row));
   }
+});
+
+test('a gated all rule does not open rows for an actor without the permission', () => {
+  const gated = [{ kind: 'all', permission: 'lead.read_all' }];
+  const nobody = { userId: 'u1', permissions: [] };
+  assert.equal(canAccessRow(gated, nobody, rows[0]), false);
+  assert.equal(canAccessRow(gated, actor, rows[3]), true);
+  assert.deepEqual(accessPredicate(gated, nobody), { kind: 'none' });
+  for (const row of rows) assert.equal(canAccessRow(gated, nobody, row), matchesPredicate(accessPredicate(gated, nobody), row));
+});
+
+test('rules use the field names they name', () => {
+  const r = [{ kind: 'own', ownerField: 'created_by' }, { kind: 'unit', unitField: 'branch' }];
+  assert.equal(canAccessRow(r, actor, { created_by: 'u1' }), true);
+  assert.equal(canAccessRow(r, actor, { owner_id: 'u1', unit_id: 'east' }), false);
+  assert.equal(canAccessRow(r, actor, { branch: 'east' }), true);
+  assert.equal(canAccessRow([{ kind: 'members', ownerField: 'rep' }], actor, { rep: 'u2' }), true);
+});
+
+test('a gated rule that does not apply does not stop later rules', () => {
+  const r = [{ kind: 'all', permission: 'missing' }, { kind: 'own', ownerField: 'owner_id' }];
+  assert.deepEqual(ids(r), ['a']);
+});
+
+test('empty value lists become none and values are sorted', () => {
+  const bare = { userId: 'u1', permissions: [] };
+  assert.deepEqual(accessPredicate([{ kind: 'members', ownerField: 'owner_id' }, { kind: 'unit', unitField: 'unit_id' }], bare), { kind: 'none' });
+  const who = { userId: 'u5', memberIds: ['u9', 'u2'], permissions: [] };
+  assert.deepEqual(accessPredicate([{ kind: 'own', ownerField: 'o' }, { kind: 'members', ownerField: 'o' }], who),
+    { kind: 'anyOf', terms: [{ field: 'o', values: ['u2', 'u5', 'u9'] }] });
 });

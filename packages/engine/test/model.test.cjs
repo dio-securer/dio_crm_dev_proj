@@ -59,3 +59,22 @@ test('a reference to an unknown term is a validation error and no model', () => 
   assert.equal(model, undefined);
   assert.ok(issues.some(i => i.severity === 'error'));
 });
+
+test('field lookup is per object and code values come back sorted by order', () => {
+  const files = readMetadata().map(f => {
+    if (f.path !== 'metadata/codes/lead_status.json') return f;
+    const doc = JSON.parse(f.content);
+    doc.values.reverse();
+    return { ...f, content: JSON.stringify(doc) };
+  });
+  files.push({ path: 'metadata/objects/contact/object.json', content: JSON.stringify({ key: 'contact', labelKey: 'lead.label', pluralLabelKey: 'lead.plural', aliases: [] }) });
+  files.push({ path: 'metadata/objects/contact/fields.json', content: JSON.stringify({ fields: [{ key: 'status', type: 'text', labelKey: 'lead.field.status', required: false, system: false, aliases: [] }] }) });
+  const { model, issues } = loadRuntimeModel(files);
+  assert.deepEqual(issues.filter(i => i.severity === 'error'), []);
+  assert.equal(model.field('contact', 'status').type, 'text');
+  assert.equal(model.field('lead', 'status').type, 'enum');
+  assert.equal(model.field('contact', 'hospital_name'), undefined);
+  const orders = model.codeValues('lead_status').map(c => c.order);
+  assert.deepEqual(orders, [...orders].sort((a, b) => a - b));
+  assert.notDeepEqual(orders, JSON.parse(files.find(f => f.path === 'metadata/codes/lead_status.json').content).values.map(v => v.order));
+});
