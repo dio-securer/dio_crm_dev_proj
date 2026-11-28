@@ -1,0 +1,15 @@
+$ node scripts/admin/run-entry-tests.cjs
+PASS BROWSER_MOCK: organization create, cycle rejection, input preserved
+PASS BROWSER_MOCK T82 partial transfer, replay, inactive target
+PASS BROWSER_MOCK: login/entry, create, update, reload, egress=0
+locator.waitFor: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('row').filter({ hasText: 'DEMO New Team' }) to be visible[22m
+
+    at main (/workspace/scratch/fc936b13017a/crm-resume/scripts/admin/run-entry-tests.cjs:5:474) {
+  log: [
+    "  - waiting for getByRole('row').filter({ hasText: 'DEMO New Team' }) to be visible"
+  ],
+  name: 'TimeoutError'
+}
+[ELIFECYCLE] Command failed with exit code 1.

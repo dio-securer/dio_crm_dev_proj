@@ -7,6 +7,8 @@ import { normalizeLocale } from '../i18n/locale-resolver';
 import { isFeatureVisible } from './feature-visibility';
 import { KR_MARKET_PROFILE } from './profiles/KR';
 import { GLOBAL_EXECUTIVE_DEMO_CONTEXT, isGlobalExecutiveDemoMode } from '../demo/demo-mode';
+import { useHqMock } from '../hq-mock/HqMockProvider';
+import { getHqToken } from '../hq-mock/mode';
 
 const fallbackContext: GlobalizationContext = {
   locale: KR_MARKET_PROFILE.defaultLocale,
@@ -37,10 +39,11 @@ const GlobalizationContextStore = createContext<ContextValue>({
 });
 
 export function GlobalizationProvider({ children }: { children: React.ReactNode }) {
-  const demoMode = isGlobalExecutiveDemoMode();
-  const hasToken = typeof window !== 'undefined' && !!localStorage.getItem('dio_crm_access_token');
+  const hq = useHqMock();
+  const demoMode = !hq.enabled && isGlobalExecutiveDemoMode();
+  const hasToken = hq.enabled ? !!getHqToken() : typeof window !== 'undefined' && !!localStorage.getItem('dio_crm_access_token');
   const query = useQuery({
-    queryKey: ['me-context'],
+    queryKey: ['me-context', hq.enabled ? 'HQ_HTTP_MOCK' : 'DEFAULT', hq.session?.user.userId, hq.session?.dataset.generation],
     queryFn: () => apiGet<MeContextResponse>('/api/me/context'),
     enabled: hasToken && !demoMode,
     staleTime: 5 * 60 * 1000,

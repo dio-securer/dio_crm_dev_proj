@@ -1,0 +1,17 @@
+$ pnpm -r build
+Scope: 3 of 4 workspace projects
+packages/contracts build$ tsc -p tsconfig.json
+packages/contracts build: Done
+backend build$ nest build
+frontend build$ tsc --noEmit && vite build
+frontend build: vite v6.4.3 building for production...
+frontend build: transforming...
+backend build: Done
+frontend build: ✓ 152 modules transformed.
+frontend build: rendering chunks...
+frontend build: computing gzip size...
+frontend build: dist/index.html                   0.86 kB │ gzip:   0.42 kB
+frontend build: dist/assets/index-BN0Z3Zvi.css   22.46 kB │ gzip:   5.29 kB
+frontend build: dist/assets/index-Bm9xw_o_.js   491.90 kB │ gzip: 146.71 kB
+frontend build: ✓ built in 1.88s
+frontend build: Done

@@ -1,0 +1,10 @@
+
+ RUN  v3.2.7 /workspace/scratch/60bbf1e11d53/crm-ui-verify/frontend
+
+ ✓ src/admin/designer/model.test.ts (12 tests) 103ms
+
+ Test Files  1 passed (1)
+      Tests  12 passed (12)
+   Start at  20:51:15
+   Duration  689ms (transform 269ms, setup 0ms, collect 357ms, tests 103ms, environment 0ms, prepare 60ms)
+

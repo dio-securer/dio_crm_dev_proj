@@ -121,9 +121,16 @@ export class ContractService {
       if (['ERP_REQUESTED','ERP_APPROVED','CLOSED'].includes(contract.status)) throw new ConflictException('Initial collection plan is locked after ERP request');
       const decision = validatePlanTotal(Number(contract.contract_amount), rows);
       if (!decision.allowed) throw new BadRequestException(decision.error);
-      await query(`DELETE FROM crm_collection_plan WHERE contract_id=@contractId AND plan_version=1`, { contractId: contract.contract_id });
+      if (new Set(rows.map(row => row.installmentNo)).size !== rows.length) throw new BadRequestException('Duplicate installment number');
+      const existing = await query<{collection_plan_id:number;installment_no:number;locked_yn:boolean}>(`SELECT collection_plan_id,installment_no,locked_yn FROM crm_collection_plan WITH(UPDLOCK,HOLDLOCK) WHERE contract_id=@contractId AND plan_version=1`, {contractId: contract.contract_id});
+      if (existing.recordset.some(plan => plan.locked_yn)) throw new ConflictException('Initial collection plan is locked');
+      if (existing.recordset.some(plan => !rows.some(row => row.installmentNo === plan.installment_no))) throw new ConflictException('Plan removal requires preservation support');
       for (const row of rows) {
-        await query(`INSERT INTO crm_collection_plan(contract_id,plan_version,installment_no,collection_method,amount,planned_date,adjustment_type,is_current,erp_sync_status,created_by)
+        const previous=existing.recordset.find(plan=>plan.installment_no===row.installmentNo);
+        if(previous){
+          const updated=await query(`UPDATE crm_collection_plan SET collection_method=@method,amount=@amount,planned_date=@plannedDate WHERE contract_id=@contractId AND collection_plan_id=@planId AND locked_yn=0`,{contractId:contract.contract_id,planId:previous.collection_plan_id,method:row.collectionMethod,amount:row.amount,plannedDate:row.plannedDate});
+          if(updated.rowsAffected?.[0]!==1) throw new ConflictException('Collection plan changed');
+        }else await query(`INSERT INTO crm_collection_plan(contract_id,plan_version,installment_no,collection_method,amount,planned_date,adjustment_type,is_current,erp_sync_status,created_by)
           VALUES(@contractId,1,@installmentNo,@method,@amount,@plannedDate,'ORIGINAL',1,'NOT_REQUESTED',@userId)`, {
           contractId: contract.contract_id, installmentNo: row.installmentNo, method: row.collectionMethod, amount: row.amount, plannedDate: row.plannedDate, userId
         });

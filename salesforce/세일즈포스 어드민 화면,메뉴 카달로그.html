@@ -1,0 +1,1477 @@
+<h1>DIO CRM Admin Screen/Menu Catalog v1.0</h1>
+<h2>1. 설계 목적</h2>
+<p>DIO CRM의 관리자 기능은 Salesforce 관리자 기능을 그대로 복제하는 것이 아니라 다음 범위까지 내재화한다.</p>
+<p><strong>관리자가 직접 변경하는 영역</strong></p>
+<p>운영조직 / 사용자 / 권한 / 데이터 접근범위 / 화면 표시 / 공통코드 / 상태값 / 데이터 Import·Export / 감사로그 / ERP·API 연계상태 / Batch 운영</p>
+<p><strong>개발자가 관리하는 영역</strong></p>
+<p>DB Entity 생성 / DB Column 생성·변경 / 데이터 타입 변경 / Formula Engine / Lookup 관계 생성 / 임의 Business Logic / API 프로그램 변경</p>
+<p>핵심 구조는 다음과 같다.</p>
+<p><code>Admin UI → Admin API → Metadata/Config → CRM Web·Mobile → Business API Validation → Audit</code></p>
+<p>화면만 Metadata를 적용하는 것이 아니라 <strong>API도 동일한 설정을 사용해야 한다.</strong></p>
+<hr>
+<h1>2. 관리자 Main Menu</h1>
+<pre><code class="language-text">관리자 HOME
+│
+├─ 1. 사용자 / 조직
+│   ├─ 사용자 관리
+│   ├─ 사용자 상세
+│   ├─ 조직 관리
+│   ├─ 그룹 / Queue 관리
+│   └─ 담당 데이터 이관
+│
+├─ 2. 권한
+│   ├─ Role 관리
+│   ├─ 권한 Matrix
+│   ├─ Data Scope / Sharing
+│   └─ 메뉴 / Action 권한
+│
+├─ 3. 화면 설정
+│   ├─ 화면 설정
+│   ├─ Field 설정
+│   ├─ Layout / Section 설정
+│   └─ List View 설정
+│
+├─ 4. 코드 관리
+│   ├─ 코드그룹
+│   ├─ 공통코드
+│   ├─ 상태 / 상태전이
+│   └─ ERP 코드 Mapping
+│
+├─ 5. 데이터 관리
+│   ├─ Import
+│   ├─ Mapping / Validation
+│   ├─ 대량수정
+│   ├─ Export
+│   └─ 처리이력 / 오류
+│
+├─ 6. 감사로그
+│   ├─ 관리자 설정 변경이력
+│   └─ CRM 데이터 변경이력
+│
+├─ 7. ERP / API Interface
+│   ├─ Interface Dashboard
+│   ├─ Interface 실행이력
+│   ├─ 오류 / 재처리
+│   ├─ API Log
+│   └─ Batch / Job
+│
+└─ 8. 시스템 운영
+    ├─ 시스템 설정
+    ├─ 인증 / 보안 상태
+    └─ 운영 공지
+</code></pre>
+<hr>
+<h1>3. ADM-SCR Master Catalog</h1>
+<table>
+<thead>
+<tr>
+<th>Screen ID</th>
+<th>화면명</th>
+<th>Route</th>
+<th>주요 ADM</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ADM-SCR-000</td>
+<td>관리자 HOME</td>
+<td><code>/admin</code></td>
+<td>전체</td>
+</tr>
+<tr>
+<td>ADM-SCR-101</td>
+<td>사용자 관리</td>
+<td><code>/admin/users</code></td>
+<td>ADM-003~006</td>
+</tr>
+<tr>
+<td>ADM-SCR-102</td>
+<td>사용자 상세</td>
+<td><code>/admin/users/:id</code></td>
+<td>ADM-004~006</td>
+</tr>
+<tr>
+<td>ADM-SCR-103</td>
+<td>조직 관리</td>
+<td><code>/admin/org</code></td>
+<td>ADM-052</td>
+</tr>
+<tr>
+<td>ADM-SCR-104</td>
+<td>그룹 / Queue</td>
+<td><code>/admin/groups</code></td>
+<td>ADM-007~008</td>
+</tr>
+<tr>
+<td>ADM-SCR-105</td>
+<td>담당 데이터 이관</td>
+<td><code>/admin/ownership-transfer</code></td>
+<td>ADM-009</td>
+</tr>
+<tr>
+<td>ADM-SCR-201</td>
+<td>Role 관리</td>
+<td><code>/admin/roles</code></td>
+<td>ADM-014~015</td>
+</tr>
+<tr>
+<td>ADM-SCR-202</td>
+<td>권한 Matrix</td>
+<td><code>/admin/permissions</code></td>
+<td>ADM-016~017</td>
+</tr>
+<tr>
+<td>ADM-SCR-203</td>
+<td>Data Scope / Sharing</td>
+<td><code>/admin/data-scope</code></td>
+<td>ADM-018~021</td>
+</tr>
+<tr>
+<td>ADM-SCR-204</td>
+<td>메뉴 / Action 권한</td>
+<td><code>/admin/menu-permissions</code></td>
+<td>ADM-054~055</td>
+</tr>
+<tr>
+<td>ADM-SCR-301</td>
+<td>화면 설정</td>
+<td><code>/admin/screens</code></td>
+<td>ADM-030~034</td>
+</tr>
+<tr>
+<td>ADM-SCR-302</td>
+<td>Field 설정</td>
+<td><code>/admin/fields</code></td>
+<td>ADM-017,023,030</td>
+</tr>
+<tr>
+<td>ADM-SCR-303</td>
+<td>Layout / Section</td>
+<td><code>/admin/layouts</code></td>
+<td>ADM-030~034</td>
+</tr>
+<tr>
+<td>ADM-SCR-304</td>
+<td>List View</td>
+<td><code>/admin/list-views</code></td>
+<td>ADM-036~037</td>
+</tr>
+<tr>
+<td>ADM-SCR-401</td>
+<td>코드그룹</td>
+<td><code>/admin/codes/groups</code></td>
+<td>ADM-026,053</td>
+</tr>
+<tr>
+<td>ADM-SCR-402</td>
+<td>공통코드</td>
+<td><code>/admin/codes</code></td>
+<td>ADM-026,053</td>
+</tr>
+<tr>
+<td>ADM-SCR-403</td>
+<td>상태 / 상태전이</td>
+<td><code>/admin/workflow</code></td>
+<td>상태관리</td>
+</tr>
+<tr>
+<td>ADM-SCR-404</td>
+<td>ERP 코드 Mapping</td>
+<td><code>/admin/code-mapping</code></td>
+<td>ADM-062</td>
+</tr>
+<tr>
+<td>ADM-SCR-501</td>
+<td>Data Import</td>
+<td><code>/admin/data/import</code></td>
+<td>ADM-041~043</td>
+</tr>
+<tr>
+<td>ADM-SCR-502</td>
+<td>Mapping / Validation</td>
+<td><code>/admin/data/import/:job</code></td>
+<td>ADM-045~047</td>
+</tr>
+<tr>
+<td>ADM-SCR-503</td>
+<td>대량 수정</td>
+<td><code>/admin/data/bulk-update</code></td>
+<td>ADM-042~044</td>
+</tr>
+<tr>
+<td>ADM-SCR-504</td>
+<td>Data Export</td>
+<td><code>/admin/data/export</code></td>
+<td>ADM-048</td>
+</tr>
+<tr>
+<td>ADM-SCR-505</td>
+<td>데이터 처리이력</td>
+<td><code>/admin/data/jobs</code></td>
+<td>ADM-047</td>
+</tr>
+<tr>
+<td>ADM-SCR-601</td>
+<td>관리자 Audit Log</td>
+<td><code>/admin/audit/config</code></td>
+<td>ADM-056</td>
+</tr>
+<tr>
+<td>ADM-SCR-602</td>
+<td>데이터 변경이력</td>
+<td><code>/admin/audit/data</code></td>
+<td>ADM-029,057</td>
+</tr>
+<tr>
+<td>ADM-SCR-701</td>
+<td>Interface Dashboard</td>
+<td><code>/admin/interfaces</code></td>
+<td>ADM-058</td>
+</tr>
+<tr>
+<td>ADM-SCR-702</td>
+<td>Interface 실행이력</td>
+<td><code>/admin/interfaces/logs</code></td>
+<td>ADM-058</td>
+</tr>
+<tr>
+<td>ADM-SCR-703</td>
+<td>오류 / 재처리</td>
+<td><code>/admin/interfaces/errors</code></td>
+<td>ADM-059</td>
+</tr>
+<tr>
+<td>ADM-SCR-704</td>
+<td>API Log</td>
+<td><code>/admin/interfaces/api</code></td>
+<td>ADM-061</td>
+</tr>
+<tr>
+<td>ADM-SCR-705</td>
+<td>Batch / Job</td>
+<td><code>/admin/jobs</code></td>
+<td>ADM-060</td>
+</tr>
+<tr>
+<td>ADM-SCR-801</td>
+<td>시스템 설정</td>
+<td><code>/admin/settings</code></td>
+<td>ADM-001</td>
+</tr>
+<tr>
+<td>ADM-SCR-802</td>
+<td>인증 / 보안 상태</td>
+<td><code>/admin/security</code></td>
+<td>ADM-010~013</td>
+</tr>
+<tr>
+<td>ADM-SCR-803</td>
+<td>운영 공지</td>
+<td><code>/admin/notices</code></td>
+<td>ADM-064</td>
+</tr>
+</tbody></table>
+<hr>
+<h1>4. ADM-SCR-000 관리자 HOME</h1>
+<h2>목적</h2>
+<p>관리자가 CRM 운영상태를 한 화면에서 파악하고 문제가 있는 관리영역으로 바로 이동한다.</p>
+<h3>Field / Widget</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Active User</td>
+<td>활성 사용자</td>
+</tr>
+<tr>
+<td>Disabled User</td>
+<td>비활성 사용자</td>
+</tr>
+<tr>
+<td>Unassigned Lead</td>
+<td>담당자가 없는 Lead</td>
+</tr>
+<tr>
+<td>Import Error</td>
+<td>최근 Import 오류</td>
+</tr>
+<tr>
+<td>Interface Error</td>
+<td>ERP/API 오류</td>
+</tr>
+<tr>
+<td>Batch Failure</td>
+<td>Batch 실패</td>
+</tr>
+<tr>
+<td>Failed Login</td>
+<td>인증 실패</td>
+</tr>
+<tr>
+<td>Config Change</td>
+<td>최근 관리자 설정 변경</td>
+</tr>
+<tr>
+<td>Pending Retry</td>
+<td>재처리 대기</td>
+</tr>
+<tr>
+<td>Last ERP Sync</td>
+<td>최근 ERP 연계시간</td>
+</tr>
+</tbody></table>
+<h3>Action</h3>
+<p><code>사용자 관리 / Interface 오류 / Batch 오류 / Audit Log / Import 오류</code> 바로가기.</p>
+<h3>Rule</h3>
+<p>오류 Count는 관리자가 접근 가능한 영역만 표시한다.</p>
+<h3>Permission</h3>
+<p><code>CRM_ADMIN / SYSTEM_ADMIN / INTERFACE_ADMIN</code></p>
+<h3>API</h3>
+<pre><code class="language-text">GET /api/admin/dashboard
+GET /api/admin/dashboard/alerts
+</code></pre>
+<h3>Metadata</h3>
+<pre><code class="language-text">ADM_DASHBOARD_WIDGET
+ADM_DASHBOARD_PREF
+</code></pre>
+<hr>
+<h1>5. 사용자 / 조직</h1>
+<h2>ADM-SCR-101 사용자 관리</h2>
+<h3>Field</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>user_id</td>
+<td>CRM User ID</td>
+</tr>
+<tr>
+<td>emp_no</td>
+<td>ERP 사번</td>
+</tr>
+<tr>
+<td>user_name</td>
+<td>사용자명</td>
+</tr>
+<tr>
+<td>login_id</td>
+<td>로그인 ID</td>
+</tr>
+<tr>
+<td>org_code</td>
+<td>조직</td>
+</tr>
+<tr>
+<td>position</td>
+<td>직급</td>
+</tr>
+<tr>
+<td>role</td>
+<td>CRM Role</td>
+</tr>
+<tr>
+<td>data_scope</td>
+<td>데이터 접근범위</td>
+</tr>
+<tr>
+<td>status</td>
+<td>Active / Disabled</td>
+</tr>
+<tr>
+<td>last_login_at</td>
+<td>최근 로그인</td>
+</tr>
+<tr>
+<td>source</td>
+<td>ERP / Manual</td>
+</tr>
+</tbody></table>
+<h3>Search</h3>
+<p>이름 / 사번 / 조직 / Role / 활성상태.</p>
+<h3>Action</h3>
+<p><code>신규 / 수정 / 활성화 / 비활성화 / Role 변경 / 비밀번호·인증상태 확인 / 데이터 이관</code></p>
+<h3>Business Rule</h3>
+<p>ERP에서 전달되는 <code>사번·성명·조직·직급</code>은 CRM에서 임의 변경하지 않는다.</p>
+<p>CRM 관리자는 CRM Role, Data Scope, 추가권한을 관리한다.</p>
+<p>퇴직자는 삭제하지 않고 <code>Disabled</code> 처리한다.</p>
+<h3>Permission</h3>
+<p><code>CRM_ADMIN</code></p>
+<h3>API</h3>
+<pre><code class="language-text">GET    /api/admin/users
+GET    /api/admin/users/{userId}
+POST   /api/admin/users
+PATCH  /api/admin/users/{userId}
+POST   /api/admin/users/{userId}/enable
+POST   /api/admin/users/{userId}/disable
+</code></pre>
+<h3>DB</h3>
+<pre><code class="language-text">ADM_USER
+ADM_USER_ORG
+ADM_USER_ROLE
+ADM_USER_PERMISSION
+</code></pre>
+<hr>
+<h1>6. ADM-SCR-102 사용자 상세</h1>
+<p>구성은 다음 Tab으로 한다.</p>
+<pre><code class="language-text">[기본정보]
+[조직]
+[Role/권한]
+[Data Scope]
+[추가권한]
+[로그인이력]
+[변경이력]
+</code></pre>
+<p>핵심 Field:</p>
+<p><code>사번 / 이름 / Email / 조직 / 직급 / Role / Data Scope / 상태 / ERP Sync 일시</code></p>
+<p>Action:</p>
+<p><code>Role 지정 / 추가권한 부여 / 권한 제거 / 활성화 / 비활성화 / 담당 데이터 이관</code></p>
+<p>사용자 자신의 Role을 관리자 본인이 임의로 상향할 수 없도록 한다.</p>
+<hr>
+<h1>7. ADM-SCR-103 조직 관리</h1>
+<h2>화면</h2>
+<p>좌측 Tree + 우측 조직 상세 구조.</p>
+<pre><code class="language-text">DIO
+ ├─ 국내영업본부
+ │   ├─ 수도권
+ │   └─ 지방
+ ├─ 해외영업본부
+ └─ ...
+</code></pre>
+<h3>Field</h3>
+<p><code>org_code / org_name / parent_org / org_level / manager / active / ERP sync</code></p>
+<h3>Action</h3>
+<p><code>조회 / CRM 조직 속성설정 / 관리자 지정 / Sync</code></p>
+<p>조직코드와 조직계층 자체는 ERP가 Master인 경우 수정 불가한다.</p>
+<h3>DB</h3>
+<pre><code class="language-text">ADM_ORG
+ADM_ORG_MANAGER
+ADM_ORG_SYNC
+</code></pre>
+<hr>
+<h1>8. ADM-SCR-104 그룹 / Queue 관리</h1>
+<p>일반 사용자 그룹과 미배정 업무 Queue를 관리한다.</p>
+<h3>Field</h3>
+<p><code>group_code / group_name / group_type / member / target_entity / active</code></p>
+<p>Group Type:</p>
+<p><code>USER_GROUP / SALES_TEAM / QUEUE</code></p>
+<h3>Rule</h3>
+<p>Queue에는 Lead, 고객문의 등 담당자가 아직 정해지지 않은 Record를 할당할 수 있다.</p>
+<hr>
+<h1>9. ADM-SCR-105 담당 데이터 이관</h1>
+<p>CRM 운영에서 중요도가 매우 높은 관리자 기능이다.</p>
+<h3>화면</h3>
+<pre><code class="language-text">기존 담당자
+   ↓
+대상 조회
+   ↓
+Lead       315
+Account     82
+Contact    147
+Opportunity 21
+Activity    36
+   ↓
+신규 담당자 선택
+   ↓
+Preview
+   ↓
+Transfer
+</code></pre>
+<h3>Action</h3>
+<p><code>대상조회 / Preview / 실행 / 취소</code></p>
+<h3>Rule</h3>
+<p>실행 전 Entity별 대상건수를 반드시 보여준다.</p>
+<p>완료 후 원복 가능한 Transfer Batch ID를 기록한다.</p>
+<h3>API</h3>
+<pre><code class="language-text">POST /api/admin/ownership-transfer/preview
+POST /api/admin/ownership-transfer/execute
+GET  /api/admin/ownership-transfer/{batchId}
+</code></pre>
+<h3>DB</h3>
+<pre><code class="language-text">ADM_OWNER_TRANSFER
+ADM_OWNER_TRANSFER_DETAIL
+</code></pre>
+<hr>
+<h1>10. 권한</h1>
+<p>DIO CRM의 권한모델은 Salesforce 구조를 그대로 복제하지 않는다.</p>
+<pre><code class="language-text">Role
+  +
+Permission
+  +
+Data Scope
+  +
+User Exception
+</code></pre>
+<hr>
+<h1>11. ADM-SCR-201 Role 관리</h1>
+<p>대표 Role 예:</p>
+<p><code>SALES_USER / SALES_MANAGER / SALES_DIRECTOR / CRM_ADMIN / DATA_ADMIN / INTERFACE_ADMIN / AUDITOR</code></p>
+<h3>Field</h3>
+<p><code>role_code / role_name / description / role_level / active</code></p>
+<h3>Action</h3>
+<p><code>신규 / 복사 / 수정 / 비활성</code></p>
+<p>삭제 대신 비활성을 기본으로 한다.</p>
+<hr>
+<h1>12. ADM-SCR-202 권한 Matrix</h1>
+<p>화면은 Matrix가 가장 적합하다.</p>
+<table>
+<thead>
+<tr>
+<th>Entity</th>
+<th align="right">조회</th>
+<th align="right">신규</th>
+<th align="right">수정</th>
+<th align="right">삭제</th>
+<th align="right">Export</th>
+<th align="right">Assign</th>
+<th align="right">Merge</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Lead</td>
+<td align="right">O</td>
+<td align="right">O</td>
+<td align="right">O</td>
+<td align="right">X</td>
+<td align="right">X</td>
+<td align="right">O</td>
+<td align="right">X</td>
+</tr>
+<tr>
+<td>Account</td>
+<td align="right">O</td>
+<td align="right">X</td>
+<td align="right">O</td>
+<td align="right">X</td>
+<td align="right">X</td>
+<td align="right">X</td>
+<td align="right">X</td>
+</tr>
+<tr>
+<td>Contact</td>
+<td align="right">O</td>
+<td align="right">O</td>
+<td align="right">O</td>
+<td align="right">X</td>
+<td align="right">X</td>
+<td align="right">X</td>
+<td align="right">X</td>
+</tr>
+<tr>
+<td>Opportunity</td>
+<td align="right">O</td>
+<td align="right">O</td>
+<td align="right">O</td>
+<td align="right">X</td>
+<td align="right">X</td>
+<td align="right">O</td>
+<td align="right">X</td>
+</tr>
+<tr>
+<td>Activity</td>
+<td align="right">O</td>
+<td align="right">O</td>
+<td align="right">O</td>
+<td align="right">O</td>
+<td align="right">X</td>
+<td align="right">X</td>
+<td align="right">X</td>
+</tr>
+</tbody></table>
+<h3>Business Rule</h3>
+<p>Permission은 기본적으로 <strong>Deny</strong> 상태이며 명시적으로 허용한다.</p>
+<p>서버 API에서도 동일 권한을 검증한다.</p>
+<h3>API</h3>
+<pre><code class="language-text">GET /api/admin/roles/{roleId}/permissions
+PUT /api/admin/roles/{roleId}/permissions
+</code></pre>
+<h3>DB</h3>
+<pre><code class="language-text">ADM_PERMISSION
+ADM_ROLE_PERMISSION
+</code></pre>
+<hr>
+<h1>13. ADM-SCR-203 Data Scope / Sharing</h1>
+<p>Salesforce OWD + Role Hierarchy + Sharing Rule을 DIO 방식으로 단순화한다.</p>
+<h3>Data Scope</h3>
+<pre><code class="language-text">SELF
+TEAM
+DEPARTMENT
+DEPARTMENT_CHILDREN
+REGION
+ALL
+</code></pre>
+<h3>Field</h3>
+<p><code>role / entity / scope_type / exception_rule</code></p>
+<p>예:</p>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Entity</th>
+<th>Data Scope</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>영업사원</td>
+<td>Lead</td>
+<td>SELF</td>
+</tr>
+<tr>
+<td>팀장</td>
+<td>Lead</td>
+<td>DEPARTMENT</td>
+</tr>
+<tr>
+<td>영업본부장</td>
+<td>Lead</td>
+<td>DEPARTMENT_CHILDREN</td>
+</tr>
+<tr>
+<td>CRM 관리자</td>
+<td>Lead</td>
+<td>ALL</td>
+</tr>
+</tbody></table>
+<h3>Sharing Rule</h3>
+<p>예:</p>
+<p><code>서울영업팀 Account → 기술지원팀 Read</code></p>
+<h3>DB</h3>
+<pre><code class="language-text">ADM_DATA_SCOPE
+ADM_SHARE_RULE
+ADM_RECORD_SHARE
+</code></pre>
+<hr>
+<h1>14. ADM-SCR-204 메뉴 / Action 권한</h1>
+<p>메뉴뿐 아니라 실제 업무 버튼까지 관리한다.</p>
+<h3>Action Code 예</h3>
+<pre><code class="language-text">LEAD.CREATE
+LEAD.DELETE
+LEAD.CONVERT
+LEAD.ASSIGN
+LEAD.EXPORT
+ACCOUNT.MERGE
+OPPORTUNITY.CLOSE
+DATA.IMPORT
+DATA.EXPORT
+</code></pre>
+<h3>DB</h3>
+<pre><code class="language-text">ADM_MENU
+ADM_ACTION
+ADM_ROLE_MENU
+ADM_ROLE_ACTION
+</code></pre>
+<hr>
+<h1>15. 화면 설정</h1>
+<h2>ADM-SCR-301 화면 설정</h2>
+<p>관리 대상:</p>
+<p><code>Lead / Account / Contact / Opportunity / Activity ...</code></p>
+<h3>Field</h3>
+<p><code>screen_code / screen_name / entity / desktop_enabled / mobile_enabled / active</code></p>
+<p>관리자는 새로운 Entity나 프로그램 화면을 생성하지 않는다.</p>
+<p>등록된 화면의 설정만 변경한다.</p>
+<hr>
+<h1>16. ADM-SCR-302 Field 설정</h1>
+<p>관리자 내재화에서 핵심 화면이다.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>field_code</td>
+<td>시스템 Field</td>
+</tr>
+<tr>
+<td>display_label</td>
+<td>사용자 표시명</td>
+</tr>
+<tr>
+<td>visible</td>
+<td>표시 여부</td>
+</tr>
+<tr>
+<td>required</td>
+<td>필수</td>
+</tr>
+<tr>
+<td>readonly</td>
+<td>수정 불가</td>
+</tr>
+<tr>
+<td>sort_order</td>
+<td>순서</td>
+</tr>
+<tr>
+<td>desktop</td>
+<td>PC 표시</td>
+</tr>
+<tr>
+<td>mobile</td>
+<td>Mobile 표시</td>
+</tr>
+<tr>
+<td>help_text</td>
+<td>도움말</td>
+</tr>
+</tbody></table>
+<p>예:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th align="right">표시</th>
+<th align="right">필수</th>
+<th align="right">Read Only</th>
+<th align="right">순서</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Lead Name</td>
+<td align="right">O</td>
+<td align="right">O</td>
+<td align="right">X</td>
+<td align="right">10</td>
+</tr>
+<tr>
+<td>Hospital</td>
+<td align="right">O</td>
+<td align="right">O</td>
+<td align="right">X</td>
+<td align="right">20</td>
+</tr>
+<tr>
+<td>Lead Source</td>
+<td align="right">O</td>
+<td align="right">O</td>
+<td align="right">X</td>
+<td align="right">30</td>
+</tr>
+<tr>
+<td>ERP Customer Code</td>
+<td align="right">O</td>
+<td align="right">X</td>
+<td align="right">O</td>
+<td align="right">40</td>
+</tr>
+</tbody></table>
+<h3>핵심 Rule</h3>
+<p><code>DB Column / Type / Relation</code>은 변경할 수 없다.</p>
+<p>필수값 설정은 Frontend와 API 양쪽에서 검증한다.</p>
+<h3>API</h3>
+<pre><code class="language-text">GET /api/meta/screens/{screenCode}/fields
+PUT /api/admin/meta/screens/{screenCode}/fields
+</code></pre>
+<h3>DB</h3>
+<pre><code class="language-text">META_ENTITY
+META_FIELD
+META_SCREEN
+META_SCREEN_FIELD
+</code></pre>
+<hr>
+<h1>17. ADM-SCR-303 Layout / Section 설정</h1>
+<p>자유형 Page Builder가 아니다.</p>
+<pre><code class="language-text">기본정보
+병원정보
+영업정보
+ERP정보
+Activity
+Related Data
+</code></pre>
+<p>각 Section에 어느 Field가 들어갈지만 관리한다.</p>
+<h3>Field</h3>
+<p><code>section_code / section_name / sequence / collapsed / desktop / mobile</code></p>
+<h3>DB</h3>
+<pre><code class="language-text">META_LAYOUT
+META_SECTION
+META_SECTION_FIELD
+</code></pre>
+<hr>
+<h1>18. ADM-SCR-304 List View</h1>
+<p>사용자 목록화면을 Metadata화한다.</p>
+<p>설정 대상:</p>
+<p><code>표시 컬럼 / 컬럼 순서 / 기본정렬 / 기본필터 / Page Size</code></p>
+<p>View Scope:</p>
+<p><code>PERSONAL / TEAM / PUBLIC</code></p>
+<h3>DB</h3>
+<pre><code class="language-text">META_LIST_VIEW
+META_LIST_COLUMN
+META_LIST_FILTER
+</code></pre>
+<hr>
+<h1>19. 코드 관리</h1>
+<h2>ADM-SCR-401 코드그룹</h2>
+<p>예:</p>
+<pre><code class="language-text">LEAD_STATUS
+LEAD_SOURCE
+ACCOUNT_TYPE
+CUSTOMER_GRADE
+OPPORTUNITY_STAGE
+ACTIVITY_TYPE
+LOST_REASON
+</code></pre>
+<p>Field:</p>
+<p><code>group_code / group_name / description / editable / active</code></p>
+<hr>
+<h1>20. ADM-SCR-402 공통코드</h1>
+<h3>Field</h3>
+<p><code>code / name_ko / name_en / sort / active / effective_from / effective_to</code></p>
+<h3>Rule</h3>
+<p>이미 데이터에서 사용 중인 코드는 물리삭제하지 않는다.</p>
+<p><code>사용중지</code> 처리한다.</p>
+<h3>API</h3>
+<pre><code class="language-text">GET  /api/admin/codes/{groupCode}
+POST /api/admin/codes/{groupCode}
+PUT  /api/admin/codes/{groupCode}/{code}
+</code></pre>
+<h3>DB</h3>
+<pre><code class="language-text">SYS_CODE_GROUP
+SYS_CODE
+</code></pre>
+<hr>
+<h1>21. ADM-SCR-403 상태 / 상태전이</h1>
+<p>예:</p>
+<pre><code class="language-text">신규
+ ↓
+접촉
+ ↓
+검토
+ ↓
+전환
+
+또는
+
+검토 → 종료
+</code></pre>
+<h3>Field</h3>
+<p><code>entity / from_status / to_status / required_role / confirm / active</code></p>
+<p>필요하면 전환 시 필수 Field도 지정한다.</p>
+<p>예:</p>
+<p><code>Opportunity → WON</code></p>
+<p>일 경우</p>
+<p><code>Contract Date / Amount</code></p>
+<p>필수.</p>
+<h3>DB</h3>
+<pre><code class="language-text">WF_STATUS
+WF_TRANSITION
+WF_TRANSITION_RULE
+</code></pre>
+<hr>
+<h1>22. ADM-SCR-404 ERP 코드 Mapping</h1>
+<p>CRM과 ERP 코드 차이를 관리자 수준에서 해결한다.</p>
+<p>예:</p>
+<table>
+<thead>
+<tr>
+<th>CRM</th>
+<th>ERP</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>KR</td>
+<td>100</td>
+</tr>
+<tr>
+<td>JP</td>
+<td>200</td>
+</tr>
+<tr>
+<td>US</td>
+<td>300</td>
+</tr>
+</tbody></table>
+<h3>Field</h3>
+<p><code>interface / mapping_type / crm_code / erp_code / effective date</code></p>
+<h3>DB</h3>
+<pre><code class="language-text">IF_CODE_MAP
+</code></pre>
+<hr>
+<h1>23. 데이터 관리</h1>
+<h2>ADM-SCR-501 Import</h2>
+<p>Workflow:</p>
+<pre><code class="language-text">파일 선택
+→ 대상 Entity
+→ Upload
+→ Mapping
+→ Validation
+→ Preview
+→ 실행
+→ 결과
+</code></pre>
+<p>지원:</p>
+<p><code>xlsx / csv</code></p>
+<h3>Rule</h3>
+<p>직접 Production Table에 Insert하지 않는다.</p>
+<p>먼저 Stage 영역에 적재한다.</p>
+<h3>DB</h3>
+<pre><code class="language-text">DATA_JOB
+DATA_STAGE
+DATA_JOB_FILE
+</code></pre>
+<hr>
+<h1>24. ADM-SCR-502 Mapping / Validation</h1>
+<h3>Mapping</h3>
+<pre><code class="language-text">Excel Column     CRM Field
+
+병원명       → Account Name
+담당자       → Owner
+연락처       → Phone
+ERP코드      → ERP Customer Code
+</code></pre>
+<h3>Validation</h3>
+<p><code>필수값 / Data Type / 코드존재 / 사용자존재 / 중복 / 권한 / 길이</code></p>
+<p>결과:</p>
+<pre><code class="language-text">총 1,000건
+정상 972건
+오류 28건
+</code></pre>
+<p>오류 28건을 실행 전에 다운로드할 수 있어야 한다.</p>
+<h3>DB</h3>
+<pre><code class="language-text">DATA_JOB_MAPPING
+DATA_JOB_ROW
+DATA_JOB_ERROR
+</code></pre>
+<hr>
+<h1>25. ADM-SCR-503 대량 수정</h1>
+<p>대상 데이터를 조회한 후 특정 Field를 일괄변경한다.</p>
+<p>지원대상은 Whitelist 방식으로 관리한다.</p>
+<p>예:</p>
+<p><code>Owner / Status / Grade / Region</code></p>
+<p>ERP Key 등 중요 필드는 대량수정 대상에서 제외한다.</p>
+<hr>
+<h1>26. ADM-SCR-504 Export</h1>
+<h3>조건</h3>
+<p><code>Entity / Filter / Column / File Type</code></p>
+<h3>Rule</h3>
+<p>화면에서 볼 수 없는 Record는 Export할 수 없다.</p>
+<p>필드 접근권한도 그대로 적용한다.</p>
+<p>민감정보 Export 여부는 별도 권한으로 관리한다.</p>
+<hr>
+<h1>27. ADM-SCR-505 데이터 처리이력</h1>
+<p>Field:</p>
+<p><code>job_id / job_type / entity / requester / request_time / total / success / fail / status / file</code></p>
+<p>Status:</p>
+<p><code>READY / VALIDATING / RUNNING / COMPLETED / PARTIAL / FAILED</code></p>
+<hr>
+<h1>28. 감사로그</h1>
+<h2>ADM-SCR-601 관리자 설정 변경이력</h2>
+<p>반드시 기록할 대상:</p>
+<p><code>사용자 상태 / Role / Permission / Data Scope / Field 설정 / Layout / 코드 / Interface Mapping / 시스템 설정</code></p>
+<p>Field:</p>
+<p><code>event_time / admin / category / target / before / after / IP / result</code></p>
+<p>관리자도 Audit Log를 수정하거나 삭제할 수 없다.</p>
+<h3>DB</h3>
+<pre><code class="language-text">AUDIT_ADMIN_EVENT
+</code></pre>
+<hr>
+<h1>29. ADM-SCR-602 CRM 데이터 변경이력</h1>
+<p>예:</p>
+<pre><code class="language-text">Account
+─────────────
+변경일시
+사용자
+Field
+Before
+After
+Source
+</code></pre>
+<p>Source:</p>
+<p><code>WEB / MOBILE / ERP / API / BATCH / ADMIN</code></p>
+<h3>DB</h3>
+<pre><code class="language-text">AUDIT_ENTITY_CHANGE
+</code></pre>
+<hr>
+<h1>30. ERP / API Interface</h1>
+<h2>ADM-SCR-701 Interface Dashboard</h2>
+<p>Card 형태:</p>
+<pre><code class="language-text">ERP Sync
+
+오늘 처리     15,251
+성공          15,209
+실패              42
+재처리 대기        12
+</code></pre>
+<p>Interface별 상태를 표시한다.</p>
+<p>예:</p>
+<p><code>ERP Customer / ERP Order / Employee / Product / HIRA / 외부 API</code></p>
+<hr>
+<h1>31. ADM-SCR-702 Interface 실행이력</h1>
+<p>Field:</p>
+<p><code>interface_id / direction / start_time / end_time / source / target / total / success / fail / status</code></p>
+<p>Direction:</p>
+<p><code>ERP → CRM</code></p>
+<p><code>CRM → ERP</code></p>
+<hr>
+<h1>32. ADM-SCR-703 Interface 오류 / 재처리</h1>
+<h3>Field</h3>
+<p><code>interface / record_key / occurred_at / error_code / error_message / retry_count / payload</code></p>
+<h3>Action</h3>
+<p><code>상세 / Payload 조회 / 재처리 / 다건 재처리</code></p>
+<h3>핵심 Rule</h3>
+<p>동일 요청 재처리 시 <strong>중복 등록되지 않아야 한다.</strong></p>
+<p>즉 Interface는 가능한 한 <code>Idempotent</code>하게 설계한다.</p>
+<h3>DB</h3>
+<pre><code class="language-text">IF_EXECUTION
+IF_MESSAGE
+IF_ERROR
+IF_RETRY
+</code></pre>
+<hr>
+<h1>33. ADM-SCR-704 API Log</h1>
+<h3>Field</h3>
+<p><code>request_id / API / method / caller / user / start / elapsed / HTTP status / result</code></p>
+<p>Payload에는 개인정보와 Token을 Masking한다.</p>
+<h3>DB</h3>
+<pre><code class="language-text">API_REQUEST_LOG
+</code></pre>
+<hr>
+<h1>34. ADM-SCR-705 Batch / Job</h1>
+<p>Field:</p>
+<p><code>job_code / job_name / schedule / last_start / elapsed / last_result / next_run / enabled</code></p>
+<p>Action:</p>
+<p><code>상세 / 실행이력 / 수동실행 / Disable</code></p>
+<p>운영 Batch를 관리자가 임의 수정하는 기능은 제공하지 않는다.</p>
+<p>Schedule 변경은 제한된 System Admin만 가능하게 한다.</p>
+<hr>
+<h1>35. 시스템 운영</h1>
+<h2>ADM-SCR-801 시스템 설정</h2>
+<p>운영자가 수정 가능한 Config만 제공한다.</p>
+<p>예:</p>
+<pre><code class="language-text">기본 Page Size
+첨부파일 최대용량
+파일 허용확장자
+Session 관련 표시값
+기본 국가
+기본 언어
+기본 Time Zone
+CRM 운영모드
+</code></pre>
+<p>설정값은 <code>Key / Value</code> 구조만 사용하지 않고 Data Type을 명확히 한다.</p>
+<h3>DB</h3>
+<pre><code class="language-text">SYS_SETTING
+
+setting_key
+setting_value
+data_type
+category
+editable
+encrypted
+</code></pre>
+<hr>
+<h1>36. ADM-SCR-802 인증 / 보안 상태</h1>
+<p>이 화면은 대부분 <strong>조회 중심</strong>이다.</p>
+<p>Field:</p>
+<p><code>SSO 상태 / MFA 사용여부 / 인증 Provider / 최근 인증오류 / Session 정책</code></p>
+<p>실제 MFA, Password Policy 등은 IdP 또는 인증 시스템에서 관리한다.</p>
+<hr>
+<h1>37. ADM-SCR-803 운영 공지</h1>
+<p>CRM 공지 또는 관리자 안내를 설정한다.</p>
+<p>Field:</p>
+<p><code>title / message / start_date / end_date / target / priority / active</code></p>
+<p>Target:</p>
+<p><code>ALL / ROLE / ORG</code></p>
+<hr>
+<h1>38. 공통 관리자 권한</h1>
+<p>관리자라고 모두 같은 권한을 주지 않는다.</p>
+<table>
+<thead>
+<tr>
+<th>관리자 Role</th>
+<th>주요 권한</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SYSTEM_ADMIN</td>
+<td>전체</td>
+</tr>
+<tr>
+<td>CRM_ADMIN</td>
+<td>사용자·조직·권한·화면·코드</td>
+</tr>
+<tr>
+<td>DATA_ADMIN</td>
+<td>Import / Export / 대량처리</td>
+</tr>
+<tr>
+<td>INTERFACE_ADMIN</td>
+<td>ERP/API/Batch</td>
+</tr>
+<tr>
+<td>SECURITY_ADMIN</td>
+<td>인증·접근·Audit</td>
+</tr>
+<tr>
+<td>AUDITOR</td>
+<td>모든 Audit 조회, 수정 불가</td>
+</tr>
+</tbody></table>
+<p>특히 <code>AUDITOR</code>는 조회 전용으로 한다.</p>
+<hr>
+<h1>39. 권한 계산 기준</h1>
+<p>최종 권한은 다음 구조로 계산한다.</p>
+<pre><code class="language-text">최종 권한
+
+= Role Permission
++ User Additional Permission
++ Data Scope
++ Record Share
+- Security Restriction
+</code></pre>
+<p>Security Restriction이 최우선이다.</p>
+<hr>
+<h1>40. Metadata 핵심 DB 구조</h1>
+<h2>사용자 / 권한</h2>
+<pre><code class="language-text">ADM_USER
+ADM_ORG
+ADM_USER_ORG
+
+ADM_ROLE
+ADM_USER_ROLE
+
+ADM_PERMISSION
+ADM_ROLE_PERMISSION
+ADM_USER_PERMISSION
+
+ADM_DATA_SCOPE
+ADM_SHARE_RULE
+ADM_RECORD_SHARE
+
+ADM_MENU
+ADM_ACTION
+ADM_ROLE_MENU
+ADM_ROLE_ACTION
+</code></pre>
+<h2>화면 Metadata</h2>
+<pre><code class="language-text">META_ENTITY
+META_FIELD
+
+META_SCREEN
+META_SCREEN_FIELD
+
+META_LAYOUT
+META_SECTION
+META_SECTION_FIELD
+
+META_LIST_VIEW
+META_LIST_COLUMN
+META_LIST_FILTER
+</code></pre>
+<h2>코드 / Workflow</h2>
+<pre><code class="language-text">SYS_CODE_GROUP
+SYS_CODE
+
+WF_STATUS
+WF_TRANSITION
+WF_TRANSITION_RULE
+
+IF_CODE_MAP
+</code></pre>
+<h2>Data Management</h2>
+<pre><code class="language-text">DATA_JOB
+DATA_JOB_FILE
+DATA_STAGE
+DATA_JOB_MAPPING
+DATA_JOB_ROW
+DATA_JOB_ERROR
+</code></pre>
+<h2>Audit</h2>
+<pre><code class="language-text">AUDIT_ADMIN_EVENT
+AUDIT_ENTITY_CHANGE
+</code></pre>
+<h2>Interface</h2>
+<pre><code class="language-text">IF_DEFINITION
+IF_EXECUTION
+IF_MESSAGE
+IF_ERROR
+IF_RETRY
+
+API_REQUEST_LOG
+
+BATCH_JOB
+BATCH_RUN
+</code></pre>
+<hr>
+<h1>41. Frontend Metadata 처리 예</h1>
+<p>Lead 상세 화면 호출 시 Frontend에서 개별 설정을 Hard Coding하지 않는다.</p>
+<pre><code class="language-text">GET /api/meta/screens/LEAD_DETAIL
+</code></pre>
+<p>개념적인 반환값:</p>
+<pre><code class="language-json">{
+  "screenCode": "LEAD_DETAIL",
+  "sections": [
+    {
+      "sectionCode": "BASIC",
+      "label": "기본정보",
+      "sequence": 10,
+      "fields": [
+        {
+          "field": "leadName",
+          "label": "Lead명",
+          "visible": true,
+          "required": true,
+          "readonly": false,
+          "sequence": 10
+        },
+        {
+          "field": "erpCustomerCode",
+          "label": "ERP 거래처코드",
+          "visible": true,
+          "required": false,
+          "readonly": true,
+          "sequence": 20
+        }
+      ]
+    }
+  ]
+}
+</code></pre>
+<p>React에서는 이 Metadata를 읽어 화면을 Render한다.</p>
+<hr>
+<h1>42. Server 저장 Validation</h1>
+<p>Frontend만 Metadata를 적용해서는 안 된다.</p>
+<p>예:</p>
+<p>관리자가 <code>Lead Source = Required</code>로 설정했다면</p>
+<pre><code class="language-text">React
+      ↓
+필수값 표시
+
+API
+      ↓
+동일 Metadata 확인
+
+DB 저장
+</code></pre>
+<p>API에서도 값이 없는 경우 저장을 거부해야 한다.</p>
+<hr>
+<h1>43. 목업 단계에서는 DB 없이 개발</h1>
+<p>현재 CRM 진행방향상 DB 연계는 후순위이므로 관리자 화면 역시 처음에는 Mock Data로 개발할 수 있다.</p>
+<p>Frontend 구조:</p>
+<pre><code class="language-text">src/
+ └─ admin/
+      ├─ dashboard/
+      ├─ users/
+      ├─ organization/
+      ├─ permissions/
+      ├─ screens/
+      ├─ codes/
+      ├─ data-management/
+      ├─ audit/
+      ├─ interfaces/
+      └─ system/
+</code></pre>
+<p>Mock:</p>
+<pre><code class="language-text">src/mocks/admin/
+</code></pre>
+<p>예:</p>
+<pre><code class="language-text">users.json
+roles.json
+permissions.json
+screens.json
+fields.json
+codes.json
+interfaceLogs.json
+auditLogs.json
+</code></pre>
+<p>이후 DB/API 연결 시 화면 수정 없이 Mock API만 실제 API로 교체하는 것을 목표로 한다.</p>
+<hr>
+<h1>44. 목업 공통 UI Pattern</h1>
+<p>관리자 화면은 종류를 많이 만들더라도 UI Pattern은 최대한 통일한다.</p>
+<pre><code class="language-text">[List]
+검색조건
+──────────────
+Grid
+──────────────
+신규 / 수정 / 비활성 / Export
+</code></pre>
+<pre><code class="language-text">[Master / Detail]
+
+좌측 목록
+│
+│     우측 상세
+│
+│     기본정보
+│     설정
+│     권한
+│
+</code></pre>
+<pre><code class="language-text">[Matrix]
+
+Role × Permission
+</code></pre>
+<pre><code class="language-text">[Tree]
+
+조직
+ └─ 부서
+     └─ 팀
+</code></pre>
+<pre><code class="language-text">[Wizard]
+
+파일
+ → Mapping
+ → Validation
+ → Preview
+ → Execute
+ → Result
+</code></pre>
+<p>이 5개 Pattern으로 대부분의 관리자 화면을 구성할 수 있다.</p>
+<hr>
+<h1>45. 목업 개발 우선순위</h1>
+<h3>P1 — 관리자 Framework</h3>
+<p><code>ADM-SCR-000</code></p>
+<p><code>ADM-SCR-101~105</code></p>
+<p><code>ADM-SCR-201~204</code></p>
+<p>관리자 Layout, 메뉴, 사용자·조직·권한 체계를 먼저 구현한다.</p>
+<h3>P2 — CRM Metadata</h3>
+<p><code>ADM-SCR-301~304</code></p>
+<p>여기까지 구현하면 실제 Lead/Account/Contact 화면과 관리자 설정을 연결할 수 있다.</p>
+<h3>P3 — 코드 / Workflow</h3>
+<p><code>ADM-SCR-401~404</code></p>
+<p>Lead Status, Source, Opportunity Stage 등의 Hard Coding을 제거한다.</p>
+<h3>P4 — Data Management</h3>
+<p><code>ADM-SCR-501~505</code></p>
+<p>Excel/CSV 관리자 기능을 구현한다.</p>
+<h3>P5 — Audit / Interface</h3>
+<p><code>ADM-SCR-601~705</code></p>
+<p>운영 안정성을 확보한다.</p>
+<h3>P6 — System</h3>
+<p><code>ADM-SCR-801~803</code></p>
+<p>공통 운영관리 영역을 마무리한다.</p>
+<hr>
+<h1>46. 기존 SCR과 관리자 기능 연결</h1>
+<p>앞으로 모든 업무화면 Specification에는 반드시 아래 항목을 추가한다.</p>
+<pre><code class="language-text">관련 Admin Setting
+</code></pre>
+<p>예를 들어 Lead 상세:</p>
+<table>
+<thead>
+<tr>
+<th>사용자 기능</th>
+<th>연결 관리자 기능</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Field 표시</td>
+<td>ADM-SCR-302</td>
+</tr>
+<tr>
+<td>Field 순서</td>
+<td>ADM-SCR-302</td>
+</tr>
+<tr>
+<td>Section</td>
+<td>ADM-SCR-303</td>
+</tr>
+<tr>
+<td>Lead Status</td>
+<td>ADM-SCR-402</td>
+</tr>
+<tr>
+<td>상태전이</td>
+<td>ADM-SCR-403</td>
+</tr>
+<tr>
+<td>신규 권한</td>
+<td>ADM-SCR-202</td>
+</tr>
+<tr>
+<td>삭제권한</td>
+<td>ADM-SCR-202</td>
+</tr>
+<tr>
+<td>담당변경</td>
+<td>ADM-SCR-204</td>
+</tr>
+<tr>
+<td>Data Scope</td>
+<td>ADM-SCR-203</td>
+</tr>
+<tr>
+<td>변경이력</td>
+<td>ADM-SCR-602</td>
+</tr>
+<tr>
+<td>ERP Code</td>
+<td>ADM-SCR-404</td>
+</tr>
+<tr>
+<td>ERP Sync</td>
+<td>ADM-SCR-701~703</td>
+</tr>
+</tbody></table>
+<p>따라서 앞으로는</p>
+<pre><code class="language-text">SCR
+업무 화면
+
+       ↕
+
+ADM-SCR
+관리자 화면
+</code></pre>
+<p>두 Specification을 동시에 연결해서 설계한다.</p>
+<hr>
+<h1>47. DIO CRM에서 최종적으로 지향할 관리자 범위</h1>
+<h3>관리자 변경 가능</h3>
+<p><code>사용자 / Role / 권한 / 데이터범위 / 코드 / 상태 / 화면표시 / Layout / Import / Export / Mapping / ERP 오류재처리</code></p>
+<h3>개발자 변경</h3>
+<p><code>DB 구조 / 새로운 Entity / 새로운 Field / 새로운 Relation / 복잡한 Business Rule / API Logic</code></p>
+<p>이 경계를 넘지 않는 것을 기본 원칙으로 한다.</p>
+<hr>
+<h1>48. 목업 개발 완료 기준</h1>
+<p>Admin Mockup을 완료했다고 판단하려면 최소한 다음 Flow가 실제 화면에서 연결되어야 한다.</p>
+<pre><code class="language-text">사용자 선택
+ → Role 변경
+ → 권한 Matrix 확인
+ → Data Scope 지정
+
+Lead 화면 선택
+ → Field 표시/숨김 변경
+ → 필수 여부 변경
+ → Layout 변경
+
+Lead Status
+ → 코드 추가
+ → 상태전이 설정
+
+Excel Import
+ → Mapping
+ → Validation
+ → Preview
+ → 결과확인
+
+ERP Interface
+ → 오류조회
+ → 오류상세
+ → 재처리
+
+Audit
+ → 관리자 변경내용 확인
+</code></pre>
+<p>이 Flow가 동작하면 관리자 기능에 대한 <strong>UX/기능 검증을 먼저 수행하고 DB/API 구현 단계로 넘어갈 수 있다.</strong></p>
+<hr>
+<h2>최종 구조</h2>
+<pre><code class="language-text">                     DIO CRM ADMIN
+                           │
+       ┌───────────────────┼───────────────────┐
+       │                   │                   │
+ 사용자/조직              권한              화면 Metadata
+       │                   │                   │
+       └──────────────┬────┴──────────────┬────┘
+                      │                   │
+                  CRM Runtime         Code/Workflow
+                      │                   │
+                      └─────────┬─────────┘
+                                │
+                            Business API
+                                │
+             ┌──────────────────┼──────────────────┐
+             │                  │                  │
+           CRM DB             ERP/API            Audit
+</code></pre>
+<p><strong>DIO CRM 관리자 기능은 별도의 CRM 플랫폼을 만드는 것이 아니라, 실제 CRM 운영에 반복적으로 발생하는 변경을 개발자 개입 없이 처리할 수 있도록 만드는 것이 최종 목표다.</strong></p>

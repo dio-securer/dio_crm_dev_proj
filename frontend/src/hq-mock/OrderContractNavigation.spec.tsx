@@ -1,0 +1,12 @@
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { expect, it, vi } from 'vitest';
+let record = '';
+vi.mock('@tanstack/react-query', () => ({ useQuery: ({queryKey}: {queryKey:string[]}) => ({data: queryKey[1] === 'orders' ? [{public_id:'o1',contract_name:'Order sample',account_name:'Customer',status:'DRAFT',items:[]}] : queryKey[1] === 'contracts' ? [{public_id:'c1',contract_name:'Contract sample',account_name:'Customer',status:'DRAFT',contract_amount:10}] : queryKey[1] === 'contract-details' ? undefined : [], refetch:vi.fn()}), useQueryClient:()=>({invalidateQueries:vi.fn()}) }));
+vi.mock('react-router-dom', () => ({useSearchParams:()=>[new URLSearchParams(record ? `record=${record}` : ''),vi.fn()], Link:({children}:{children:React.ReactNode})=><a>{children}</a>}));
+vi.mock('./HqMockProvider', () => ({useHqMock:()=>({session:{user:{userId:1,permissions:['ORDER.WRITE','CONTRACT.WRITE']}}})}));
+vi.mock('../market/globalization-context', () => ({useGlobalization:()=>({globalization:{locale:'ko-KR',currencyCode:'KRW'}})}));
+import { HqOrdersPage } from './HqH06Pages';
+import { HqContractsPage } from './HqSalesPages';
+it('initially shows lists without auto-selected details',()=>{record='';for(const [element,list,detail] of [[<HqOrdersPage />,'주문 목록','주문 상세'],[<HqContractsPage />,'계약 목록','계약 상세']] as const){const html=renderToStaticMarkup(element);expect(html).toContain(list);expect(html).not.toContain(detail);} });
+it('record URL shows only matching detail with a way back',()=>{for(const [id,element,list,detail] of [['o1',<HqOrdersPage />,'주문 목록','주문 상세'],['c1',<HqContractsPage />,'계약 목록','계약 상세']] as const){record=id;const html=renderToStaticMarkup(element);expect(html).not.toContain(list);expect(html).toContain(detail);expect(html).toContain('목록으로');}});

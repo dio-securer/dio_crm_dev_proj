@@ -1,0 +1,23 @@
+import type {RecordSpec,RecordField} from './ConfiguredRecords';
+const field=(prefix:string,id:string,column:string):RecordField=>({id:prefix+'.'+id,column});
+export const directWorkRecordSpec:RecordSpec={
+ screen:'HQ_DIRECT_WORK',path:'/api/direct-works',detailFromList:true,title:{ko:'직출·직퇴',en:'Direct work'},
+ fields:[['type','work_type'],['reason','reason'],['status','status'],['erpStatus','erp_sync_status'],['relatedName','related_name_snapshot'],['plannedAt','planned_at'],['activityStatus','activity_status']].map(([id,column])=>field('directWork',id,column)),
+ commands:[{action:'DW.request',suffix:'/request-approval',method:'POST',fields:[]},...(['branch','division'] as const).map(step=>({action:'DW.decision.'+step,suffix:'/decision/'+step,method:'POST' as const,fields:[{id:'directWork.decision',column:'action',input:'action',required:true,options:['APPROVE','REJECT']},{id:'directWork.comment',column:'comment',input:'comment'}]})),
+  {action:'DW.reassign',suffix:'/reassign',method:'POST',fields:[{id:'directWork.reassignStep',column:'step',input:'step',required:true,options:['BRANCH','DIVISION']},{id:'directWork.approverUserId',column:'approver_user_id',input:'approverUserId',required:true,referenceBy:{input:'step',choices:{BRANCH:{path:'/api/direct-works/:id/approvers?step=BRANCH',labelColumn:'name'},DIVISION:{path:'/api/direct-works/:id/approvers?step=DIVISION',labelColumn:'name'}}}},{id:'directWork.reassignReason',column:'reason',input:'reason',required:true}]},
+  {action:'DW.erpRetry',suffix:'/erp/retry',method:'POST',fields:[]}]
+};
+export const activityReportRecordSpec:RecordSpec={
+ screen:'HQ_ACTIVITY_REPORT',version:{field:'report.version',column:'version',input:'expectedVersion'},path:'/api/activity-reports',detailHeader:'header',title:{ko:'활동보고',en:'Activity reports'},createAction:'REP.prepare',createSuffix:'/prepare',
+ fields:[{id:'report.date',input:'reportDate',column:'report_date',type:'date',required:true,writeIn:['create']},...['status','reporterUserId','branchApproverUserId','divisionApproverUserId','requestedAt','finalApprovedAt'].map((id,i)=>field('report',id,['status','reporter_user_id','branch_approver_user_id','division_approver_user_id','requested_at','final_approved_at'][i]))],
+ commands:[{action:'REP.request',suffix:'/request-approval',method:'POST',fields:[]},{action:'REP.approveBranch',suffix:'/approve/branch',method:'POST',fields:[{id:'report.branchComment',column:'comment',input:'comment'}]},{action:'REP.approveDivision',suffix:'/approve/division',method:'POST',fields:[{id:'report.divisionComment',column:'comment',input:'comment'}]}],
+ children:[{key:'items',labelId:'section:report.write',fields:[['itemType','item_type'],['plannedAt','planned_at_snapshot'],['relatedName','related_name_snapshot'],['visitPurpose','visit_purpose_snapshot'],['consultationSnapshot','consultation_snapshot']].map(([id,column])=>field('report',id,column))}]
+};
+
+activityReportRecordSpec.children![0].commands=[{action:'REP.edit',suffix:'/items/:childId',idColumn:'report_item_id',identityField:'report.itemId',method:'PATCH',fields:[{id:'report.visitPurpose',column:'visit_purpose_snapshot',input:'visitPurpose'},{id:'report.consultationSnapshot',column:'consultation_snapshot',input:'consultationContent'}]}];
+
+for(const command of directWorkRecordSpec.commands!)command.when=command.action==='DW.erpRetry'?{field:'directWork.erpStatus',column:'erp_sync_status',values:['FAILED','TIMED_OUT']}:{field:'directWork.status',column:'status',values:command.action==='DW.request'?['DRAFT','BRANCH_REJECTED','DIVISION_REJECTED']:command.action==='DW.reassign'?['REQUESTED','BRANCH_APPROVED']:command.action.endsWith('branch')?['REQUESTED']:['BRANCH_APPROVED']};
+activityReportRecordSpec.fields.push({id:'report.branchComment',column:'branch_comment'},{id:'report.divisionComment',column:'division_comment'});
+for(const step of ['Branch','Division'])for(const decision of ['comment','reject'])activityReportRecordSpec.commands!.push({action:'REP.'+decision+step,suffix:'/'+decision+'/'+step.toLowerCase(),method:'POST',fields:[{id:'report.'+step.toLowerCase()+'Comment',column:'comment',input:'comment',required:true}]});
+for(const command of activityReportRecordSpec.commands!)command.when={field:'report.status',column:'status',values:command.action==='REP.request'?['DRAFT','BRANCH_REJECTED','DIVISION_REJECTED']:command.action.endsWith('Branch')?['REQUESTED']:['BRANCH_APPROVED']};
+activityReportRecordSpec.children![0].commands![0].when={field:'report.status',column:'status',values:['DRAFT','REQUESTED','BRANCH_REJECTED','DIVISION_REJECTED']};

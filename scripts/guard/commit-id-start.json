@@ -1,0 +1,5 @@
+{
+  "schemaVersion": 1,
+  "note": "G09(변경 ID)의 시작점. lastExemptCommit 과 그 조상은 변경 ID 가 없어도 된다(규칙 도입 전 커밋). 기준 브랜치에 들어간 뒤에는 바꿀 수 없다(P5).",
+  "lastExemptCommit": "cd950ce14c88d53eedfaad4b681c722b388b435d"
+}

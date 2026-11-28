@@ -1,3 +1,5 @@
+import {RecordModeBoundary} from './customization/ConfiguredRecords';
+import {contractRecordSpec} from './customization/record-specs';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { apiGet, apiPost } from './api';
@@ -8,7 +10,8 @@ type Opportunity = { public_id:string; opportunity_name:string; stage:string; am
 type Contract = { public_id:string; contract_name:string; contract_amount:number; status:string; integration_status:string; erp_contract_no?:string|null; account_name:string; opportunity_name:string };
 type Reconciliation = { contractAmount:number; currentPlanTotal:number; actualTotal:number; overduePlanTotal:number; outstandingAmount:number; correctionRequired:boolean };
 
-export function ContractsPage() {
+export function ContractsPage() { return <RecordModeBoundary spec={contractRecordSpec} legacy={<LegacyContractsPage/>}/>; }
+function LegacyContractsPage() {
   const { t } = useTranslation();
   const { globalization } = useGlobalization();
   const money=(value:number)=>formatCurrency(Number(value||0),globalization.locale,globalization.currencyCode);

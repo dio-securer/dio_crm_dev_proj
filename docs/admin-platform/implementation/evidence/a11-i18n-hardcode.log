@@ -1,0 +1,2 @@
+[i18n] hard-coded Korean TSX text check PASS
+$ node scripts/i18n/hardcode-check.mjs

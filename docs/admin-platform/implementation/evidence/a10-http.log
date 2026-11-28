@@ -1,0 +1,10 @@
+✔ A10 HTTP publication schedule/cancel contract, permissions and immutable release (375.098953ms)
+✔ A10 HTTP SECURITY publish activates MFA and blocks existing token/refresh (248.628313ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 955.01531

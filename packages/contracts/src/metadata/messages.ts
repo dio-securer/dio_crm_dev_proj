@@ -1,0 +1,64 @@
+// Every human-readable message of the metamodel checks, in one table, so the texts can move to TERM later.
+// `{name}` is replaced with the value of the same name. Messages are for a non-developer: say what is wrong and where.
+export const ISSUE_MESSAGES = {
+  M01_SCHEMA_INVALID: '형식이 맞지 않습니다: {detail}',
+  M02_OVERLAY_INVALID: '덮어쓰기(overlay)를 적용할 수 없습니다: {detail}',
+  M03_OVERLAY_TARGET_MISSING: '덮어쓰기 대상 "{target}" 이(가) 기본 설정에 없습니다.',
+  R01_UNKNOWN_ENTITY: '개체 "{entity}" 이(가) 정의되어 있지 않습니다.',
+  R02_UNKNOWN_FIELD: '개체 "{entity}" 에 필드 "{field}" 이(가) 없습니다.',
+  R03_UNKNOWN_SECTION: '화면 "{screen}" 에 구역 "{section}" 이(가) 없습니다.',
+  R03_UNKNOWN_TAB: '화면 "{screen}" 에 탭 "{tab}" 이(가) 없습니다.',
+  R04_MISSING_TRANSLATION: '문구 키 "{labelKey}" 의 {locale} 번역이 없습니다.',
+  R05_UNKNOWN_CODE_GROUP: '코드 그룹 "{group}" 이(가) 없습니다.',
+  R06_UNKNOWN_REFERENCE_OBJECT: '참조 대상 개체 "{entity}" 이(가) 없습니다.',
+  R07_UNKNOWN_ACTION: '동작 "{action}" 이(가) 개체 "{entity}" 에 없습니다.',
+  R07_UNKNOWN_FEATURE: '기능 "{feature}" 이(가) 기능 목록에 없습니다.',
+  R07_UNKNOWN_PERMISSION: '권한 "{permission}" 이(가) 권한 목록에 없습니다.',
+  R07_UNKNOWN_STATE: '상태 "{state}" 이(가) 업무 흐름의 상태 목록에 없습니다.',
+  R07_UNKNOWN_MENU_PARENT: '상위 메뉴 "{parent}" 이(가) 없습니다.',
+  R08_DUPLICATE_KEY: '이름 "{key}" 이(가) 두 번 쓰였습니다({kind}).',
+  R09_REPLACED_BY_MISSING: '"{key}" 을(를) 대신할 "{replacedBy}" 이(가) 없습니다.',
+  R09_REPLACED_BY_DEPRECATED: '"{key}" 을(를) 대신할 "{replacedBy}" 도 폐기 예정입니다.',
+  R09_DEPRECATED_REQUIRED: '폐기 예정 필드 "{field}" 을(를) 화면 "{screen}" 에서 필수로 둘 수 없습니다.',
+  R09_DEPRECATED_USE: '폐기 예정 필드 "{field}" 을(를) 쓰고 있습니다. "{replacedBy}" 로 바꾸세요.',
+  R09_ALIAS_USE: '"{alias}" 는 옛 이름입니다. 새 이름 "{field}" 을(를) 쓰세요.',
+  R10_OPTION_NOT_ALLOWED: '필드 "{field}"({type}) 에는 "{option}" 을(를) 쓸 수 없습니다.',
+  R10_ENUM_NEEDS_GROUP: '선택형 필드 "{field}" 에 코드 그룹이 없습니다.',
+  R10_REFERENCE_NEEDS_OBJECT: '참조 필드 "{field}" 에 참조 대상 개체가 없습니다.',
+  R10_OPERATOR_TYPE: '필드 "{field}"({type}) 은(는) 크기 비교("{op}")를 할 수 없습니다.',
+  R10_REQUIRED_HIDDEN: '필수 필드 "{field}" 이(가) 하나뿐인 입력 화면 "{screen}" 에 보이지 않습니다.',
+  F01_UNKNOWN_FILE: '알 수 없는 파일입니다. 정해진 자리에 있는 파일만 읽습니다.',
+  F02_MISPLACED_FILE: '파일 자리와 내용이 맞지 않습니다: {detail}',
+  F03_INVALID_JSON: 'JSON 으로 읽을 수 없습니다.',
+  F04_TOO_LARGE: '파일이 너무 큽니다({lines}줄, {bytes}바이트). 300줄·15000바이트 안으로 나눕니다.',
+  D01_REMOVED_WITHOUT_DEPRECATION: '{kind} "{key}" 이(가) 폐기 예정 표시 없이 사라졌습니다.',
+  D02_RENAMED_WITHOUT_ALIAS: '{kind} "{key}" 의 이름이 "{to}" 로 바뀐 것 같지만 옛 이름(alias)이 없습니다.',
+  D03_TYPE_CHANGED: '필드 "{key}" 의 형식이 {from} 에서 {to} 로 바뀌었습니다. 허용된 넓힘이 아닙니다.',
+  D04_DEPRECATED_NEW_USE: '폐기 예정 필드 "{field}" 을(를) 새로 쓰기 시작했습니다.',
+} as const;
+
+/** Names of the kinds of things a message can talk about (the {kind} parameter). */
+export const KIND_LABELS = {
+  field: '필드', screen: '화면', tab: '탭', section: '구역', screenField: '화면 필드', listView: '목록 보기', action: '동작',
+  rule: '규칙', state: '상태', object: '개체', menu: '메뉴', codeGroup: '코드 그룹', codeValue: '코드 값', feature: '기능',
+  semanticKey: '의미 키', translation: '번역', deprecation: '폐기 예정 기록',
+} as const;
+
+/** Fixed texts used as the {detail} parameter. */
+export const DETAILS = {
+  whole: '(전체)',
+  entityOnlyForObjects: 'entity/screenKey 는 개체 설정에만 씁니다',
+  entityRequired: 'entity 가 필요합니다',
+  screenKeyRequired: 'screenKey 가 필요합니다',
+  objectFileMissing: 'object.json 이 없습니다',
+  nameMismatch: '파일·폴더 이름과 내용의 키가 다릅니다',
+  fieldsTwice: 'fields.json 과 fields/ 폴더를 함께 둘 수 없습니다',
+  chunkGap: 'fields/ 의 파일 번호는 01 부터 빠짐없이 이어져야 합니다',
+  unknownLocale: '알 수 없는 언어 폴더입니다',
+  namespaceMismatch: '문구 키가 파일 이름(namespace)으로 시작하지 않습니다',
+  unknownScope: '알 수 없는 범위 폴더입니다',
+  overlayName: '덮어쓰기 파일 이름은 <DOMAIN>[.<개체>[.<화면>]].json 입니다',
+} as const;
+
+/** Header row of the issue code table in docs/framework/metamodel.md. */
+export const CODE_TABLE_HEADER = '| 코드 | 심각도 | 검사 함수 | 문구 |';

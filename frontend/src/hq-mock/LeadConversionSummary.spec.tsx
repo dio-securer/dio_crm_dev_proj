@@ -1,0 +1,2 @@
+﻿import React from 'react';import {renderToStaticMarkup} from 'react-dom/server';import {describe,it,expect} from 'vitest';import {LeadConversionSummary} from './LeadConversionSummary';
+describe('리드 전환 선택 확인',()=>{it('거래처·연락처·기회와 담당을 구분해 보여준다',()=>{const text=renderToStaticMarkup(<LeadConversionSummary account="기존 치과" contact="생성 안 함" opportunity="신규 기회" owner="담당자" />);for(const value of ['기존 치과','생성 안 함','신규 기회','담당자','MOCK'])expect(text).toContain(value);});});

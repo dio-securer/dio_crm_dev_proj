@@ -3,8 +3,15 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import type { LeadSummary } from '@dio-crm/contracts';
 import { apiGet } from './api';
+import { useHqMock } from './hq-mock/HqMockProvider';
+import { HqLeadsPage } from './hq-mock/HqLeadsPage';
+import {LeadModeBoundary} from './customization/ConfiguredLeads';
 
 export function LeadsPage() {
+  const { enabled } = useHqMock();
+  return enabled ? <HqLeadsPage /> : <LeadModeBoundary legacy={<LegacyLeadsPage />}/>;
+}
+function LegacyLeadsPage() {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const query = useQuery({

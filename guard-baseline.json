@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 2,
+  "note": "기존 위반을 묶어 둔 기준선. 숫자는 줄어들 수만 있다(--update-baseline). 숫자를 올리거나 파일을 추가하려면 사람이 직접 고쳐야 한다(보호 파일).",
+  "rules": {
+    "G03": {
+      "total": {
+        "lines": 16637,
+        "bytes": 2392430
+      },
+      "files": {
+        "backend/src/customization": {"activity-report-gateway.ts":{"lines":93,"bytes":16744},"config-service.ts":{"lines":242,"bytes":45555},"contract-gateway.ts":{"lines":83,"bytes":19055},"lead-commands.ts":{"lines":88,"bytes":15171},"lead-extension-contract.ts":{"lines":170,"bytes":16706},"legacy-boundary.ts":{"lines":89,"bytes":22379}},
+        "backend/src/hq-mock": {"activity-routes.ts":{"lines":330,"bytes":32180},"app.ts":{"lines":559,"bytes":50444},"customer-routes.ts":{"lines":507,"bytes":65229},"interfaces.ts":{"lines":514,"bytes":55091},"order-routes.ts":{"lines":196,"bytes":17522},"sales-routes.ts":{"lines":567,"bytes":60023}},
+        "backend/src/modules/activity": {"activity.service.ts":{"lines":393,"bytes":31122}},
+        "backend/src/modules/admin": {"mock.module.ts":{"lines":317,"bytes":23550}},
+        "backend/src/modules/analytics": {"analytics.service.ts":{"lines":254,"bytes":18793}},
+        "backend/src/modules/contract": {"contract.service.ts":{"lines":259,"bytes":22069}},
+        "backend/src/modules/customer": {"customer.service.ts":{"lines":378,"bytes":25855}},
+        "backend/src/modules/opportunity": {"opportunity.service.ts":{"lines":197,"bytes":15573}},
+        "backend/src/modules/order": {"order.service.ts":{"lines":258,"bytes":21033}},
+        "frontend/src": {"AccountsPage.tsx":{"lines":545,"bytes":35244}},
+        "frontend/src/admin": {"AdvancedDesigner.tsx":{"lines":40,"bytes":15161},"ApprovalsPage.tsx":{"lines":29,"bytes":18431},"MockEntry.tsx":{"lines":121,"bytes":16858},"SecurityPages.tsx":{"lines":53,"bytes":17694}},
+        "frontend/src/app": {"hq-runtime-standard.ts":{"lines":309,"bytes":35499},"hq-standard-registry.ts":{"lines":510,"bytes":83875}},
+        "frontend/src/customization": {"AdminConfiguration.tsx":{"lines":143,"bytes":32748},"ConfiguredLeads.tsx":{"lines":144,"bytes":39871},"ConfiguredRecords.tsx":{"lines":95,"bytes":27867},"VisualPreviewPanel.tsx":{"lines":271,"bytes":34967},"VisualPreviewRuntime.tsx":{"lines":208,"bytes":16305},"VisualPropertyPanel.tsx":{"lines":161,"bytes":26669}},
+        "frontend/src/demo": {"GlobalExecutiveDemoScreens.tsx":{"lines":235,"bytes":17098},"LeadAccountDemoScreens.tsx":{"lines":349,"bytes":36974}},
+        "frontend/src/hq-mock": {"HqAccountDetail.tsx":{"lines":175,"bytes":24503},"HqActivityPages.tsx":{"lines":271,"bytes":48570},"HqH06Pages.tsx":{"lines":120,"bytes":32638},"HqLeadsPage.tsx":{"lines":306,"bytes":58386},"HqOpportunityQuotes.tsx":{"lines":62,"bytes":16932},"HqSalesPages.tsx":{"lines":348,"bytes":73053},"lead-salesforce.css":{"lines":488,"bytes":48236}},
+        "frontend/src/styles": {"global.css":{"lines":115,"bytes":24055},"tablet-design.css":{"lines":136,"bytes":17407}},
+        "packages/contracts/src": {"crm-customization.ts":{"lines":299,"bytes":29494},"hq-standard.ts":{"lines":718,"bytes":51844}},
+        "packages/contracts/src/admin": {"approval-engine.ts":{"lines":53,"bytes":19697},"configuration.ts":{"lines":186,"bytes":29687},"integration-engine.ts":{"lines":44,"bytes":18745},"organization.ts":{"lines":228,"bytes":21339},"security.ts":{"lines":308,"bytes":40061}},
+        "scripts/admin": {"run-designer-ui.cjs":{"lines":18,"bytes":18503}},
+        "scripts/admin-customization": {"build-catalog.mjs":{"lines":115,"bytes":20980},"complete-w01-map.mjs":{"lines":188,"bytes":18270},"config-service.test.mjs":{"lines":61,"bytes":15432},"generate-editor-scope-review.mjs":{"lines":117,"bytes":22605},"lead-extension-contract.test.mjs":{"lines":54,"bytes":15415},"lead-grid-settings.test.mjs":{"lines":91,"bytes":18374},"lead-managed-responsive-check.mjs":{"lines":34,"bytes":15149},"map-semantics.mjs":{"lines":166,"bytes":23390},"render-comparison.mjs":{"lines":79,"bytes":22673},"render-design.mjs":{"lines":221,"bytes":53485},"w06-browser.mjs":{"lines":164,"bytes":15608}},
+        "scripts/hq-standard": {"account-zip-walkthrough.mjs":{"lines":50,"bytes":23384},"activity-report-walkthrough.mjs":{"lines":63,"bytes":23355},"activity-report-zip.test.mjs":{"lines":123,"bytes":15979},"build-full-activity-walkthrough.mjs":{"lines":63,"bytes":15169},"contract-collection-walkthrough.mjs":{"lines":58,"bytes":23073},"full-report-direct-walkthrough.mjs":{"lines":116,"bytes":30438},"h02-browser.mjs":{"lines":368,"bytes":21051},"h02-foundation.test.mjs":{"lines":255,"bytes":26025},"h03-browser.mjs":{"lines":163,"bytes":33458},"h03-customer.test.mjs":{"lines":281,"bytes":35312},"h04-http.mjs":{"lines":175,"bytes":17023},"h06-http.mjs":{"lines":168,"bytes":18227},"hq-standard.test.mjs":{"lines":368,"bytes":35868},"lead-zip-walkthrough.mjs":{"lines":55,"bytes":28074},"opportunity-followup-ui.mjs":{"lines":39,"bytes":15464},"opportunity-review-ui.mjs":{"lines":62,"bytes":19315},"opportunity-walkthrough.mjs":{"lines":72,"bytes":21861},"order-delivery-walkthrough.mjs":{"lines":76,"bytes":24348}},
+        "tests/admin": {"account-http.cjs":{"lines":28,"bytes":15144},"approval-http.cjs":{"lines":34,"bytes":20862},"designer-acceptance.cjs":{"lines":50,"bytes":28500},"integration-http.cjs":{"lines":37,"bytes":18010},"notification-http.cjs":{"lines":32,"bytes":15228},"security.cjs":{"lines":29,"bytes":23376}}
+      }
+    },
+    "G04": {
+      "total": 744,
+      "files": {
+        "frontend/src": {"AccountsPage.tsx":4,"App.tsx":2},
+        "frontend/src/customization": {"AccountBulkDialog.tsx":3,"ActionInspector.tsx":4,"AdminConfiguration.tsx":25,"AdminWorkspace.tsx":13,"ConfiguredActivities.tsx":1,"ConfiguredLeads.tsx":5,"ConfiguredLedger.tsx":2,"ConfiguredRecords.tsx":3,"ConfiguredReport.tsx":1,"ExtensionFieldInputs.tsx":5,"HqFieldManager.tsx":12,"LeadExclusionHistory.tsx":2,"LeadExtensionLayoutEditor.tsx":4,"LeadOwnActivities.tsx":1,"LogicDraftEditor.tsx":25,"PlacementEditor.tsx":3,"VisualPreviewPanel.tsx":54,"VisualPropertyPanel.tsx":24},
+        "frontend/src/hq-mock": {"AccountActionConfirm.spec.tsx":4,"AccountActionConfirm.tsx":1,"AccountLogisticsPanel.tsx":12,"AccountRelatedPanel.tsx":13,"AccountServicePanel.tsx":11,"AccountSharingPanel.tsx":4,"ContractCollectionMethod.spec.tsx":2,"ContractCollectionMethod.tsx":2,"ContractFiles.tsx":10,"ContractObservedFields.spec.tsx":1,"ContractObservedFields.tsx":3,"ContractPlanCards.spec.tsx":1,"ContractPlanCards.tsx":1,"HqAccountDetail.tsx":8,"HqActivityList.spec.tsx":6,"HqActivityPages.tsx":24,"HqCollectionPlanList.spec.tsx":4,"HqCollectionPlanList.tsx":8,"HqCollectionPlansPage.tsx":1,"HqContractOrders.tsx":8,"HqDashboardWorkspace.tsx":17,"HqFulfillmentLines.spec.tsx":7,"HqFulfillmentLines.tsx":1,"HqGlobalSearch.tsx":9,"HqH06Pages.tsx":26,"HqH07Pages.tsx":53,"HqLeadsPage.tsx":36,"HqMockControls.tsx":1,"HqOpportunityActivities.spec.tsx":4,"HqOpportunityActivities.tsx":24,"HqOpportunityContactRoles.spec.tsx":3,"HqOpportunityContactRoles.tsx":7,"HqOpportunityContractProducts.tsx":8,"HqOpportunityFollowUps.tsx":11,"HqOpportunityHistory.spec.tsx":4,"HqOpportunityHistory.tsx":10,"HqOpportunityList.spec.tsx":8,"HqOpportunityNotes.spec.tsx":2,"HqOpportunityNotes.tsx":7,"HqOpportunityProductPicker.tsx":17,"HqOpportunityQuotes.spec.tsx":2,"HqOpportunityQuotes.tsx":16,"HqSalesPages.tsx":125,"LeadConversionLinks.spec.tsx":1,"LeadConversionSummary.spec.tsx":1,"LeadConversionSummary.tsx":1,"LeadMobileCards.spec.tsx":5,"LeadMobileCards.tsx":4,"OpportunityInfoFields.tsx":9,"OrderContractNavigation.spec.tsx":2,"QuotePrintView.spec.tsx":1,"QuotePrintView.tsx":1,"customer-shared.tsx":4}
+      }
+    },
+    "G05": {
+      "total": 1492,
+      "files": {
+        "frontend/src": {"Account360Page.tsx":5,"ActivitiesPage.tsx":9,"ActivityReportsPage.tsx":6,"AnalyticsDashboardPage.tsx":5,"ContractsPage.tsx":7,"DirectWorkPage.tsx":5,"FulfillmentPage.tsx":8,"LedgerStatementsPage.tsx":3,"OpportunitiesPage.tsx":7,"OpsStatusPage.tsx":5,"OrdersPage.tsx":6,"PipelinePage.tsx":3},
+        "frontend/src/admin": {"MockEntry.tsx":1,"OrganizationPages.tsx":1,"configuration.css":11,"security.css":1},
+        "frontend/src/admin/designer": {"designer.css":31},
+        "frontend/src/customization": {"admin-workspace.css":11,"button-presentation.css":7,"configured.css":18,"logic-draft-editor.css":6,"visual-preview.css":24},
+        "frontend/src/hq-mock": {"HqActivityPages.tsx":3,"HqOpportunityHistory.tsx":1,"account-related.css":3,"collection-plans.css":24,"customer.css":83,"hq-activity.css":81,"hq-h06.css":126,"hq-mock.css":30,"hq-sales.css":133,"lead-salesforce.css":385},
+        "frontend/src/market": {"map-adapter.tsx":3},
+        "frontend/src/market/templates/global": {"GlobalAccountPage.tsx":2,"GlobalActivityPage.tsx":5,"GlobalActivityReportPage.tsx":5,"GlobalLeadPage.tsx":4},
+        "frontend/src/styles": {"account-mobile-design.css":87,"demo.css":11,"global.css":174,"lead-account-demo.css":18,"tablet-design.css":98,"workspace.css":36}
+      }
+    },
+    "G06": {
+      "total": 40,
+      "files": {
+        "backend/src/hq-mock": {"interfaces.ts":1,"seed.ts":1},
+        "frontend/src/admin/designer": {"labels.ts":1},
+        "frontend/src/app": {"hq-standard-registry.ts":3,"screen-resolver.ts":2},
+        "frontend/src/customization": {"VisualPreviewPanel.tsx":1,"VisualPreviewRuntime.tsx":1},
+        "frontend/src/demo": {"LeadAccountDemoScreens.tsx":3,"demo-account-repository.ts":3},
+        "frontend/src/formatting": {"phone.ts":1},
+        "frontend/src/market/field-profiles": {"field-profile-resolver.ts":2},
+        "packages/contracts/src/admin": {"account-runtime.ts":2,"configuration.ts":7,"core.ts":4,"drafts.ts":2,"master-engine.ts":1,"notification-runtime.ts":2,"security.ts":1,"versions.ts":2}
+      }
+    },
+    "G07": {
+      "total": 6,
+      "files": {
+        "frontend/public": {"sw.js":2},
+        "frontend/src/admin": {"MockEntry.tsx":1},
+        "frontend/src/customization": {"VisualPreviewPanel.tsx":3}
+      }
+    },
+    "G08": {
+      "total": 4,
+      "files": {
+        "scripts/hq-standard": {"server-host.test.mjs":1,"w01-activity-contract.test.mjs":1},
+        "tests/admin": {"browser-security-scenarios.cjs":2}
+      }
+    }
+  }
+}

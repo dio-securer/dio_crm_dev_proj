@@ -1,0 +1,20 @@
+import type {RecordSpec,RecordField} from './ConfiguredRecords';
+import {accountRecordSpec,opportunityRecordSpec,contractRecordSpec,orderRecordSpec} from './record-specs';
+const fields=(prefix:string,pairs:string[][]):RecordField[]=>pairs.map(([id,column])=>({id:prefix+'.'+id,column,type:['amount','quantity','lineAmount'].includes(id)?'number':'text'}));
+const deliveryFields=fields('delivery',[['erpDeliveryNo','erp_delivery_no'],['deliveryStatus','delivery_status'],['shippedAt','shipped_at'],['deliveredAt','delivered_at']]);
+const salesFields=fields('sales',[['erpSalesNo','erp_sales_no'],['salesDate','sales_date'],['amount','amount'],['itemCode','item_code'],['itemName','item_name'],['quantity','quantity']]);
+const returnFields=fields('return',[['erpReferenceNo','erp_reference_no'],['transactionType','transaction_type'],['status','status'],['itemCode','item_code'],['quantity','quantity'],['processedAt','processed_at']]);
+export const account360RecordSpec:RecordSpec={screen:'HQ_ACCOUNT360',path:'/api/analytics/accounts',listPath:'/api/accounts',detailSuffix:'/360',title:{ko:'고객 360',en:'Account 360'},fields:accountRecordSpec.fields.map(f=>({...f,input:undefined})),children:[
+ {key:'summary',labelId:'section:account360.summary',fields:['opportunityCount','contractCount','orderCount','activityCount','salesTotal','collectionTotal','outstandingObserved'].map(id=>({id:'account360.'+id,column:id,type:'number'}))},
+ {key:'contacts',labelId:'section:account.contacts',fields:accountRecordSpec.related![0].spec.fields},
+ {key:'opportunities',labelId:'HQ_OPPORTUNITY',fields:opportunityRecordSpec.fields.filter(f=>['name','stage','amount','expectedCloseDate','successProbability','forecastCategory'].some(id=>f.id==='opportunity.'+id))},
+ {key:'contracts',labelId:'HQ_CONTRACT',fields:contractRecordSpec.fields.filter(f=>['contractName','contractDate','contractAmount','status','erpContractNo'].some(id=>f.id==='contract.'+id))},
+ {key:'orders',labelId:'HQ_ORDER',fields:orderRecordSpec.fields.filter(f=>['status','erpOrderNo','deliveryAddress','expressYn'].some(id=>f.id==='order.'+id))},
+ {key:'activities',labelId:'HQ_ACTIVITY',fields:fields('activity',[['plannedAt','planned_at'],['visitPurpose','visit_purpose'],['consultation','consultation_content'],['status','status'],['inAt','in_at'],['outAt','out_at']])},
+ {key:'deliveries',labelId:'section:fulfillment.result',fields:deliveryFields},{key:'sales',labelId:'section:fulfillment.result',fields:salesFields},{key:'returns',labelId:'section:fulfillment.result',fields:returnFields},
+ {key:'collections',labelId:'section:collection.actual',fields:fields('actual',[['erpCollectionNo','erp_collection_no'],['amount','amount'],['collectedAt','collected_at']])}
+]};
+export const fulfillmentRecordSpec:RecordSpec={screen:'HQ_FULFILLMENT',path:'/api/orders',detailSuffix:'/fulfillment',title:{ko:'배송·매출·반품',en:'Fulfillment'},fields:orderRecordSpec.fields.map(f=>({...f,input:undefined})),children:[{key:'deliveries',labelId:'section:fulfillment.result',fields:deliveryFields},{key:'sales',labelId:'section:fulfillment.result',fields:salesFields},{key:'returnExchanges',labelId:'section:fulfillment.result',fields:returnFields}]};
+export const productCatalogRecordSpec:RecordSpec={screen:'HQ_PRODUCT_PACKAGE',path:'/api/product-packages',detailFromList:true,title:{ko:'상품 카탈로그',en:'Product catalog'},createAction:'PRODUCT_CATALOG.create',search:{id:'productCatalog.search',sources:['productCatalog.itemName','productCatalog.erpItemCode']},fields:[{id:'productCatalog.itemType',column:'item_type',input:'itemType',required:true,options:['PACKAGE','PRODUCT']},{id:'productCatalog.itemName',column:'item_name',input:'itemName',required:true},{id:'productCatalog.erpItemCode',column:'erp_item_code',input:'erpItemCode'},{id:'productCatalog.category',column:'category',input:'category'},{id:'productCatalog.basePrice',column:'base_price',input:'basePrice',type:'number'},{id:'productCatalog.sourceSystem',column:'source_system'}]};
+
+for(const spec of [account360RecordSpec,fulfillmentRecordSpec,productCatalogRecordSpec])spec.paged=true;

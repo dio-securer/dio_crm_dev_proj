@@ -1,3 +1,5 @@
+import {ReportModeBoundary} from './customization/ConfiguredReport';
+import {pipelineReportSpec} from './customization/report-specs';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { apiGet } from './api';
@@ -8,7 +10,8 @@ type FunnelRow = { stage: string; opportunity_count: number; amount: number; wei
 type ForecastRow = { forecast_category: string; opportunity_count: number; amount: number };
 type Pipeline = { byStage: FunnelRow[]; forecast: ForecastRow[] };
 
-export function PipelinePage() {
+export function PipelinePage() { return <ReportModeBoundary spec={pipelineReportSpec} legacy={<LegacyPipelinePage/>}/>; }
+function LegacyPipelinePage() {
   const { t } = useTranslation();
   const { globalization } = useGlobalization();
   const money = (value:number) => formatCurrency(Number(value||0),globalization.locale,globalization.currencyCode);

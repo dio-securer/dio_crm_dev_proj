@@ -1,0 +1,21 @@
+$ pnpm -r build
+Scope: 3 of 4 workspace projects
+packages/contracts build$ tsc -p tsconfig.json
+packages/contracts build: Done
+backend build$ nest build
+frontend build$ tsc --noEmit && vite build
+backend build: Done
+frontend build: vite v6.4.3 building for production...
+frontend build: transforming...
+frontend build: ✓ 184 modules transformed.
+frontend build: rendering chunks...
+frontend build: computing gzip size...
+frontend build: dist/index.html                   0.86 kB │ gzip:   0.42 kB
+frontend build: dist/assets/index-JOi7NRNB.css   24.37 kB │ gzip:   5.71 kB
+frontend build: dist/assets/index-BWlVbWf3.js   559.61 kB │ gzip: 163.14 kB
+frontend build: ✓ built in 1.99s
+frontend build: (!) Some chunks are larger than 500 kB after minification. Consider:
+frontend build: - Using dynamic import() to code-split the application
+frontend build: - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+frontend build: - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+frontend build: Done

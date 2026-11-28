@@ -1,0 +1,19 @@
+.hq-plan-cards{display:none}
+.hq-collection-list button,.hq-collection-list input,.hq-collection-list select{min-height:44px}
+@media(max-width:900px){.hq-collection-list>.hq-sales-scroll{display:none}.hq-plan-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.hq-plan-cards article{min-width:0;padding:16px;border:1px solid #dbe4ee;border-radius:12px;background:#f8faff;overflow-wrap:anywhere}.hq-plan-cards article>a{display:block;color:#173d74;font-weight:700;padding:4px 0;min-height:36px}.hq-plan-cards strong{display:block;font-size:20px;color:#122d52}.hq-plan-cards dl{margin:10px 0 0}.hq-plan-cards dl>div{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:4px 0}.hq-plan-cards dt{color:#58677b}.hq-plan-cards dd{margin:0;text-align:right}}
+@media(max-width:560px){.hq-plan-cards{grid-template-columns:minmax(0,1fr)}.hq-collection-list .hq-sales-fields{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:599px){
+ .hq-collection-page{gap:12px;padding-bottom:96px}
+ .hq-collection-page>header{padding:18px;border-radius:16px;background:#102b5d;color:#fff;box-shadow:0 7px 18px #102b5d20}
+ .route-surface .hq-collection-page>header .dio-workspace-heading{color:#fff;font-size:20px}
+ .hq-collection-page>header p{color:#d5e4fa;font-size:12px;line-height:1.5;margin:8px 0 0}
+ .hq-collection-page .hq-collection-list{padding:16px;border:1px solid #e1eaf6;border-radius:15px;box-shadow:0 5px 18px #17365b0d}
+ .hq-collection-page .hq-sales-fields{grid-template-columns:minmax(0,1fr);gap:13px}
+ .hq-collection-page .hq-sales-fields label{display:grid;gap:7px;color:#405576;font-size:13px;line-height:1.4;font-weight:700}
+ .hq-collection-page .hq-sales-fields :is(input,select){box-sizing:border-box;width:100%;min-height:46px;padding:10px 12px;border:1px solid #d4e1f2;border-radius:10px;color:#172e50;background:#fff;font-size:16px}
+ .hq-collection-page .hq-sales-fields button{min-height:44px;padding:10px 14px;border:1px solid #cfe0f8;border-radius:10px;background:#eff5ff;color:#1552a2;font-weight:750}
+ .hq-collection-page .hq-plan-cards article{border-color:#dce8f8;border-left:4px solid #4383ed;border-radius:13px;background:#f9fbff}
+ .hq-collection-page .hq-plan-cards article>a{font-size:15px;color:#1552a2}
+ .hq-collection-page .hq-plan-cards strong{font-size:20px;color:#102b5d}
+ .hq-collection-page :is([role=alert],[role=status]){line-height:1.5;overflow-wrap:anywhere}
+}

@@ -1,0 +1,41 @@
+.config-toolbar{display:flex;flex-wrap:wrap;gap:16px;align-items:end;margin:20px 0}.config-toolbar label,.config-dialog label{display:flex;flex-direction:column;gap:6px}.configured-leads button{margin:3px}.config-dialog{border:1px solid #cbd5e1;border-radius:14px;padding:24px;width:min(540px,calc(100vw - 32px));max-height:85vh;overflow:auto}.config-dialog::backdrop{background:#14283c88}.config-dialog form{display:grid;gap:16px}.config-dialog input,.config-dialog select,.config-toolbar input,.config-toolbar select{min-height:40px;border:1px solid #94a3b8;border-radius:6px;padding:8px;max-width:100%}.config-dialog dl>div{margin:10px 0}.config-dialog dd{margin-left:0;overflow-wrap:anywhere}.config-dialog dt{font-weight:600}.config-dialog button{min-height:40px}
+.configured-leads{min-width:0;max-width:100%}.configured-leads .table-scroll{max-width:100%;overflow:auto}.configured-leads table{border-collapse:collapse;min-width:800px}.configured-leads th,.configured-leads td{padding:10px;text-align:left;border-bottom:1px solid #e2e8f0}.configured-leads button{min-height:36px;border:1px solid #cbd5e1;border-radius:6px;padding:6px 12px;background:#fff;color:#15344c;cursor:pointer}.configured-leads button:disabled{opacity:.5;cursor:default}
+.configured-leads details{border:1px solid #d8e2eb;border-radius:8px;margin:8px 0;padding:12px;background:white}
+.configured-leads summary{cursor:pointer;overflow-wrap:anywhere;font-weight:600}
+.configured-leads fieldset{display:flex;gap:14px;flex-wrap:wrap;border:1px solid #d8e2eb;margin:12px 0;padding:14px;min-width:0}
+.configured-leads fieldset label{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.configured-leads fieldset input:not([type=checkbox]){max-width:100%;min-width:100px}
+.configured-leads button:focus-visible,.configured-leads summary:focus-visible{outline:3px solid #007e91;outline-offset:3px}
+.lead-detail-tabs{display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid #d8e2eb}.lead-detail-tabs button[aria-selected=true]{font-weight:700;border-bottom:3px solid #2459cd}.config-dialog [role=tabpanel]{min-width:0}
+.managed-split-notice{display:none}
+.managed-lead-shortcuts{display:none}
+@media(min-width:1000px) and (max-width:1199px){
+ .managed-split-notice{display:block;color:#42566b;margin:0}
+ .configured-leads.managed-split-open{display:grid;grid-template-columns:minmax(0,36%) minmax(0,1fr);gap:12px;align-items:start}
+ .configured-leads.managed-split-open .managed-lead-list{min-width:0;max-height:calc(100vh - 80px);overflow:auto}
+ .configured-leads.managed-split-open>.config-dialog[open]:not(:modal){position:sticky;top:12px;margin:0;box-sizing:border-box;width:100%;max-width:none;max-height:calc(100vh - 24px)}
+}
+@media(max-width:999px){
+ .configured-leads .table-scroll{overflow:visible}
+ .configured-leads table,.configured-leads tbody,.configured-leads tr,.configured-leads td{display:block;min-width:0;width:100%;box-sizing:border-box}
+ .configured-leads thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+ .configured-leads tr{background:#fff;border:1px solid #d8e2eb;border-radius:8px;margin:10px 0;padding:8px}
+ .configured-leads td{display:grid;grid-template-columns:minmax(90px,35%) minmax(0,1fr);gap:10px;border:0;padding:7px;overflow-wrap:anywhere}
+ .configured-leads td::before{content:attr(data-label);font-weight:600;color:#596579}
+ .configured-leads td:last-child{display:flex;flex-wrap:wrap;align-items:center;border-top:1px solid #e2e8f0}
+ .configured-leads button{min-height:44px}
+}
+@media(min-width:600px) and (max-width:999px){
+ .configured-leads tbody{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+ .configured-leads tr{margin:0}
+}
+@media(max-width:599px){
+ .configured-leads .config-toolbar label{width:100%}
+ .configured-leads .config-toolbar input,.configured-leads .config-toolbar select{width:100%;box-sizing:border-box}
+ .configured-leads .lead-detail-tabs{flex-wrap:nowrap;overflow-x:auto}
+ .configured-leads .lead-detail-tabs button{flex:none;white-space:nowrap}
+ .configured-leads .managed-lead-shortcuts{display:flex;gap:8px}
+ .configured-leads .config-dialog{box-sizing:border-box;max-height:calc(100dvh - 24px);padding:16px}
+ .configured-leads .config-dialog form>[data-config-instance='detail.form.save'],.configured-leads dialog.managed-lead-create form>button[type=submit]{position:sticky;bottom:0;z-index:2;min-height:44px;background:#075985;color:white;box-shadow:0 0 0 8px white}
+}
+

@@ -1,0 +1,14 @@
+✔ A08 T13/T32 two channels once per approver, unauthorized recipient excluded, read ownership and replay immutable (1226.025626ms)
+✔ A08 T32 locale/render snapshot survives changed preference and templates; company isolation (1325.695271ms)
+✔ A08 T79 template placeholders and config management permissions enforced (544.704512ms)
+✔ A08 overdue fake clock uses frozen dueAt and emits once, completion no further overdue (648.914657ms)
+✔ A08 revoked approval permission hides historical notification and excludes new recipient (602.421944ms)
+✔ A08 unsaved template preview is validated/nonmutating; pagination and unread reach all inbox rows (537.177391ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5314.477324

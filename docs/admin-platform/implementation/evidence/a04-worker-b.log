@@ -1,0 +1,16 @@
+✔ HTTP platform-owned target draft is editable by company admin; validate/publish/runtime/rollback and permissions (303.254186ms)
+✔ false/0/empty stable keys, tombstones, RESET, locks and unsafe properties (8.388576ms)
+✔ draft isolation, validation modification, concurrent publish, idempotency and rollback preserve security/sequence (100.659357ms)
+✔ T56 immutable parent chain and explicit rebase through all levels; US_B unchanged (101.799909ms)
+✔ stale rebase TTL and edit reject without partial changes; unauthorized access (13.403804ms)
+✔ unknown parent and locked tax field fail validation (7.016345ms)
+✔ rollback restores immutable company profile and A02 edit remains usable (24.920981ms)
+✔ new company is pinned at creation and scope conflict/expired preview are atomic (18.319874ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 705.698422

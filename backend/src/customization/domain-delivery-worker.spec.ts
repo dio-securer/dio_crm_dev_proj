@@ -1,0 +1,14 @@
+import {DomainDeliveryWorker} from './domain-delivery-worker';import {ConfigError,emptyConfigState} from './config-store';
+const actor={id:'actor',companyId:'company'};
+describe('bounded domain worker entry point',()=>{
+ it('unconfigured transport does not access DB or create a background task',async()=>{const repo={assertDeliveryBoundary:jest.fn(),transact:jest.fn()},worker=new DomainDeliveryWorker(repo as any,null);expect(repo.transact).not.toHaveBeenCalled();await expect(worker.runOnce(actor)).rejects.toMatchObject({code:'TRANSPORT_NOT_CONFIGURED'});expect(repo.transact).not.toHaveBeenCalled();});
+ it('ambient transaction denied before selecting jobs',async()=>{const repo={assertDeliveryBoundary:()=>{throw new ConfigError(409,'AMBIENT_DELIVERY_TRANSACTION');},transact:jest.fn()},worker=new DomainDeliveryWorker(repo as any,{supportsIdempotency:true,send:jest.fn()});await expect(worker.runOnce(actor)).rejects.toMatchObject({code:'AMBIENT_DELIVERY_TRANSACTION'});expect(repo.transact).not.toHaveBeenCalled();});
+ it('bounded scheduler selects only own pending known interfaces',async()=>{const state=emptyConfigState('company',{});state.outbox=[
+  {id:'a',type:'DOMAIN_DELIVERY',status:'PENDING',releaseId:'r',delivery:{actorId:'actor',interfaceCode:'IF-ERP-002'} as any},
+  {id:'b',type:'DOMAIN_DELIVERY',status:'PENDING',releaseId:'r',delivery:{actorId:'other',interfaceCode:'IF-ERP-002'} as any},
+  {id:'c',type:'DOMAIN_DELIVERY',status:'REVIEW_REQUIRED',releaseId:'r',delivery:{actorId:'actor',interfaceCode:'IF-ERP-002'} as any},
+  {id:'d',type:'DOMAIN_DELIVERY',status:'PENDING',releaseId:'r',delivery:{actorId:'actor',interfaceCode:'UNSUPPORTED'} as any},
+  {id:'e',type:'DOMAIN_DELIVERY',status:'PENDING',releaseId:'r',delivery:{actorId:'actor',interfaceCode:'IF-ERP-004'} as any}
+ ];const repo={assertDeliveryBoundary:jest.fn(),transact:async(_c:any,_a:any,work:any)=>work({state})},worker=new DomainDeliveryWorker(repo as any,{supportsIdempotency:true,send:jest.fn()}),retry=jest.spyOn(worker,'retry').mockResolvedValue({id:'a',status:'SENT',attempts:1});await worker.runOnce(actor,1);expect(retry).toHaveBeenCalledTimes(1);expect(retry).toHaveBeenCalledWith(actor,'a');});
+ it('manual retry cannot target another actors request',async()=>{const state=emptyConfigState('company',{});state.outbox=[{id:'request',type:'DOMAIN_DELIVERY',status:'PENDING',releaseId:'r',delivery:{actorId:'other',interfaceCode:'IF-ERP-002'} as any}];const repo={assertDeliveryBoundary:jest.fn(),transact:async(_c:any,_a:any,work:any)=>work({state})},transport={supportsIdempotency:true as const,send:jest.fn()},worker=new DomainDeliveryWorker(repo as any,transport);await expect(worker.retry(actor,'request')).rejects.toMatchObject({code:'NOT_FOUND'});expect(transport.send).not.toHaveBeenCalled();});
+});

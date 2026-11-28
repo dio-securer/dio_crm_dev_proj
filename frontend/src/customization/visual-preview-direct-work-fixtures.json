@@ -1,0 +1,31 @@
+{
+  "requested": {
+    "public_id": "90000000-0000-4000-8000-000000000001",
+    "work_date": "2026-10-28",
+    "work_type": "DIRECT_WORK",
+    "status": "REQUESTED",
+    "erp_sync_status": "NOT_REQUESTED",
+    "reason": "Synthetic branch approval example",
+    "related_name_snapshot": "Fixture account",
+    "activity_public_id": "90000000-0000-4000-8000-000000000101",
+    "owner_user_id": 10,
+    "branch_approver_user_id": 99,
+    "division_approver_user_id": 99,
+    "history": []
+  },
+  "branchApproved": {
+    "public_id": "90000000-0000-4000-8000-000000000002",
+    "work_date": "2026-10-28",
+    "work_type": "DIRECT_LEAVE",
+    "status": "BRANCH_APPROVED",
+    "erp_sync_status": "NOT_REQUESTED",
+    "reason": "Synthetic division approval example",
+    "related_name_snapshot": "Fixture account",
+    "activity_public_id": "90000000-0000-4000-8000-000000000102",
+    "owner_user_id": 10,
+    "branch_approver_user_id": 99,
+    "division_approver_user_id": 99,
+    "history": []
+  },
+  "approvers": [{"userId": 20, "name": "Fixture approver"}]
+}

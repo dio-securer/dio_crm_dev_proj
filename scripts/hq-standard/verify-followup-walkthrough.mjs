@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {readFile,writeFile} from 'node:fs/promises';
+import path from 'node:path';
+import {pathToFileURL} from 'node:url';
+import {chromium} from 'playwright';
+const root=path.resolve('docs/crm-work-queue/20261108/opportunity/followup-walkthrough');
+const records=JSON.parse(await readFile(path.join(root,'steps.json'),'utf8'));assert.equal(records.length,95);assert(records.every(row=>row.status==='PASS'));
+const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'});const page=await browser.newPage({viewport:{width:390,height:844}});
+await page.goto(pathToFileURL(path.join(root,'index.html')).href,{timeout:60000});assert.equal(await page.locator('article').count(),95);assert.equal(await page.locator('article img').count(),190);
+await page.locator('article details').first().evaluate(element=>element.open=true);const first=page.locator('article img').first();await first.evaluate(element=>element.decode());
+assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);await page.screenshot({path:path.join(root,'html-mobile.png')});
+await writeFile(path.join(root,'verification.json'),JSON.stringify({steps:95,images:190,embedded:true,sampleDecode:true,mobileNoOverflow:true},null,2));
+await Promise.race([browser.close(),new Promise(r=>setTimeout(r,5000))]);console.log('PASS HTML 95 steps, 190 screenshots, decode, mobile layout');process.exit(0);

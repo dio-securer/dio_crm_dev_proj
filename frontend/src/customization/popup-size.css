@@ -1,0 +1,6 @@
+.crm-popup-size-small{width:min(480px,calc(100vw - 32px))!important}
+.crm-popup-size-medium{width:min(720px,calc(100vw - 32px))!important}
+.crm-popup-size-large{width:min(1000px,calc(100vw - 32px))!important}
+.crm-popup-size-full{width:calc(100vw - 32px)!important}
+.crm-popup-size-small,.crm-popup-size-medium,.crm-popup-size-large,.crm-popup-size-full{box-sizing:border-box;max-width:calc(100vw - 32px);max-height:calc(100dvh - 40px);overflow:auto}
+.crm-popup-size-small h2,.crm-popup-size-medium h2,.crm-popup-size-large h2,.crm-popup-size-full h2,.crm-popup-size-small h3,.crm-popup-size-medium h3,.crm-popup-size-large h3,.crm-popup-size-full h3{overflow-wrap:anywhere}

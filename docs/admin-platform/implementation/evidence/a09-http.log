@@ -1,0 +1,15 @@
+✔ A09 T18/T20/T80 registry, preview pure, MOCK-only and required mapping (251.677112ms)
+✔ A09 T19/T21/T22 success/rejection separate from transport, duplicate once, retries keep request identity (104.868463ms)
+✔ A09 T23/T53/T54 timeout late success, stale superseded, terminal immutable, event hash and company boundary (112.940749ms)
+✔ A09 T24/T54 collection/delivery correction replaces total exactly, same version collision, out of order ignored (143.134886ms)
+✔ A09 DELAYED fake clock and notification once; idempotency conflicts (59.504344ms)
+✔ A09 account runtime ERP action applies once and masks operator responses; correction hashes date (96.644873ms)
+✔ A09 timeout retry never rebinds an edited business revision (37.579055ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1235.391116

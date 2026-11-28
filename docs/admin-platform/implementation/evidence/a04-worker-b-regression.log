@@ -1,0 +1,46 @@
+✔ HTTP requires valid typed mock authentication (118.862831ms)
+✔ duplicate login requires a company; credentials failure returns 401 (11.882728ms)
+✔ strict payload, company isolation and idempotent create over HTTP (75.741695ms)
+✔ non-admin cannot change configurations; revoked session cannot be replayed (55.835672ms)
+✔ production mock bootstrap fails before binding providers (1.001547ms)
+✔ unimplemented API fails explicitly rather than falling through to SQL (4.120738ms)
+✔ restarting API resets seed, draft data and sessions (39.545382ms)
+✔ GET preserves business data while recording session activity (19.717975ms)
+✔ refresh token is consumed exactly once under concurrent requests (20.808516ms)
+✔ T68 organization tree rejects cycle and cross-company parent atomically (182.252732ms)
+✔ T38 shared membership switch rejects unassigned company and old token (76.903203ms)
+✔ identity and membership suspension invalidate existing sessions and protect last admins (47.845545ms)
+✔ T29/T82 transfer detects concurrent edits, preserves tasks, replays completed job (53.372965ms)
+✔ T58-UNIT company create prepares draft; code and template are immutable in PATCH (31.836902ms)
+✔ T49 company and user reactivation never resurrects revoked tokens (91.161471ms)
+✔ T49/T58 company profile is a draft and live work blocks deactivation (55.409739ms)
+✔ T58 template preview rejects stale revision and apply creates only a draft (28.422976ms)
+✔ a single stopped membership does not prevent login to another active company (60.599559ms)
+✔ a SALES membership cannot replace the last reachable platform administrator (56.227581ms)
+✔ T39 REQUIRED enroll, pending business403, atomic concurrent verify and receipt replay (261.940397ms)
+✔ T40 OFF/OPTIONAL/enrolled and inherited REQUIRED branches (125.214978ms)
+✔ T41 five failures persist lock; expiration uses injected clock; max/idle sessions (109.143009ms)
+✔ T43-UNIT company switch retains old context until MFA and refresh cannot bypass strengthening (85.199286ms)
+✔ T62/T63 global reset request isolates companies, approval revokes all sessions/challenges once (142.490947ms)
+✔ T63 stale and expired reset request reject without revocation (87.806671ms)
+✔ T69 SELF/ORG/SUBTREE/COMPANY scope filters total, detail, PATCH and company isolation (110.883122ms)
+✔ T66/T07 field DENY and LAST4 hide raw values, query side channels and injected writes (65.58617ms)
+✔ role assignment invalidates old access/refresh, DENY beats grant and unknown/global grant rejected (69.93892ms)
+✔ T70 FIELD-only delegation rejects SECURITY, privilege escalation and expired access (56.863884ms)
+✔ admin1 manages configuration but has no implicit business access (21.632124ms)
+✔ T69 ORG versus SUBTREE versus COMPANY uses descendant, sibling and unrelated owners for reads/writes (177.682636ms)
+✔ custom role cannot assign stronger data/field authority or expand explicit org with empty roots (36.015991ms)
+✔ config.read/edit custom grants and denies are enforced independently of base SALES role (38.765476ms)
+✔ MFA wrong-code and skip idempotency preserve attempt/session count, session self-revoke works (56.625577ms)
+✔ policy role overrides enforce MFA; freshness and max lifetime survive refresh (169.406077ms)
+✔ security draft validates positive limits and DEMO provider, does not activate policy (36.363149ms)
+✔ authorized repository rechecks session inside write transaction after earlier authorization (18.188289ms)
+✔ company administrator may assign business permissions but cannot mint higher administrative authority (25.767335ms)
+ℹ tests 38
+ℹ suites 0
+ℹ pass 38
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2097.368617

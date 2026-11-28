@@ -4,7 +4,33 @@
   "private": true,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "crm-customization": ["dist/crm-customization.d.ts"],
+      "logic-events": ["dist/logic-events.d.ts"],
+      "lead-grid-columns": ["dist/lead-grid-columns.d.ts"],
+      "hq-common-policy": ["dist/hq-common-policy.d.ts"],
+      "admin": ["dist/admin/index.d.ts"],
+      "metadata": ["dist/metadata/index.d.ts"]
+    }
+  },
   "exports": {
+    "./logic-events": {
+      "types": "./dist/logic-events.d.ts",
+      "default": "./dist/logic-events.js"
+    },
+    "./lead-grid-columns": {
+      "types": "./dist/lead-grid-columns.d.ts",
+      "default": "./dist/lead-grid-columns.js"
+    },
+    "./hq-common-policy": {
+      "types": "./dist/hq-common-policy.d.ts",
+      "default": "./dist/hq-common-policy.js"
+    },
+    "./crm-customization": {
+      "types": "./dist/crm-customization.d.ts",
+      "default": "./dist/crm-customization.js"
+    },
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
@@ -12,12 +38,28 @@
     "./globalization": {
       "types": "./dist/globalization.d.ts",
       "default": "./dist/globalization.js"
+    },
+    "./hq-standard": {
+      "types": "./dist/hq-standard.d.ts",
+      "default": "./dist/hq-standard.js"
+    },
+    "./admin": {
+      "types": "./dist/admin/index.d.ts",
+      "default": "./dist/admin/index.js"
+    },
+    "./metadata": {
+      "types": "./dist/metadata/index.d.ts",
+      "default": "./dist/metadata/index.js"
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc -p tsconfig.json",
+    "test": "tsc -p tsconfig.json && node --test \"../../tests/metadata/*.test.cjs\""
   },
   "devDependencies": {
     "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "zod": "^3.24.1"
   }
 }

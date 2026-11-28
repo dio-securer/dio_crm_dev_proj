@@ -1,0 +1,2 @@
+[pwa:check] PASS — manifest, installability baseline and API cache safety checks passed.
+$ node scripts/pwa/check.mjs

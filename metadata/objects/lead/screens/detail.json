@@ -1,0 +1,225 @@
+{
+  "fields": {
+    "entity": "lead",
+    "extensionDefinitions": [],
+    "fields": [
+      {
+        "key": "hospital_name",
+        "labelKey": "lead.field.hospital_name",
+        "order": 0,
+        "readOnly": false,
+        "required": true,
+        "sectionId": "info",
+        "visible": true
+      },
+      {
+        "key": "status",
+        "labelKey": "lead.field.status",
+        "order": 1,
+        "readOnly": false,
+        "required": true,
+        "sectionId": "info",
+        "visible": true
+      },
+      {
+        "key": "owner_name",
+        "labelKey": "lead.field.owner_name",
+        "order": 2,
+        "readOnly": false,
+        "required": false,
+        "sectionId": "info",
+        "visible": true
+      },
+      {
+        "key": "phone",
+        "labelKey": "lead.field.phone",
+        "order": 3,
+        "readOnly": false,
+        "required": false,
+        "sectionId": "info",
+        "visible": true
+      },
+      {
+        "key": "business_no",
+        "labelKey": "lead.field.business_no",
+        "order": 4,
+        "readOnly": false,
+        "required": false,
+        "sectionId": "info",
+        "visible": true
+      },
+      {
+        "key": "exclusion_reason",
+        "labelKey": "lead.field.exclusion_reason",
+        "order": 5,
+        "readOnly": false,
+        "required": false,
+        "sectionId": "info",
+        "visible": true
+      },
+      {
+        "key": "updated_at",
+        "labelKey": "lead.field.updated_at",
+        "order": 6,
+        "readOnly": true,
+        "required": false,
+        "sectionId": "info",
+        "visible": true
+      },
+      {
+        "key": "sido",
+        "labelKey": "lead.field.sido",
+        "order": 0,
+        "readOnly": false,
+        "required": false,
+        "sectionId": "region",
+        "visible": true
+      },
+      {
+        "key": "sigungu",
+        "labelKey": "lead.field.sigungu",
+        "order": 1,
+        "readOnly": false,
+        "required": false,
+        "sectionId": "region",
+        "visible": true
+      },
+      {
+        "key": "address",
+        "labelKey": "lead.field.address",
+        "order": 2,
+        "readOnly": false,
+        "required": false,
+        "sectionId": "region",
+        "visible": true
+      },
+      {
+        "key": "keyman_surname",
+        "labelKey": "lead.field.keyman_surname",
+        "order": 0,
+        "readOnly": false,
+        "required": false,
+        "sectionId": "keyman",
+        "visible": true
+      },
+      {
+        "key": "keyman_type",
+        "labelKey": "lead.field.keyman_type",
+        "order": 1,
+        "readOnly": false,
+        "required": false,
+        "sectionId": "keyman",
+        "visible": true
+      },
+      {
+        "key": "keyman_mobile",
+        "labelKey": "lead.field.keyman_mobile",
+        "order": 2,
+        "readOnly": false,
+        "required": false,
+        "sectionId": "keyman",
+        "visible": true
+      },
+      {
+        "key": "keyman_email",
+        "labelKey": "lead.field.keyman_email",
+        "order": 3,
+        "readOnly": false,
+        "required": false,
+        "sectionId": "keyman",
+        "visible": true
+      },
+      {
+        "key": "keyman_school",
+        "labelKey": "lead.field.keyman_school",
+        "order": 4,
+        "readOnly": false,
+        "required": false,
+        "sectionId": "keyman",
+        "visible": true
+      },
+      {
+        "key": "keyman_class_year",
+        "labelKey": "lead.field.keyman_class_year",
+        "order": 5,
+        "readOnly": false,
+        "required": false,
+        "sectionId": "keyman",
+        "visible": true
+      },
+      {
+        "key": "keyman_major",
+        "labelKey": "lead.field.keyman_major",
+        "order": 6,
+        "readOnly": false,
+        "required": false,
+        "sectionId": "keyman",
+        "visible": true
+      },
+      {
+        "key": "main_system",
+        "labelKey": "lead.field.main_system",
+        "order": 0,
+        "readOnly": false,
+        "required": false,
+        "sectionId": "system",
+        "visible": true
+      },
+      {
+        "key": "sub_system",
+        "labelKey": "lead.field.sub_system",
+        "order": 1,
+        "readOnly": false,
+        "required": false,
+        "sectionId": "system",
+        "visible": true
+      }
+    ]
+  },
+  "screen": {
+    "entity": "lead",
+    "screenKey": "detail",
+    "sections": [
+      {
+        "columns": 2,
+        "id": "info",
+        "order": 0,
+        "tabId": "basic",
+        "titleKey": "lead.section.info"
+      },
+      {
+        "columns": 2,
+        "id": "region",
+        "order": 1,
+        "tabId": "basic",
+        "titleKey": "lead.section.region"
+      },
+      {
+        "columns": 2,
+        "id": "keyman",
+        "order": 0,
+        "tabId": "keyman",
+        "titleKey": "lead.section.keyman"
+      },
+      {
+        "columns": 2,
+        "id": "system",
+        "order": 1,
+        "tabId": "keyman",
+        "titleKey": "lead.section.system"
+      }
+    ],
+    "tabs": [
+      {
+        "id": "basic",
+        "labelKey": "lead.tab.basic",
+        "order": 0
+      },
+      {
+        "id": "keyman",
+        "labelKey": "lead.tab.keyman",
+        "order": 1
+      }
+    ]
+  }
+}

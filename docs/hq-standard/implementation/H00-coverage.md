@@ -2,33 +2,33 @@
 
 기준 커밋: `9e16bc20fe28457b46a7ee68ee6489130bf9f82b` · 조사일: 2026-10-22. 근거는 [P0 화면 카탈로그](../../../spec/screens/P0-08_screen_menu_catalog.md), [라우트](../../../frontend/src/app/route-config.ts), [화면 프로필](../../../frontend/src/app/screen-profile.ts), [화면 등록부](../../../frontend/src/app/screen-registry.tsx), 각 페이지와 backend controller다. 이 표의 판정은 **현재 구현 조사 결과**이며 완료 판정이 아니다. `부분`은 진입 또는 일부 동작만 확인된 상태, `미구현`은 카탈로그의 독립 업무 동작을 확인하지 못한 상태다. 실제 브라우저 조작 검증은 H03–H07에서 수행한다.
 
-`/`는 현재 Lead 슬롯이므로 P0의 홈 대시보드가 아니다. 14개 HQ 진입점은 모두 등록되어 있지만, 카탈로그의 상세·팝업·관리자 기능을 모두 충족한다는 뜻은 아니다. 목록 내 하위 화면에는 독립 경로를 만들지 않고 부모 화면과 액션을 대응시킨다. 모바일은 `P0 우선`과 실제 구현 확인을 구분한다.
+`/`는 현재 Lead 슬롯이므로 P0의 홈 대시보드가 아니다. 14개 HQ 진입점은 모두 등록되어 있지만, 카탈로그의 상세·팝업·관리자 기능을 모두 충족한다는 뜻은 아니다. 목록 내 하위 화면에는 독립 경로를 만들지 않고 부모 화면과 액션을 대응시킨다. 모바일은 `P0 우선`과 실제 구현 확인을 구분한다. 교육 연결은 아래 개별 S ID 표와 일치하도록 보완했으며, 이번 보완의 근거는 기존 교육 분석문서의 분류와 원본코드 대조다. 원본 교육영상을 다시 재생·검증한 결과가 아니다.
 
 | P0 ID | 현 진입점 / 부모 화면 | 코드·API 근거 | 교육 분석 연결 | 현 판정 / 주요 차이 |
 |---|---|---|---|---|
 | SCR-HOME-001 | `/` 현재 `HQ_LEAD` | `LeadsPage`, analytics dashboard API 별도 | S01, S41–S43 | 미구현: 홈 위젯 화면 없음 |
 | SCR-LEAD-001 | `/` `HQ_LEAD` 목록 | `LeadsPage`; `GET /api/leads` | S02–S04 | 부분: 검색·목록 중심, 신규/오늘/나의 필터 확인 필요 |
 | SCR-LEAD-002 | `HQ_LEAD` 상세 | `LeadsPage`에는 상세 진입 없음; `GET/PATCH /api/leads/:id`, status/owner API만 존재 | S04–S09, S11–S12 | 미구현: 상세·편집 UI 없음 |
-| SCR-LEAD-003 | `HQ_LEAD` 전환 대화상자 | `POST /api/leads/:id/convert`; 현 `LeadsPage`와 연결 확인 필요 | S12 | 미구현: 신규/기존 분기·중복 확인 UI 확인 안 됨 |
-| SCR-ACC-001 | `/accounts` `HQ_ACCOUNT` | `AccountsPage`; `GET/POST /api/accounts` | S13–S14 | 부분: 목록·검색·생성 UI 있음, 범위·일괄조회 확인 필요 |
-| SCR-ACC-002 | `/account360` `HQ_ACCOUNT360`, 계정 상세 | `Account360Page`, `AccountsPage`; `GET /api/analytics/accounts/:id/360` | S15–S20, S44 | 부분: 요약 조회 있음, Sales/Order/Service/Timeline/병원현황 탭 부족 |
-| SCR-ACC-003 | `HQ_ACCOUNT` 상세 액션 | `AccountsPage`; `POST /api/erp-accounts/:id/request`, 중복조회 API | S17–S18 | 부분: ERP 요청 버튼 있음, 승인결과/상태 연결 미완료 |
+| SCR-LEAD-003 | `HQ_LEAD` 전환 대화상자 | `POST /api/leads/:id/convert`; 현 `LeadsPage`와 연결 확인 필요 | S10 입력, S13 결과 | 미구현: 신규/기존 분기·중복 확인 UI 확인 안 됨 |
+| SCR-ACC-001 | `/accounts` `HQ_ACCOUNT` | `AccountsPage`; `GET/POST /api/accounts` | S20 관리대장 | 부분: 목록·검색·생성 UI 있음, 범위·일괄조회 확인 필요 |
+| SCR-ACC-002 | `/account360` `HQ_ACCOUNT360`, 계정 상세 | `Account360Page`, `AccountsPage`; `GET /api/analytics/accounts/:id/360` | S13–S19, S44, S520 | 부분: 요약 조회 있음, Sales/Order/Service/Timeline/병원현황 탭 부족 |
+| SCR-ACC-003 | `HQ_ACCOUNT` 상세 액션 | `AccountsPage`; `POST /api/erp-accounts/:id/request`, 중복조회 API | S505 ERP 등록 교육 설명, S14 ERP 필드 맥락 | 부분: ERP 요청 버튼 있음, 승인결과/상태 연결 미완료 |
 | SCR-ACC-004 | `HQ_ACCOUNT` 관리 액션 | `POST /api/accounts/merge`; UI 연결 확인 필요 | S13–S20 중 중복 맥락 | 미구현: 최대 3개·주체/필드 선택 UI 없음 |
 | SCR-ACT-001 | `/activities` `HQ_ACTIVITY` 지도 영역 | `ActivitiesPage`; `GET /api/activities/map/today` | Drive 상세 없음; P0 | 부분: 주변 조회 있음, 지도/GPS 시각·오류 처리 확인 필요 |
 | SCR-ACT-002 | `HQ_ACTIVITY` 활동 상세 | `ActivitiesPage`; check-in/out, `PATCH /api/activities/:id` | Drive 상세 없음; P0 | 부분: IN/상담/OUT 버튼 있음, 상세 편집·이력 부족 |
 | SCR-ACT-003 | `HQ_ACTIVITY` 계획 폼 | `ActivitiesPage`; `POST /api/activities/plans` | Drive 상세 없음; P0 | 부분: 단건 등록 있음, 상태·직출 연계 확인 필요 |
 | SCR-ACT-004 | `HQ_ACTIVITY` 다건 대화상자 | `POST /api/activities/plans/bulk`; UI 확인 필요 | Drive 상세 없음; P0 | 미구현: PC 다건 선택/등록 UI 없음 |
 | SCR-CAL-001 | `HQ_ACTIVITY` 캘린더 | `GET /api/activities/calendar`; `ActivitiesPage` 목록 | Drive 상세 없음; P0 | 부분: 일정 목록 있음, 월/일 캘린더 화면 부족 |
-| SCR-REP-001 | `/activity-reports` `HQ_ACTIVITY_REPORT` | `ActivityReportsPage`; prepare/edit/request API | S21–S22 | 부분: 작성·요청 있음, 계획/결과 속성 대조 필요 |
-| SCR-REP-002 | `HQ_ACTIVITY_REPORT` 승인 목록 | `ActivityReportsPage`; `GET /api/activity-reports` | S22 | 부분: 목록 있음, 기간·권한별 승인대상 필터 부족 |
+| SCR-REP-001 | `/activity-reports` `HQ_ACTIVITY_REPORT` | `ActivityReportsPage`; prepare/edit/request API | 작성/요청은 P0·기존 코드; S21–S22는 승인 맥락 | 부분: 작성·요청 있음, 계획/결과 속성 대조 필요 |
+| SCR-REP-002 | `HQ_ACTIVITY_REPORT` 승인 목록 | `ActivityReportsPage`; `GET /api/activity-reports` | S21 | 부분: 목록 있음, 기간·권한별 승인대상 필터 부족 |
 | SCR-REP-003 | `HQ_ACTIVITY_REPORT` 승인 상세 | `ActivityReportsPage`; branch/division approve API | S22 | 부분: 버튼 있음, 상세·의견 저장·반려 구분 부족 |
 | SCR-DW-001 | `/direct-work` `HQ_DIRECT_WORK` | `DirectWorkPage`; `GET /api/direct-work` | Drive 상세 없음; P0 | 부분: 목록·요청 버튼 있음, 상세/ERP 결과 부족 |
 | SCR-DW-002 | `HQ_DIRECT_WORK` 승인 영역 | `DirectWorkPage`; branch/division decision API | Drive 상세 없음; P0 | 부분: 승인/반려 버튼 있음, 재할당·의견·결과 부족 |
 | SCR-OPP-001 | `/opportunities`, `/pipeline` | `OpportunitiesPage`, `PipelinePage`; opportunity list/funnel API | S41–S45, S501 | 부분: 목록·단계 집계 있음, 필터/예상금액 대조 필요 |
-| SCR-OPP-002 | `HQ_OPPORTUNITY` 상세 | `OpportunitiesPage`; stage/patch API | S46–S50, S502 | 부분: 단계·협상 입력 일부 있음, 니즈/제안/수주 차단 속성 부족 |
-| SCR-OPP-003 | `HQ_OPPORTUNITY` 제품 영역 | `OpportunitiesPage`; product add/patch/delete API | S49–S51, S502 | 부분: 단건 추가 있음, 복수 선택·수량·패키지 계산 부족 |
-| SCR-CON-001 | `/contracts` 생성 영역 | `ContractsPage`; `POST /api/contracts` | S503–S506 | 부분: 생성 폼 있음, 제품별 행·특약·종류 부족 |
-| SCR-CON-002 | `HQ_CONTRACT` 상세 | `ContractsPage`; contract detail/ERP request/result API | S507–S510 | 부분: 계약·ERP 요청 있음, 승인결과/탭·잠금 부족 |
+| SCR-OPP-002 | `HQ_OPPORTUNITY` 상세 | `OpportunitiesPage`; stage/patch API, `saveNegotiation` 샘플 액션 | S44–S46, S50–S51, S501–S502; S506 매핑 교육 | 부분: 단계·고정값 협상 샘플 저장 있음, 니즈/제안/자유 협상 입력·수주 차단 UI 속성 부족 |
+| SCR-OPP-003 | `HQ_OPPORTUNITY` 제품 영역 | `OpportunitiesPage`; product add/patch/delete API | S47–S49, S502 | 부분: 단건 추가 있음, 복수 선택·수량·패키지 계산 부족 |
+| SCR-CON-001 | `/contracts` 생성 영역 | `ContractsPage`; `POST /api/contracts` | S503–S504; S506 매핑 교육 | 부분: 생성 폼 있음, 제품별 행·특약·종류 부족 |
+| SCR-CON-002 | `HQ_CONTRACT` 상세 | `ContractsPage`; contract detail/ERP request/result API | S504, S507–S508, S510, S513, S520, S524; S526 연동 교육 | 부분: 계약·ERP 요청 있음, 승인결과/탭·잠금 UI 부족; 서버 잠금 규칙은 존재 |
 | SCR-COL-001 | `HQ_CONTRACT` 수금 영역 | `ContractsPage`; collection plan/change/reconciliation API | S511–S514 | 부분: 최초계획 일부 있음, 변경/분할/ERP 결과 UI 부족 |
 | SCR-ORD-001 | `/orders` `HQ_ORDER` | `OrdersPage`; product/draft/item/delivery/submit API | S517–S524, S701–S704 | 부분: 주문 폼 있음, 검색/복수 선택·ERP 품목 제약 부족 |
 | SCR-ORD-002 | `/fulfillment` `HQ_FULFILLMENT` | `FulfillmentPage`; order/fulfillment/sales API | S521–S524 | 부분: 목록·납품 조회 있음, ERP 결과·반품 상세 부족 |
@@ -93,10 +93,10 @@
 
 ## 교육 분석 단위 개별 대응
 
-아래 명칭은 Drive의 1차·04·05 원문 제목을 기준으로 옮겼다. `02·03`은 1차의 구간 분할, `06·07`은 05의 구간 분할이므로 같은 S 단위를 중복 화면으로 등록하지 않는다. `S505`, `S506`, `S525`–`S527`은 교육 설명으로 분류한다. `S701`–`S704`는 07의 후반 모바일 설명을 가리키는 작업설계서 표기이며, 이번에 확인한 05 원문의 고유 S ID는 `S520`–`S524`이므로 별도 화면 수에 더하지 않는다.
+아래 명칭은 기존 H00 조사에서 Drive의 1차·04·05 분석문서 제목을 기준으로 옮긴 기록을 보존한다. 이번 보완에서 원본 문서/교육영상의 모든 시연을 다시 검증했다는 뜻은 아니다. `근거 유형`의 시연/교육 설명은 그 분석 기록의 분류다. `02·03`은 1차의 구간 분할, `06·07`은 05의 구간 분할이므로 같은 S 단위를 중복 화면으로 등록하지 않는다. `S505`, `S506`, `S525`–`S527`은 교육 설명으로 분류한다. `S701`–`S704`는 07의 후반 모바일 설명을 가리키는 작업설계서 표기이며, 기존 조사에서 대응시킨 05 분석문서의 고유 S ID `S520`–`S524`와 별도 화면 수로 더하지 않는다.
 
 | 분석 ID·내용 | 대응 P0 화면 / 영역 | 근거 유형 |
-|---|---|
+|---|---|---|
 | S01 영업 홈과 앱 전환 | SCR-HOME-001 | 시연 |
 | S02 리드 목록보기 선택 | SCR-LEAD-001 / 목록 필터 | 시연 |
 | S03 리드 목록에서 상세 조회 | SCR-LEAD-001 → 002 | 시연 |

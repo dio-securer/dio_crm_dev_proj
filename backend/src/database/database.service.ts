@@ -1,11 +1,15 @@
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import sql, { ConnectionPool, IResult, Request, Transaction } from 'mssql';
 import { env } from '../config/env';
+import { AsyncLocalStorage } from 'node:async_hooks';
 
 export type DbQuery = <T = any>(text: string, params?: Record<string, unknown>) => Promise<IResult<T>>;
 
 @Injectable()
 export class DatabaseService implements OnModuleDestroy {
+  // All providers target the same configured database. Nested domain/config calls share
+  // the request transaction instead of opening an independently committing connection.
+  private static readonly transactionScope = new AsyncLocalStorage<{query:DbQuery;rollbackOnly:boolean;after:Array<(committed:boolean)=>Promise<void>>}>();
   private pool?: ConnectionPool;
   private readonly logger = new Logger(DatabaseService.name);
 
@@ -26,25 +30,43 @@ export class DatabaseService implements OnModuleDestroy {
   }
 
   async query<T = any>(text: string, params: Record<string, unknown> = {}): Promise<IResult<T>> {
+    const scope=DatabaseService.transactionScope.getStore();
+    if(scope)return scope.query<T>(text,params);
     const pool = await this.getPool();
     return this.executeRequest<T>(pool.request(), text, params);
   }
 
   async transaction<T>(work: (query: DbQuery) => Promise<T>): Promise<T> {
+    const existing=DatabaseService.transactionScope.getStore();
+    if(existing){try{return await work(existing.query);}catch(error){existing.rollbackOnly=true;throw error;}}
     const pool = await this.getPool();
     const tx = new Transaction(pool);
     await tx.begin();
     const query: DbQuery = <R = any>(text: string, params: Record<string, unknown> = {}) =>
       this.executeRequest<R>(new Request(tx), text, params);
+    const scope={query,rollbackOnly:false,after:[] as Array<(committed:boolean)=>Promise<void>>};let committed=false;
     try {
-      const result = await work(query);
+      const result = await DatabaseService.transactionScope.run(scope,()=>work(query));
+      if(scope.rollbackOnly)throw new Error('NESTED_TRANSACTION_ABORTED');
       await tx.commit();
+      committed=true;
       return result;
     } catch (error) {
       await tx.rollback();
       throw error;
+    } finally {
+      // The transaction/locks have ended and ALS has been restored. Forensic audit hooks
+      // never cause a successfully committed business transaction to be rolled back.
+      for(const after of scope.after){try{await after(committed);}catch{this.logger.error('transaction_completion_audit_failed');}}
     }
   }
+
+  afterTransaction(callback:(committed:boolean)=>Promise<void>):void {
+    const scope=DatabaseService.transactionScope.getStore();
+    if(!scope)throw new Error('TRANSACTION_CONTEXT_REQUIRED');
+    scope.after.push(callback);
+  }
+  hasActiveTransaction():boolean {return DatabaseService.transactionScope.getStore()!==undefined;}
 
   private async executeRequest<T>(request: Request, text: string, params: Record<string, unknown>): Promise<IResult<T>> {
     for (const [key, value] of Object.entries(params)) request.input(key, value as never);

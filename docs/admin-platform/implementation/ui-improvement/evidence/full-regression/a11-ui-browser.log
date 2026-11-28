@@ -1,0 +1,4 @@
+PASS T27 legacy migration/backup/original preservation; T45 unsupported Web Locks blocks writes atomically
+PASS T44 Browser injected transaction failure rolls back business/event/receipt
+PASS browser reload, false preservation, cross-tab CAS, shared DTO commands and idempotency
+$ node scripts/admin/run-web-test.cjs tests/admin/browser.cjs

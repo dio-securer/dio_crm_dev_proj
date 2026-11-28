@@ -1,0 +1,12 @@
+PASS BROWSER_MOCK shared integration scenarios [
+  '7 transport scenarios',
+  'retry identity',
+  'timeout duplicate',
+  'delay fake clock',
+  'out-of-order',
+  'exact replacement total',
+  'hash conflict atomic'
+]
+PASS BROWSER_MOCK: ERP typed settings, preview, fixture request, transient retry, rejected reason; egress=0
+PASS API_MOCK: ERP typed settings, preview, fixture request, transient retry, rejected reason; egress=0
+$ node scripts/admin/run-integration-ui.cjs

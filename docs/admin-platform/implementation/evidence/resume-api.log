@@ -1,0 +1,18 @@
+$ node --test tests/admin/api.cjs tests/admin/legacy-auth.cjs
+✔ HTTP requires valid typed mock authentication (111.60077ms)
+✔ duplicate login requires a company; credentials failure returns 401 (11.390963ms)
+✔ strict payload, company isolation and idempotent create over HTTP (35.125122ms)
+✔ non-admin cannot change configurations; revoked session cannot be replayed (14.358348ms)
+✔ production mock bootstrap fails before binding providers (0.526306ms)
+✔ update rejects payload combined with company overrides (5.764027ms)
+✔ unsupported mock route never silently falls back to legacy (1.540942ms)
+✔ new API instance starts with a clean dataset (34.629722ms)
+✔ T60 LEGACY HTTP login/refresh/logout preserves numeric claims with SQL stub (148.642412ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 590.733893

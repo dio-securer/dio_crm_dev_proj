@@ -1,0 +1,2 @@
+PASS BROWSER_MOCK: notification draft preview/escape, publish, approval event delivery, EMAIL MOCK_SENT, own inbox, locale snapshot, read/filter; egress=0
+PASS API_MOCK: notification draft preview/escape, publish, approval event delivery, EMAIL MOCK_SENT, own inbox, locale snapshot, read/filter; egress=0

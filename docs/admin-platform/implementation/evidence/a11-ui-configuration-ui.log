@@ -1,0 +1,4 @@
+T57 false/0/remove/reset/locked path422/stale rebase409/publish race409 and T56 COMMON→TEMPLATE→COUNTRY→COMPANY immutable chain PASS
+PASS BROWSER_MOCK: save, validate, publish, RESET, rollback, user release, cross-tab CAS (browser), egress=0
+PASS API_MOCK: save, validate, publish, RESET, rollback, user release, cross-tab CAS (browser), egress=0
+$ node scripts/admin/run-configuration-ui.cjs

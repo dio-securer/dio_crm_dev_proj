@@ -1,0 +1,34 @@
+$ node scripts/deploy/devuat-migration-plan.mjs --target DEV && node scripts/pilot/mobile-pwa-readiness.mjs && node scripts/integration/external-readiness.mjs
+DIO CRM DEV Migration Plan
+Migrations:
+01. 001_phase1_foundation.sql
+02. 002_phase2_customer.sql
+03. 003_phase3_activity.sql
+04. 004_phase4_opportunity.sql
+05. 005_phase5_contract_collection.sql
+06. 006_phase6_order_delivery_sales.sql
+07. 007_phase7_analytics.sql
+08. 008_phase8_hardening.sql
+09. 009_globalization_foundation.sql
+10. 010_account_interface_fields.sql
+11. 011_multi_market_foundation.sql
+Seeds:
+01. 001_phase1_seed.sql
+02. 002_phase2_seed.sql
+03. 003_phase3_seed.sql
+04. 004_phase4_seed.sql
+05. 005_phase5_seed.sql
+06. 006_phase6_seed.sql
+07. 007_phase7_seed.sql
+08. 008_phase8_seed.sql
+09. 009_globalization_seed.sql
+PLAN ONLY No SQL was executed. Add --execute only after backup/snapshot and environment approval.
+DIO CRM Mobile/PWA Pilot Readiness
+Web: (not supplied)
+API: (not supplied)
+WARN HTTPS endpoint - CRM_WEB_BASE_URL or --baseUrl is required for runtime pilot validation
+INFO Runtime checks skipped. Use --strict with a deployed DEV/UAT HTTPS URL for Pilot Gate.
+DIO CRM External Integration Readiness
+SKIP  Map provider config - CRM_MAP_PROVIDER not configured
+SKIP  ERP test endpoint - CRM_ERP_BASE_URL and CRM_ERP_HEALTH_PATH are required
+INFO Connectivity PASS does not prove business transaction correctness. Validate request/response mappings in UAT using non-production test data.

@@ -1,0 +1,35 @@
+{
+  "key": "lead_status",
+  "values": [
+    {
+      "active": true,
+      "code": "NEW",
+      "labelKey": "lead.status.NEW",
+      "order": 0
+    },
+    {
+      "active": true,
+      "code": "FIRST_VISIT",
+      "labelKey": "lead.status.FIRST_VISIT",
+      "order": 1
+    },
+    {
+      "active": true,
+      "code": "KEYMAN_MEETING",
+      "labelKey": "lead.status.KEYMAN_MEETING",
+      "order": 2
+    },
+    {
+      "active": true,
+      "code": "CONTACT_EXCLUDED",
+      "labelKey": "lead.status.CONTACT_EXCLUDED",
+      "order": 3
+    },
+    {
+      "active": true,
+      "code": "CONVERTED",
+      "labelKey": "lead.status.CONVERTED",
+      "order": 4
+    }
+  ]
+}

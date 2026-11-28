@@ -1,0 +1,58 @@
+{
+  "entity": "lead",
+  "views": [
+    {
+      "columns": [
+        "hospital_name",
+        "status",
+        "owner_name",
+        "sido",
+        "sigungu",
+        "phone",
+        "business_no",
+        "updated_at"
+      ],
+      "filter": {
+        "arg": {
+          "field": "hospital_name",
+          "op": "isEmpty"
+        },
+        "op": "not"
+      },
+      "key": "hq_default",
+      "labelKey": "lead.view.hq_default",
+      "pageSize": 25,
+      "shared": true,
+      "sort": [
+        {
+          "direction": "DESC",
+          "field": "updated_at"
+        }
+      ]
+    },
+    {
+      "columns": [
+        "hospital_name",
+        "status",
+        "owner_name",
+        "exclusion_reason",
+        "updated_at"
+      ],
+      "filter": {
+        "field": "status",
+        "op": "eq",
+        "value": "CONTACT_EXCLUDED"
+      },
+      "key": "excluded",
+      "labelKey": "lead.view.excluded",
+      "pageSize": 25,
+      "shared": true,
+      "sort": [
+        {
+          "direction": "DESC",
+          "field": "updated_at"
+        }
+      ]
+    }
+  ]
+}
