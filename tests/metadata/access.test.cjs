@@ -59,3 +59,8 @@ test('access.json is read and written at metadata/objects/<o>/access.json', () =
   const broken = files.map(f => (f === file ? { ...f, content: '{"entity":"lead","rules":[]}' } : f));
   assert.ok(m.bundleFromFiles(broken).issues.some(i => i.code === 'M01_SCHEMA_INVALID' && i.path.startsWith('metadata/objects/lead/access.json')));
 });
+
+test('schema: an extra top-level key in access.json is M01', () => {
+  const b = variant(x => { obj(x, 'lead').access = { entity: 'lead', rules: [{ kind: 'own', ownerField: 'name' }], extra: true }; });
+  assert.ok(codes(b).some(c => c.startsWith('M01_SCHEMA_INVALID objects/1/access')), codes(b).join('\n'));
+});

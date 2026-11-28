@@ -39,3 +39,25 @@ test('a rule naming an unknown field or permission stops the model', () => {
     assert.ok(issues.some(i => i.code === code), code);
   }
 });
+
+test('rules are per object: an unknown object gets none and a second object keeps its own rules', () => {
+  const files = readMetadata();
+  files.push({ path: 'metadata/objects/contact/object.json', content: JSON.stringify({ key: 'contact', labelKey: 'lead.label', pluralLabelKey: 'lead.plural', aliases: [] }) });
+  files.push({ path: 'metadata/objects/contact/fields.json', content: JSON.stringify({ fields: [{ key: 'unit_id', type: 'text', labelKey: 'lead.field.status', required: false, system: false, aliases: [] }] }) });
+  files.push({ path: 'metadata/objects/contact/access.json', content: JSON.stringify({ entity: 'contact', rules: [{ kind: 'unit', unitField: 'unit_id' }] }) });
+  const { model, issues } = loadRuntimeModel(files);
+  assert.deepEqual(issues.filter(i => i.severity === 'error'), []);
+  assert.deepEqual(model.rowAccess('no_such'), []);
+  assert.deepEqual(model.rowAccess('contact'), [{ kind: 'unit', unitField: 'unit_id' }]);
+  assert.deepEqual(model.rowAccess('lead'), [{ kind: 'own', ownerField: 'owner_name' }, { kind: 'members', ownerField: 'owner_name' }]);
+});
+
+test('aliases are resolved for members and unit rules too', () => {
+  let files = editJson(readMetadata(), 'metadata/objects/lead/fields.json', d => {
+    d.fields.find(x => x.key === 'owner_name').aliases = ['owner'];
+    d.fields.find(x => x.key === 'sido').aliases = ['region'];
+  });
+  files = editJson(files, ACCESS, d => { d.rules = [{ kind: 'members', ownerField: 'owner' }, { kind: 'unit', unitField: 'region', permission: 'account.read' }]; });
+  const { model } = loadRuntimeModel(files);
+  assert.deepEqual(model.rowAccess('lead'), [{ kind: 'members', ownerField: 'owner_name' }, { kind: 'unit', unitField: 'sido', permission: 'account.read' }]);
+});

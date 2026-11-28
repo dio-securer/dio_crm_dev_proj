@@ -3,6 +3,7 @@ import { Issue, issue, sortIssues } from './issues';
 import { FieldDef, MetadataBundle, ObjectBundle } from './schemas';
 import { analyzeBundle } from './validate';
 import { KIND_LABELS } from './messages';
+import { diffAccess } from './diff-access';
 
 /**
  * Type changes that keep every stored value valid and every reader working:
@@ -46,6 +47,7 @@ function diffObjects(base: MetadataBundle, head: MetadataBundle, out: Issue[]) {
       continue;
     }
     diffFields(ob, now, p, out);
+    diffAccess(ob, now, p, out);
     diffKeyed((ob.listViews?.views ?? []).map(v => v.key), (now.listViews?.views ?? []).map(v => v.key), KIND_LABELS.listView, k => recorded('LIST_VIEW', key, k), k => `${p}/listViews/views[${k}]`, out);
     diffKeyed((ob.actions?.actions ?? []).map(a => a.key), (now.actions?.actions ?? []).map(a => a.key), KIND_LABELS.action, k => recorded('ACTION', key, k), k => `${p}/actions/actions[${k}]`, out);
   }
@@ -53,7 +55,7 @@ function diffObjects(base: MetadataBundle, head: MetadataBundle, out: Issue[]) {
 }
 
 /**
- * Errors for changes that break existing data or references (D01-D03), warnings for new uses of deprecated
+ * Errors for changes that break existing data or references (D01-D03) or widen row access (D05), warnings for new uses of deprecated
  * fields (D04). Additions are always fine. Both inputs are parsed first; a bundle that does not parse gives M01.
  */
 export function diffBundles(baseInput: unknown, headInput: unknown): Issue[] {

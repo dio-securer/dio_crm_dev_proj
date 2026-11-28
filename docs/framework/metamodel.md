@@ -33,6 +33,7 @@
 `access.json` 은 `{ entity, rules }` 다. 규칙은 `all`, `none`, `own`(ownerField), `members`(ownerField), `unit`(unitField) 이고, `none` 외에는 `permission` 을 붙일 수 있다.
 규칙은 하나라도 맞으면 보인다(OR). 파일이 없으면 아무 행도 보이지 않는다(닫힌 기본값). 엔진의 `RuntimeModel.rowAccess(개체)` 가 이 규칙을 읽어 평가기에 넘긴다. 결정의 이유는 [ADR 0007](adr/0007-row-access-in-metadata.md) 에 있다.
 ownerField·unitField 는 있는 필드여야 하고(R02) 글자나 참조 필드여야 한다(R11). `none` 은 혼자만 쓴다(R11). 덮어쓰기 대상은 아직 아니다.
+기준보다 더 많은 행을 보이게 하는 변경은 `diffBundles` 의 D05_ACCESS_WIDENED 오류다(P6). 좁히는 변경은 통과한다.
 
 ## 필드 종류
 
@@ -68,6 +69,7 @@ ownerField·unitField 는 있는 필드여야 하고(R02) 글자나 참조 필�
 | `D02_RENAMED_WITHOUT_ALIAS` | error | `diffBundles` | {kind} "{key}" 의 이름이 "{to}" 로 바뀐 것 같지만 옛 이름(alias)이 없습니다. |
 | `D03_TYPE_CHANGED` | error | `diffBundles` | 필드 "{key}" 의 형식이 {from} 에서 {to} 로 바뀌었습니다. 허용된 넓힘이 아닙니다. |
 | `D04_DEPRECATED_NEW_USE` | warning | `diffBundles` | 폐기 예정 필드 "{field}" 을(를) 새로 쓰기 시작했습니다. |
+| `D05_ACCESS_WIDENED` | error | `diffBundles` | 개체 "{entity}" 의 행 권한 규칙 "{rule}" 이(가) 전보다 더 많은 행을 보이게 합니다. 권한을 넓히는 변경은 따로 승인받아야 합니다. |
 | `F01_UNKNOWN_FILE` | error | `bundleFromFiles` | 알 수 없는 파일입니다. 정해진 자리에 있는 파일만 읽습니다. |
 | `F02_MISPLACED_FILE` | error | `bundleFromFiles` | 파일 자리와 내용이 맞지 않습니다: {detail} |
 | `F03_INVALID_JSON` | error | `bundleFromFiles` | JSON 으로 읽을 수 없습니다. |

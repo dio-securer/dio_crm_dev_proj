@@ -18,15 +18,19 @@ F2-1 에서 엔진에 행 권한 평가기(`canAccessRow`, `accessPredicate`)를
 4. 검사: 없는 필드 R02, 없는 권한 R07(admin `permissionCatalog`), 개체 이름 불일치 R01, 별칭·폐기 예정 필드 사용 R09 경고,
    사용자·조직 ID 를 담을 수 없는 필드(글자·참조가 아닌 것) R11_ACCESS_FIELD_TYPE, 다른 규칙과 섞인 `none` R11_ACCESS_NONE_MIXED.
 5. 엔진 `loadRuntimeModel` 이 규칙을 적재하고 `rowAccess(개체)` 로 내준다. 별칭으로 적은 필드는 정식 필드 키로 바꿔 내준다.
-6. 미룬 것: 덮어쓰기(overlay) 대상으로 행 권한을 여는 일, DB 조회 조건으로 바꾸는 일(F2-4), 리드 전용 권한(권한 목록 확장).
+6. 넓히기 검사: P6(`diffBundles`)가 기준과 비교해 전보다 더 많은 행을 보이게 하는 규칙을 D05_ACCESS_WIDENED 오류로 잡는다(own→all, 규칙 추가, 필드·종류 변경, 권한 조건 제거).
+   좁히기(규칙 삭제, 권한 조건 추가, `none`, 파일 삭제)는 통과한다. 기준에 `access.json` 이 없던 개체의 첫 규칙은 새 정의로 보고 비교하지 않는다.
+7. 미룬 것: 덮어쓰기(overlay) 대상으로 행 권한을 여는 일, DB 조회 조건으로 바꾸는 일(F2-4), 리드 전용 권한(권한 목록 확장).
 
 ## 결과
 
 - 좋은 점: 행 권한을 설정으로 바꾼다. 지어낸 필드·권한은 G12 에서 오류가 된다. 설정과 평가기의 형식이 갈라질 수 없다.
 - 치르는 값: 권한 목록에 lead.* 권한이 없어 리드 규칙(`own`, `members`)에는 아직 권한 조건을 붙이지 않았다.
+- 치르는 값: P6 는 예외 선언이 안 되므로 정당한 넓히기도 PR 로는 통과하지 못한다. 넓히기는 보호 검사 변경과 사람 승인이 필요하다.
 - 한계: 담당자 필드(`owner_name`)가 사용자 ID 를 담는지는 형식(글자)만 본다. 실제 값이 사용자 ID 인지는 확인하지 않음.
 
 ## 기계 검사
 
+- 보호 검사 P6 `metadata-compat`: D05 로 행 권한 넓히기를 막는다(`tests/metadata/access-diff.test.cjs`).
 - 가드 규칙 G12 `metadata-valid`: `access.json` 도 `bundleFromFiles` + `validateBundle` 로 검사한다.
 - `tests/metadata/access.test.cjs`(계약), `packages/engine/test/access-config.test.cjs`(엔진).
