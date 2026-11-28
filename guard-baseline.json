@@ -5,7 +5,7 @@
     "G03": {
       "total": {
         "lines": 16637,
-        "bytes": 2392533
+        "bytes": 2392430
       },
       "files": {
         "backend/src/customization": {"activity-report-gateway.ts":{"lines":93,"bytes":16744},"config-service.ts":{"lines":242,"bytes":45555},"contract-gateway.ts":{"lines":83,"bytes":19055},"lead-commands.ts":{"lines":88,"bytes":15171},"lead-extension-contract.ts":{"lines":170,"bytes":16706},"legacy-boundary.ts":{"lines":89,"bytes":22379}},
@@ -17,7 +17,7 @@
         "backend/src/modules/customer": {"customer.service.ts":{"lines":378,"bytes":25855}},
         "backend/src/modules/opportunity": {"opportunity.service.ts":{"lines":197,"bytes":15573}},
         "backend/src/modules/order": {"order.service.ts":{"lines":258,"bytes":21033}},
-        "frontend/src": {"AccountsPage.tsx":{"lines":545,"bytes":35342}},
+        "frontend/src": {"AccountsPage.tsx":{"lines":545,"bytes":35244}},
         "frontend/src/admin": {"AdvancedDesigner.tsx":{"lines":40,"bytes":15161},"ApprovalsPage.tsx":{"lines":29,"bytes":18431},"MockEntry.tsx":{"lines":121,"bytes":16858},"SecurityPages.tsx":{"lines":53,"bytes":17694}},
         "frontend/src/app": {"hq-runtime-standard.ts":{"lines":309,"bytes":35499},"hq-standard-registry.ts":{"lines":510,"bytes":83875}},
         "frontend/src/customization": {"AdminConfiguration.tsx":{"lines":143,"bytes":32748},"ConfiguredLeads.tsx":{"lines":144,"bytes":39871},"ConfiguredRecords.tsx":{"lines":95,"bytes":27867},"VisualPreviewPanel.tsx":{"lines":271,"bytes":34967},"VisualPreviewRuntime.tsx":{"lines":208,"bytes":16305},"VisualPropertyPanel.tsx":{"lines":161,"bytes":26669}},
@@ -28,7 +28,7 @@
         "packages/contracts/src/admin": {"approval-engine.ts":{"lines":53,"bytes":19697},"configuration.ts":{"lines":186,"bytes":29687},"integration-engine.ts":{"lines":44,"bytes":18745},"organization.ts":{"lines":228,"bytes":21339},"security.ts":{"lines":308,"bytes":40061}},
         "scripts/admin": {"run-designer-ui.cjs":{"lines":18,"bytes":18503}},
         "scripts/admin-customization": {"build-catalog.mjs":{"lines":115,"bytes":20980},"complete-w01-map.mjs":{"lines":188,"bytes":18270},"config-service.test.mjs":{"lines":61,"bytes":15432},"generate-editor-scope-review.mjs":{"lines":117,"bytes":22605},"lead-extension-contract.test.mjs":{"lines":54,"bytes":15415},"lead-grid-settings.test.mjs":{"lines":91,"bytes":18374},"lead-managed-responsive-check.mjs":{"lines":34,"bytes":15149},"map-semantics.mjs":{"lines":166,"bytes":23390},"render-comparison.mjs":{"lines":79,"bytes":22673},"render-design.mjs":{"lines":221,"bytes":53485},"w06-browser.mjs":{"lines":164,"bytes":15608}},
-        "scripts/hq-standard": {"account-zip-walkthrough.mjs":{"lines":50,"bytes":23384},"activity-report-walkthrough.mjs":{"lines":63,"bytes":23355},"activity-report-zip.test.mjs":{"lines":123,"bytes":15979},"build-full-activity-walkthrough.mjs":{"lines":63,"bytes":15169},"contract-collection-walkthrough.mjs":{"lines":58,"bytes":23073},"full-report-direct-walkthrough.mjs":{"lines":116,"bytes":30438},"h02-browser.mjs":{"lines":368,"bytes":21051},"h02-foundation.test.mjs":{"lines":255,"bytes":26025},"h03-browser.mjs":{"lines":163,"bytes":33463},"h03-customer.test.mjs":{"lines":281,"bytes":35312},"h04-http.mjs":{"lines":175,"bytes":17023},"h06-http.mjs":{"lines":168,"bytes":18227},"hq-standard.test.mjs":{"lines":368,"bytes":35868},"lead-zip-walkthrough.mjs":{"lines":55,"bytes":28074},"opportunity-followup-ui.mjs":{"lines":39,"bytes":15464},"opportunity-review-ui.mjs":{"lines":62,"bytes":19315},"opportunity-walkthrough.mjs":{"lines":72,"bytes":21861},"order-delivery-walkthrough.mjs":{"lines":76,"bytes":24348}},
+        "scripts/hq-standard": {"account-zip-walkthrough.mjs":{"lines":50,"bytes":23384},"activity-report-walkthrough.mjs":{"lines":63,"bytes":23355},"activity-report-zip.test.mjs":{"lines":123,"bytes":15979},"build-full-activity-walkthrough.mjs":{"lines":63,"bytes":15169},"contract-collection-walkthrough.mjs":{"lines":58,"bytes":23073},"full-report-direct-walkthrough.mjs":{"lines":116,"bytes":30438},"h02-browser.mjs":{"lines":368,"bytes":21051},"h02-foundation.test.mjs":{"lines":255,"bytes":26025},"h03-browser.mjs":{"lines":163,"bytes":33458},"h03-customer.test.mjs":{"lines":281,"bytes":35312},"h04-http.mjs":{"lines":175,"bytes":17023},"h06-http.mjs":{"lines":168,"bytes":18227},"hq-standard.test.mjs":{"lines":368,"bytes":35868},"lead-zip-walkthrough.mjs":{"lines":55,"bytes":28074},"opportunity-followup-ui.mjs":{"lines":39,"bytes":15464},"opportunity-review-ui.mjs":{"lines":62,"bytes":19315},"opportunity-walkthrough.mjs":{"lines":72,"bytes":21861},"order-delivery-walkthrough.mjs":{"lines":76,"bytes":24348}},
         "tests/admin": {"account-http.cjs":{"lines":28,"bytes":15144},"approval-http.cjs":{"lines":34,"bytes":20862},"designer-acceptance.cjs":{"lines":50,"bytes":28500},"integration-http.cjs":{"lines":37,"bytes":18010},"notification-http.cjs":{"lines":32,"bytes":15228},"security.cjs":{"lines":29,"bytes":23376}}
       }
     },
