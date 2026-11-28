@@ -3,6 +3,7 @@
 import type { AccessPredicate, RecordValue } from '@dio-crm/engine';
 import type { FieldDef } from '@dio-crm/contracts/metadata';
 import { MetaQuery, MetaTransactional } from './crm-meta-version-store';
+import { PublishedCheck, assertStillPublished } from './crm-meta-published';
 import { ObjectShape, columnFor } from './crm-obj-names';
 import { ListQuery, Page, RecordScope, Statement, getStatement, insertStatement, listStatement, updateStatement } from './crm-obj-sql';
 
@@ -43,8 +44,13 @@ export class SqlObjectRecords {
     });
   }
 
-  insert(object: ObjectShape, scope: RecordScope, values: Record<string, RecordValue>, at: Date): Promise<StoredRecord> {
+  /**
+   * `check` (here and in update): the version the values were validated for must still be the published one, checked
+   * inside this transaction with the pointer held, so a row is never written under the rules of a version that is gone.
+   */
+  insert(object: ObjectShape, scope: RecordScope, values: Record<string, RecordValue>, at: Date, check?: PublishedCheck): Promise<StoredRecord> {
     return this.db.transaction(async query => {
+      if (check) await assertStillPublished(query, check, 'shared');
       const id = Number((await run(query, insertStatement(object, scope, values, at))).recordset[0].id);
       const [row] = (await run(query, getStatement(object, scope, { kind: 'all' }, id, false))).recordset;
       return recordOf(object, row);
@@ -56,9 +62,10 @@ export class SqlObjectRecords {
    * Undefined when the row does not exist for this actor; nothing is written then.
    */
   update(object: ObjectShape, scope: RecordScope, predicate: AccessPredicate, id: number,
-    decide: (current: StoredRecord) => Record<string, RecordValue>, at: Date): Promise<StoredRecord | undefined> {
+    decide: (current: StoredRecord) => Record<string, RecordValue>, at: Date, check?: PublishedCheck): Promise<StoredRecord | undefined> {
     if (predicate.kind === 'none') return Promise.resolve(undefined);
     return this.db.transaction(async query => {
+      if (check) await assertStillPublished(query, check, 'shared');
       const [row] = (await run(query, getStatement(object, scope, predicate, id, true))).recordset;
       if (!row) return undefined;
       await run(query, updateStatement(object, scope, id, decide(recordOf(object, row)), at));

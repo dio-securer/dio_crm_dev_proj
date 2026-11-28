@@ -3,7 +3,9 @@
 // The physical names come from crm-obj-name-map.ts (recorded in dbo.crm_meta_obj_name; a retired name is never followed again).
 // A column whose type no longer matches the metadata (e.g. an allowed integer -> decimal widening) stops the run
 // (CRM_OBJ_SCHEMA_DRIFT): changing a column with data in it is left to a person.
+import { bundleFromFiles } from '@dio-crm/contracts/metadata';
 import { MetaTransactional } from './crm-meta-version-store';
+import { PublishedCheck, StaleVersionError, assertStillPublished } from './crm-meta-published';
 import { ObjectShape, columnFor, fieldColumns, quote, sqlTypeOf, tableOf } from './crm-obj-names';
 import { NAMES_QUERY, NAME_RETIRED_DDL, NAME_TABLE_DDL, NameRow, TABLES_QUERY, resolveNames, resolveTable } from './crm-obj-name-map';
 import { APPLOCK, writeNames } from './crm-obj-name-sync';
@@ -50,13 +52,31 @@ export function schemaDrift(object: ObjectShape, rows: readonly ColumnRow[]): st
   return drift;
 }
 
+/** The requested objects and fields must be in the published files: a name is never recorded for something that is not published. */
+function assertPublished(objects: readonly ObjectShape[], files: readonly { path: string; content: string }[] | undefined): void {
+  const bundle = files?.length ? bundleFromFiles([...files]).bundle : undefined;
+  for (const object of objects) {
+    const published = bundle?.objects.find(o => o.object.key === object.key)?.object;
+    const fields = new Set(published?.fields.map(f => f.key));
+    const missing = !published ? object.key : object.fields.find(f => !fields.has(f.key))?.key;
+    if (missing !== undefined) throw new StaleVersionError(`not published: ${object.key}${published ? `.${missing}` : ''}`);
+  }
+}
+
 /**
  * Creates or completes the record tables of the given objects in one transaction, serialised by an application lock.
  * Returns each object with its physical table and column names; the record SQL must be built from these.
+ *
+ * `check` is given by everything that serves requests: the pointer is locked first (the lock a publish takes first),
+ * and the run goes on only if the version these objects come from is still the published one, at the same stamp, and
+ * really has these objects and fields. A request that still holds an older version therefore cannot record a name
+ * that a publish has retired in the meantime. Without `check` (the real-database check script, unit tests) nothing is compared.
  */
-export async function applyObjectSchema(db: MetaTransactional, objects: readonly ObjectShape[]): Promise<ObjectShape[]> {
+export async function applyObjectSchema(db: MetaTransactional, objects: readonly ObjectShape[], check?: PublishedCheck): Promise<ObjectShape[]> {
   return db.transaction(async query => {
+    if (check) await assertStillPublished(query, check, 'update');
     await query(APPLOCK);
+    if (check) assertPublished(objects, await check.files(query, check.expected.id));
     await query(NAME_TABLE_DDL);
     await query(NAME_RETIRED_DDL);
     const drift: string[] = [], out: ObjectShape[] = [];

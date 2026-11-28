@@ -3,6 +3,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { MetadataVersions, memoryVersionStore } from '@dio-crm/engine';
+import type { PublishedCheck, PublishedPointer } from '../../src/database/crm-meta-published';
 import { syncPublishedNames } from '../../src/database/crm-obj-name-sync';
 import { applyObjectSchema } from '../../src/database/crm-obj-schema';
 import { SqlObjectRecords } from '../../src/database/crm-obj-store';
@@ -50,9 +51,11 @@ export async function engineFixture(files: File[] | null = readMetadata()) {
     readId: async () => (await versions.published())?.id,
     readPointer: async () => { const v = await versions.published(); return v ? { id: v.id, stamp: String(moves) } : undefined; },
     readFiles: async (id: number) => { const v = await versions.published(); return v && v.id === id ? { id, files: v.files } : undefined; },
-    ensureTables: (objects: any[]) => applyObjectSchema(db, objects),
+    ensureTables: (objects: any[], check?: PublishedCheck) => applyObjectSchema(db, objects, check),
+    // The same check the SQL ports give, answered by the memory version store (there is no pointer row in the fake database).
+    check: (expected: PublishedPointer): PublishedCheck => ({ expected, read: () => ports.readPointer(), files: async (_query, id) => (await ports.readFiles(id))?.files }),
   };
   const api = new EngineRecords(new PublishedModels(ports), new SqlObjectRecords(db), () => NOW);
-  return { db, versions, publish, api };
+  return { db, versions, publish, api, ports };
 }
 export const LEAD = { hospital_name: 'H1', status: 'NEW' };

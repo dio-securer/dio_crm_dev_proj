@@ -3,6 +3,7 @@
 // Closed by default: no rules means no rows and no create; a row outside the actor's access is "not found".
 import { accessPredicate, buildUiModel, isUiLocale, matchesPredicate, validateWrite, withOwnerDefault } from '@dio-crm/engine';
 import type { Actor, RecordError, RecordValue, RuntimeModel, AccessPredicate, UiModel } from '@dio-crm/engine';
+import { PublishedCheck, StaleVersionError } from '../../database/crm-meta-published';
 import { FilterError } from '../../database/crm-obj-filter';
 import type { ObjectShape } from '../../database/crm-obj-schema';
 import { MAX_ACCESS_VALUES, accessValueCount } from '../../database/crm-obj-sql';
@@ -15,19 +16,24 @@ export interface Published {
   model: RuntimeModel;
   /** The object with its physical table and column names; makes the table complete on first use (503 when it cannot). */
   shape(objectKey: string): Promise<ObjectShape>;
+  /** Given to every write: the version must still be the published one inside the write's transaction. */
+  check?: PublishedCheck;
 }
 export interface PublishedSource { current(): Promise<Published | undefined> }
 export interface RecordStore {
   list(object: ObjectShape, scope: RecordScope, predicate: AccessPredicate, page: Page, query?: ListQuery): Promise<StoredRecord[]>;
   get(object: ObjectShape, scope: RecordScope, predicate: AccessPredicate, id: number): Promise<StoredRecord | undefined>;
-  insert(object: ObjectShape, scope: RecordScope, values: Record<string, RecordValue>, at: Date): Promise<StoredRecord>;
+  insert(object: ObjectShape, scope: RecordScope, values: Record<string, RecordValue>, at: Date, check?: PublishedCheck): Promise<StoredRecord>;
   update(object: ObjectShape, scope: RecordScope, predicate: AccessPredicate, id: number,
-    decide: (current: StoredRecord) => Record<string, RecordValue>, at: Date): Promise<StoredRecord | undefined>;
+    decide: (current: StoredRecord) => Record<string, RecordValue>, at: Date, check?: PublishedCheck): Promise<StoredRecord | undefined>;
 }
 
 export class EngineApiError extends Error {
   constructor(readonly status: number, readonly code: string, readonly errors: RecordError[] = []) { super(code); this.name = 'EngineApiError'; }
 }
+
+/** A write for a version that is no longer the published one wrote nothing: the caller asks again and gets the new version. */
+const stale = (error: unknown): never => { throw error instanceof StaleVersionError ? new EngineApiError(503, 'PUBLISHED_METADATA_CHANGED') : error; };
 
 const ID = /^[1-9][0-9]{0,14}$/;
 const COUNT = /^[0-9]{1,7}$/;
@@ -133,7 +139,7 @@ export class EngineRecords {
     const values = withOwnerDefault(rules, caller.actor, checked.values);
     // The new row must be one the actor can see: nobody creates rows for others or outside their access.
     if (!matchesPredicate(predicate, values)) throw new EngineApiError(403, 'ACCESS_DENIED');
-    return this.store.insert(shape, scope, values, this.now());
+    return this.store.insert(shape, scope, values, this.now(), current.check).catch(stale);
   }
 
   async update(caller: Caller, objectKey: string, rawId: string, body: unknown): Promise<StoredRecord> {
@@ -146,7 +152,7 @@ export class EngineRecords {
       // The changed row must stay inside the actor's access: a row cannot be handed out of it.
       if (!matchesPredicate(predicate, { ...row.values, ...checked.values })) throw new EngineApiError(403, 'ACCESS_DENIED');
       return checked.values;
-    }, this.now());
+    }, this.now(), current.check).catch(stale);
     if (!updated) throw new EngineApiError(404, 'RECORD_NOT_FOUND');
     return updated;
   }
