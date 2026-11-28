@@ -19,6 +19,13 @@ F2-1 에서 패키지를 만들었습니다. 지금 있는 것:
 - 프레임워크 작업 단위(F2 이후)를 맡은 AI 작업자만 고칩니다.
 - 개별 화면 요청(REQ) 작업에서는 엔진을 고치지 않고 `metadata/` 를 고칩니다.
 
+## 메타데이터 버전 (F2-3)
+
+`src/versions/` 는 설정 묶음의 버전을 staging → publish → rollback 으로 옮기는 순수 규칙입니다. 저장은 `VersionStore` 포트로만 합니다.
+- 상태 표: `transitions.ts` 하나가 정합니다. publish 는 설정 검사(오류 0)와 지금 게시본과의 하위 호환 검사(`diffBundles`, 행 권한 넓히기 D05 포함)를 통과해야 합니다.
+- 메모리 포트 `memoryVersionStore()` 는 테스트용입니다. MS SQL 어댑터는 `backend/src/database/crm-meta-version-store.ts`(전용 표 `crm_meta_*`)입니다.
+- 실제 DB 확인은 `node scripts/meta-db/run-publish-rollback.mjs` 를 DB 가 있는 PC 에서 돌립니다(연결 정보는 환경 변수 `CRM_META_DB_*`).
+
 ## 적용되는 규칙
 
 | 규칙 | 내용 |
