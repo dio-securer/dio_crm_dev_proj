@@ -5,7 +5,9 @@ import { byCodeUnit } from './files.mjs';
 import { GuardError } from './gitbase.mjs';
 
 export const RAISES_FILE = 'guard-raises.json';
-export const RAISE_RULES = ['P1', 'P2', 'P3', 'P5'];
+export const RAISE_RULES = ['P1', 'P2', 'P3', 'P5', 'P6'];
+/** P6 can excuse only a row access widening (D05): one rule of one object's access.json, written out in full. */
+export const ACCESS_FILE = /^metadata\/objects\/[a-z][a-z0-9_]*\/access\.json$/;
 export const KEYS = ['rule', 'guardRule', 'file', 'from', 'to', 'reason', 'changeId'];
 export const MIN_REASON = 10;
 export const ID_ONLY = new RegExp(`^${CHANGE_ID.source.replace(/^\\\[/, '').replace(/\\\]$/, '')}$`);
@@ -24,6 +26,10 @@ export const targetOf = item => canonical({ rule: item.rule, guardRule: item.gua
 const isValue = value => value === null || typeof value === 'string' || (Number.isInteger(value) && value >= 0)
   || (typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length > 0 && Object.values(value).every(n => Number.isInteger(n) && n >= 0));
 
+/** A row access rule as written in access.json: a `kind` and only string values. */
+const isAccessRule = value => !!value && typeof value === 'object' && !Array.isArray(value) && typeof value.kind === 'string'
+  && Object.values(value).every(v => typeof v === 'string' && v !== '');
+
 /** Parse and validate. `text === null` (no file) means no declarations. Throws GuardError on any malformed entry. */
 export function parseRaises(text) {
   if (text === null) return [];
@@ -39,7 +45,11 @@ export function parseRaises(text) {
     if (entry.rule === 'P1' ? !/^G\d{2}$/.test(entry.guardRule ?? '') : entry.guardRule !== undefined) bad('guardRule 은 P1 에만, 규칙 ID(예: "G03")로 적습니다.');
     if (typeof entry.file !== 'string' || entry.file === '') bad('file 이 없습니다.');
     if (/[*?[\]{}]/.test(entry.file)) bad(`file 에 와일드카드를 쓸 수 없습니다: ${entry.file}`);
-    if (!('from' in entry) || !('to' in entry) || !isValue(entry.from) || !isValue(entry.to)) bad('from / to 는 바뀌기 전과 후의 값을 그대로 적습니다(숫자, 글자, 숫자 묶음, null).');
+    if (entry.rule === 'P6' && !(ACCESS_FILE.test(entry.file) && entry.from === null && isAccessRule(entry.to))) {
+      bad('P6 은 행 권한 넓히기(D05)만 선언합니다: file 은 metadata/objects/<개체>/access.json, from 은 null, to 는 넓어진 규칙 그대로.');
+    }
+    const values = 'from' in entry && 'to' in entry && isValue(entry.from) && isValue(entry.to);
+    if (entry.rule !== 'P6' && !values) bad('from / to 는 바뀌기 전과 후의 값을 그대로 적습니다(숫자, 글자, 숫자 묶음, null).');
     if (typeof entry.reason !== 'string' || entry.reason.trim().length < MIN_REASON) bad(`reason 은 사람이 읽을 이유를 ${MIN_REASON}자 이상 적습니다.`);
     if (typeof entry.changeId !== 'string' || !ID_ONLY.test(entry.changeId)) bad('changeId 는 REQ-숫자 또는 F숫자-숫자 형식입니다.');
     return entry;

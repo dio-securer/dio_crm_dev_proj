@@ -752,11 +752,16 @@
   "scripts/guard/lib/protect-metadata.mjs": {
    "values": {},
    "notPinned": [
+    "WIDENED",
     "id",
     "name"
    ],
-   "patterns": [],
-   "numbers": {}
+   "patterns": [
+    "/^objects\\[([a-z][a-z0-9_]*)\\]\\/access\\/rules\\[#(\\d+)\\]$/"
+   ],
+   "numbers": {
+    "2": 1
+   }
   },
   "scripts/guard/lib/protect-tests.mjs": {
    "values": {},
@@ -779,6 +784,10 @@
   },
   "scripts/guard/lib/raises.mjs": {
    "values": {
+    "ACCESS_FILE": {
+     "$regex": "^metadata\\/objects\\/[a-z][a-z0-9_]*\\/access\\.json$",
+     "flags": ""
+    },
     "ID_ONLY": {
      "$regex": "^(?:REQ-\\d+|F\\d+-\\d+)$",
      "flags": ""
@@ -798,11 +807,13 @@
      "P1",
      "P2",
      "P3",
-     "P5"
+     "P5",
+     "P6"
     ]
    },
    "notPinned": [],
    "patterns": [
+    "/^metadata\\/objects\\/[a-z][a-z0-9_]*\\/access\\.json$/",
     "/^\\\\\\[/",
     "/\\\\\\]$/",
     "/^G\\d{2}$/",
