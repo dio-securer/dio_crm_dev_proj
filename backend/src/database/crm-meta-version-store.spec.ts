@@ -16,10 +16,12 @@ function fakeDb() {
   let state = { versions: new Map<number, Row>(), pointer: null as number | null, events: [] as Row[], next: 1, tables: new Set<string>(['crm_meta_version', 'crm_meta_pointer', 'crm_meta_event']), pointerRow: true };
   const log: { text: string; params: Record<string, unknown> }[] = [];
   const clone = () => ({ versions: new Map([...state.versions].map(([k, v]) => [k, { ...v }])), pointer: state.pointer, events: [...state.events], next: state.next, tables: new Set(state.tables), pointerRow: state.pointerRow });
-  const created: string[] = [];
+  const created: string[] = [], names: string[] = [];
   const run = (s: typeof state): MetaQuery => async (text, params = {}) => {
     log.push({ text, params });
     const p = params as Row;
+    // The name table of record tables is synchronised with every pointer move (crm-obj-name-sync.ts); here it is empty.
+    if (text.startsWith('DECLARE @lock INT;') || text.includes('crm_meta_obj_name')) { names.push(text.split('\n')[0].slice(0, 40)); return { recordset: [] }; }
     const guard = /^IF OBJECT_ID\(N'dbo\.(\w+)', N'U'\) IS NULL\nCREATE TABLE dbo\.(\w+) /.exec(text);
     if (guard) {
       if (guard[1] !== guard[2]) throw new Error('guard and table differ');
@@ -48,7 +50,7 @@ function fakeDb() {
   };
   const db: MetaTransactional = { async transaction(work) { const draft = clone(); const out = await work(run(draft)); state = draft; return out; } };
   const empty = () => { state.tables.clear(); state.pointerRow = false; };
-  return { db, log, created, empty, get state() { return state; } };
+  return { db, log, created, names, empty, get state() { return state; } };
 }
 
 function readMetadata() {
@@ -123,5 +125,8 @@ describe('SqlMetaVersionStore', () => {
     expect(f.state.pointer).toBe(v1);
     expect([...f.state.versions.values()].map(v => v.status)).toEqual(['published', 'rolled_back']);
     expect(f.state.events.map(e => e.action)).toEqual(['stage', 'publish', 'stage', 'supersede', 'publish', 'rollback', 'restore']);
+    // Every pointer move (two publishes, one rollback) synchronised the names of record tables in the same transaction.
+    expect(f.names.filter(t => t.startsWith('SELECT [scope]'))).toHaveLength(3);
+    expect(f.names.filter(t => t.startsWith('DECLARE @lock'))).toHaveLength(3);
   });
 });

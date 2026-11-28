@@ -49,6 +49,9 @@ export function sqliteDb() {
       if (!columns(m[1]).some(c => c.name === m![2])) db.exec(`ALTER TABLE [${m[1]}] ADD COLUMN [${m[2]}] ${m[5]}`);
       return { recordset: [] };
     }
+    if (text.startsWith('SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES')) {
+      return { recordset: (db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name LIKE 'crm\\_obj\\_%' ESCAPE '\\'").all() as Row[]).map(r => ({ TABLE_NAME: r.name })) };
+    }
     if (text.startsWith('SELECT COLUMN_NAME, DATA_TYPE')) {
       return { recordset: columns(String(params.table)).map(c => typeRow(String(c.name), String(c.type))) };
     }

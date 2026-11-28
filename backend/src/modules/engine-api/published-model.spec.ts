@@ -77,4 +77,30 @@ describe('published models', () => {
     moved.state.published = true;
     expect((await moved.models.current())?.versionId).toBe(1);
   });
+
+  it('builds a version again when it comes back after the pointer moved (a rollback), told by the stamp', async () => {
+    const { state, p } = ports();
+    let stamp = 'a';
+    const models = new PublishedModels({ ...p, readPointer: async () => (state.id === undefined ? undefined : { id: state.id, stamp }) }, () => state.at);
+    const first = (await models.current())!;
+    await first.shape('lead');
+    expect(await models.current()).toBe(first);
+    expect(state.ensured).toHaveLength(1);
+    // The same id, another stamp: publish and rollback happened in between.
+    stamp = 'b';
+    const again = (await models.current())!;
+    expect(again).not.toBe(first);
+    expect(again.versionId).toBe(1);
+    await again.shape('lead');
+    expect(state.ensured).toHaveLength(2);
+    expect(await models.current()).toBe(again);
+    // Nothing older is kept: even the first stamp coming back means a new build.
+    stamp = 'a';
+    const third = (await models.current())!;
+    expect(third).not.toBe(first);
+    await third.shape('lead');
+    expect(state.ensured).toHaveLength(3);
+    state.id = undefined;
+    expect(await models.current()).toBeUndefined();
+  });
 });

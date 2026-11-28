@@ -3,6 +3,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { MetadataVersions, memoryVersionStore } from '@dio-crm/engine';
+import { syncPublishedNames } from '../../src/database/crm-obj-name-sync';
 import { applyObjectSchema } from '../../src/database/crm-obj-schema';
 import { SqlObjectRecords } from '../../src/database/crm-obj-store';
 import { Caller, EngineRecords } from '../../src/modules/engine-api/engine-records';
@@ -32,11 +33,22 @@ export const NOW = new Date('2026-11-28T01:02:03.000Z');
 
 export async function engineFixture(files: File[] | null = readMetadata()) {
   const db = sqliteDb();
-  const versions = new MetadataVersions(memoryVersionStore(), () => NOW.toISOString());
+  // The memory version store, with the same step the SQL store takes when the pointer moves: the names of record
+  // tables and columns are synchronised with the newly published files (crm-obj-name-sync.ts).
+  const memory = memoryVersionStore();
+  let moves = 0;
+  const store: Pick<typeof memory, "transaction"> = { transaction: work => memory.transaction(tx => work({ ...tx, setPointer: async id => {
+    await tx.setPointer(id);
+    const files = id === undefined ? undefined : (await tx.get(id))?.files ?? [];
+    await db.transaction(q => syncPublishedNames(q, files));
+    moves += 1;
+  } })) };
+  const versions = new MetadataVersions(store, () => NOW.toISOString());
   const publish = async (f: File[]) => (await versions.publish(await versions.stage(f, 'test'), 'test')).id;
   if (files) await publish(files);
   const ports = {
     readId: async () => (await versions.published())?.id,
+    readPointer: async () => { const v = await versions.published(); return v ? { id: v.id, stamp: String(moves) } : undefined; },
     readFiles: async (id: number) => { const v = await versions.published(); return v && v.id === id ? { id, files: v.files } : undefined; },
     ensureTables: (objects: any[]) => applyObjectSchema(db, objects),
   };

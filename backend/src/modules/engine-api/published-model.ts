@@ -1,17 +1,19 @@
 // The runtime model of the published metadata version (F2-3), for the automatic API. The pointer is read on every
-// request, so a publish or a rollback takes effect at once; a version's model is built once per version id (versions
-// are immutable, so the cache never goes stale). An object's record table is made complete the first time the object
+// request, so a publish or a rollback takes effect at once; a version's model is built once per pointer move (the
+// version id with a stamp that changes at every publish and rollback). An object's record table is made complete the first time the object
 // is used in that version. If that fails (type drift, a database error), only that object answers 503, the failure is
 // remembered for TABLE_RETRY_MS so every request does not run the DDL again, and the other objects keep working.
 import { loadRuntimeModel } from '@dio-crm/engine';
 import type { RuntimeModel } from '@dio-crm/engine';
 import type { MetaTransactional } from '../../database/crm-meta-version-store';
-import { readPublishedFiles, readPublishedId } from '../../database/crm-meta-published';
+import { PublishedPointer, readPublishedFiles, readPublishedId, readPublishedPointer } from '../../database/crm-meta-published';
 import { applyObjectSchema, ObjectShape } from '../../database/crm-obj-schema';
 import { EngineApiError, Published, PublishedSource } from './engine-records';
 
 export interface PublishedPorts {
   readId(): Promise<number | undefined>;
+  /** The version with a stamp that changes at every publish and rollback. Without it the version id alone is the cache key. */
+  readPointer?(): Promise<PublishedPointer | undefined>;
   readFiles(id: number): Promise<{ id: number; files: { path: string; content: string }[] } | undefined>;
   /** Makes the tables complete and returns each object with its physical table and column names. */
   ensureTables(objects: ObjectShape[]): Promise<ObjectShape[]>;
@@ -21,6 +23,7 @@ export interface PublishedPorts {
 
 export const sqlPublishedPorts = (db: MetaTransactional, report?: PublishedPorts['report']): PublishedPorts => ({
   readId: () => readPublishedId(db),
+  readPointer: () => readPublishedPointer(db),
   readFiles: id => readPublishedFiles(db, id),
   ensureTables: objects => applyObjectSchema(db, objects),
   report,
@@ -64,18 +67,28 @@ class ObjectTables {
 }
 
 export class PublishedModels implements PublishedSource {
-  private readonly loaded = new Map<number, Promise<Published>>();
+  private readonly loaded = new Map<string, Promise<Published>>();
   constructor(private readonly ports: PublishedPorts, private readonly now: () => number = () => Date.now()) {}
 
-  async current(): Promise<Published | undefined> {
+  private async pointer(): Promise<PublishedPointer | undefined> {
+    if (this.ports.readPointer) return this.ports.readPointer();
     const id = await this.ports.readId();
-    if (id === undefined) return undefined;
-    let pending = this.loaded.get(id);
+    return id === undefined ? undefined : { id, stamp: '' };
+  }
+
+  async current(): Promise<Published | undefined> {
+    const pointer = await this.pointer();
+    if (pointer === undefined) return undefined;
+    const key = `${pointer.id}:${pointer.stamp}`;
+    let pending = this.loaded.get(key);
     if (!pending) {
-      pending = this.load(id);
-      this.loaded.set(id, pending);
+      // The pointer moved: nothing built before it is kept. A version that comes back by rollback is built again,
+      // because the names of its tables and columns may have been retired while it was away.
+      this.loaded.clear();
+      pending = this.load(pointer.id);
+      this.loaded.set(key, pending);
       // A failure (database down, invalid version) is not remembered: the next request tries again.
-      pending.catch(() => this.loaded.delete(id));
+      pending.catch(() => { if (this.loaded.get(key) === pending) this.loaded.delete(key); });
     }
     return pending;
   }

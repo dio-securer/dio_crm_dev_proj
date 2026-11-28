@@ -1,6 +1,6 @@
 // Row conversion of the record store and the unlocked read of the published version (F2-4), with a recording fake.
 import type { FieldDef } from '@dio-crm/contracts/metadata';
-import { readPublishedFiles, readPublishedId } from './crm-meta-published';
+import { readPublishedFiles, readPublishedId, readPublishedPointer } from './crm-meta-published';
 import { MetaQuery } from './crm-meta-version-store';
 import { recordOf } from './crm-obj-store';
 
@@ -33,5 +33,11 @@ describe('record store', () => {
     const none = recording(() => [{ published_version_id: null }]);
     expect(await readPublishedId(none)).toBeUndefined();
     expect(await readPublishedFiles(recording(() => []), 4)).toBeUndefined();
+    // With the stamp that changes at every publish and rollback (the newest event), still without a lock.
+    const stamped = recording(() => [{ published_version_id: 3, stamp: 41 }]);
+    expect(await readPublishedPointer(stamped)).toEqual({ id: 3, stamp: '41' });
+    expect(stamped.log.map(l => l.text)).toEqual(['SELECT published_version_id, (SELECT MAX(id) FROM dbo.crm_meta_event) AS stamp FROM dbo.crm_meta_pointer WHERE id = 1']);
+    expect(await readPublishedPointer(recording(() => [{ published_version_id: null, stamp: 41 }]))).toBeUndefined();
+    expect(await readPublishedPointer(recording(() => [{ published_version_id: 2, stamp: null }]))).toEqual({ id: 2, stamp: '' });
   });
 });

@@ -1,5 +1,6 @@
 import { CRM_META_SCHEMA } from './crm-meta-schema';
 import { dateTimeParam } from './sql-params';
+import { syncPublishedNames } from './crm-obj-name-sync';
 // MS SQL adapter of the engine's metadata VersionStore port (packages/engine/src/versions/types.ts).
 // The shapes below mirror that port; crm-meta-version-store.spec.ts runs the engine service on this adapter.
 type Row = Record<string, unknown>;
@@ -37,7 +38,7 @@ function toRecord(r: Row): MetaVersionRecord {
 }
 
 export function metaVersionTx(query: MetaQuery): MetaVersionTx {
-  return {
+  const tx: MetaVersionTx = {
     async lockPointer() {
       const r = await query('SELECT published_version_id FROM dbo.crm_meta_pointer WITH (UPDLOCK, HOLDLOCK) WHERE id = 1');
       if (!r.recordset.length) throw new Error('CRM_META_SCHEMA_MISSING');
@@ -45,6 +46,9 @@ export function metaVersionTx(query: MetaQuery): MetaVersionTx {
     },
     async setPointer(id) {
       await query('UPDATE dbo.crm_meta_pointer SET published_version_id = @id WHERE id = 1', { id: id ?? null });
+      // The names of record tables and columns follow the pointer in the same transaction: what the new version no
+      // longer has is retired, so a later object or field of that name cannot reach the old rows (crm-obj-name-sync.ts).
+      await syncPublishedNames(query, id === undefined ? undefined : (await tx.get(id))?.files ?? []);
     },
     async get(id) {
       const r = await query('SELECT id, status, files_json, created_by, created_at, published_at, previous_id, note FROM dbo.crm_meta_version WHERE id = @id', { id });
@@ -69,6 +73,7 @@ OUTPUT INSERTED.id VALUES (@status, @files, @createdBy, @createdAt, @publishedAt
         { versionId: e.versionId, action: e.action, actor: e.actor, at: date(e.at), fromVersionId: e.fromVersionId ?? null });
     },
   };
+  return tx;
 }
 
 /** The VersionStore: every engine operation runs in one database transaction. */

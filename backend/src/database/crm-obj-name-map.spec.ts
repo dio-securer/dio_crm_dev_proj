@@ -2,7 +2,7 @@
 // table, the column and the data; names are recorded once and only ever added.
 import type { FieldDef } from '@dio-crm/contracts/metadata';
 import { sqliteDb } from '../../test/support/sqlite-db';
-import { NAME_INSERT, NAME_TABLE_DDL, NAMES_QUERY, resolveNames } from './crm-obj-name-map';
+import { NAME_INSERT, NAME_RETIRE, NAME_RETIRED_DDL, NAME_REUSE, NAME_TABLE_DDL, NAMES_QUERY, TABLES_QUERY, resolveNames } from './crm-obj-name-map';
 import { applyObjectSchema } from './crm-obj-schema';
 import { SqlObjectRecords } from './crm-obj-store';
 
@@ -48,22 +48,33 @@ describe('physical names of record tables', () => {
     expect((await store.get(s4, scope, all, 1))?.values).toEqual({ hospital_name: 'H', rep: 'u1' });
   });
 
-  it('a table made before names were recorded: the column of the key, else of an alias, is the field\'s column', async () => {
+  it('a table nobody recorded is never adopted: the object starts on a fresh table, and so does a field on a fresh column', async () => {
     const db = sqliteDb();
     db.raw.exec('CREATE TABLE crm_obj_lead (id INTEGER PRIMARY KEY AUTOINCREMENT, company_id INT, created_at NVARCHAR(40), created_by NVARCHAR(100), updated_at NVARCHAR(40), updated_by NVARCHAR(100), [f_hospital_name] NVARCHAR(4000), [f_owner_name] NVARCHAR(4000), [f_phone] NVARCHAR(4000))');
     db.raw.exec("INSERT INTO crm_obj_lead (company_id, created_at, created_by, updated_at, updated_by, f_hospital_name, f_owner_name) VALUES (1, 'a', 'u', 'a', 'u', 'H', 'u1')");
     const [s] = await applyObjectSchema(db, [v2]);
-    expect(s.columns).toEqual({ hospital_name: 'f_hospital_name', owner: 'f_owner_name', phone_number: 'f_phone', memo: 'f_memo' });
-    expect((await new SqlObjectRecords(db).get(s, scope, all, 1))?.values.owner).toBe('u1');
+    expect(s.table).toBe('crm_obj_lead_r2');
+    expect(await new SqlObjectRecords(db).list(s, scope, all, { limit: 9, offset: 0 })).toEqual([]);
+    // Pure form: existing columns and tables are only ever avoided, whatever the aliases say.
+    const rows = [{ scope: '', name_key: 'lead', physical: 'crm_obj_lead' }];
+    expect(resolveNames({ key: 'lead', fields: [field('owner', ['owner_name']), field('phone')] }, rows, ['f_owner_name', 'F_PHONE', 'f_phone_r2']).shape.columns).toEqual({ owner: 'f_owner', phone: 'f_phone_r3' });
+    expect(resolveNames({ key: 'visit', fields: [] }, rows, [], ['crm_obj_visit', 'CRM_OBJ_VISIT_R2']).shape.table).toBe('crm_obj_visit_r3');
+    // Two new fields never land on one fresh column.
+    expect(resolveNames({ key: 'lead', fields: [field('a'), field('a_r2')] }, rows, ['f_a']).shape.columns).toEqual({ a: 'f_a_r2', a_r2: 'f_a_r2_r2' });
+    expect(resolveNames({ key: 'visit', fields: [] }, [...rows, { scope: '', name_key: 'old', physical: 'crm_obj_visit', retired: 1 }], []).shape.table).toBe('crm_obj_visit_r2');
   });
 
-  it('records each name once (idempotent), only adds rows, and uses no statement but SELECT / INSERT on the name table', async () => {
+  it('records each name once (idempotent) and never drops or deletes; the only updates retire a name or give a retired name a new physical name', async () => {
     const db = sqliteDb();
     await applyObjectSchema(db, [v1]);
     const before = namesOf(db);
     await applyObjectSchema(db, [v1]);
     expect(namesOf(db)).toEqual(before);
     for (const text of [NAME_TABLE_DDL, NAMES_QUERY, NAME_INSERT]) expect(text).not.toMatch(/\b(DROP|DELETE|UPDATE|ALTER|TRUNCATE|EXEC)\b/i);
+    for (const text of [NAME_RETIRE, NAME_REUSE, NAME_RETIRED_DDL, TABLES_QUERY]) expect(text).not.toMatch(/\b(DROP|DELETE|TRUNCATE|EXEC)\b/i);
+    expect(NAME_RETIRE).toBe('UPDATE dbo.[crm_meta_obj_name] SET [retired] = 1 WHERE [scope] = @scope AND [name_key] = @key AND [retired] IS NULL');
+    expect(NAME_REUSE).toBe('UPDATE dbo.[crm_meta_obj_name] SET [physical] = @physical, [retired] = NULL WHERE [scope] = @scope AND [name_key] = @key AND [retired] = 1');
+    expect(NAME_RETIRED_DDL).toBe("IF COL_LENGTH(N'dbo.crm_meta_obj_name', N'retired') IS NULL\nALTER TABLE dbo.[crm_meta_obj_name] ADD [retired] INT NULL");
     expect(NAME_TABLE_DDL).toMatch(/^IF OBJECT_ID\(N'dbo\.crm_meta_obj_name', N'U'\) IS NULL\nCREATE TABLE dbo\.\[crm_meta_obj_name\]/);
   });
 
@@ -79,8 +90,8 @@ describe('physical names of record tables', () => {
     const rows = [{ scope: '', name_key: 'lead', physical: 'crm_obj_lead' }, { scope: 'crm_obj_lead', name_key: 'company_name', physical: 'f_company_name' }, { scope: 'crm_obj_lead', name_key: 'name', physical: 'f_name' }];
     for (const aliases of [['company_name', 'name'], ['name', 'company_name']]) {
       expect(() => resolveNames({ key: 'lead', fields: [field('cn2', aliases)] }, rows, [])).toThrow('CRM_OBJ_COLUMN_AMBIGUOUS crm_obj_lead.cn2');
-      // A table from before names were recorded: the existing columns say the same.
-      expect(() => resolveNames({ key: 'lead', fields: [field('cn2', aliases)] }, rows.slice(0, 1), ['f_company_name', 'f_name'])).toThrow('CRM_OBJ_COLUMN_AMBIGUOUS crm_obj_lead.cn2');
+      // Columns nobody recorded are not followed at all: the field gets its own.
+      expect(resolveNames({ key: 'lead', fields: [field('cn2', aliases)] }, rows.slice(0, 1), ['f_company_name', 'f_name']).shape.columns).toEqual({ cn2: 'f_cn2' });
     }
     expect(() => resolveNames({ key: 'lead', fields: [field('name', ['company_name'])] }, rows, [])).toThrow('CRM_OBJ_COLUMN_AMBIGUOUS crm_obj_lead.name');
     // One column under several names is not a merge: a rename chain resolves as before.

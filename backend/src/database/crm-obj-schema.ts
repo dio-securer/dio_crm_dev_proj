@@ -1,17 +1,15 @@
 // Record tables of metadata objects (F2-4): one dbo.crm_obj_<object> table per object. Idempotent: a missing table is
 // created and a missing field column added; nothing is dropped, no column is changed, no table outside crm_obj_ is touched.
-// The physical names come from crm-obj-name-map.ts (recorded once in dbo.crm_meta_obj_name; rows are only ever added).
+// The physical names come from crm-obj-name-map.ts (recorded in dbo.crm_meta_obj_name; a retired name is never followed again).
 // A column whose type no longer matches the metadata (e.g. an allowed integer -> decimal widening) stops the run
 // (CRM_OBJ_SCHEMA_DRIFT): changing a column with data in it is left to a person.
 import { MetaTransactional } from './crm-meta-version-store';
 import { ObjectShape, columnFor, fieldColumns, quote, sqlTypeOf, tableOf } from './crm-obj-names';
-import { NAMES_QUERY, NAME_INSERT, NAME_TABLE_DDL, NameRow, resolveNames, resolveTable } from './crm-obj-name-map';
+import { NAMES_QUERY, NAME_RETIRED_DDL, NAME_TABLE_DDL, NameRow, TABLES_QUERY, resolveNames, resolveTable } from './crm-obj-name-map';
+import { APPLOCK, writeNames } from './crm-obj-name-sync';
 
 export type { ObjectShape };
-/** A negative sp_getapplock result (timeout, deadlock) is raised, so the run never goes on without the lock. */
-export const APPLOCK = `DECLARE @lock INT;
-EXEC @lock = sp_getapplock @Resource = N'crm_obj_schema', @LockMode = N'Exclusive', @LockOwner = N'Transaction', @LockTimeout = 30000;
-IF @lock < 0 THROW 51000, N'CRM_OBJ_SCHEMA_LOCK', 1;`;
+export { APPLOCK };
 
 export function objectSchemaStatements(object: ObjectShape): string[] {
   const table = tableOf(object);
@@ -60,13 +58,15 @@ export async function applyObjectSchema(db: MetaTransactional, objects: readonly
   return db.transaction(async query => {
     await query(APPLOCK);
     await query(NAME_TABLE_DDL);
+    await query(NAME_RETIRED_DDL);
     const drift: string[] = [], out: ObjectShape[] = [];
     const columnsOf = async (table: string) => (await query(COLUMNS_QUERY, { table })).recordset as ColumnRow[];
     for (const object of objects) {
       const names = (await query(NAMES_QUERY)).recordset as unknown as NameRow[];
-      const before = await columnsOf(resolveTable(object, names));
-      const { shape, add } = resolveNames(object, names, before.map(c => c.COLUMN_NAME));
-      for (const row of add) await query(NAME_INSERT, { scope: row.scope, key: row.name_key, physical: row.physical });
+      const tables = (await query(TABLES_QUERY)).recordset.map(r => String(r.TABLE_NAME));
+      const before = await columnsOf(resolveTable(object, names, tables));
+      const { shape, add } = resolveNames(object, names, before.map(c => c.COLUMN_NAME), tables);
+      await writeNames(query, add);
       for (const statement of objectSchemaStatements(shape)) await query(statement);
       drift.push(...schemaDrift(shape, await columnsOf(tableOf(shape))));
       out.push(shape);

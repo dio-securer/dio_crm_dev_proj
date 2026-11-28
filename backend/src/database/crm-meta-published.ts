@@ -12,6 +12,20 @@ export function readPublishedId(db: MetaTransactional): Promise<number | undefin
   });
 }
 
+export interface PublishedPointer { id: number; stamp: string }
+/**
+ * The published version with a stamp that changes at every publish and rollback (each writes events). A rollback
+ * brings an old version id back, but the names of its tables may have been retired in between: what was built for
+ * that id before must not be used again, and the stamp tells.
+ */
+export function readPublishedPointer(db: MetaTransactional): Promise<PublishedPointer | undefined> {
+  return db.transaction(async query => {
+    const r = await query('SELECT published_version_id, (SELECT MAX(id) FROM dbo.crm_meta_event) AS stamp FROM dbo.crm_meta_pointer WHERE id = 1');
+    const id = r.recordset[0]?.published_version_id;
+    return id === null || id === undefined ? undefined : { id: Number(id), stamp: String(r.recordset[0].stamp ?? '') };
+  });
+}
+
 /** The files of a version that is published now; undefined when the version is not (or no longer) published. */
 export function readPublishedFiles(db: MetaTransactional, id: number): Promise<PublishedFiles | undefined> {
   return db.transaction(async query => {
